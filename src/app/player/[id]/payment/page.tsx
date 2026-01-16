@@ -17,6 +17,29 @@ export default function PaymentPage() {
     const [showQR, setShowQR] = useState(false);
     const [showScanner, setShowScanner] = useState(false);
 
+    // 事前にカメラ権限をリクエストする (ユーザー要望)
+    React.useEffect(() => {
+        const requestCameraPermission = async () => {
+            // Check if mediaDevices API is available
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                console.log('MediaDevices API not available (HTTP or unsupported browser)');
+                return;
+            }
+
+            try {
+                // ストリームを一瞬だけ取得して権限ダイアログを出す
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                // 取得できたらすぐに停止して解放する
+                stream.getTracks().forEach(track => track.stop());
+            } catch (e) {
+                // 拒否されたりエラーが出ても、ここでは特に何もしない（スキャンボタン押下時に詳細エラーが出るため）
+                console.log('Pre-check camera permission failed:', e);
+            }
+        };
+
+        requestCameraPermission();
+    }, []);
+
     if (!gameState || !currentUser) return <div>Loading...</div>;
 
     const unpaidTax = currentUser.unpaidTax || 0;
@@ -168,8 +191,13 @@ export default function PaymentPage() {
                 onClose={() => setShowScanner(false)}
                 onScan={(decodedText) => {
                     setTargetId(decodedText);
+                    setMode('transfer'); // スキャンしたら自動で送金モードへ
                     setShowScanner(false);
-                    alert(`QRコードを読み取りました: ${decodedText}`);
+                    // スキャン成功音の代わりにバイブレーションなどができればベストだがWebでは制限あり
+                    // 代わりにフォームへスクロール
+                    setTimeout(() => {
+                        document.getElementById('action-area')?.scrollIntoView({ behavior: 'smooth' });
+                    }, 100);
                 }}
             />
 
@@ -247,15 +275,38 @@ export default function PaymentPage() {
                         />
                     </div>
 
-                    <Button
-                        fullWidth
-                        size="lg"
-                        onClick={handleAction}
-                        disabled={isProcessing || !payAmount || ((mode !== 'pay') && !targetId)}
-                        style={{ background: mode === 'transfer' ? '#3b82f6' : mode === 'bill' ? '#f59e0b' : '#ef4444', color: 'white' }}
-                    >
-                        {isProcessing ? 'Peipei...' : mode === 'transfer' ? '送金する' : mode === 'bill' ? '請求する' : '支払う'}
-                    </Button>
+                    {mode === 'transfer' ? (
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
+                            <Button
+                                fullWidth
+                                size="lg"
+                                onClick={handleAction}
+                                disabled={isProcessing || !payAmount || !targetId}
+                                style={{ background: '#3b82f6', color: 'white' }}
+                            >
+                                {isProcessing ? '処理中...' : '送金する'}
+                            </Button>
+                            <Button
+                                fullWidth
+                                size="lg"
+                                onClick={() => targetId && (window.location.href = `/player/${currentUser.id}/visit/${targetId}`)}
+                                disabled={!targetId}
+                                variant="secondary"
+                            >
+                                店へ行く
+                            </Button>
+                        </div>
+                    ) : (
+                        <Button
+                            fullWidth
+                            size="lg"
+                            onClick={handleAction}
+                            disabled={isProcessing || !payAmount || ((mode !== 'pay') && !targetId)}
+                            style={{ background: mode === 'bill' ? '#f59e0b' : '#ef4444', color: 'white' }}
+                        >
+                            {isProcessing ? 'Peipei...' : mode === 'bill' ? '請求する' : '支払う'}
+                        </Button>
+                    )}
                 </div>
             </Card>
 

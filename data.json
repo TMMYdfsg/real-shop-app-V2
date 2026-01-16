@@ -19,9 +19,9 @@
       "id": "e5a72cef-6372-4c32-b707-46e213d06d03",
       "name": "1",
       "role": "player",
-      "balance": 6,
+      "balance": 306,
       "deposit": 6,
-      "debt": 100,
+      "debt": 260,
       "job": "youtuber",
       "popularity": 50,
       "happiness": 50,
@@ -30,13 +30,24 @@
         "s1": 1
       },
       "forbiddenStocks": {},
-      "isForbiddenUnlocked": false
+      "isForbiddenUnlocked": false,
+      "transactions": [
+        {
+          "id": "5d08f2ae-6478-4b88-bb82-8bbc2a91836c",
+          "type": "income",
+          "amount": 300,
+          "senderId": "d483e2a5-f105-4c23-8f41-d4ef113dc167",
+          "receiverId": "e5a72cef-6372-4c32-b707-46e213d06d03",
+          "description": "受取: 2",
+          "timestamp": 1768594800785
+        }
+      ]
     },
     {
       "id": "d483e2a5-f105-4c23-8f41-d4ef113dc167",
       "name": "2",
       "role": "player",
-      "balance": 1000,
+      "balance": 550,
       "deposit": 0,
       "debt": 0,
       "job": "unemployed",
@@ -45,13 +56,30 @@
       "items": [],
       "stocks": {},
       "forbiddenStocks": {},
-      "isForbiddenUnlocked": false
+      "isForbiddenUnlocked": false,
+      "transactions": [
+        {
+          "id": "57afc7b5-c980-4b54-b130-bf48b642f3ed",
+          "type": "payment",
+          "amount": 300,
+          "senderId": "d483e2a5-f105-4c23-8f41-d4ef113dc167",
+          "receiverId": "e5a72cef-6372-4c32-b707-46e213d06d03",
+          "description": "支払い: 1",
+          "timestamp": 1768594800785
+        }
+      ],
+      "pointCards": [
+        {
+          "shopOwnerId": "e5a72cef-6372-4c32-b707-46e213d06d03",
+          "points": 3
+        }
+      ]
     },
     {
       "id": "85aa5f67-e07c-4a9d-a35e-3500a2f52f08",
       "name": "3",
       "role": "player",
-      "balance": 1100,
+      "balance": 950,
       "deposit": 0,
       "debt": 0,
       "job": "unemployed",
@@ -67,7 +95,7 @@
     {
       "id": "s1",
       "name": "テック・フューチャー",
-      "price": 1000,
+      "price": 1070,
       "previousPrice": 1000,
       "volatility": 0.1,
       "isForbidden": false
@@ -75,7 +103,7 @@
     {
       "id": "s2",
       "name": "ハッピー・フーズ",
-      "price": 500,
+      "price": 510,
       "previousPrice": 500,
       "volatility": 0.05,
       "isForbidden": false
@@ -83,7 +111,7 @@
     {
       "id": "s3",
       "name": "ミラクル建設",
-      "price": 800,
+      "price": 790,
       "previousPrice": 800,
       "volatility": 0.08,
       "isForbidden": false
@@ -91,7 +119,7 @@
     {
       "id": "f1",
       "name": "シャドウ・コーポレーション",
-      "price": 5000,
+      "price": 3300,
       "previousPrice": 5000,
       "volatility": 0.5,
       "isForbidden": true
@@ -99,7 +127,7 @@
     {
       "id": "f2",
       "name": "ブラックバイオ研究所",
-      "price": 2000,
+      "price": 550,
       "previousPrice": 2000,
       "volatility": 0.8,
       "isForbidden": true
@@ -107,7 +135,7 @@
     {
       "id": "f3",
       "name": "ネオカルト証券",
-      "price": 10000,
+      "price": 17010,
       "previousPrice": 10000,
       "volatility": 1,
       "isForbidden": true
@@ -148,11 +176,20 @@
       "details": "s1",
       "status": "approved",
       "timestamp": 1768590227328
+    },
+    {
+      "id": "80f13871-2288-4ac1-b41f-fe8b7caa2157",
+      "type": "bill",
+      "requesterId": "e5a72cef-6372-4c32-b707-46e213d06d03",
+      "amount": 300,
+      "details": "d483e2a5-f105-4c23-8f41-d4ef113dc167",
+      "status": "approved",
+      "timestamp": 1768594792663
     }
   ],
   "marketStatus": "open",
-  "turn": 1,
-  "isDay": false,
+  "turn": 2,
+  "isDay": true,
   "settings": {
     "taxRate": 0.1,
     "insuranceRate": 100,

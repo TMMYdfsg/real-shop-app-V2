@@ -22,7 +22,7 @@ export default function PlayerShopPage() {
 
     useEffect(() => {
         if (gameState && currentUser) {
-            const myProducts = gameState.products.filter(p => p.sellerId === currentUser.id);
+            const myProducts = (gameState.products || []).filter(p => p.sellerId === currentUser.id);
             setProducts(myProducts);
         }
     }, [gameState, currentUser]);

@@ -34,6 +34,21 @@ export interface Request {
     timestamp: number;
 }
 
+export interface Transaction {
+    id: string;
+    type: 'payment' | 'transfer' | 'income' | 'tax' | 'deposit' | 'withdraw';
+    amount: number;
+    senderId?: string;
+    receiverId?: string;
+    description: string;
+    timestamp: number;
+}
+
+export interface PointCard {
+    shopOwnerId: string;
+    points: number;
+}
+
 export interface User {
     id: string;
     name: string;
@@ -43,6 +58,7 @@ export interface User {
     debt: number; // 借金
     popularity: number; // 人気度
     happiness: number; // 幸福度
+    rating: number; // 評価 (0-5)
     job: string;
     items: string[]; // 購入した商品のIDなど
     stocks: { [stockId: string]: number }; // 保有株数
@@ -50,6 +66,10 @@ export interface User {
     isForbiddenUnlocked: boolean;
     lastJobChangeTurn?: number; // 最後に転職したターン
     unpaidTax: number; // 未払いの税金
+    transactions: Transaction[]; // 取引履歴
+    pointCards: PointCard[]; // ポイントカード
+    shopName?: string; // 店名 (任意)
+    cardType?: 'point' | 'stamp'; // ポイントカードのタイプ
 }
 
 export interface GameSettings {
@@ -57,6 +77,7 @@ export interface GameSettings {
     insuranceRate: number;
     interestRate: number;
     salaryAutoSafeRate: number; // 稼ぎの何%を自動貯金するか (デフォルト50%)
+    turnDuration: number; // 1ターンの時間(ミリ秒)
 }
 
 export interface GameState {
@@ -66,6 +87,8 @@ export interface GameState {
     marketStatus: 'open' | 'closed'; // 昼夜連動など
     turn: number;
     isDay: boolean; // true=昼, false=夜
+    lastTick: number; // 最後の時間更新
+    timeRemaining: number; // 次のターンまでの残り時間(ms)
     settings: GameSettings;
     news: string[]; // ニュースログ
     roulette: {

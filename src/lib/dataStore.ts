@@ -19,21 +19,24 @@ const INITIAL_STATE: GameState = {
     marketStatus: 'open',
     turn: 1,
     isDay: true,
+    lastTick: Date.now(),
+    timeRemaining: 5 * 60 * 1000, // 5 minutes
     settings: {
         taxRate: 0.1,
         insuranceRate: 100,
         interestRate: 0.05,
-        salaryAutoSafeRate: 0.5
+        salaryAutoSafeRate: 0.5,
+        turnDuration: 5 * 60 * 1000 // 5 minutes
     },
     news: [],
     roulette: {
         items: [
-            { id: 1, text: '宝くじ 1等 (1000枚)', effect: 'bonus_1000' },
-            { id: 2, text: '宝くじ はずれ', effect: 'none' },
-            { id: 3, text: '風邪をひいた (治療費 -50)', effect: 'sick_cold' },
-            { id: 4, text: '臨時ボーナス (300枚)', effect: 'bonus_300' },
-            { id: 5, text: '財布を落とした (-100枚)', effect: 'lost_100' },
-            { id: 6, text: '人気者になった (人気+10)', effect: 'pop_up' },
+            { id: 1, text: '宝くじ 1等 (1000枚)', effect: 'bonus_1000', weight: 1 },
+            { id: 2, text: '宝くじ はずれ', effect: 'none', weight: 5 },
+            { id: 3, text: '風邪をひいた (治療費 -50)', effect: 'sick_cold', weight: 3 },
+            { id: 4, text: '臨時ボーナス (300枚)', effect: 'bonus_300', weight: 2 },
+            { id: 5, text: '財布を落とした (-100枚)', effect: 'lost_100', weight: 3 },
+            { id: 6, text: '人気者になった (人気+10)', effect: 'pop_up', weight: 2 },
         ],
         currentResult: null
     },

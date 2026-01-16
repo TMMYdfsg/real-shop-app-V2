@@ -1,22 +1,34 @@
-import { NextResponse } from 'next/server';
+import { NextResponse, NextRequest } from 'next/server';
 import { updateGameState } from '@/lib/dataStore';
-import { GameState, User } from '@/types';
-import { NextRequest } from 'next/server';
+import { GameState, User, Transaction } from '@/types';
+import crypto from 'crypto';
+
+// Helper for adding transactions (placed outside main function or inside if preferred scope allows)
+const addHistory = (user: User, type: Transaction['type'], amount: number, description: string, targetId?: string, senderId?: string) => {
+    if (!user.transactions) user.transactions = [];
+    user.transactions.push({
+        id: crypto.randomUUID(),
+        type,
+        amount,
+        senderId: senderId || (type === 'income' ? 'system' : user.id),
+        receiverId: targetId,
+        description,
+        timestamp: Date.now()
+    });
+};
 
 export async function POST(req: NextRequest) {
     try {
         const body = await req.json();
         const { action, requestId, type, decision, season, amount } = body;
 
-        // -----------------------------------------------------
-        // 季節変更 (Change Season)
-        // -----------------------------------------------------
+        // ... (change_season block skipped for brevity in this replacement if not needed, but we keep structure)
         if (action === 'change_season') {
+            // ... existing change_season logic ...
             updateGameState((state) => {
                 if (season) state.season = season;
                 state.news.push(`季節が ${season} に変わりました！`);
-
-                // 税金発生 (全員一律 10% + 固定資産税 100 と仮定)
+                // 税金発生
                 state.users.forEach(u => {
                     if (u.role === 'player') {
                         const tax = Math.floor(u.balance * 0.1) + 100;
@@ -24,15 +36,11 @@ export async function POST(req: NextRequest) {
                     }
                 });
                 state.news.push('季節の変わり目により、税金が発生しました。');
-
                 return state;
             });
             return NextResponse.json({ success: true });
         }
 
-        // -----------------------------------------------------
-        // 申請承認 / 却下
-        // -----------------------------------------------------
         if (action === 'approve' || action === 'reject') {
             if (!requestId) return NextResponse.json({ error: 'RequestId required' }, { status: 400 });
 
@@ -44,23 +52,27 @@ export async function POST(req: NextRequest) {
                 req.status = action === 'approve' ? 'approved' : 'rejected';
 
                 if (action === 'approve') {
-                    // Apply changes based on request type
                     const user = state.users.find(u => u.id === req.requesterId);
                     if (user) {
                         if (req.type === 'income') {
                             user.balance += req.amount;
+                            addHistory(user, 'income', req.amount, '給料/収入');
+
                             const saving = Math.floor(req.amount * state.settings.salaryAutoSafeRate);
                             if (saving > 0 && user.balance >= saving) {
                                 user.balance -= saving;
                                 user.deposit += saving;
+                                addHistory(user, 'deposit', saving, '自動貯金');
                             }
                         } else if (req.type === 'loan') {
                             user.balance += req.amount;
                             user.debt += req.amount;
+                            addHistory(user, 'income', req.amount, '借金');
                         } else if (req.type === 'repay') {
                             if (user.balance >= req.amount) {
                                 user.balance -= req.amount;
                                 user.debt = Math.max(0, user.debt - req.amount);
+                                addHistory(user, 'payment', req.amount, '借金返済');
                             } else {
                                 req.status = 'rejected';
                             }
@@ -68,23 +80,23 @@ export async function POST(req: NextRequest) {
                             if (user.balance >= req.amount) {
                                 user.balance -= req.amount;
                                 user.unpaidTax = Math.max(0, (user.unpaidTax || 0) - req.amount);
+                                addHistory(user, 'tax', req.amount, '納税');
                             } else {
                                 req.status = 'rejected';
                             }
                         } else if (req.type === 'tax' || req.type === 'bill') {
-                            // Check if this is a "Charge" bill (Target -> Requester) or "Self Payment" (Requester -> Void)
                             const targetId = req.details;
-                            // If details looks like a user ID (and not 'Self Payment'), treat as Charge
                             const target = targetId ? state.users.find(u => u.id === targetId) : null;
 
                             if (target && targetId && targetId !== 'Self Payment' && targetId !== 'Tax Payment') {
                                 // Charge: Target pays Requester
-                                // If target has enough balance?
+                                let paidAmount = 0;
                                 if (target.balance >= req.amount) {
                                     target.balance -= req.amount;
                                     user.balance += req.amount;
+                                    paidAmount = req.amount;
                                 } else {
-                                    // Forced collection (Debt)
+                                    paidAmount = req.amount; // 借金してでも払う
                                     target.balance -= req.amount;
                                     if (target.balance < 0) {
                                         target.debt += Math.abs(target.balance);
@@ -92,10 +104,25 @@ export async function POST(req: NextRequest) {
                                     }
                                     user.balance += req.amount;
                                 }
+                                addHistory(target, 'payment', paidAmount, `支払い: ${user.name}`, user.id);
+                                addHistory(user, 'income', paidAmount, `受取: ${target.name}`, user.id, target.id);
+
+                                // ポイント加算 (100枚につき1pt)
+                                const points = Math.floor(paidAmount / 100);
+                                if (points > 0) {
+                                    if (!target.pointCards) target.pointCards = [];
+                                    let card = target.pointCards.find(c => c.shopOwnerId === user.id);
+                                    if (!card) {
+                                        card = { shopOwnerId: user.id, points: 0 };
+                                        target.pointCards.push(card);
+                                    }
+                                    card.points += points;
+                                }
                             } else {
-                                // Self Payment / Legacy Bill
+                                // Self Payment
                                 if (user.balance >= req.amount) {
                                     user.balance -= req.amount;
+                                    addHistory(user, 'payment', req.amount, '支払い');
                                 }
                             }
                         } else if (req.type === 'transfer') {
@@ -105,6 +132,8 @@ export async function POST(req: NextRequest) {
                                 if (user.balance >= req.amount) {
                                     user.balance -= req.amount;
                                     target.balance += req.amount;
+                                    addHistory(user, 'transfer', req.amount, `送金: ${target.name}`, target.id);
+                                    addHistory(target, 'income', req.amount, `受取: ${user.name}`, target.id, user.id);
                                 } else {
                                     req.status = 'rejected';
                                 }
@@ -119,6 +148,7 @@ export async function POST(req: NextRequest) {
                                     user.balance -= cost;
                                     if (!user.stocks) user.stocks = {};
                                     user.stocks[stockId] = (user.stocks[stockId] || 0) + quantity;
+                                    addHistory(user, 'payment', cost, `株購入: ${stock.name} x${quantity}`);
                                 } else {
                                     req.status = 'rejected';
                                 }
@@ -133,6 +163,7 @@ export async function POST(req: NextRequest) {
                                     const revenue = stock.price * quantity;
                                     user.balance += revenue;
                                     user.stocks[stockId] -= quantity;
+                                    addHistory(user, 'income', revenue, `株売却: ${stock.name} x${quantity}`);
                                 } else {
                                     req.status = 'rejected';
                                 }

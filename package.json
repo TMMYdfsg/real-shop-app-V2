@@ -4,12 +4,14 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "dev:ssl": "concurrently \"local-ssl-proxy --source 3001 --target 3000 --hostname 0.0.0.0\" \"next dev\"",
     "build": "next build",
     "start": "next start",
     "lint": "eslint"
   },
   "dependencies": {
     "html5-qrcode": "^2.3.8",
+    "jsqr": "^1.4.0",
     "next": "15.1.0",
     "qrcode.react": "^4.2.0",
     "react": "^19.0.0",
@@ -20,8 +22,10 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "concurrently": "^9.2.1",
     "eslint": "^8",
     "eslint-config-next": "15.0.3",
+    "local-ssl-proxy": "^2.0.5",
     "typescript": "^5"
   }
 }

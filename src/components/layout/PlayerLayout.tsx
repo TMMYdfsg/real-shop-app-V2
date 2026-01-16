@@ -38,9 +38,38 @@ export const PlayerLayout: React.FC<{ children: React.ReactNode }> = ({ children
 
     }, [gameState, currentUser]);
 
+    // Timer & SE Logic
+    // Hooks must be called unconditionally at the top level
+    const [displayTime, setDisplayTime] = useState<number>(gameState?.timeRemaining || 0);
+    const lastDayStatus = useRef<boolean>(gameState?.isDay ?? true);
+
+    useEffect(() => {
+        if (!gameState) return;
+
+        // Sync local state
+        setDisplayTime(gameState.timeRemaining);
+
+        // SE Check
+        if (lastDayStatus.current !== gameState.isDay) {
+            const soundFile = gameState.isDay ? '/sounds/day.mp3' : '/sounds/night.mp3';
+            const audio = new Audio(soundFile);
+            audio.volume = 0.5;
+            audio.play().catch(e => console.log('SE Check:', e));
+            lastDayStatus.current = gameState.isDay;
+        }
+
+        // Timer Interval
+        const interval = setInterval(() => {
+            setDisplayTime(prev => Math.max(0, prev - 1000));
+        }, 1000);
+
+        return () => clearInterval(interval);
+    }, [gameState]);
+
     // Simple Notification Component (Inline)
     const activeBills = gameState?.requests.filter(r => r.type === 'bill' && r.details === currentUser?.id && r.status === 'pending') || [];
 
+    // Conditional Return (must be AFTER all hooks)
     if (!currentUser) return <>{children}</>;
 
     const basePath = `/player/${currentUser.id}`;
@@ -49,15 +78,27 @@ export const PlayerLayout: React.FC<{ children: React.ReactNode }> = ({ children
         { label: '収入', path: `${basePath}`, icon: '💰' },
         { label: '借金', path: `${basePath}/debt`, icon: '💸' },
         { label: '支払い', path: `${basePath}/payment`, icon: '🧾' },
+        { label: '履歴', path: `${basePath}/history`, icon: '📜' },
         { label: 'マイショップ', path: `${basePath}/shop`, icon: '🛍️' },
+        { label: 'ポイント', path: `${basePath}/points`, icon: '💳' },
         { label: '株', path: `${basePath}/stock`, icon: '📈' },
+        { label: '貯金', path: `${basePath}/bank`, icon: '🏦' },
         { label: '仕事', path: `${basePath}/job`, icon: '🛠️' },
         { label: 'ルーレット結果', path: `${basePath}/roulette`, icon: '🎲' },
+        { label: 'ランキング', path: `${basePath}/ranking`, icon: '🏆' },
+        { label: '設定', path: `${basePath}/config`, icon: '⚙️' },
     ];
 
     if (currentUser.isForbiddenUnlocked) {
         navItems.push({ label: '闇市場', path: `${basePath}/forbidden`, icon: '💀' });
     }
+
+    const formatTime = (ms: number) => {
+        const seconds = Math.floor(ms / 1000);
+        const m = Math.floor(seconds / 60);
+        const s = seconds % 60;
+        return `${m}:${s.toString().padStart(2, '0')}`;
+    };
 
     const handleSecret = async (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === 'Enter') {
@@ -66,7 +107,6 @@ export const PlayerLayout: React.FC<{ children: React.ReactNode }> = ({ children
                 if (confirm('禁断の知恵に触れますか...？')) {
                     await fetch('/api/action', {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
                             type: 'unlock_forbidden',
                             requesterId: currentUser.id,
@@ -81,7 +121,7 @@ export const PlayerLayout: React.FC<{ children: React.ReactNode }> = ({ children
     };
 
     return (
-        <div style={{ minHeight: '100vh', paddingBottom: '80px', background: currentUser.isForbiddenUnlocked ? '#111' : undefined }}>
+        <div style={{ minHeight: '100vh', paddingBottom: '80px', background: currentUser.isForbiddenUnlocked ? '#111' : '#e0f2fe' }}>
             {/* Notifications */}
             {activeBills.length > 0 && (
                 <div style={{ position: 'fixed', top: '70px', left: '1rem', right: '1rem', zIndex: 100, background: '#ef4444', color: 'white', padding: '1rem', borderRadius: '8px', boxShadow: '0 4px 6px rgba(0,0,0,0.1)', animation: 'slideDown 0.3s ease' }}>
@@ -90,30 +130,55 @@ export const PlayerLayout: React.FC<{ children: React.ReactNode }> = ({ children
                 </div>
             )}
 
+            {/* Night Blocking Overlay */}
+            {gameState && !gameState.isDay && (
+                <div style={{
+                    position: 'fixed', inset: 0, zIndex: 9999,
+                    background: 'rgba(15, 23, 42, 0.95)',
+                    display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                    color: 'white', textAlign: 'center'
+                }}>
+                    <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>🌙</div>
+                    <h2 style={{ fontSize: '2rem', fontWeight: 'bold', marginBottom: '1rem' }}>夜は必ず寝ましょう</h2>
+                    <p style={{ fontSize: '1.2rem', opacity: 0.8 }}>次の朝までお待ちください...</p>
+                    <div style={{ marginTop: '2rem', fontFamily: 'monospace', fontSize: '1.5rem' }}>
+                        あと {formatTime(displayTime)}
+                    </div>
+                </div>
+            )}
+
             {/* Header */}
             <header style={{
                 position: 'sticky',
                 top: 0,
                 zIndex: 50,
-                background: 'var(--glass-bg)',
+                background: gameState?.isDay ? 'rgba(255,255,255,0.8)' : 'rgba(0,0,0,0.8)',
                 backdropFilter: 'blur(10px)',
                 borderBottom: '1px solid var(--glass-border)',
                 padding: '0.75rem 1rem',
                 display: 'flex',
                 justifyContent: 'space-between',
-                alignItems: 'center'
+                alignItems: 'center',
+                color: gameState?.isDay ? '#000' : '#fff',
+                transition: 'all 0.5s'
             }}>
-                <div style={{ fontWeight: 'bold' }}>{currentUser.name}</div>
-                <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                    <span style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>所持金:</span>
-                    <span style={{ fontSize: '1.2rem', fontWeight: 'bold', color: 'var(--accent-color)' }}>
-                        {currentUser.balance.toLocaleString()}枚
-                    </span>
+                <div>
+                    <div style={{ fontSize: '0.8rem', opacity: 0.8 }}>Turn {gameState?.turn}</div>
+                    <div style={{ fontWeight: 'bold' }}>{currentUser.name}</div>
+                </div>
+                <div style={{ textAlign: 'right' }}>
+                    <div style={{ fontSize: '0.8rem' }}>{gameState?.isDay ? '☀️ 昼' : '🌙 夜'} {formatTime(displayTime)}</div>
+                    <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                        <span style={{ fontSize: '0.9rem', opacity: 0.8 }}>所持金:</span>
+                        <span style={{ fontSize: '1.2rem', fontWeight: 'bold', color: 'var(--accent-color)' }}>
+                            {currentUser.balance.toLocaleString()}
+                        </span>
+                    </div>
                 </div>
             </header>
 
             {/* Main Content */}
-            <main style={{ padding: '4rem 1rem 1rem 1rem' }}>
+            <main style={{ padding: '1rem', maxWidth: '800px', margin: '0 auto' }}>
                 <Sidebar title={currentUser.name} items={navItems} role="player" />
                 {children}
 
