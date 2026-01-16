@@ -49,6 +49,7 @@ export const PlayerLayout: React.FC<{ children: React.ReactNode }> = ({ children
         { label: '収入', path: `${basePath}`, icon: '💰' },
         { label: '借金', path: `${basePath}/debt`, icon: '💸' },
         { label: '支払い', path: `${basePath}/payment`, icon: '🧾' },
+        { label: 'マイショップ', path: `${basePath}/shop`, icon: '🛍️' },
         { label: '株', path: `${basePath}/stock`, icon: '📈' },
         { label: '仕事', path: `${basePath}/job`, icon: '🛠️' },
         { label: 'ルーレット結果', path: `${basePath}/roulette`, icon: '🎲' },

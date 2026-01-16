@@ -38,7 +38,7 @@ export default function BankerRoulettePage() {
 
     const handleAdd = () => {
         const maxId = items.length > 0 ? Math.max(...items.map(i => i.id)) : 0;
-        setItems([...items, { id: maxId + 1, text: '新しい項目', effect: 'none' }]);
+        setItems([...items, { id: maxId + 1, text: '新しい項目', effect: 'none', weight: 1 }]);
     };
 
     const handleDelete = (index: number) => {
