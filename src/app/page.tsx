@@ -1,66 +1,182 @@
-import Image from "next/image";
-import styles from "./page.module.css";
+'use client';
+
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useGame } from '@/context/GameContext';
+import { Button } from '@/components/ui/Button';
+import { Card } from '@/components/ui/Card';
+import { Role } from '@/types';
 
 export default function Home() {
-  return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className={styles.intro}>
-          <h1>To get started, edit the page.tsx file.</h1>
-          <p>
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
+  const { gameState, login, isLoading } = useGame();
+  const router = useRouter();
+  const [setupStep, setSetupStep] = useState(0); // 0: Check, 1: Setup Form
+  const [playerCount, setPlayerCount] = useState(4);
+  const [names, setNames] = useState<string[]>(['', '', '', '']);
+  const [ids, setIds] = useState<string[]>(['', '', '', '']); // Custom IDs
+
+  useEffect(() => {
+    if (!isLoading && gameState) {
+      if (gameState.users.length === 0) {
+        setSetupStep(1);
+      } else {
+        setSetupStep(0);
+      }
+    }
+  }, [gameState, isLoading]);
+
+  const handleLogin = (userId: string, role: Role, userName: string) => {
+    if (!confirm(`${userName}さんで間違いありませんか？`)) return;
+
+    login(userId);
+    if (role === 'banker') {
+      router.push('/banker');
+    } else {
+      router.push(`/player/${userId}`);
+    }
+  };
+
+  const handleSetupSubmit = async () => {
+    // Register users sequentially
+    const usersToCreate = names.map((name, index) => ({
+      name: name || `Player ${index + 1}`,
+      role: index === 0 ? 'banker' : 'player',
+      job: 'unemployed',
+      id: ids[index] || undefined // Pass custom ID if set
+    }));
+
+    for (const user of usersToCreate) {
+      await fetch('/api/setup/user', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(user),
+      });
+    }
+    // Refresh page or wait for polling
+    window.location.reload();
+  };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="glass-panel p-8">Loading...</div>
+      </div>
+    );
+  }
+
+  // Setup Mode
+  if (gameState && gameState.users.length === 0) {
+    return (
+      <main className="min-h-screen flex items-center justify-center p-4">
+        <Card title="初期セットアップ" className="max-w-md w-full" style={{ textAlign: 'center' }}>
+          <p style={{ marginBottom: '1rem' }}>プレイする人数と名前を入力してね</p>
+
+          <div style={{ marginBottom: '1rem' }}>
+            <label>人数: </label>
+            <select
+              value={playerCount}
+              onChange={(e) => {
+                const count = Number(e.target.value);
+                setPlayerCount(count);
+                setNames(prev => {
+                  const newArr = [...prev];
+                  if (count > prev.length) for (let i = prev.length; i < count; i++) newArr.push('');
+                  else newArr.splice(count);
+                  return newArr;
+                });
+                setIds(prev => {
+                  const newArr = [...prev];
+                  if (count > prev.length) for (let i = prev.length; i < count; i++) newArr.push('');
+                  else newArr.splice(count);
+                  return newArr;
+                });
+              }}
+              style={{ padding: '0.5rem', borderRadius: '4px' }}
             >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className={styles.secondary}
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
+              {[2, 3, 4].map(n => <option key={n} value={n}>{n}人</option>)}
+            </select>
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '1.5rem' }}>
+            {names.map((name, index) => (
+              <div key={index} style={{ padding: '0.5rem', border: '1px solid #eee', borderRadius: '4px' }}>
+                <div style={{ fontSize: '0.8rem', marginBottom: '0.2rem', textAlign: 'left', fontWeight: 'bold' }}>
+                  {index === 0 ? '銀行員' : `プレイヤー${index}`}
+                </div>
+                <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                  <input
+                    type="text"
+                    placeholder="名前"
+                    value={name}
+                    onChange={(e) => {
+                      const newNames = [...names];
+                      newNames[index] = e.target.value;
+                      setNames(newNames);
+                    }}
+                    style={{ flex: 1, padding: '0.5rem', borderRadius: '4px', border: '1px solid #ccc' }}
+                  />
+                </div>
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <input
+                    type="text"
+                    placeholder="ID (任意: 英数字)"
+                    value={ids[index]}
+                    onChange={(e) => {
+                      const newIds = [...ids];
+                      newIds[index] = e.target.value;
+                      setIds(newIds);
+                    }}
+                    style={{ flex: 1, padding: '0.5rem', borderRadius: '4px', border: '1px solid #ccc', fontSize: '0.9rem' }}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <Button onClick={handleSetupSubmit} fullWidth>
+            ゲームスタート！
+          </Button>
+        </Card>
       </main>
-    </div>
+    );
+  }
+
+  // Login Mode
+  return (
+    <main className="min-h-screen flex flex-col items-center justify-center p-4 gap-8">
+      <h1 style={{ fontSize: '2.5rem', fontWeight: 'bold', background: 'linear-gradient(to right, #6366f1, #ec4899)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', marginBottom: '2rem' }}>
+        Real Shop
+      </h1>
+
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1rem', width: '100%', maxWidth: '400px' }}>
+        {gameState?.users.map((user) => (
+          <Button
+            key={user.id}
+            variant={user.role === 'banker' ? 'primary' : 'secondary'}
+            size="lg"
+            fullWidth
+            onClick={() => handleLogin(user.id, user.role, user.name)}
+            style={{
+              justifyContent: 'space-between',
+              padding: '1.5rem',
+              fontSize: '1.2rem'
+            }}
+          >
+            <div>
+              <div style={{ fontWeight: 'bold' }}>{user.name}</div>
+              <div style={{ fontSize: '0.8rem', opacity: 0.6 }}>ID: {user.id}</div>
+            </div>
+            <span style={{ fontSize: '0.8rem', opacity: 0.8 }}>
+              {user.role === 'banker' ? '銀行員' : 'プレイヤー'}
+            </span>
+          </Button>
+        ))}
+      </div>
+
+      {/* Reset Button (Debug) */}
+      {/* <div style={{ marginTop: '2rem' }}>
+        <Button variant="ghost" size="sm" onClick={() => fetch('/api/reset')}>リセット</Button>
+      </div> */}
+    </main>
   );
 }

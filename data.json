@@ -1,0 +1,204 @@
+{
+  "users": [
+    {
+      "id": "c6e0c017-c16a-464d-9e77-a41d5fd87aec",
+      "name": "0",
+      "role": "banker",
+      "balance": 1000000,
+      "deposit": 0,
+      "debt": 0,
+      "job": "unemployed",
+      "popularity": 50,
+      "happiness": 50,
+      "items": [],
+      "stocks": {},
+      "forbiddenStocks": {},
+      "isForbiddenUnlocked": false
+    },
+    {
+      "id": "e5a72cef-6372-4c32-b707-46e213d06d03",
+      "name": "1",
+      "role": "player",
+      "balance": 6,
+      "deposit": 6,
+      "debt": 100,
+      "job": "youtuber",
+      "popularity": 50,
+      "happiness": 50,
+      "items": [],
+      "stocks": {
+        "s1": 1
+      },
+      "forbiddenStocks": {},
+      "isForbiddenUnlocked": false
+    },
+    {
+      "id": "d483e2a5-f105-4c23-8f41-d4ef113dc167",
+      "name": "2",
+      "role": "player",
+      "balance": 1000,
+      "deposit": 0,
+      "debt": 0,
+      "job": "unemployed",
+      "popularity": 60,
+      "happiness": 50,
+      "items": [],
+      "stocks": {},
+      "forbiddenStocks": {},
+      "isForbiddenUnlocked": false
+    },
+    {
+      "id": "85aa5f67-e07c-4a9d-a35e-3500a2f52f08",
+      "name": "3",
+      "role": "player",
+      "balance": 1100,
+      "deposit": 0,
+      "debt": 0,
+      "job": "unemployed",
+      "popularity": 50,
+      "happiness": 50,
+      "items": [],
+      "stocks": {},
+      "forbiddenStocks": {},
+      "isForbiddenUnlocked": false
+    }
+  ],
+  "stocks": [
+    {
+      "id": "s1",
+      "name": "テック・フューチャー",
+      "price": 1000,
+      "previousPrice": 1000,
+      "volatility": 0.1,
+      "isForbidden": false
+    },
+    {
+      "id": "s2",
+      "name": "ハッピー・フーズ",
+      "price": 500,
+      "previousPrice": 500,
+      "volatility": 0.05,
+      "isForbidden": false
+    },
+    {
+      "id": "s3",
+      "name": "ミラクル建設",
+      "price": 800,
+      "previousPrice": 800,
+      "volatility": 0.08,
+      "isForbidden": false
+    },
+    {
+      "id": "f1",
+      "name": "シャドウ・コーポレーション",
+      "price": 5000,
+      "previousPrice": 5000,
+      "volatility": 0.5,
+      "isForbidden": true
+    },
+    {
+      "id": "f2",
+      "name": "ブラックバイオ研究所",
+      "price": 2000,
+      "previousPrice": 2000,
+      "volatility": 0.8,
+      "isForbidden": true
+    },
+    {
+      "id": "f3",
+      "name": "ネオカルト証券",
+      "price": 10000,
+      "previousPrice": 10000,
+      "volatility": 1,
+      "isForbidden": true
+    }
+  ],
+  "requests": [
+    {
+      "id": "1e277caf-00b0-410d-8c26-c6326748c0b4",
+      "type": "loan",
+      "requesterId": "e5a72cef-6372-4c32-b707-46e213d06d03",
+      "amount": 100,
+      "status": "approved",
+      "timestamp": 1768588731962
+    },
+    {
+      "id": "cd64fec5-b970-4994-aeb4-7088bd8b42b0",
+      "type": "income",
+      "requesterId": "e5a72cef-6372-4c32-b707-46e213d06d03",
+      "amount": 12,
+      "details": "Work (youtuber): Score 128.1",
+      "status": "approved",
+      "timestamp": 1768589365454
+    },
+    {
+      "id": "1ebf07eb-5245-48d5-b4c6-697ca294aa9f",
+      "type": "bill",
+      "requesterId": "e5a72cef-6372-4c32-b707-46e213d06d03",
+      "amount": 100,
+      "details": "Bill Payment",
+      "status": "approved",
+      "timestamp": 1768590184145
+    },
+    {
+      "id": "a470def2-9230-4021-9392-84142aa007dd",
+      "type": "buy_stock",
+      "requesterId": "e5a72cef-6372-4c32-b707-46e213d06d03",
+      "amount": 1,
+      "details": "s1",
+      "status": "approved",
+      "timestamp": 1768590227328
+    }
+  ],
+  "marketStatus": "open",
+  "turn": 1,
+  "isDay": false,
+  "settings": {
+    "taxRate": 0.1,
+    "insuranceRate": 100,
+    "interestRate": 0.05,
+    "salaryAutoSafeRate": 0.5
+  },
+  "news": [
+    "季節が summer に変わりました！"
+  ],
+  "roulette": {
+    "items": [
+      {
+        "id": 1,
+        "text": "宝くじ 1等 (1000枚)",
+        "effect": "bonus_1000"
+      },
+      {
+        "id": 2,
+        "text": "宝くじ はずれ",
+        "effect": "none"
+      },
+      {
+        "id": 3,
+        "text": "風邪をひいた (治療費 -50)",
+        "effect": "sick_cold"
+      },
+      {
+        "id": 4,
+        "text": "臨時ボーナス (300枚)",
+        "effect": "bonus_300"
+      },
+      {
+        "id": 5,
+        "text": "財布を落とした (-100枚)",
+        "effect": "lost_100"
+      },
+      {
+        "id": 6,
+        "text": "人気者になった (人気+10)",
+        "effect": "pop_up"
+      }
+    ],
+    "currentResult": {
+      "text": "人気者になった (人気+10) (対象: 指定ユーザー)",
+      "timestamp": 1768590376029
+    }
+  },
+  "season": "summer"
+}

@@ -1,0 +1,43 @@
+'use client';
+
+import { useRef } from 'react';
+import { Sidebar } from './Sidebar';
+import { useGame } from '@/context/GameContext';
+import { Button } from '@/components/ui/Button';
+import { useRouter } from 'next/navigation';
+
+export const BankerLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+    const { currentUser } = useGame();
+    const router = useRouter();
+
+    const navItems = [
+        { label: 'ホーム (Dashboard)', path: '/banker', icon: '🏠' },
+        { label: '申請承認', path: '/banker/requests', icon: '📝' },
+        { label: '職業管理', path: '/banker/users', icon: '👥' },
+        { label: '株式市場', path: '/banker/market', icon: '📈' },
+        { label: 'イベント制御', path: '/banker/events', icon: '🎉' },
+        { label: 'ルーレット設定', path: '/banker/roulette', icon: '⚙️' },
+        { label: '商品管理', path: '/banker/products', icon: '🛍️' },
+        { label: '季節管理', path: '/banker/season', icon: '🌸' },
+    ];
+
+    return (
+        <div style={{ minHeight: '100vh', background: 'var(--bg-secondary)' }}>
+            <Sidebar title="銀行員管理画面" items={navItems} role="banker" />
+
+            {/* Main Content */}
+            <main style={{ padding: '4rem 1rem 2rem 1rem', overflowY: 'auto' }}>
+                {currentUser && (
+                    <div style={{ maxWidth: '1200px', margin: '0 auto 1rem auto', display: 'flex', justifyContent: 'flex-end' }}>
+                        <Button size="sm" variant="secondary" onClick={() => router.push(`/player/${currentUser.id}`)}>
+                            👛 私の財布(プレイヤー画面)を見る
+                        </Button>
+                    </div>
+                )}
+                <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+                    {children}
+                </div>
+            </main>
+        </div>
+    );
+};
