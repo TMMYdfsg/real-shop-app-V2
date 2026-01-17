@@ -19,6 +19,7 @@ const INITIAL_STATE: GameState = {
     marketStatus: 'open',
     turn: 1,
     isDay: true,
+    isTimerRunning: true,
     lastTick: Date.now(),
     timeRemaining: 5 * 60 * 1000, // 5 minutes
     settings: {
@@ -41,7 +42,52 @@ const INITIAL_STATE: GameState = {
         currentResult: null
     },
     season: 'spring',
-    products: []
+    products: [],
+    activeNPCs: [],
+    npcTemplates: [
+        {
+            id: 'guest',
+            name: '一般客',
+            description: '普通のお客さん。何か買ってくれるかも？',
+            duration: 60 * 1000,
+            spawnRate: 30, // 30% per check
+            actionType: 'buy',
+            minPayment: 100,
+            maxPayment: 500
+        },
+        {
+            id: 'thief',
+            name: '怪しい男',
+            description: 'キョロキョロしている...泥棒かもしれない。',
+            duration: 3 * 60 * 1000,
+            spawnRate: 5,
+            actionType: 'steal_money',
+            minStealAmount: 1000,
+            maxStealAmount: 5000
+        },
+        {
+            id: 'scammer',
+            name: '自称投資家',
+            description: 'うまい儲け話を持ちかけてくる。',
+            duration: 2 * 60 * 1000,
+            spawnRate: 5,
+            actionType: 'scam',
+            minStealAmount: 2000,
+            maxStealAmount: 10000
+        },
+        {
+            id: 'rich_guest',
+            name: '富豪',
+            description: '金払いの良いお客さん。期待大！',
+            duration: 60 * 1000,
+            spawnRate: 2,
+            actionType: 'buy',
+            minPayment: 5000,
+            maxPayment: 20000
+        }
+    ],
+    activeEvents: [], // アクティブなイベント
+    properties: [] // 不動産リスト
 };
 
 // データを読み込む

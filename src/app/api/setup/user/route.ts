@@ -23,10 +23,13 @@ export async function POST(request: Request) {
             job: job || 'unemployed',
             popularity: 50,
             happiness: 50,
+            rating: 3, // 初期評価: 3つ星
             items: [],
             stocks: {},
             forbiddenStocks: {},
-            isForbiddenUnlocked: false
+            isForbiddenUnlocked: false,
+            transactions: [], // 取引履歴
+            pointCards: [] // ポイントカード
         };
 
         updateGameState((state) => {

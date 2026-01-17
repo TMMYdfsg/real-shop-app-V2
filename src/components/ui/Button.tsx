@@ -1,6 +1,7 @@
 import React from 'react';
+import { motion, HTMLMotionProps } from 'framer-motion';
 
-interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+interface ButtonProps extends HTMLMotionProps<"button"> {
     variant?: 'primary' | 'secondary' | 'danger' | 'ghost' | 'success';
     size?: 'sm' | 'md' | 'lg';
     fullWidth?: boolean;
@@ -15,22 +16,20 @@ export const Button: React.FC<ButtonProps> = ({
     style,
     ...props
 }) => {
-    const baseStyle: React.CSSProperties = {
-        display: 'inline-flex',
-        alignItems: 'center',
-        justifyContent: 'center',
+    const baseStyle = {
+        display: 'inline-flex' as const,
+        alignItems: 'center' as const,
+        justifyContent: 'center' as const,
         borderRadius: 'var(--radius-sm)',
-        fontWeight: 600,
-        cursor: props.disabled ? 'not-allowed' : 'pointer',
+        fontWeight: 600 as const,
+        cursor: props.disabled ? 'not-allowed' as const : 'pointer' as const,
         opacity: props.disabled ? 0.6 : 1,
-        transition: 'all 0.2s ease',
         border: 'none',
         outline: 'none',
         width: fullWidth ? '100%' : 'auto',
-        ...style
     };
 
-    const variants = {
+    const variantsMap = {
         primary: {
             background: 'var(--accent-color)',
             color: 'white',
@@ -63,29 +62,21 @@ export const Button: React.FC<ButtonProps> = ({
 
     const combinedStyle = {
         ...baseStyle,
-        ...variants[variant],
+        ...variantsMap[variant],
         ...sizes[size],
+        ...style
     };
 
     return (
-        <button
+        <motion.button
             className={`btn-${variant} ${className}`}
             style={combinedStyle}
+            whileHover={!props.disabled ? { scale: 1.05, filter: 'brightness(1.1)' } : {}}
+            whileTap={!props.disabled ? { scale: 0.95 } : {}}
+            transition={{ type: 'spring', stiffness: 400, damping: 17 }}
             {...props}
-            onMouseEnter={(e) => {
-                if (!props.disabled && variant !== 'ghost') {
-                    e.currentTarget.style.transform = 'translateY(-2px)';
-                    e.currentTarget.style.filter = 'brightness(1.1)';
-                }
-            }}
-            onMouseLeave={(e) => {
-                if (!props.disabled && variant !== 'ghost') {
-                    e.currentTarget.style.transform = 'translateY(0)';
-                    e.currentTarget.style.filter = 'brightness(1)';
-                }
-            }}
         >
             {children}
-        </button>
+        </motion.button>
     );
 };

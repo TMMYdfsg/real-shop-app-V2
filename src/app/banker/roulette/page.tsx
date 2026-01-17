@@ -7,13 +7,29 @@ import { Button } from '@/components/ui/Button';
 
 export default function BankerRoulettePage() {
     const { gameState } = useGame();
-    const [items, setItems] = useState<{ id: number; text: string; effect: string }[]>([]);
+    const [items, setItems] = useState<{ id: number; text: string; effect: string; weight?: number }[]>([]);
+    const [selectedUser, setSelectedUser] = useState<string>('');
+    const [rouletteCost, setRouletteCost] = useState<number>(0);
 
     useEffect(() => {
         if (gameState?.roulette?.items) {
             setItems(gameState.roulette.items);
         }
     }, [gameState]);
+
+    const handleSpin = async () => {
+        if (!confirm(`ルーレットを実行しますか？ (参加費: ${rouletteCost}枚)`)) return;
+
+        await fetch('/api/admin', {
+            method: 'POST',
+            body: JSON.stringify({
+                action: 'spin_roulette',
+                requestId: selectedUser || undefined,
+                amount: rouletteCost
+            })
+        });
+        alert('ルーレットを回しました！結果はニュースを確認してください。');
+    };
 
     const handleSave = async () => {
         if (!confirm('変更を保存しますか？')) return;
@@ -29,7 +45,7 @@ export default function BankerRoulettePage() {
         alert('保存しました');
     };
 
-    const handleChange = (index: number, field: string, value: string) => {
+    const handleChange = (index: number, field: string, value: string | number) => {
         const newItems = [...items];
         // @ts-ignore
         newItems[index][field] = value;
@@ -102,6 +118,45 @@ export default function BankerRoulettePage() {
                 <div style={{ marginTop: '1rem' }}>
                     <p style={{ fontSize: '0.8rem', color: '#666', marginBottom: '0.5rem' }}>※確率: 数字が大きいほど当たりやすくなります（例: 10は1の10倍当たりやすい）</p>
                     <Button variant="ghost" onClick={handleAdd} fullWidth>+ 項目を追加</Button>
+                </div>
+            </Card>
+
+
+            <Card padding="md" style={{ marginTop: '1rem' }}>
+                <h3>🎰 ルーレット実行</h3>
+                <p style={{ marginBottom: '1rem' }}>全員、または特定のユーザーに対してルーレットを回します。</p>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                    <div>
+                        <label style={{ display: 'block', marginBottom: '0.5rem' }}>ターゲットユーザー（任意）</label>
+                        <select
+                            value={selectedUser}
+                            onChange={(e) => setSelectedUser(e.target.value)}
+                            style={{ padding: '0.5rem', width: '100%', border: '1px solid #ccc', borderRadius: '4px' }}
+                        >
+                            <option value="">全員</option>
+                            {gameState?.users.filter(u => u.role === 'player').map(u => (
+                                <option key={u.id} value={u.id}>{u.name}</option>
+                            ))}
+                        </select>
+                    </div>
+
+                    <div>
+                        <label style={{ display: 'block', marginBottom: '0.5rem' }}>参加費 (枚)</label>
+                        <input
+                            type="number"
+                            value={rouletteCost}
+                            onChange={e => setRouletteCost(Number(e.target.value))}
+                            style={{ padding: '0.5rem', border: '1px solid #ccc', borderRadius: '4px', width: '100px' }}
+                            min="0"
+                        />
+                    </div>
+
+                    <div>
+                        <Button variant="primary" onClick={handleSpin}>
+                            {selectedUser ? '選択したユーザーで回す' : '全員で回す'}
+                        </Button>
+                    </div>
                 </div>
             </Card>
         </div>

@@ -5,6 +5,7 @@ import { Sidebar } from './Sidebar';
 import { useGame } from '@/context/GameContext';
 import { Button } from '@/components/ui/Button';
 import { useRouter } from 'next/navigation';
+import { PageTransition } from './PageTransition';
 
 export const BankerLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const { currentUser } = useGame();
@@ -15,10 +16,15 @@ export const BankerLayout: React.FC<{ children: React.ReactNode }> = ({ children
         { label: '申請承認', path: '/banker/requests', icon: '📝' },
         { label: '職業管理', path: '/banker/users', icon: '👥' },
         { label: '株式市場', path: '/banker/market', icon: '📈' },
-        { label: 'イベント制御', path: '/banker/events', icon: '🎉' },
-        { label: 'ルーレット設定', path: '/banker/roulette', icon: '⚙️' },
+        { label: '大規模イベント', path: '/banker/eventcontrol', icon: '🎭' },
+        { label: 'NPC派遣/管理', path: '/banker/events', icon: '🤖' },
+        { label: 'ルーレット', path: '/banker/roulette', icon: '⚙️' },
         { label: '商品管理', path: '/banker/products', icon: '🛍️' },
         { label: '季節管理', path: '/banker/season', icon: '🌸' },
+        { label: 'タイマー管理', path: '/banker/timer', icon: '⏱️' },
+        { label: '財務・給付', path: '/banker/finance', icon: '💰' },
+        { label: 'システム設定', path: '/banker/config', icon: '🔧' },
+        { label: '⚡️ 神モード', path: '/banker/godmode', icon: '⚡️' },
     ];
 
     return (
@@ -35,7 +41,9 @@ export const BankerLayout: React.FC<{ children: React.ReactNode }> = ({ children
                     </div>
                 )}
                 <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-                    {children}
+                    <PageTransition>
+                        {children}
+                    </PageTransition>
                 </div>
             </main>
         </div>

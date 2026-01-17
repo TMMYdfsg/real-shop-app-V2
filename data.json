@@ -2,28 +2,315 @@
   "users": [
     {
       "id": "c6e0c017-c16a-464d-9e77-a41d5fd87aec",
-      "name": "0",
+      "name": "ともや",
       "role": "banker",
-      "balance": 1000000,
+      "balance": null,
       "deposit": 0,
       "debt": 0,
-      "job": "unemployed",
+      "job": "hacker",
       "popularity": 50,
       "happiness": 50,
       "items": [],
-      "stocks": {},
+      "stocks": {
+        "f3": 10
+      },
       "forbiddenStocks": {},
-      "isForbiddenUnlocked": false
+      "isForbiddenUnlocked": true,
+      "transactions": [
+        {
+          "id": "657ac8ce-500d-44a9-84b1-1f9c5a03ef6d",
+          "type": "payment",
+          "amount": 240500,
+          "senderId": "c6e0c017-c16a-464d-9e77-a41d5fd87aec",
+          "description": "株購入: ネオカルト証券 x10",
+          "timestamp": 1768597000265
+        },
+        {
+          "id": "3a39a64d-a747-45e0-9a02-65856dc44cb3",
+          "type": "income",
+          "amount": 401,
+          "description": "仕事報酬 (hacker)",
+          "timestamp": 1768601025852
+        },
+        {
+          "id": "489faa68-9d2a-41fa-935f-3994b56d3b96",
+          "type": "income",
+          "amount": 403,
+          "description": "仕事報酬 (hacker)",
+          "timestamp": 1768635205025
+        },
+        {
+          "id": "60fde4e5-848a-4df0-b881-8b51dde97659",
+          "type": "income",
+          "amount": 100,
+          "description": "スロット: ペア! 2倍配当",
+          "timestamp": 1768635389652
+        },
+        {
+          "id": "f2b32ad8-f1d4-4226-8e66-10e854eb2588",
+          "type": "payment",
+          "amount": 500,
+          "senderId": "c6e0c017-c16a-464d-9e77-a41d5fd87aec",
+          "receiverId": "e5a72cef-6372-4c32-b707-46e213d06d03",
+          "description": "購入: テスト（1）",
+          "timestamp": 1768636780649
+        },
+        {
+          "id": "61118684-670a-4f18-b781-5c8ae9e0f02f",
+          "type": "payment",
+          "amount": 500,
+          "senderId": "c6e0c017-c16a-464d-9e77-a41d5fd87aec",
+          "receiverId": "e5a72cef-6372-4c32-b707-46e213d06d03",
+          "description": "購入: テスト（1）",
+          "timestamp": 1768637181979
+        },
+        {
+          "id": "3507da31-b40b-4c23-85eb-cc6535552ba2",
+          "type": "payment",
+          "amount": 100,
+          "senderId": "c6e0c017-c16a-464d-9e77-a41d5fd87aec",
+          "receiverId": "e5a72cef-6372-4c32-b707-46e213d06d03",
+          "description": "購入: 休みたい（1）",
+          "timestamp": 1768637198298
+        },
+        {
+          "id": "117a77fb-0139-4775-a493-8e55fb15f008",
+          "type": "payment",
+          "amount": 700,
+          "senderId": "c6e0c017-c16a-464d-9e77-a41d5fd87aec",
+          "receiverId": "e5a72cef-6372-4c32-b707-46e213d06d03",
+          "description": "購入: 人間😭（1）",
+          "timestamp": 1768637553810
+        },
+        {
+          "id": "85dddc16-f1b6-4439-948a-349759624944",
+          "type": "transfer",
+          "amount": 1000,
+          "senderId": "c6e0c017-c16a-464d-9e77-a41d5fd87aec",
+          "receiverId": "e5a72cef-6372-4c32-b707-46e213d06d03",
+          "description": "送金: Lina🐑",
+          "timestamp": 1768638788380
+        },
+        {
+          "id": "ecce7744-b562-4575-95fc-d5882c4575ac",
+          "type": "payment",
+          "amount": 5000,
+          "senderId": "c6e0c017-c16a-464d-9e77-a41d5fd87aec",
+          "receiverId": "e5a72cef-6372-4c32-b707-46e213d06d03",
+          "description": "購入: ドラえもん（1）",
+          "timestamp": 1768639994954
+        },
+        {
+          "id": "6f6ea29e-c26a-499c-b8a1-284d502b4dc1",
+          "type": "payment",
+          "amount": 700,
+          "senderId": "c6e0c017-c16a-464d-9e77-a41d5fd87aec",
+          "receiverId": "85aa5f67-e07c-4a9d-a35e-3500a2f52f08",
+          "description": "購入: ショートケーキ（ヴェト・ジュテ・ミラル）",
+          "timestamp": 1768640642451
+        },
+        {
+          "id": "b03aecc9-4e88-40a9-9ca0-5d21b6ec02de",
+          "type": "payment",
+          "amount": 600,
+          "senderId": "c6e0c017-c16a-464d-9e77-a41d5fd87aec",
+          "receiverId": "85aa5f67-e07c-4a9d-a35e-3500a2f52f08",
+          "description": "購入: イチゴたっぷりショートケーキ（ヴェト・ジュテ・ミラル）",
+          "timestamp": 1768640652081
+        },
+        {
+          "id": "d51eab1b-e362-4ac4-bdaa-86bd7f33314c",
+          "type": "payment",
+          "amount": 1000,
+          "senderId": "c6e0c017-c16a-464d-9e77-a41d5fd87aec",
+          "receiverId": "e5a72cef-6372-4c32-b707-46e213d06d03",
+          "description": "購入: (ΦωΦ)（1）",
+          "timestamp": 1768640685798
+        },
+        {
+          "id": "d0cad147-5577-4b5b-afbb-a363c44d8b3e",
+          "type": "payment",
+          "amount": 500,
+          "senderId": "c6e0c017-c16a-464d-9e77-a41d5fd87aec",
+          "receiverId": "85aa5f67-e07c-4a9d-a35e-3500a2f52f08",
+          "description": "購入: チーズケーキ（ヴェト・ジュテ・ミラル）",
+          "timestamp": 1768640748539
+        },
+        {
+          "id": "76713155-0783-4f2e-8774-d02dcbc26d80",
+          "type": "payment",
+          "amount": 500,
+          "senderId": "c6e0c017-c16a-464d-9e77-a41d5fd87aec",
+          "receiverId": "85aa5f67-e07c-4a9d-a35e-3500a2f52f08",
+          "description": "購入: チーズケーキ（ヴェト・ジュテ・ミラル）",
+          "timestamp": 1768640752494
+        },
+        {
+          "id": "7d35f825-7683-48b5-8cee-bb70f8c3368c",
+          "type": "payment",
+          "amount": 500,
+          "senderId": "c6e0c017-c16a-464d-9e77-a41d5fd87aec",
+          "receiverId": "85aa5f67-e07c-4a9d-a35e-3500a2f52f08",
+          "description": "購入: チーズケーキ（ヴェト・ジュテ・ミラル）",
+          "timestamp": 1768640757118
+        },
+        {
+          "id": "10061c6e-56f8-45fb-9615-cc42afaf05c7",
+          "type": "payment",
+          "amount": 500,
+          "senderId": "c6e0c017-c16a-464d-9e77-a41d5fd87aec",
+          "receiverId": "85aa5f67-e07c-4a9d-a35e-3500a2f52f08",
+          "description": "購入: バスクチーズケーキ（ヴェト・ジュテ・ミラル）",
+          "timestamp": 1768640920177
+        },
+        {
+          "id": "77909ce7-ec90-4982-9e46-5ee73ab44950",
+          "type": "payment",
+          "amount": 500,
+          "senderId": "c6e0c017-c16a-464d-9e77-a41d5fd87aec",
+          "receiverId": "85aa5f67-e07c-4a9d-a35e-3500a2f52f08",
+          "description": "購入: レアチーズケーキ（ヴェト・ジュテ・ミラル）",
+          "timestamp": 1768640927104
+        },
+        {
+          "id": "5f4ae23b-0c11-44f1-8e5c-feac0c85d561",
+          "type": "payment",
+          "amount": 500,
+          "senderId": "c6e0c017-c16a-464d-9e77-a41d5fd87aec",
+          "receiverId": "e5a72cef-6372-4c32-b707-46e213d06d03",
+          "description": "購入: 光るお守り（1）",
+          "timestamp": 1768640983404
+        },
+        {
+          "id": "42046d8a-8c76-4902-aa3e-64e6a31d698d",
+          "type": "payment",
+          "amount": 5000,
+          "senderId": "c6e0c017-c16a-464d-9e77-a41d5fd87aec",
+          "receiverId": "e5a72cef-6372-4c32-b707-46e213d06d03",
+          "description": "購入: 赤字（1）",
+          "timestamp": 1768641059495
+        },
+        {
+          "id": "ed7bb20b-4fa3-4ade-afdd-d232318d0153",
+          "type": "payment",
+          "amount": 50,
+          "description": "仕入れ: 💩 x5",
+          "timestamp": 1768642594333
+        },
+        {
+          "id": "5f7673d9-56f4-4ea4-b32c-677723619d37",
+          "type": "payment",
+          "amount": 45450,
+          "senderId": "c6e0c017-c16a-464d-9e77-a41d5fd87aec",
+          "receiverId": "e5a72cef-6372-4c32-b707-46e213d06d03",
+          "description": "一括購入: 「許さないからな」なに？記憶って書かれてるだけだよ?????????????????の店 (2商品)",
+          "timestamp": 1768642764581
+        },
+        {
+          "id": "ba18d5b1-afe2-46ed-8a8c-078173835440",
+          "type": "payment",
+          "amount": 488295,
+          "senderId": "c6e0c017-c16a-464d-9e77-a41d5fd87aec",
+          "receiverId": "e5a72cef-6372-4c32-b707-46e213d06d03",
+          "description": "一括購入: 料理の丸❍の店 (87点)",
+          "timestamp": 1768643128519
+        },
+        {
+          "id": "20cf9111-bef5-4ce5-a8d2-d4cc7dadfbdd",
+          "type": "income",
+          "amount": 416,
+          "description": "仕事報酬 (hacker)",
+          "timestamp": 1768673753248
+        },
+        {
+          "id": "a6d30073-1de9-4c86-96b4-3c3bb9ea2372",
+          "type": "payment",
+          "amount": 8000,
+          "description": "不動産購入: 貸し店舗「商店街」",
+          "timestamp": 1768673944154
+        },
+        {
+          "id": "da4ede3b-b754-4e37-9bb0-d7ae4548f8f8",
+          "type": "payment",
+          "amount": 5000,
+          "description": "不動産購入: アパート「ひまわり」",
+          "timestamp": 1768673947261
+        },
+        {
+          "id": "4b3e16fd-87e6-4469-87e1-eab2d06a59a6",
+          "type": "payment",
+          "amount": 2000,
+          "description": "不動産購入: 郊外の空き地 (土地)",
+          "timestamp": 1768673949959
+        },
+        {
+          "id": "9965d332-b658-404b-8396-bcd47719be49",
+          "type": "payment",
+          "amount": 10000,
+          "description": "不動産購入: 駅前の一等地 (土地)",
+          "timestamp": 1768673952481
+        },
+        {
+          "id": "554348f8-6aba-44fc-b849-1ea7ad7d5c45",
+          "type": "payment",
+          "amount": 50000,
+          "description": "不動産購入: 高級マンション「ヒルズ」",
+          "timestamp": 1768673955213
+        }
+      ],
+      "lastJobChangeTurn": 17,
+      "jobType": "normal",
+      "shopName": "0",
+      "cardType": "stamp",
+      "pointCards": [
+        {
+          "shopOwnerId": "e5a72cef-6372-4c32-b707-46e213d06d03",
+          "points": 133
+        },
+        {
+          "shopOwnerId": "85aa5f67-e07c-4a9d-a35e-3500a2f52f08",
+          "points": 38
+        }
+      ],
+      "shopMenu": [
+        {
+          "id": "hf34pyi59",
+          "name": "💩",
+          "cost": 10,
+          "price": 50000,
+          "stock": 5,
+          "description": "💩",
+          "isSale": false,
+          "discount": 0
+        }
+      ],
+      "coupons": [
+        {
+          "id": "2f0314ca-0601-4123-8521-9d927425d8a4",
+          "shopOwnerId": "c6e0c017-c16a-464d-9e77-a41d5fd87aec",
+          "code": "UNTI",
+          "discountPercent": 10,
+          "minPurchase": 10000,
+          "maxUses": 1,
+          "usedCount": 0,
+          "createdAt": 1768641768153,
+          "isActive": true
+        }
+      ],
+      "catalogPoints": null,
+      "isInsured": false,
+      "propertyLevel": "mansion",
+      "landRank": 3
     },
     {
       "id": "e5a72cef-6372-4c32-b707-46e213d06d03",
-      "name": "1",
+      "name": "料理の丸❍",
       "role": "player",
-      "balance": 306,
-      "deposit": 6,
-      "debt": 260,
-      "job": "youtuber",
-      "popularity": 50,
+      "balance": 510655,
+      "deposit": 93225,
+      "debt": 0,
+      "job": "cracker",
+      "popularity": 0,
       "happiness": 50,
       "items": [],
       "stocks": {
@@ -33,25 +320,2440 @@
       "isForbiddenUnlocked": false,
       "transactions": [
         {
-          "id": "5d08f2ae-6478-4b88-bb82-8bbc2a91836c",
+          "id": "c536b235-6fbb-424b-b4d4-17c93b203da3",
           "type": "income",
-          "amount": 300,
+          "amount": 100,
           "senderId": "d483e2a5-f105-4c23-8f41-d4ef113dc167",
           "receiverId": "e5a72cef-6372-4c32-b707-46e213d06d03",
           "description": "受取: 2",
-          "timestamp": 1768594800785
+          "timestamp": 1768634623692
+        },
+        {
+          "id": "b16263d6-516e-47a8-af95-cfdf399ade20",
+          "type": "payment",
+          "amount": 100,
+          "description": "仕入れ: ガチャピン x10",
+          "timestamp": 1768634827108
+        },
+        {
+          "id": "c48bd4ce-b669-41d2-941d-a97e5900c21b",
+          "type": "income",
+          "amount": 500,
+          "senderId": "system",
+          "description": "店舗売上",
+          "timestamp": 1768634989852
+        },
+        {
+          "id": "0c74ecec-a34f-41ef-acc3-85f20a0992bd",
+          "type": "income",
+          "amount": 1500,
+          "senderId": "system",
+          "description": "店舗売上",
+          "timestamp": 1768635024523
+        },
+        {
+          "id": "28f8feee-b4fb-4a86-9562-e70c19299e14",
+          "type": "payment",
+          "amount": 100,
+          "description": "ギャンブル(high): 敗北 (出目4)",
+          "timestamp": 1768635288258
+        },
+        {
+          "id": "0b46dab0-3c7b-4efb-bc07-4113c70c501c",
+          "type": "income",
+          "amount": 100,
+          "description": "ギャンブル(low): 勝利 (出目4)",
+          "timestamp": 1768635304547
+        },
+        {
+          "id": "b7733559-de79-4961-9e0c-5e7e7a3a2da2",
+          "type": "payment",
+          "amount": 100,
+          "description": "ギャンブル(high): 敗北 (出目7)",
+          "timestamp": 1768635312392
+        },
+        {
+          "id": "ad15faf2-d46c-4a3e-b74d-828b9dfb7528",
+          "type": "payment",
+          "amount": 100,
+          "description": "ギャンブル(low): 敗北 (出目8)",
+          "timestamp": 1768635320329
+        },
+        {
+          "id": "e8339efe-2045-4d76-b66c-1437d3e8d47a",
+          "type": "payment",
+          "amount": 100,
+          "description": "競馬: 外れ (馬5→2)",
+          "timestamp": 1768635352681
+        },
+        {
+          "id": "52193405-3dc4-4983-835f-59d08fbdc2bb",
+          "type": "payment",
+          "amount": 100,
+          "description": "競馬: 外れ (馬2→3)",
+          "timestamp": 1768635357692
+        },
+        {
+          "id": "36c45434-b970-466d-a8b3-5993424373bd",
+          "type": "payment",
+          "amount": 100,
+          "description": "競馬: 外れ (馬3→1)",
+          "timestamp": 1768635365355
+        },
+        {
+          "id": "925e1ba5-2d2a-4f63-a3cd-17e3e00f24e4",
+          "type": "income",
+          "amount": 100,
+          "description": "スロット: ペア! 2倍配当",
+          "timestamp": 1768635373171
+        },
+        {
+          "id": "3e7daf4d-3dbc-4a67-857a-cece19953fd8",
+          "type": "income",
+          "amount": 100,
+          "description": "スロット: ペア! 2倍配当",
+          "timestamp": 1768635378425
+        },
+        {
+          "id": "a51f1406-05f8-4187-acf7-19940c2ebb9d",
+          "type": "payment",
+          "amount": 100,
+          "description": "スロット: ハズレ...",
+          "timestamp": 1768635384104
+        },
+        {
+          "id": "d61f3a04-7ce5-494e-bda6-cfd1767237fa",
+          "type": "income",
+          "amount": 100,
+          "description": "ブラックジャック: win",
+          "timestamp": 1768635397713
+        },
+        {
+          "id": "f545c7fa-9f35-42c4-8cf1-7313afe29a0b",
+          "type": "payment",
+          "amount": 100,
+          "description": "ブラックジャック: lose",
+          "timestamp": 1768635407275
+        },
+        {
+          "id": "4329737e-0c97-4c02-b948-214a7763ac60",
+          "type": "payment",
+          "amount": 100,
+          "description": "ブラックジャック: bust",
+          "timestamp": 1768635415269
+        },
+        {
+          "id": "ebc0fdb7-6ba9-49b2-807c-5b8fd7571b8e",
+          "type": "income",
+          "amount": 100,
+          "description": "ギャンブル(low): 勝利 (出目6)",
+          "timestamp": 1768635418481
+        },
+        {
+          "id": "3cbeac69-58a3-4435-818a-eba6c1e524eb",
+          "type": "income",
+          "amount": 100,
+          "description": "ギャンブル(low): 勝利 (出目3)",
+          "timestamp": 1768635421337
+        },
+        {
+          "id": "70fb0663-5274-42a8-a043-b07d9546228d",
+          "type": "payment",
+          "amount": 100,
+          "description": "ギャンブル(low): 敗北 (出目8)",
+          "timestamp": 1768635423077
+        },
+        {
+          "id": "025dc692-4bd4-43ac-b41d-a2fed44d8d68",
+          "type": "payment",
+          "amount": 100,
+          "description": "ギャンブル(low): 敗北 (出目11)",
+          "timestamp": 1768635425651
+        },
+        {
+          "id": "6defef76-b41f-4fe8-9a46-cefd70d33e8c",
+          "type": "payment",
+          "amount": 100,
+          "description": "ギャンブル(high): 敗北 (出目4)",
+          "timestamp": 1768635427471
+        },
+        {
+          "id": "95f3ddd6-4cf4-4cd5-9edc-dc37017a10f4",
+          "type": "payment",
+          "amount": 100,
+          "description": "ギャンブル(low): 敗北 (出目10)",
+          "timestamp": 1768635429296
+        },
+        {
+          "id": "771b18de-4e5e-405f-a983-6cfebcb2200f",
+          "type": "payment",
+          "amount": 500,
+          "description": "仕入れ: ミステリー雑誌 x5",
+          "timestamp": 1768635566342
+        },
+        {
+          "id": "996605d9-8601-425c-9756-31736b02087a",
+          "type": "income",
+          "amount": 1000,
+          "senderId": "d483e2a5-f105-4c23-8f41-d4ef113dc167",
+          "receiverId": "e5a72cef-6372-4c32-b707-46e213d06d03",
+          "description": "受取: 💩",
+          "timestamp": 1768635572306
+        },
+        {
+          "id": "a1545cd5-828b-464d-a597-5a1fecb37186",
+          "type": "income",
+          "amount": 1250,
+          "senderId": "system",
+          "description": "店舗売上",
+          "timestamp": 1768635622190
+        },
+        {
+          "id": "e4fec55c-3c6f-463c-a7ad-16f7036d82e6",
+          "type": "payment",
+          "amount": 500,
+          "description": "仕入れ: ミステリー雑誌 x5",
+          "timestamp": 1768635639989
+        },
+        {
+          "id": "496f9aec-e9b2-44fc-9ff6-ad61e12d911c",
+          "type": "deposit",
+          "amount": 2000,
+          "senderId": "e5a72cef-6372-4c32-b707-46e213d06d03",
+          "description": "預け入れ",
+          "timestamp": 1768635766310
+        },
+        {
+          "id": "b99dfb15-8b93-468a-b3c2-6ab7637431ae",
+          "type": "deposit",
+          "amount": 1000,
+          "senderId": "e5a72cef-6372-4c32-b707-46e213d06d03",
+          "description": "預け入れ",
+          "timestamp": 1768635778517
+        },
+        {
+          "id": "fbdca6ea-0543-42e4-9471-1aeef3c11a26",
+          "type": "payment",
+          "amount": 50,
+          "description": "仕入れ: 休みたい x5",
+          "timestamp": 1768635900693
+        },
+        {
+          "id": "e616aad8-d3f1-4804-9a3d-87eb04827fc3",
+          "type": "income",
+          "amount": 150,
+          "description": "ブラックジャック: win",
+          "timestamp": 1768635981271
+        },
+        {
+          "id": "e0f4928d-d0e2-4222-b78c-cbf0c70d761c",
+          "type": "income",
+          "amount": 0,
+          "description": "ブラックジャック: push",
+          "timestamp": 1768635989974
+        },
+        {
+          "id": "2cafd7b1-152a-445d-9bd9-f40d1740100e",
+          "type": "income",
+          "amount": 100,
+          "description": "ブラックジャック: win",
+          "timestamp": 1768635999997
+        },
+        {
+          "id": "005ad3f9-70e1-4ac3-8c50-6c24cce6a30e",
+          "type": "income",
+          "amount": 100,
+          "description": "ブラックジャック: win",
+          "timestamp": 1768636007589
+        },
+        {
+          "id": "d1770117-2854-4ef0-85f5-96ca8536dfa6",
+          "type": "payment",
+          "amount": 100,
+          "description": "ブラックジャック: lose",
+          "timestamp": 1768636015964
+        },
+        {
+          "id": "c67784e5-41da-4e19-8bd5-0e349aa8448d",
+          "type": "income",
+          "amount": 500,
+          "description": "ブラックジャック: win",
+          "timestamp": 1768636022172
+        },
+        {
+          "id": "5a2573c6-524b-477c-8177-70321c57cabe",
+          "type": "payment",
+          "amount": 1000,
+          "description": "ブラックジャック: bust",
+          "timestamp": 1768636030159
+        },
+        {
+          "id": "a245a752-efee-4d1c-948a-917c3639151e",
+          "type": "income",
+          "amount": 0,
+          "description": "ブラックジャック: push",
+          "timestamp": 1768636035057
+        },
+        {
+          "id": "8d721b06-bb04-442c-8216-7cb861964e6e",
+          "type": "payment",
+          "amount": 1000,
+          "description": "ブラックジャック: lose",
+          "timestamp": 1768636042274
+        },
+        {
+          "id": "09e6900b-09a7-4d8e-8bb7-cb35687864a2",
+          "type": "payment",
+          "amount": 1000,
+          "description": "ブラックジャック: bust",
+          "timestamp": 1768636045438
+        },
+        {
+          "id": "2793d683-fd50-4f1c-be3e-2db806bd48b5",
+          "type": "payment",
+          "amount": 100,
+          "description": "ブラックジャック: bust",
+          "timestamp": 1768636052850
+        },
+        {
+          "id": "02606bd7-aad9-4ecd-97ef-b1bc02d26441",
+          "type": "payment",
+          "amount": 500,
+          "description": "スロット: ハズレ...",
+          "timestamp": 1768636060147
+        },
+        {
+          "id": "058d7f3f-f66c-472d-a4a0-ee2a65812faf",
+          "type": "income",
+          "amount": 100,
+          "description": "スロット: ペア! 2倍配当",
+          "timestamp": 1768636064009
+        },
+        {
+          "id": "3d7592a6-8494-4803-8100-0f3378465ba7",
+          "type": "payment",
+          "amount": 500,
+          "description": "スロット: ハズレ...",
+          "timestamp": 1768636068345
+        },
+        {
+          "id": "926c9f06-e692-4015-83e4-e016ed48e9db",
+          "type": "payment",
+          "amount": 500,
+          "description": "スロット: ハズレ...",
+          "timestamp": 1768636071598
+        },
+        {
+          "id": "fe0ec318-423d-4979-90a2-f236d6c9aaaa",
+          "type": "payment",
+          "amount": 500,
+          "description": "スロット: ハズレ...",
+          "timestamp": 1768636075269
+        },
+        {
+          "id": "122c5f5c-3a9d-4f32-a5c1-bb18bd91689b",
+          "type": "income",
+          "amount": 100,
+          "description": "スロット: ペア! 2倍配当",
+          "timestamp": 1768636079165
+        },
+        {
+          "id": "39d465d8-a3bb-4a2f-9951-d71902f30ae2",
+          "type": "payment",
+          "amount": 500,
+          "description": "スロット: ハズレ...",
+          "timestamp": 1768636082892
+        },
+        {
+          "id": "2314bf36-7d60-4238-803b-0281f034e44d",
+          "type": "payment",
+          "amount": 500,
+          "description": "スロット: ハズレ...",
+          "timestamp": 1768636085863
+        },
+        {
+          "id": "eafbc79d-562b-44d9-adc0-54ba31176140",
+          "type": "payment",
+          "amount": 100,
+          "description": "スロット: ハズレ...",
+          "timestamp": 1768636090402
+        },
+        {
+          "id": "3afcad77-d64b-4357-b3d6-ea677521116c",
+          "type": "income",
+          "amount": 100,
+          "description": "スロット: ペア! 2倍配当",
+          "timestamp": 1768636093379
+        },
+        {
+          "id": "a192cfb7-0dd6-41ae-a0bd-a51c234c8d0f",
+          "type": "payment",
+          "amount": 100,
+          "description": "競馬: 外れ (馬4→1)",
+          "timestamp": 1768636100349
+        },
+        {
+          "id": "0a44ff3a-b615-497b-a0ec-fbe4d1fb5d00",
+          "type": "income",
+          "amount": 150,
+          "description": "競馬: 的中! (馬1→1)",
+          "timestamp": 1768636104166
+        },
+        {
+          "id": "ef099c5a-c5c8-4bf7-be17-cb8334c68f9f",
+          "type": "payment",
+          "amount": 100,
+          "description": "競馬: 外れ (馬1→2)",
+          "timestamp": 1768636107242
+        },
+        {
+          "id": "ed55af71-8f7a-4592-83a9-cb69e3234d36",
+          "type": "income",
+          "amount": 150,
+          "description": "競馬: 的中! (馬1→1)",
+          "timestamp": 1768636110721
+        },
+        {
+          "id": "fdbcdcc9-425d-414b-abc6-27aeac5fa626",
+          "type": "income",
+          "amount": 150,
+          "description": "競馬: 的中! (馬1→1)",
+          "timestamp": 1768636114045
+        },
+        {
+          "id": "77d11274-fbe5-406d-b429-b6b0bc7269da",
+          "type": "payment",
+          "amount": 100,
+          "description": "競馬: 外れ (馬1→2)",
+          "timestamp": 1768636117213
+        },
+        {
+          "id": "bbf02952-7401-43ec-b2a3-398f5a06bedc",
+          "type": "income",
+          "amount": 150,
+          "description": "競馬: 的中! (馬1→1)",
+          "timestamp": 1768636119925
+        },
+        {
+          "id": "55f7988c-b539-4f44-b71b-0d4971c78c23",
+          "type": "income",
+          "amount": 200,
+          "description": "競馬: 的中! (馬2→2)",
+          "timestamp": 1768636123361
+        },
+        {
+          "id": "a80da85e-a4d3-413a-8b59-86bfc5018741",
+          "type": "payment",
+          "amount": 100,
+          "description": "競馬: 外れ (馬3→1)",
+          "timestamp": 1768636129362
+        },
+        {
+          "id": "f370db41-eb59-4bf3-8d3e-c1ccd56496ff",
+          "type": "income",
+          "amount": 150,
+          "description": "競馬: 的中! (馬1→1)",
+          "timestamp": 1768636132250
+        },
+        {
+          "id": "c2eb7746-2569-416d-a1b8-ed96905ca36a",
+          "type": "income",
+          "amount": 150,
+          "description": "競馬: 的中! (馬1→1)",
+          "timestamp": 1768636135205
+        },
+        {
+          "id": "9927252a-039c-48e9-84c4-c0d2e41248cd",
+          "type": "payment",
+          "amount": 100,
+          "description": "競馬: 外れ (馬1→3)",
+          "timestamp": 1768636138576
+        },
+        {
+          "id": "96bcc533-bd48-40e4-bc11-53a3361d06f5",
+          "type": "payment",
+          "amount": 100,
+          "description": "競馬: 外れ (馬3→1)",
+          "timestamp": 1768636141466
+        },
+        {
+          "id": "0403468c-a4d8-4628-846c-1ed22891bde7",
+          "type": "payment",
+          "amount": 100,
+          "description": "競馬: 外れ (馬3→2)",
+          "timestamp": 1768636144392
+        },
+        {
+          "id": "c28e6861-f0fe-4b68-b1ed-d37b5ab4ff00",
+          "type": "income",
+          "amount": 240,
+          "description": "仕事報酬 (novelist)",
+          "timestamp": 1768636350083
+        },
+        {
+          "id": "e063c2ec-0d4e-4143-a06f-9c9aaf79395b",
+          "type": "income",
+          "amount": 270,
+          "description": "仕事報酬 (doctor)",
+          "timestamp": 1768636439996
+        },
+        {
+          "id": "24e46804-5fdc-4ead-a0cb-14fc334e907e",
+          "type": "income",
+          "amount": 500,
+          "senderId": "c6e0c017-c16a-464d-9e77-a41d5fd87aec",
+          "receiverId": "e5a72cef-6372-4c32-b707-46e213d06d03",
+          "description": "売上: テスト",
+          "timestamp": 1768636780649
+        },
+        {
+          "id": "9c3e8375-acc6-417d-957f-758be3d17e2e",
+          "type": "income",
+          "amount": 59,
+          "description": "仕事報酬 (chef)",
+          "timestamp": 1768636922258
+        },
+        {
+          "id": "4cca13ea-3fa8-4f48-9709-67bed08606ea",
+          "type": "income",
+          "amount": 390,
+          "description": "仕事報酬 (investigator)",
+          "timestamp": 1768637065479
+        },
+        {
+          "id": "4427c477-c4b5-4e25-8acc-7251f8e1c7db",
+          "type": "income",
+          "amount": 120,
+          "description": "仕事報酬 (cracker)",
+          "timestamp": 1768637089077
+        },
+        {
+          "id": "a253da4e-7a5c-49d7-8b29-223fed6b94ed",
+          "type": "income",
+          "amount": 500,
+          "senderId": "c6e0c017-c16a-464d-9e77-a41d5fd87aec",
+          "receiverId": "e5a72cef-6372-4c32-b707-46e213d06d03",
+          "description": "売上: テスト",
+          "timestamp": 1768637181979
+        },
+        {
+          "id": "3b583982-7a1b-46b8-977e-c8c6ff1e2749",
+          "type": "income",
+          "amount": 100,
+          "senderId": "c6e0c017-c16a-464d-9e77-a41d5fd87aec",
+          "receiverId": "e5a72cef-6372-4c32-b707-46e213d06d03",
+          "description": "売上: 休みたい",
+          "timestamp": 1768637198298
+        },
+        {
+          "id": "638e4b51-284c-49b5-aea0-013e5814a6a2",
+          "type": "payment",
+          "amount": 500,
+          "description": "仕入れ: 人間😭 x5",
+          "timestamp": 1768637328471
+        },
+        {
+          "id": "a612edab-1dab-4227-9adf-d2c6704ec61f",
+          "type": "income",
+          "amount": 700,
+          "senderId": "c6e0c017-c16a-464d-9e77-a41d5fd87aec",
+          "receiverId": "e5a72cef-6372-4c32-b707-46e213d06d03",
+          "description": "売上: 人間😭",
+          "timestamp": 1768637553810
+        },
+        {
+          "id": "8192267e-1b52-4e64-bf40-11966b644b55",
+          "type": "income",
+          "amount": 100,
+          "description": "ギャンブル(low): 勝利 (出目6)",
+          "timestamp": 1768637641242
+        },
+        {
+          "id": "6adfa51f-2fc0-4f9b-b7b5-79de029c698c",
+          "type": "payment",
+          "amount": 100,
+          "description": "ギャンブル(low): 敗北 (出目7)",
+          "timestamp": 1768637643134
+        },
+        {
+          "id": "73690d9f-9454-40a5-a022-90a701023be5",
+          "type": "payment",
+          "amount": 500,
+          "description": "ギャンブル(low): 敗北 (出目7)",
+          "timestamp": 1768637645541
+        },
+        {
+          "id": "36f3b38f-6782-457b-bae9-6daa3cb85540",
+          "type": "payment",
+          "amount": 500,
+          "description": "ギャンブル(high): 敗北 (出目5)",
+          "timestamp": 1768637647478
+        },
+        {
+          "id": "28d12715-ca10-473f-8626-fa5349a8375e",
+          "type": "income",
+          "amount": 500,
+          "description": "ギャンブル(low): 勝利 (出目6)",
+          "timestamp": 1768637649190
+        },
+        {
+          "id": "af9b2b24-fe86-4de0-8691-66103664557d",
+          "type": "payment",
+          "amount": 500,
+          "description": "ギャンブル(low): 敗北 (出目8)",
+          "timestamp": 1768637652486
+        },
+        {
+          "id": "2447615e-33cc-440d-bb72-0c59df5c0432",
+          "type": "income",
+          "amount": 500,
+          "description": "ギャンブル(high): 勝利 (出目9)",
+          "timestamp": 1768637654703
+        },
+        {
+          "id": "745f383a-2a1a-424e-b6ac-5fa21612c54e",
+          "type": "payment",
+          "amount": 500,
+          "description": "ギャンブル(high): 敗北 (出目5)",
+          "timestamp": 1768637658497
+        },
+        {
+          "id": "25812e24-4112-4e2b-a983-439627c2a098",
+          "type": "payment",
+          "amount": 500,
+          "description": "ギャンブル(low): 敗北 (出目7)",
+          "timestamp": 1768637660618
+        },
+        {
+          "id": "7e07dcde-3c84-4f57-a494-22caf6c96cd3",
+          "type": "payment",
+          "amount": 500,
+          "description": "ギャンブル(low): 敗北 (出目11)",
+          "timestamp": 1768637665454
+        },
+        {
+          "id": "2d2b5f7d-2f83-4793-bcc1-e3eb2c9b04b4",
+          "type": "payment",
+          "amount": 500,
+          "description": "ギャンブル(high): 敗北 (出目4)",
+          "timestamp": 1768637667364
+        },
+        {
+          "id": "73e0b948-08fa-446f-b5ad-3cd144435d9f",
+          "type": "income",
+          "amount": 500,
+          "description": "ギャンブル(low): 勝利 (出目4)",
+          "timestamp": 1768637669408
+        },
+        {
+          "id": "9c665149-a20d-47d9-930f-2fd1e9df4c7a",
+          "type": "payment",
+          "amount": 100,
+          "description": "ギャンブル(low): 敗北 (出目8)",
+          "timestamp": 1768637673478
+        },
+        {
+          "id": "b0a8cdeb-878c-471c-8d96-c2ad71efb3dc",
+          "type": "income",
+          "amount": 100,
+          "description": "スロット: ペア! 2倍配当",
+          "timestamp": 1768637682818
+        },
+        {
+          "id": "49a9380d-1bb3-417f-8ae1-184536a47f0b",
+          "type": "payment",
+          "amount": 100,
+          "description": "スロット: ハズレ...",
+          "timestamp": 1768637686117
+        },
+        {
+          "id": "b83ba931-b1da-4478-b212-5dd6d37908d7",
+          "type": "income",
+          "amount": 100,
+          "description": "スロット: ペア! 2倍配当",
+          "timestamp": 1768637701953
+        },
+        {
+          "id": "4281595e-424a-472b-b723-8a8883aad242",
+          "type": "income",
+          "amount": 100,
+          "description": "スロット: ペア! 2倍配当",
+          "timestamp": 1768637725413
+        },
+        {
+          "id": "f2794287-a012-423b-b055-4978a8756a83",
+          "type": "income",
+          "amount": 100,
+          "description": "スロット: ペア! 2倍配当",
+          "timestamp": 1768637735568
+        },
+        {
+          "id": "53177915-f389-4ed3-8f56-e02ec1f8b6bc",
+          "type": "income",
+          "amount": 24500,
+          "description": "スロット: 💎 ダイヤモンド! 50倍配当！",
+          "timestamp": 1768637739526
+        },
+        {
+          "id": "8c3d46ae-a7a9-45ed-80ca-c74235fceb50",
+          "type": "payment",
+          "amount": 100,
+          "description": "競馬: 外れ (馬1→3)",
+          "timestamp": 1768637765257
+        },
+        {
+          "id": "4d96e335-4b86-4693-8982-b9409c1cbec0",
+          "type": "payment",
+          "amount": 100,
+          "description": "競馬: 外れ (馬2→1)",
+          "timestamp": 1768637769030
+        },
+        {
+          "id": "2398b533-b4ab-4e13-a77e-3c6dd60fb9b6",
+          "type": "payment",
+          "amount": 100,
+          "description": "競馬: 外れ (馬1→2)",
+          "timestamp": 1768637772388
+        },
+        {
+          "id": "dae44a0b-4556-415a-9c56-3c4317d474ac",
+          "type": "income",
+          "amount": 200,
+          "description": "競馬: 的中! (馬2→2)",
+          "timestamp": 1768637775616
+        },
+        {
+          "id": "b1c25b00-9faf-40a4-91d9-2da25b4d1b7f",
+          "type": "payment",
+          "amount": 100,
+          "description": "競馬: 外れ (馬2→1)",
+          "timestamp": 1768637778961
+        },
+        {
+          "id": "99b1cf90-b14f-41e7-b9fc-0d40b968bf0c",
+          "type": "income",
+          "amount": 1700,
+          "senderId": "system",
+          "description": "店舗売上",
+          "timestamp": 1768637811437
+        },
+        {
+          "id": "0ec72c32-4a0e-43e0-a075-ba260b3c5b82",
+          "type": "income",
+          "amount": 150,
+          "description": "競馬: 的中! (馬1→1)",
+          "timestamp": 1768637820813
+        },
+        {
+          "id": "ac236c11-6fc6-46ce-a8f7-20e9caa37dd2",
+          "type": "income",
+          "amount": 1500,
+          "description": "競馬: 的中! (馬1→1)",
+          "timestamp": 1768637828314
+        },
+        {
+          "id": "e3b9295d-9922-4f15-86ad-351f8646e4cb",
+          "type": "income",
+          "amount": 1500,
+          "description": "競馬: 的中! (馬1→1)",
+          "timestamp": 1768637834280
+        },
+        {
+          "id": "fd0c2c2e-0150-4a8f-b163-a18457b02573",
+          "type": "income",
+          "amount": 1500,
+          "description": "競馬: 的中! (馬1→1)",
+          "timestamp": 1768637837234
+        },
+        {
+          "id": "1523f457-2a68-4a47-872b-bf4658d54047",
+          "type": "income",
+          "amount": 1500,
+          "description": "競馬: 的中! (馬1→1)",
+          "timestamp": 1768637840296
+        },
+        {
+          "id": "d6103e4c-2e8d-4e9c-86af-df350506edb3",
+          "type": "income",
+          "amount": 1500,
+          "description": "競馬: 的中! (馬1→1)",
+          "timestamp": 1768637843272
+        },
+        {
+          "id": "1ed5f4a4-652a-4cdf-b9d9-15840a514aee",
+          "type": "payment",
+          "amount": 1000,
+          "description": "競馬: 外れ (馬1→2)",
+          "timestamp": 1768637846423
+        },
+        {
+          "id": "821b754f-3515-477a-aea0-3bfc601b2e1b",
+          "type": "payment",
+          "amount": 1000,
+          "description": "競馬: 外れ (馬2→1)",
+          "timestamp": 1768637849220
+        },
+        {
+          "id": "fc4c595c-f691-45fc-b9f5-90352b0d360a",
+          "type": "income",
+          "amount": 1500,
+          "description": "競馬: 的中! (馬1→1)",
+          "timestamp": 1768637852196
+        },
+        {
+          "id": "e7e95180-994f-4d27-a7ea-372db13b0f1e",
+          "type": "income",
+          "amount": 1500,
+          "description": "競馬: 的中! (馬1→1)",
+          "timestamp": 1768637854841
+        },
+        {
+          "id": "178044a3-8c93-41c9-8b88-63fc30f4ddd4",
+          "type": "income",
+          "amount": 1500,
+          "description": "競馬: 的中! (馬1→1)",
+          "timestamp": 1768637859284
+        },
+        {
+          "id": "5a76bef5-6ec7-4c9b-97a3-c55cf1c030b5",
+          "type": "income",
+          "amount": 1500,
+          "description": "競馬: 的中! (馬1→1)",
+          "timestamp": 1768637860744
+        },
+        {
+          "id": "8368056a-efaf-491d-a54a-35d80492968e",
+          "type": "payment",
+          "amount": 1000,
+          "description": "競馬: 外れ (馬1→2)",
+          "timestamp": 1768637866564
+        },
+        {
+          "id": "45094aa4-6067-47e8-864b-bc97f3e464fd",
+          "type": "payment",
+          "amount": 1000,
+          "description": "競馬: 外れ (馬1→2)",
+          "timestamp": 1768637871848
+        },
+        {
+          "id": "08e2808f-6b7e-4523-84f2-e9a9dea3adc9",
+          "type": "payment",
+          "amount": 1000,
+          "description": "競馬: 外れ (馬2→1)",
+          "timestamp": 1768637874925
+        },
+        {
+          "id": "f40aacc6-e618-4bed-9ecc-bf4c119c5849",
+          "type": "income",
+          "amount": 1500,
+          "description": "競馬: 的中! (馬1→1)",
+          "timestamp": 1768637880070
+        },
+        {
+          "id": "6c486677-e5d3-4f0c-9174-08bce29eee1c",
+          "type": "income",
+          "amount": 1500,
+          "description": "競馬: 的中! (馬1→1)",
+          "timestamp": 1768637884588
+        },
+        {
+          "id": "ada62a69-dacd-4875-bcbb-ab506daa1bd8",
+          "type": "payment",
+          "amount": 500,
+          "description": "ブラックジャック: bust",
+          "timestamp": 1768637910301
+        },
+        {
+          "id": "23971751-c26b-4a6d-baac-b6bf9e6e05f2",
+          "type": "payment",
+          "amount": 500,
+          "description": "ブラックジャック: lose",
+          "timestamp": 1768637915740
+        },
+        {
+          "id": "97a57536-fd3f-4947-a16c-1e9deb479027",
+          "type": "payment",
+          "amount": 500,
+          "description": "ブラックジャック: bust",
+          "timestamp": 1768637918860
+        },
+        {
+          "id": "d4104f23-1f89-4a50-9913-9fd0873d3a94",
+          "type": "income",
+          "amount": 500,
+          "description": "ブラックジャック: win",
+          "timestamp": 1768637923856
+        },
+        {
+          "id": "e7ad4479-c6ef-4f67-84d0-43d6db4b29df",
+          "type": "payment",
+          "amount": 1000,
+          "description": "ブラックジャック: lose",
+          "timestamp": 1768637932235
+        },
+        {
+          "id": "afb5891a-5981-49eb-b995-0b6762e6ec6d",
+          "type": "payment",
+          "amount": 1000,
+          "description": "ブラックジャック: bust",
+          "timestamp": 1768637946511
+        },
+        {
+          "id": "4e2d20e8-11d3-4229-814f-1d4f4aa46563",
+          "type": "payment",
+          "amount": 500,
+          "description": "ギャンブル(low): 敗北 (出目7)",
+          "timestamp": 1768637950977
+        },
+        {
+          "id": "c496dca1-dee5-46e1-9aba-ed53eb294dab",
+          "type": "payment",
+          "amount": 500,
+          "description": "ギャンブル(high): 敗北 (出目5)",
+          "timestamp": 1768637953522
+        },
+        {
+          "id": "6872fa3e-d912-433d-9c69-44b2a385672d",
+          "type": "income",
+          "amount": 500,
+          "description": "ギャンブル(low): 勝利 (出目2)",
+          "timestamp": 1768637955193
+        },
+        {
+          "id": "c584b2e0-63e1-4fa8-b7de-9f20f5912ebc",
+          "type": "income",
+          "amount": 500,
+          "description": "ギャンブル(low): 勝利 (出目6)",
+          "timestamp": 1768637956834
+        },
+        {
+          "id": "7dde673d-868b-404f-8261-a893fbf6ebb7",
+          "type": "income",
+          "amount": 500,
+          "description": "ギャンブル(low): 勝利 (出目3)",
+          "timestamp": 1768637960185
+        },
+        {
+          "id": "1a7737fb-a52a-4dd6-8c9c-2873011b84e5",
+          "type": "payment",
+          "amount": 500,
+          "description": "ギャンブル(high): 敗北 (出目7)",
+          "timestamp": 1768637962337
+        },
+        {
+          "id": "5716f7e5-405a-4a16-bdcb-4f7558941dea",
+          "type": "payment",
+          "amount": 500,
+          "description": "ギャンブル(low): 敗北 (出目10)",
+          "timestamp": 1768637964776
+        },
+        {
+          "id": "bd73536b-8bd3-4293-b09b-50ccd6039d68",
+          "type": "income",
+          "amount": 500,
+          "description": "ギャンブル(low): 勝利 (出目3)",
+          "timestamp": 1768637966783
+        },
+        {
+          "id": "169cdff6-1a82-48fe-9024-2059c9c9697d",
+          "type": "income",
+          "amount": 1000,
+          "description": "ギャンブル(low): 勝利 (出目2)",
+          "timestamp": 1768637968955
+        },
+        {
+          "id": "86e8e283-2c18-40ab-aea0-59a59469a6b6",
+          "type": "payment",
+          "amount": 1000,
+          "description": "ギャンブル(low): 敗北 (出目8)",
+          "timestamp": 1768637970891
+        },
+        {
+          "id": "2fd5bd92-eb5e-404c-badf-3b3f895f04a0",
+          "type": "payment",
+          "amount": 1000,
+          "description": "ギャンブル(low): 敗北 (出目10)",
+          "timestamp": 1768637973509
+        },
+        {
+          "id": "3932b684-25be-4c8a-9872-1fbd50f6f01e",
+          "type": "payment",
+          "amount": 1000,
+          "description": "ギャンブル(high): 敗北 (出目5)",
+          "timestamp": 1768637975507
+        },
+        {
+          "id": "d7c556bc-46fb-44a0-aa9d-511152315e90",
+          "type": "income",
+          "amount": 1000,
+          "description": "ギャンブル(low): 勝利 (出目4)",
+          "timestamp": 1768637977222
+        },
+        {
+          "id": "2c6c5420-747d-4936-a8bb-4c592f901797",
+          "type": "income",
+          "amount": 4200,
+          "senderId": "system",
+          "description": "店舗売上",
+          "timestamp": 1768638085195
+        },
+        {
+          "id": "304db993-8b62-403d-844e-25aa5deb05c4",
+          "type": "payment",
+          "amount": 500,
+          "description": "仕入れ: ミステリー雑誌 x5",
+          "timestamp": 1768638130055
+        },
+        {
+          "id": "6b0e1ada-bc23-4341-ae90-283d723160bf",
+          "type": "payment",
+          "amount": 50,
+          "description": "仕入れ: 休みたい x5",
+          "timestamp": 1768638133720
+        },
+        {
+          "id": "9d4ae116-b42d-4f84-8290-6b2762131856",
+          "type": "payment",
+          "amount": 50,
+          "description": "仕入れ: ◯体 x5",
+          "timestamp": 1768638181993
+        },
+        {
+          "id": "359fe3a9-7063-4c90-a0f0-d2ba9bf0b6fd",
+          "type": "payment",
+          "amount": 0,
+          "description": "仕入れ: 内臓 x10",
+          "timestamp": 1768638288096
+        },
+        {
+          "id": "6ec074cd-4187-443e-8748-8d1ba5ac4a6d",
+          "type": "payment",
+          "amount": 50,
+          "description": "仕入れ: アルミカン x5",
+          "timestamp": 1768638745333
+        },
+        {
+          "id": "4871b960-cdd7-4df5-a698-489dc12d1dd4",
+          "type": "income",
+          "amount": 1000,
+          "senderId": "c6e0c017-c16a-464d-9e77-a41d5fd87aec",
+          "receiverId": "e5a72cef-6372-4c32-b707-46e213d06d03",
+          "description": "受取: ともや",
+          "timestamp": 1768638788380
+        },
+        {
+          "id": "f35f0f54-f409-4be0-9cf3-83010de50571",
+          "type": "income",
+          "amount": 100,
+          "senderId": "85aa5f67-e07c-4a9d-a35e-3500a2f52f08",
+          "receiverId": "e5a72cef-6372-4c32-b707-46e213d06d03",
+          "description": "売上: 休みたい",
+          "timestamp": 1768639325553
+        },
+        {
+          "id": "6368f68d-ab78-4701-a6d8-0740b5bb793c",
+          "type": "income",
+          "amount": 150,
+          "senderId": "85aa5f67-e07c-4a9d-a35e-3500a2f52f08",
+          "receiverId": "e5a72cef-6372-4c32-b707-46e213d06d03",
+          "description": "売上: アルミカン",
+          "timestamp": 1768639338443
+        },
+        {
+          "id": "69f9c970-aec8-4312-80b0-63fc56734e11",
+          "type": "payment",
+          "amount": 500,
+          "description": "仕入れ: ドラえもん x5",
+          "timestamp": 1768639959247
+        },
+        {
+          "id": "06327933-822a-4e73-993b-fb4fffba27c9",
+          "type": "income",
+          "amount": 5000,
+          "senderId": "c6e0c017-c16a-464d-9e77-a41d5fd87aec",
+          "receiverId": "e5a72cef-6372-4c32-b707-46e213d06d03",
+          "description": "売上: ドラえもん",
+          "timestamp": 1768639994954
+        },
+        {
+          "id": "618f6b31-6438-4a2b-a654-fb58db7994b5",
+          "type": "deposit",
+          "amount": 30000,
+          "senderId": "e5a72cef-6372-4c32-b707-46e213d06d03",
+          "description": "預け入れ",
+          "timestamp": 1768640046832
+        },
+        {
+          "id": "73905b1b-1168-4094-bc2e-ca256799d931",
+          "type": "payment",
+          "amount": 50,
+          "description": "仕入れ: 世界1いらないモノ x5",
+          "timestamp": 1768640508126
+        },
+        {
+          "id": "6a9eb4da-3829-4564-b449-0f2134f4a456",
+          "type": "payment",
+          "amount": 50,
+          "description": "仕入れ: (ΦωΦ) x5",
+          "timestamp": 1768640631043
+        },
+        {
+          "id": "d5c4ab4d-a83e-42d3-af10-a8d8dc057392",
+          "type": "income",
+          "amount": 1000,
+          "senderId": "c6e0c017-c16a-464d-9e77-a41d5fd87aec",
+          "receiverId": "e5a72cef-6372-4c32-b707-46e213d06d03",
+          "description": "売上: (ΦωΦ)",
+          "timestamp": 1768640685798
+        },
+        {
+          "id": "f2722120-df37-4ebb-bfd7-b8d5f65e8e7e",
+          "type": "payment",
+          "amount": 50,
+          "description": "仕入れ: はたらきたい x5",
+          "timestamp": 1768640772911
+        },
+        {
+          "id": "fc057aca-8fe2-4d3d-88bf-b4810cfaeeab",
+          "type": "payment",
+          "amount": 50,
+          "description": "仕入れ: 光るお守り x5",
+          "timestamp": 1768640934763
+        },
+        {
+          "id": "7c014c15-4502-4054-8637-53a10d871ec9",
+          "type": "income",
+          "amount": 500,
+          "senderId": "c6e0c017-c16a-464d-9e77-a41d5fd87aec",
+          "receiverId": "e5a72cef-6372-4c32-b707-46e213d06d03",
+          "description": "売上: 光るお守り",
+          "timestamp": 1768640983404
+        },
+        {
+          "id": "4160ea33-d130-4902-b22e-c75951896129",
+          "type": "payment",
+          "amount": 500,
+          "description": "仕入れ: 赤字 x5",
+          "timestamp": 1768641036469
+        },
+        {
+          "id": "024ac913-7f3e-4abd-9047-502546a203e3",
+          "type": "payment",
+          "amount": 500,
+          "description": "仕入れ: 赤字 x5",
+          "timestamp": 1768641039904
+        },
+        {
+          "id": "963f7939-9102-45ef-aca1-3403230d989e",
+          "type": "income",
+          "amount": 5000,
+          "senderId": "c6e0c017-c16a-464d-9e77-a41d5fd87aec",
+          "receiverId": "e5a72cef-6372-4c32-b707-46e213d06d03",
+          "description": "売上: 赤字",
+          "timestamp": 1768641059495
+        },
+        {
+          "id": "545ea921-cef6-4ed2-b88c-adeba5448ee5",
+          "type": "payment",
+          "amount": 100,
+          "description": "ギャンブル(low): 敗北 (出目7)",
+          "timestamp": 1768641179457
+        },
+        {
+          "id": "a608de7c-a5ac-4fd8-b48b-e6510b4883f9",
+          "type": "payment",
+          "amount": 500,
+          "description": "ギャンブル(low): 敗北 (出目10)",
+          "timestamp": 1768641182079
+        },
+        {
+          "id": "3ce7a459-6a9c-4ce4-8bfb-d2953e4555b1",
+          "type": "payment",
+          "amount": 500,
+          "description": "ギャンブル(high): 敗北 (出目6)",
+          "timestamp": 1768641183760
+        },
+        {
+          "id": "a71ac48e-23ec-4afe-9693-1b86f2dc918b",
+          "type": "income",
+          "amount": 500,
+          "description": "ギャンブル(high): 勝利 (出目10)",
+          "timestamp": 1768641185853
+        },
+        {
+          "id": "65f4aa31-62e3-4077-9cff-476766622cab",
+          "type": "income",
+          "amount": 500,
+          "description": "ギャンブル(high): 勝利 (出目11)",
+          "timestamp": 1768641187945
+        },
+        {
+          "id": "2307b1b1-6e22-4be8-89c1-0058a897b989",
+          "type": "payment",
+          "amount": 500,
+          "description": "ギャンブル(high): 敗北 (出目7)",
+          "timestamp": 1768641189980
+        },
+        {
+          "id": "16b68c47-a37b-4be2-b866-6f201b3079ae",
+          "type": "payment",
+          "amount": 1000,
+          "description": "ギャンブル(high): 敗北 (出目6)",
+          "timestamp": 1768641192754
+        },
+        {
+          "id": "caf13420-66cf-40a9-8287-5153a2850a61",
+          "type": "income",
+          "amount": 1000,
+          "description": "ギャンブル(high): 勝利 (出目10)",
+          "timestamp": 1768641194514
+        },
+        {
+          "id": "1c8d4ca7-8743-4597-a4bd-0ee3d2936dd3",
+          "type": "payment",
+          "amount": 1000,
+          "description": "ギャンブル(high): 敗北 (出目5)",
+          "timestamp": 1768641196459
+        },
+        {
+          "id": "5f478047-5f59-429b-899b-69165162bf6b",
+          "type": "income",
+          "amount": 1000,
+          "description": "ギャンブル(low): 勝利 (出目3)",
+          "timestamp": 1768641198031
+        },
+        {
+          "id": "b0b37c49-bdbc-431d-bfc4-427659c1caaa",
+          "type": "payment",
+          "amount": 5000,
+          "description": "ブラックジャック: lose",
+          "timestamp": 1768641208942
+        },
+        {
+          "id": "2664be1c-8766-483a-b5fa-34ac1cebc3da",
+          "type": "income",
+          "amount": 1000,
+          "description": "ブラックジャック: win",
+          "timestamp": 1768641218629
+        },
+        {
+          "id": "b6b404bc-5752-48c3-b32d-ef2163f5c59e",
+          "type": "payment",
+          "amount": 100,
+          "description": "スロット: ハズレ...",
+          "timestamp": 1768641225129
+        },
+        {
+          "id": "ebe7edb1-1612-4bd4-a244-1f819f5ab15a",
+          "type": "payment",
+          "amount": 100,
+          "description": "スロット: ハズレ...",
+          "timestamp": 1768641228225
+        },
+        {
+          "id": "36c10d01-a9e4-4667-b861-118813cd7dcd",
+          "type": "payment",
+          "amount": 1000,
+          "description": "スロット: ハズレ...",
+          "timestamp": 1768641235544
+        },
+        {
+          "id": "26dc9250-5762-48c4-850a-fd5b689c597c",
+          "type": "income",
+          "amount": 1000,
+          "description": "スロット: ペア! 2倍配当",
+          "timestamp": 1768641239364
+        },
+        {
+          "id": "b9aedc22-9e0d-4323-ae65-f0178d93a891",
+          "type": "income",
+          "amount": 1000,
+          "description": "スロット: ペア! 2倍配当",
+          "timestamp": 1768641241511
+        },
+        {
+          "id": "27e7a8fb-352e-4864-aebf-870361a84d2a",
+          "type": "payment",
+          "amount": 1000,
+          "description": "スロット: ハズレ...",
+          "timestamp": 1768641245138
+        },
+        {
+          "id": "e71bb205-48ed-477a-83f5-d76ad6fb83e6",
+          "type": "income",
+          "amount": 1000,
+          "description": "スロット: ペア! 2倍配当",
+          "timestamp": 1768641248029
+        },
+        {
+          "id": "aa444068-fbbd-4f0a-b271-26e32cd3f5d2",
+          "type": "income",
+          "amount": 1000,
+          "description": "スロット: ペア! 2倍配当",
+          "timestamp": 1768641251681
+        },
+        {
+          "id": "3670b96b-f789-41ef-9cc9-4f162306d661",
+          "type": "payment",
+          "amount": 1000,
+          "description": "スロット: ハズレ...",
+          "timestamp": 1768641256181
+        },
+        {
+          "id": "2c2a51cf-a9a6-4f4c-a754-df740186c5c4",
+          "type": "income",
+          "amount": 1500,
+          "description": "競馬: 的中! (馬1→1)",
+          "timestamp": 1768641263641
+        },
+        {
+          "id": "4871b4bf-0941-4774-b659-a39b55fa29c1",
+          "type": "income",
+          "amount": 1500,
+          "description": "競馬: 的中! (馬1→1)",
+          "timestamp": 1768641268329
+        },
+        {
+          "id": "e0a4e2ef-1b73-4571-96e7-283badf2b192",
+          "type": "payment",
+          "amount": 1000,
+          "description": "競馬: 外れ (馬1→2)",
+          "timestamp": 1768641271514
+        },
+        {
+          "id": "9ec75fea-f666-4933-8280-b4b79c6f1c07",
+          "type": "income",
+          "amount": 1500,
+          "description": "競馬: 的中! (馬1→1)",
+          "timestamp": 1768641274393
+        },
+        {
+          "id": "61f370cf-27a1-4c69-b67f-030ee7909697",
+          "type": "income",
+          "amount": 2000,
+          "description": "競馬: 的中! (馬2→2)",
+          "timestamp": 1768641277707
+        },
+        {
+          "id": "89deb27d-859f-4259-aea0-73164beefb0b",
+          "type": "payment",
+          "amount": 1000,
+          "description": "競馬: 外れ (馬1→2)",
+          "timestamp": 1768641282075
+        },
+        {
+          "id": "d13e3bdf-3392-490f-ac8e-c0d13ebdfc7a",
+          "type": "payment",
+          "amount": 1000,
+          "description": "競馬: 外れ (馬2→1)",
+          "timestamp": 1768641284921
+        },
+        {
+          "id": "641ee1f7-87bd-42a0-8b90-2d7a188458ce",
+          "type": "income",
+          "amount": 1500,
+          "description": "競馬: 的中! (馬1→1)",
+          "timestamp": 1768641287740
+        },
+        {
+          "id": "0a093d15-34c8-4ce5-97ac-d0aecd815d30",
+          "type": "payment",
+          "amount": 1000,
+          "description": "競馬: 外れ (馬2→1)",
+          "timestamp": 1768641291047
+        },
+        {
+          "id": "fb553603-767c-4146-ab11-4da6231c788b",
+          "type": "income",
+          "amount": 1500,
+          "description": "競馬: 的中! (馬1→1)",
+          "timestamp": 1768641293934
+        },
+        {
+          "id": "d6c4fbd4-847d-42df-a3ab-3b6417a4deb3",
+          "type": "payment",
+          "amount": 1000,
+          "description": "競馬: 外れ (馬1→2)",
+          "timestamp": 1768641297171
+        },
+        {
+          "id": "2d8e5cb4-bad4-4bde-b803-14ecf185114f",
+          "type": "payment",
+          "amount": 1000,
+          "description": "競馬: 外れ (馬2→1)",
+          "timestamp": 1768641301103
+        },
+        {
+          "id": "41d0c827-df69-434a-802b-97338659353f",
+          "type": "payment",
+          "amount": 1000,
+          "description": "競馬: 外れ (馬1→2)",
+          "timestamp": 1768641304006
+        },
+        {
+          "id": "842b2961-5697-4a57-91e5-ba4f480dbe12",
+          "type": "income",
+          "amount": 1500,
+          "description": "競馬: 的中! (馬1→1)",
+          "timestamp": 1768641308777
+        },
+        {
+          "id": "427c3393-15b6-4d0d-9ef6-36d268825655",
+          "type": "payment",
+          "amount": 5000,
+          "description": "競馬: 外れ (馬1→2)",
+          "timestamp": 1768641312333
+        },
+        {
+          "id": "95fee56a-c5f1-42b2-8dc8-b1b311d75e99",
+          "type": "income",
+          "amount": 7500,
+          "description": "競馬: 的中! (馬1→1)",
+          "timestamp": 1768641316545
+        },
+        {
+          "id": "a165de23-461b-421f-85a7-f779b8f7c65a",
+          "type": "payment",
+          "amount": 5000,
+          "description": "競馬: 外れ (馬1→2)",
+          "timestamp": 1768641321385
+        },
+        {
+          "id": "3fe09f0d-8f41-4623-9f1c-844a3ca0afee",
+          "type": "payment",
+          "amount": 5000,
+          "description": "競馬: 外れ (馬1→2)",
+          "timestamp": 1768641325297
+        },
+        {
+          "id": "c7c0ff0b-fb13-43b6-97cd-a49d5fa7c53d",
+          "type": "income",
+          "amount": 1500,
+          "description": "競馬: 的中! (馬1→1)",
+          "timestamp": 1768641332007
+        },
+        {
+          "id": "53083fde-dc6d-44c9-9077-18df0fdcb67b",
+          "type": "income",
+          "amount": 1500,
+          "description": "競馬: 的中! (馬1→1)",
+          "timestamp": 1768641333193
+        },
+        {
+          "id": "05cec690-e4bd-42a6-bb93-0ff3fa1e55ec",
+          "type": "payment",
+          "amount": 5000,
+          "description": "競馬: 外れ (馬1→2)",
+          "timestamp": 1768641337975
+        },
+        {
+          "id": "ecec49fe-931b-4da0-9575-c2c6deb30260",
+          "type": "payment",
+          "amount": 5000,
+          "description": "競馬: 外れ (馬1→2)",
+          "timestamp": 1768641342770
+        },
+        {
+          "id": "52742ff7-7525-4112-aaf7-044f2e09a82c",
+          "type": "payment",
+          "amount": 5000,
+          "description": "競馬: 外れ (馬2→1)",
+          "timestamp": 1768641345678
+        },
+        {
+          "id": "4eb18e1a-07d4-4e1c-ae22-ea1736dfb49d",
+          "type": "payment",
+          "amount": 5000,
+          "description": "競馬: 外れ (馬1→3)",
+          "timestamp": 1768641349244
+        },
+        {
+          "id": "93ce4c48-db73-4122-abed-193aede930d0",
+          "type": "payment",
+          "amount": 5000,
+          "description": "競馬: 外れ (馬2→1)",
+          "timestamp": 1768641351834
+        },
+        {
+          "id": "29582141-900e-4837-952c-64ab96227e4e",
+          "type": "payment",
+          "amount": 500,
+          "description": "競馬: 外れ (馬5→1)",
+          "timestamp": 1768641359133
+        },
+        {
+          "id": "6e091590-92b8-4ed2-8897-4294b3675981",
+          "type": "payment",
+          "amount": 500,
+          "description": "競馬: 外れ (馬1→2)",
+          "timestamp": 1768641362320
+        },
+        {
+          "id": "7ed96783-eabc-4cb2-ae07-c888ce2228d9",
+          "type": "payment",
+          "amount": 100,
+          "description": "競馬: 外れ (馬1→3)",
+          "timestamp": 1768641366051
+        },
+        {
+          "id": "feef03b1-16f7-4351-8d8c-7e757d5c5cd3",
+          "type": "payment",
+          "amount": 100,
+          "description": "競馬: 外れ (馬1→3)",
+          "timestamp": 1768641368859
+        },
+        {
+          "id": "4e08d791-9158-488e-9095-2228efd06f04",
+          "type": "payment",
+          "amount": 100,
+          "description": "競馬: 外れ (馬3→1)",
+          "timestamp": 1768641371650
+        },
+        {
+          "id": "69ec332c-c587-4f55-ae5e-724e59be7b1b",
+          "type": "income",
+          "amount": 150,
+          "description": "競馬: 的中! (馬1→1)",
+          "timestamp": 1768641374081
+        },
+        {
+          "id": "83b2fcb7-3de7-4043-afc1-f16ce2ad3310",
+          "type": "payment",
+          "amount": 100,
+          "description": "競馬: 外れ (馬1→2)",
+          "timestamp": 1768641376990
+        },
+        {
+          "id": "be17578b-c028-4326-bc1b-a256d8aacae3",
+          "type": "payment",
+          "amount": 100,
+          "description": "競馬: 外れ (馬1→2)",
+          "timestamp": 1768641379953
+        },
+        {
+          "id": "5a078a55-b214-43cd-a39c-9830be9f6dd8",
+          "type": "payment",
+          "amount": 100,
+          "description": "ギャンブル(low): 敗北 (出目7)",
+          "timestamp": 1768641388020
+        },
+        {
+          "id": "ec585e79-3574-4db2-8863-76b5c1711883",
+          "type": "income",
+          "amount": 100,
+          "description": "ギャンブル(low): 勝利 (出目6)",
+          "timestamp": 1768641391158
+        },
+        {
+          "id": "fb8d0723-4e69-4723-a0a6-a02ec3ebcab8",
+          "type": "payment",
+          "amount": 100,
+          "description": "ギャンブル(low): 敗北 (出目7)",
+          "timestamp": 1768641393474
+        },
+        {
+          "id": "efa3fc4a-2425-4940-aec9-dfd55b862551",
+          "type": "payment",
+          "amount": 100,
+          "description": "ギャンブル(high): 敗北 (出目7)",
+          "timestamp": 1768641395116
+        },
+        {
+          "id": "d4f8fced-bf91-411c-8986-c7f4981b4516",
+          "type": "income",
+          "amount": 100,
+          "description": "ブラックジャック: win",
+          "timestamp": 1768641404100
+        },
+        {
+          "id": "d6a9867b-70c9-41ba-ac45-b1f392340977",
+          "type": "income",
+          "amount": 100,
+          "description": "ブラックジャック: win",
+          "timestamp": 1768641405269
+        },
+        {
+          "id": "db618199-ea18-4e02-9037-0c1009f14c65",
+          "type": "payment",
+          "amount": 100,
+          "description": "ブラックジャック: lose",
+          "timestamp": 1768641411937
+        },
+        {
+          "id": "88a3b8aa-2347-4c2f-8ddd-b3ac490bdfdc",
+          "type": "payment",
+          "amount": 100,
+          "description": "ブラックジャック: bust",
+          "timestamp": 1768641415101
+        },
+        {
+          "id": "287a8e45-70aa-44ed-b330-8af26356deeb",
+          "type": "income",
+          "amount": 500,
+          "description": "ブラックジャック: win",
+          "timestamp": 1768641422490
+        },
+        {
+          "id": "858b4a4e-68a1-47b3-a6e6-0f26801248a7",
+          "type": "payment",
+          "amount": 1000,
+          "description": "ブラックジャック: lose",
+          "timestamp": 1768641428181
+        },
+        {
+          "id": "ffa63e3c-98b4-4a9e-a020-07c706796e39",
+          "type": "income",
+          "amount": 1000,
+          "description": "ブラックジャック: win",
+          "timestamp": 1768641432586
+        },
+        {
+          "id": "62d22c69-f134-44ab-bc7c-d9f1a47767c9",
+          "type": "payment",
+          "amount": 1000,
+          "description": "ブラックジャック: bust",
+          "timestamp": 1768641438297
+        },
+        {
+          "id": "879c7959-6d07-440e-b321-5d6bb6ffc70e",
+          "type": "payment",
+          "amount": 1800,
+          "senderId": "e5a72cef-6372-4c32-b707-46e213d06d03",
+          "receiverId": "85aa5f67-e07c-4a9d-a35e-3500a2f52f08",
+          "description": "一括購入: ハ・ルールールルルーの店 (3商品)",
+          "timestamp": 1768641553857
+        },
+        {
+          "id": "df6656d5-00f6-4ae2-8c73-d0da53889353",
+          "type": "payment",
+          "amount": 50,
+          "description": "仕入れ: 千里眼 x5",
+          "timestamp": 1768641805529
+        },
+        {
+          "id": "0bf98c2a-4429-4e55-a872-e6f653e747f2",
+          "type": "payment",
+          "amount": 50,
+          "description": "仕入れ: 記憶 x5",
+          "timestamp": 1768641936257
+        },
+        {
+          "id": "bb23c536-88ec-4696-bcd4-696a8666dc74",
+          "type": "payment",
+          "amount": 1270,
+          "senderId": "e5a72cef-6372-4c32-b707-46e213d06d03",
+          "description": "株購入: テック・フューチャー x1",
+          "timestamp": 1768641977621
+        },
+        {
+          "id": "0eda4937-5634-48af-8a12-73511a8407fd",
+          "type": "payment",
+          "amount": 50,
+          "description": "仕入れ: フルーツナイフ x5",
+          "timestamp": 1768642149634
+        },
+        {
+          "id": "e8d2d6c0-8041-4d95-a581-1e4719c63cd3",
+          "type": "payment",
+          "amount": 50,
+          "description": "仕入れ: フルーツナイフ x5",
+          "timestamp": 1768642154444
+        },
+        {
+          "id": "4221fe3f-ee34-4efe-992f-b587c33f7f0d",
+          "type": "withdraw",
+          "amount": 10000,
+          "senderId": "e5a72cef-6372-4c32-b707-46e213d06d03",
+          "description": "引き出し",
+          "timestamp": 1768642492427
+        },
+        {
+          "id": "ca72e00f-b432-49a5-9d5d-7f01c1dd5f2d",
+          "type": "income",
+          "amount": 100,
+          "description": "ギャンブル(low): 勝利 (出目6)",
+          "timestamp": 1768642538565
+        },
+        {
+          "id": "8d505887-5418-4087-9e88-a05d7a097830",
+          "type": "payment",
+          "amount": 500,
+          "description": "ギャンブル(low): 敗北 (出目9)",
+          "timestamp": 1768642542503
+        },
+        {
+          "id": "b6959559-b542-4813-9f2d-a8983074b211",
+          "type": "payment",
+          "amount": 500,
+          "description": "ギャンブル(high): 敗北 (出目6)",
+          "timestamp": 1768642544577
+        },
+        {
+          "id": "3cb404a9-fd90-454c-b317-31257e2e5875",
+          "type": "income",
+          "amount": 500,
+          "description": "ギャンブル(high): 勝利 (出目8)",
+          "timestamp": 1768642546940
+        },
+        {
+          "id": "e0671c27-4288-4910-b478-d1b51e7a74de",
+          "type": "payment",
+          "amount": 1000,
+          "description": "ブラックジャック: lose",
+          "timestamp": 1768642561751
+        },
+        {
+          "id": "bd218612-e1ba-462a-8284-57a3ea0d9ebc",
+          "type": "income",
+          "amount": 1000,
+          "description": "ブラックジャック: win",
+          "timestamp": 1768642568101
+        },
+        {
+          "id": "88b65277-05a4-41cc-941a-1eaa56cfae93",
+          "type": "income",
+          "amount": 1000,
+          "description": "ブラックジャック: win",
+          "timestamp": 1768642616558
+        },
+        {
+          "id": "53e1bde7-8b1f-444c-90f7-985d65a8293a",
+          "type": "income",
+          "amount": 0,
+          "description": "ブラックジャック: push",
+          "timestamp": 1768642619829
+        },
+        {
+          "id": "7305931a-e343-4153-864e-34a5fbab7028",
+          "type": "income",
+          "amount": 1000,
+          "description": "ブラックジャック: win",
+          "timestamp": 1768642623927
+        },
+        {
+          "id": "d784c93f-e6e5-409c-827d-9f2a50c178bf",
+          "type": "income",
+          "amount": 1500,
+          "description": "ブラックジャック: win",
+          "timestamp": 1768642627329
+        },
+        {
+          "id": "819d2bb2-49d9-45f3-a422-2c047da155a7",
+          "type": "income",
+          "amount": 1000,
+          "description": "ブラックジャック: win",
+          "timestamp": 1768642632588
+        },
+        {
+          "id": "a3adaa5e-1d8a-4429-875d-934112f501f2",
+          "type": "payment",
+          "amount": 1000,
+          "description": "ブラックジャック: bust",
+          "timestamp": 1768642636327
+        },
+        {
+          "id": "b1ffef46-5018-4d07-93b1-c871bbd9a014",
+          "type": "payment",
+          "amount": 1000,
+          "description": "ブラックジャック: lose",
+          "timestamp": 1768642640507
+        },
+        {
+          "id": "bcfcca4c-78bd-4533-8250-383e31301f32",
+          "type": "income",
+          "amount": 5000,
+          "description": "ブラックジャック: win",
+          "timestamp": 1768642644431
+        },
+        {
+          "id": "2831a749-019e-4474-9411-f521fd923df7",
+          "type": "payment",
+          "amount": 5000,
+          "description": "ブラックジャック: lose",
+          "timestamp": 1768642654053
+        },
+        {
+          "id": "5278fe12-5bfd-415d-8454-8d3f27c945aa",
+          "type": "payment",
+          "amount": 5000,
+          "description": "ブラックジャック: bust",
+          "timestamp": 1768642655294
+        },
+        {
+          "id": "e5c0b452-50c0-4b89-90c3-eb359887a607",
+          "type": "income",
+          "amount": 7500,
+          "description": "ブラックジャック: win",
+          "timestamp": 1768642658834
+        },
+        {
+          "id": "1e05d7d1-89e5-4c1f-81e0-05523728f2b1",
+          "type": "payment",
+          "amount": 5000,
+          "description": "スロット: ハズレ...",
+          "timestamp": 1768642665642
+        },
+        {
+          "id": "ae0ca093-80c2-458a-9a36-d2e31ca38fb4",
+          "type": "payment",
+          "amount": 1000,
+          "description": "スロット: ハズレ...",
+          "timestamp": 1768642669155
+        },
+        {
+          "id": "b618725c-4be3-4628-9540-19e44176ee5b",
+          "type": "income",
+          "amount": 500,
+          "description": "スロット: ペア! 2倍配当",
+          "timestamp": 1768642672383
+        },
+        {
+          "id": "a35e3881-fc54-4ebb-b6f0-5348148f0a60",
+          "type": "payment",
+          "amount": 1000,
+          "description": "スロット: ハズレ...",
+          "timestamp": 1768642676230
+        },
+        {
+          "id": "5ac5305a-e088-4d34-b97d-9fe2efe4db59",
+          "type": "income",
+          "amount": 9500,
+          "description": "スロット: ⭐ スター! 20倍配当！",
+          "timestamp": 1768642679510
+        },
+        {
+          "id": "c598f5a3-7ac3-4573-8f21-8d040c250e43",
+          "type": "income",
+          "amount": 45450,
+          "senderId": "c6e0c017-c16a-464d-9e77-a41d5fd87aec",
+          "receiverId": "e5a72cef-6372-4c32-b707-46e213d06d03",
+          "description": "売上: 2商品",
+          "timestamp": 1768642764581
+        },
+        {
+          "id": "5e0ac852-3e01-45fe-b028-81b7fc5ccad2",
+          "type": "deposit",
+          "amount": 60000,
+          "senderId": "e5a72cef-6372-4c32-b707-46e213d06d03",
+          "description": "預け入れ",
+          "timestamp": 1768642797674
+        },
+        {
+          "id": "19c837ef-24d4-4daf-b0a6-761ed4b11ac1",
+          "type": "payment",
+          "amount": 100,
+          "description": "ギャンブル(low): 敗北 (出目8)",
+          "timestamp": 1768642809481
+        },
+        {
+          "id": "6be4671e-46c4-48db-a01f-8988f54ad08d",
+          "type": "payment",
+          "amount": 5000,
+          "description": "ブラックジャック: bust",
+          "timestamp": 1768642815235
+        },
+        {
+          "id": "1e40a2ef-8c02-43dc-851c-31df2791f80c",
+          "type": "payment",
+          "amount": 5000,
+          "description": "ブラックジャック: lose",
+          "timestamp": 1768642820425
+        },
+        {
+          "id": "3f7000c6-a8aa-4e73-a1d6-146b93d321e0",
+          "type": "income",
+          "amount": 5000,
+          "description": "ブラックジャック: win",
+          "timestamp": 1768642825577
+        },
+        {
+          "id": "8fb43fc8-3bca-47c1-8b0a-bf85876a96ae",
+          "type": "payment",
+          "amount": 100,
+          "description": "スロット: ハズレ...",
+          "timestamp": 1768642832091
+        },
+        {
+          "id": "2a7bd889-3658-4e38-a5d9-efc1cbd8fe5c",
+          "type": "income",
+          "amount": 1000,
+          "description": "スロット: ペア! 2倍配当",
+          "timestamp": 1768642835173
+        },
+        {
+          "id": "616a8c73-adfe-43ea-a9ca-22dd519f90ae",
+          "type": "payment",
+          "amount": 100,
+          "description": "スロット: ハズレ...",
+          "timestamp": 1768642839483
+        },
+        {
+          "id": "cb9f00d6-ebf8-4fea-8838-bff59f3673fe",
+          "type": "payment",
+          "amount": 100,
+          "description": "スロット: ハズレ...",
+          "timestamp": 1768642842358
+        },
+        {
+          "id": "00fcc1e9-d8ff-4b49-b1ad-666aa7fcf158",
+          "type": "payment",
+          "amount": 100,
+          "description": "スロット: ハズレ...",
+          "timestamp": 1768642845113
+        },
+        {
+          "id": "5a166e8c-828b-48a4-97f9-93db8f716f55",
+          "type": "payment",
+          "amount": 100,
+          "description": "スロット: ハズレ...",
+          "timestamp": 1768642847835
+        },
+        {
+          "id": "97527d51-3c5a-4198-ae71-a4689ed917d3",
+          "type": "payment",
+          "amount": 500,
+          "description": "スロット: ハズレ...",
+          "timestamp": 1768642851258
+        },
+        {
+          "id": "7a104170-1c83-4f4c-abfe-986132a57f8f",
+          "type": "payment",
+          "amount": 1000,
+          "description": "スロット: ハズレ...",
+          "timestamp": 1768642854675
+        },
+        {
+          "id": "0499a2c2-2cb8-4f24-bbf9-fc9fd356977f",
+          "type": "payment",
+          "amount": 5000,
+          "description": "スロット: ハズレ...",
+          "timestamp": 1768642857916
+        },
+        {
+          "id": "a050abd5-3b74-49ca-825b-029d89204e68",
+          "type": "income",
+          "amount": 1000,
+          "description": "スロット: ペア! 2倍配当",
+          "timestamp": 1768642861128
+        },
+        {
+          "id": "61341c9b-caad-404a-9405-dd0455ef8e43",
+          "type": "income",
+          "amount": 1000,
+          "description": "スロット: ペア! 2倍配当",
+          "timestamp": 1768642865291
+        },
+        {
+          "id": "efe4d08e-a9d5-46de-85e4-df6d25f37999",
+          "type": "income",
+          "amount": 500,
+          "description": "スロット: ペア! 2倍配当",
+          "timestamp": 1768642869296
+        },
+        {
+          "id": "71c49877-5ff1-4d0d-b5cb-dae555cd4d15",
+          "type": "payment",
+          "amount": 5000,
+          "description": "スロット: ハズレ...",
+          "timestamp": 1768642872465
+        },
+        {
+          "id": "33553348-9ed5-46b7-bfee-b0e0278144aa",
+          "type": "income",
+          "amount": 1000,
+          "description": "スロット: ペア! 2倍配当",
+          "timestamp": 1768642875869
+        },
+        {
+          "id": "a1d44945-7efb-45ba-ad60-913fd2edc9ba",
+          "type": "payment",
+          "amount": 100,
+          "description": "競馬: 外れ (馬1→4)",
+          "timestamp": 1768642880870
+        },
+        {
+          "id": "d5977903-7a98-4e4c-8762-edd440257380",
+          "type": "payment",
+          "amount": 100,
+          "description": "競馬: 外れ (馬4→2)",
+          "timestamp": 1768642885103
+        },
+        {
+          "id": "a66b938e-3587-4174-8a9f-82fbb43ba457",
+          "type": "payment",
+          "amount": 100,
+          "description": "競馬: 外れ (馬2→1)",
+          "timestamp": 1768642887811
+        },
+        {
+          "id": "e12e3e91-07cd-4146-b3dd-a09220f05e74",
+          "type": "payment",
+          "amount": 100,
+          "description": "競馬: 外れ (馬3→1)",
+          "timestamp": 1768642890662
+        },
+        {
+          "id": "cdb7d3f1-5402-4f7e-bb0f-55e0a3db5869",
+          "type": "income",
+          "amount": 150,
+          "description": "競馬: 的中! (馬1→1)",
+          "timestamp": 1768642893334
+        },
+        {
+          "id": "d6321d13-7c52-484f-9894-e5de817d6154",
+          "type": "income",
+          "amount": 750,
+          "description": "競馬: 的中! (馬1→1)",
+          "timestamp": 1768642897862
+        },
+        {
+          "id": "d3661c47-f04a-40c8-a2f5-fbcb0dae1bda",
+          "type": "payment",
+          "amount": 1000,
+          "description": "競馬: 外れ (馬2→1)",
+          "timestamp": 1768642909063
+        },
+        {
+          "id": "d7569a17-f68e-461a-9cca-c0f1765e30da",
+          "type": "payment",
+          "amount": 500,
+          "description": "競馬: 外れ (馬1→2)",
+          "timestamp": 1768642909065
+        },
+        {
+          "id": "0edf0c33-d91f-4557-9934-71619bc1759f",
+          "type": "payment",
+          "amount": 100,
+          "description": "競馬: 外れ (馬2→1)",
+          "timestamp": 1768642909479
+        },
+        {
+          "id": "d8a92830-55ba-4be9-9648-554d48db1045",
+          "type": "income",
+          "amount": 150,
+          "description": "競馬: 的中! (馬1→1)",
+          "timestamp": 1768642912341
+        },
+        {
+          "id": "62910ad3-6f31-4cef-a4dc-b519c853fa41",
+          "type": "payment",
+          "amount": 500,
+          "description": "競馬: 外れ (馬1→2)",
+          "timestamp": 1768642916487
+        },
+        {
+          "id": "f5cf9f3d-24e1-414d-bce0-1f70717bf3cc",
+          "type": "income",
+          "amount": 150,
+          "description": "競馬: 的中! (馬1→1)",
+          "timestamp": 1768642920771
+        },
+        {
+          "id": "6d2ddad8-86e0-4db2-94ac-6c5f61ac47e9",
+          "type": "income",
+          "amount": 1000,
+          "description": "競馬: 的中! (馬2→2)",
+          "timestamp": 1768642924244
+        },
+        {
+          "id": "2396b81c-af92-453f-9bd2-b21ba821f04e",
+          "type": "payment",
+          "amount": 1000,
+          "description": "競馬: 外れ (馬1→2)",
+          "timestamp": 1768642929130
+        },
+        {
+          "id": "2ef68084-9649-4640-8c37-b5327c2f3e28",
+          "type": "income",
+          "amount": 750,
+          "description": "競馬: 的中! (馬1→1)",
+          "timestamp": 1768642933747
+        },
+        {
+          "id": "3ae3fddd-db9a-4e6d-a411-a3a43cc69d33",
+          "type": "payment",
+          "amount": 1000,
+          "description": "競馬: 外れ (馬1→2)",
+          "timestamp": 1768642945096
+        },
+        {
+          "id": "772e946d-0a7a-4994-9c66-05d52c8211fa",
+          "type": "payment",
+          "amount": 500,
+          "description": "競馬: 外れ (馬2→1)",
+          "timestamp": 1768642954049
+        },
+        {
+          "id": "dc4a02de-7845-4583-87e3-93d541ddb4f5",
+          "type": "income",
+          "amount": 150,
+          "description": "競馬: 的中! (馬1→1)",
+          "timestamp": 1768642954051
+        },
+        {
+          "id": "771897dd-e517-4a39-b551-b9ca131a7ed4",
+          "type": "payment",
+          "amount": 500,
+          "description": "競馬: 外れ (馬1→2)",
+          "timestamp": 1768642957054
+        },
+        {
+          "id": "22f57135-4dff-4d62-b004-2b02890686d7",
+          "type": "income",
+          "amount": 100,
+          "description": "ブラックジャック: win",
+          "timestamp": 1768642970555
+        },
+        {
+          "id": "b8101b36-3307-4141-ab25-b23eb0440bb1",
+          "type": "payment",
+          "amount": 500,
+          "description": "ブラックジャック: bust",
+          "timestamp": 1768642975077
+        },
+        {
+          "id": "e218a0e2-b211-4d55-8de9-b738c0322f32",
+          "type": "income",
+          "amount": 100,
+          "description": "ブラックジャック: win",
+          "timestamp": 1768642980305
+        },
+        {
+          "id": "0346f021-f3d6-4a2c-af06-c5b4d05da8b0",
+          "type": "payment",
+          "amount": 500,
+          "description": "ブラックジャック: bust",
+          "timestamp": 1768642983056
+        },
+        {
+          "id": "e327011d-20d6-4522-a277-81db7b8cc202",
+          "type": "payment",
+          "amount": 100,
+          "description": "ブラックジャック: bust",
+          "timestamp": 1768642986178
+        },
+        {
+          "id": "fa5ce7a3-c6d5-4cb4-927b-cbd80115f402",
+          "type": "income",
+          "amount": 100,
+          "description": "ブラックジャック: win",
+          "timestamp": 1768642993130
+        },
+        {
+          "id": "cc5e1278-6b5a-4f73-b83e-6a0254ce3036",
+          "type": "income",
+          "amount": 500,
+          "description": "ブラックジャック: win",
+          "timestamp": 1768642994444
+        },
+        {
+          "id": "af7058a7-5179-4781-85ac-62b6b3a78fd8",
+          "type": "payment",
+          "amount": 1000,
+          "description": "ブラックジャック: lose",
+          "timestamp": 1768642999201
+        },
+        {
+          "id": "17b34534-2290-4f26-b68c-4d493fc8c391",
+          "type": "payment",
+          "amount": 500,
+          "description": "ブラックジャック: bust",
+          "timestamp": 1768643003251
+        },
+        {
+          "id": "b0e96e2e-b6d4-44df-9c65-3ce70f4bfb66",
+          "type": "deposit",
+          "amount": 10000,
+          "senderId": "e5a72cef-6372-4c32-b707-46e213d06d03",
+          "description": "預け入れ",
+          "timestamp": 1768643033507
+        },
+        {
+          "id": "aa05d578-5f98-45d6-9849-0db77ce7ebb2",
+          "type": "income",
+          "amount": 488295,
+          "senderId": "c6e0c017-c16a-464d-9e77-a41d5fd87aec",
+          "receiverId": "e5a72cef-6372-4c32-b707-46e213d06d03",
+          "description": "売上: 87点",
+          "timestamp": 1768643128519
+        },
+        {
+          "id": "32c950a0-5129-40d2-9bc0-359ca27b24c5",
+          "type": "payment",
+          "amount": 50,
+          "description": "仕入れ: ガチャピン x5",
+          "timestamp": 1768643144799
+        },
+        {
+          "id": "3e98ca25-8597-42e4-9ab3-a415a90aa3e7",
+          "type": "payment",
+          "amount": 500,
+          "description": "仕入れ: ミステリー雑誌 x5",
+          "timestamp": 1768643145824
+        },
+        {
+          "id": "b73dacf0-c77d-4362-9cfe-b7e5e4e36eda",
+          "type": "payment",
+          "amount": 50,
+          "description": "仕入れ: 休みたい x5",
+          "timestamp": 1768643147119
+        },
+        {
+          "id": "6bbb14fc-b3d5-425c-a51e-cd6c8634c05a",
+          "type": "payment",
+          "amount": 50,
+          "description": "仕入れ: ◯体 x5",
+          "timestamp": 1768643151409
+        },
+        {
+          "id": "d49fde4b-b63a-4a11-8b05-d628634d388f",
+          "type": "payment",
+          "amount": 500,
+          "description": "仕入れ: 人間😭 x5",
+          "timestamp": 1768643157094
+        },
+        {
+          "id": "e8815d13-c290-42e8-9462-5b5841872093",
+          "type": "payment",
+          "amount": 0,
+          "description": "仕入れ: 内臓 x5",
+          "timestamp": 1768643162534
+        },
+        {
+          "id": "0ee63c6b-059f-4f7e-b1f6-4090b62ca0e3",
+          "type": "payment",
+          "amount": 50,
+          "description": "仕入れ: アルミカン x5",
+          "timestamp": 1768643164959
+        },
+        {
+          "id": "ccb64b02-63f8-4508-a931-0ef68bc736ec",
+          "type": "payment",
+          "amount": 500,
+          "description": "仕入れ: ドラえもん x5",
+          "timestamp": 1768643166665
+        },
+        {
+          "id": "9cae4b01-aea8-4538-b5f4-c01961d13535",
+          "type": "payment",
+          "amount": 50,
+          "description": "仕入れ: 世界1いらないモノ x5",
+          "timestamp": 1768643168485
+        },
+        {
+          "id": "a83a24fc-36c2-4fc4-b297-d8b306f73b88",
+          "type": "payment",
+          "amount": 50,
+          "description": "仕入れ: (ΦωΦ) x5",
+          "timestamp": 1768643170163
+        },
+        {
+          "id": "cf6a42d4-a0d8-4db9-a8ac-43577398fcec",
+          "type": "payment",
+          "amount": 50,
+          "description": "仕入れ: はたらきたい x5",
+          "timestamp": 1768643171923
+        },
+        {
+          "id": "a703f807-a671-4649-94c6-04adbcb8867a",
+          "type": "payment",
+          "amount": 50,
+          "description": "仕入れ: 光るお守り x5",
+          "timestamp": 1768643176966
+        },
+        {
+          "id": "0e9eb110-0166-4450-a4cc-7cce15dbfb4f",
+          "type": "payment",
+          "amount": 500,
+          "description": "仕入れ: 赤字 x5",
+          "timestamp": 1768643178843
+        },
+        {
+          "id": "a38264e4-9e7a-4f92-b42a-9b483605b16e",
+          "type": "payment",
+          "amount": 50,
+          "description": "仕入れ: 千里眼 x5",
+          "timestamp": 1768643180725
+        },
+        {
+          "id": "2579094f-31bd-4a96-9ec4-ff4970563af1",
+          "type": "payment",
+          "amount": 50,
+          "description": "仕入れ: 記憶 x5",
+          "timestamp": 1768643182422
+        },
+        {
+          "id": "eb7c9135-aaa6-41d9-b720-fefc78317009",
+          "type": "payment",
+          "amount": 50,
+          "description": "仕入れ: フルーツナイフ x5",
+          "timestamp": 1768643189677
+        }
+      ],
+      "unpaidTax": 4718,
+      "shopName": "いろんなお店で事故が起きたから",
+      "cardType": "stamp",
+      "shopMenu": [
+        {
+          "id": "ocolnahfd",
+          "name": "ガチャピン",
+          "cost": 10,
+          "price": 500,
+          "stock": 5
+        },
+        {
+          "id": "sirn0xc1z",
+          "name": "ミステリー雑誌",
+          "cost": 100,
+          "price": 250,
+          "stock": 5
+        },
+        {
+          "id": "csb7lu2bh",
+          "name": "休みたい",
+          "cost": 10,
+          "price": 100,
+          "stock": 5,
+          "description": "休みたい休みたい休みたい休みたい休みたい休みたい"
+        },
+        {
+          "id": "ts3dbyp1s",
+          "name": "人間😭",
+          "cost": 100,
+          "price": 700,
+          "stock": 5,
+          "description": "（人間）助けて助けて助けて助けて助けて助けて助けて助けて助けて助けて助けて助けて助けて助けて助けて助けて助けて助けて助けて助けて助けて助けて"
+        },
+        {
+          "id": "c9bluzu3r",
+          "name": "◯体",
+          "cost": 10,
+          "price": 500,
+          "stock": 5,
+          "description": "◯体あげます♪"
+        },
+        {
+          "id": "8so0vmafs",
+          "name": "内臓",
+          "cost": 0,
+          "price": 500,
+          "stock": 5,
+          "description": "内臓がないぞう"
+        },
+        {
+          "id": "i30edqmkv",
+          "name": "アルミカン",
+          "cost": 10,
+          "price": 150,
+          "stock": 5,
+          "description": "アルミカンの上にある🍊"
+        },
+        {
+          "id": "16cskvoeu",
+          "name": "ドラえもん",
+          "cost": 100,
+          "price": 5000,
+          "stock": 5,
+          "description": "ドラえもんはね\nすごいんだよ\nだから\n「高くて買えない〜」とか\n言わないでね♪（圧）\n5000枚だけど\n安いほうだよ♪（圧）\n買ってね♪（圧）\n\n"
+        },
+        {
+          "id": "cp8ysuxkz",
+          "name": "世界1いらないモノ",
+          "cost": 10,
+          "price": 50,
+          "stock": 5,
+          "description": "\n\n\n\n\n\n\n\n\n\n\n\n\n気になるよね\nソレは教えてあげないね"
+        },
+        {
+          "id": "x2492r5bl",
+          "name": "(ΦωΦ)",
+          "cost": 10,
+          "price": 1000,
+          "stock": 5,
+          "description": "(ΦωΦ)ロボット"
+        },
+        {
+          "id": "38lq5twqx",
+          "name": "はたらきたい",
+          "cost": 10,
+          "price": 500,
+          "stock": 5,
+          "description": "働きたいよー(泣)"
+        },
+        {
+          "id": "11qf2dy23",
+          "name": "光るお守り",
+          "cost": 10,
+          "price": 500,
+          "stock": 5,
+          "description": "光るお守りはね\nすごいんだよ（圧）\n光るお守りはねポケモンの\n色違いを出しやすく\nするんだよ♪\nでも同じぐらいすごい\nドラえもんよりはね\nやすいでしょ♪\n買ってね買ってね\n買ってね（圧）"
+        },
+        {
+          "id": "x2vbxirxp",
+          "name": "赤字",
+          "cost": 100,
+          "price": 5000,
+          "stock": 5,
+          "description": "赤字回避のために\n買ってください♪（圧）"
+        },
+        {
+          "id": "8u4xyvdla",
+          "name": "千里眼",
+          "cost": 10,
+          "price": 50000,
+          "stock": 5,
+          "description": "千里眼だよ\n高いけど\n買ってね♪♪（圧）"
+        },
+        {
+          "id": "52i1qz11z",
+          "name": "記憶",
+          "cost": 10,
+          "price": 50000,
+          "stock": 5,
+          "description": "誰かさんの記憶……の袋\n（袋に記憶って\n書かれてるだけだよ）\n高いけど買ってね♫（圧）"
+        },
+        {
+          "id": "2a9ajd5p3",
+          "name": "フルーツナイフ",
+          "cost": 10,
+          "price": 500,
+          "stock": 5,
+          "description": "誰かさんのナイフ"
+        }
+      ],
+      "isInsured": false,
+      "propertyLevel": "none",
+      "lastJobChangeTurn": 5,
+      "jobType": "normal",
+      "rating": 0,
+      "pointCards": [],
+      "arrestCount": 0,
+      "stolenAmount": 0,
+      "fanCount": 0,
+      "health": 91.40870525024879,
+      "landRank": 0,
+      "coupons": [
+        {
+          "id": "d1ba8c25-a808-43b9-b32b-e4f20fe8391a",
+          "shopOwnerId": "e5a72cef-6372-4c32-b707-46e213d06d03",
+          "code": "LINALINA0821",
+          "discountPercent": 10,
+          "maxUses": 10,
+          "usedCount": 2,
+          "createdAt": 1768642732668,
+          "isActive": true
         }
       ]
     },
     {
       "id": "d483e2a5-f105-4c23-8f41-d4ef113dc167",
-      "name": "2",
+      "name": "💩さんで間違いありません",
       "role": "player",
-      "balance": 550,
-      "deposit": 0,
+      "balance": 800000000,
+      "deposit": 225,
       "debt": 0,
-      "job": "unemployed",
-      "popularity": 60,
+      "job": "artist",
+      "popularity": 0,
       "happiness": 50,
       "items": [],
       "stocks": {},
@@ -59,136 +2761,876 @@
       "isForbiddenUnlocked": false,
       "transactions": [
         {
-          "id": "57afc7b5-c980-4b54-b130-bf48b642f3ed",
-          "type": "payment",
-          "amount": 300,
+          "id": "a3e45d10-5a12-4584-a92b-5d6048dc335e",
+          "type": "transfer",
+          "amount": 100,
           "senderId": "d483e2a5-f105-4c23-8f41-d4ef113dc167",
           "receiverId": "e5a72cef-6372-4c32-b707-46e213d06d03",
-          "description": "支払い: 1",
-          "timestamp": 1768594800785
+          "description": "送金: 1",
+          "timestamp": 1768634623692
+        },
+        {
+          "id": "005a1702-ef6c-4001-9e00-a8f05e5418b9",
+          "type": "transfer",
+          "amount": 1000,
+          "senderId": "d483e2a5-f105-4c23-8f41-d4ef113dc167",
+          "receiverId": "e5a72cef-6372-4c32-b707-46e213d06d03",
+          "description": "送金: Linalina",
+          "timestamp": 1768635572306
+        },
+        {
+          "id": "da992f1e-e49f-4159-b1d6-68bd10f39a66",
+          "type": "tax",
+          "amount": 207,
+          "senderId": "d483e2a5-f105-4c23-8f41-d4ef113dc167",
+          "description": "納税",
+          "timestamp": 1768641509138
         }
       ],
-      "pointCards": [
-        {
-          "shopOwnerId": "e5a72cef-6372-4c32-b707-46e213d06d03",
-          "points": 3
-        }
-      ]
+      "pointCards": [],
+      "unpaidTax": 0,
+      "rating": 0,
+      "jobType": "normal",
+      "lastJobChangeTurn": 4,
+      "arrestCount": 0,
+      "stolenAmount": 0,
+      "fanCount": 0,
+      "isInsured": false,
+      "propertyLevel": "none",
+      "health": 96.90820222693613,
+      "shopMenu": [],
+      "landRank": 0
     },
     {
       "id": "85aa5f67-e07c-4a9d-a35e-3500a2f52f08",
-      "name": "3",
+      "name": "ハ・ルールールルルー",
       "role": "player",
-      "balance": 950,
-      "deposit": 0,
+      "balance": 44938299,
+      "deposit": 225,
       "debt": 0,
-      "job": "unemployed",
-      "popularity": 50,
+      "job": "novelist",
+      "popularity": 0,
       "happiness": 50,
       "items": [],
       "stocks": {},
       "forbiddenStocks": {},
-      "isForbiddenUnlocked": false
+      "isForbiddenUnlocked": false,
+      "unpaidTax": 0,
+      "transactions": [
+        {
+          "id": "1f9ae375-256d-4d86-8bac-75428908d9e8",
+          "type": "payment",
+          "amount": 100,
+          "senderId": "85aa5f67-e07c-4a9d-a35e-3500a2f52f08",
+          "receiverId": "e5a72cef-6372-4c32-b707-46e213d06d03",
+          "description": "購入: 休みたい（1）",
+          "timestamp": 1768639325553
+        },
+        {
+          "id": "9562383c-1b59-42fe-992a-d7b565b84fec",
+          "type": "payment",
+          "amount": 150,
+          "senderId": "85aa5f67-e07c-4a9d-a35e-3500a2f52f08",
+          "receiverId": "e5a72cef-6372-4c32-b707-46e213d06d03",
+          "description": "購入: アルミカン（1）",
+          "timestamp": 1768639338443
+        },
+        {
+          "id": "557b6e58-5dce-4730-a068-a8fbbff040d3",
+          "type": "income",
+          "amount": 300,
+          "description": "仕事報酬 (novelist)",
+          "timestamp": 1768639656178
+        },
+        {
+          "id": "9231d450-3a17-402a-8a47-b55fc0a104ea",
+          "type": "income",
+          "amount": 459,
+          "description": "仕事報酬 (novelist)",
+          "timestamp": 1768639713604
+        },
+        {
+          "id": "fa3b3b5b-6f03-48e9-b091-37a4d6762b34",
+          "type": "income",
+          "amount": 100,
+          "description": "スロット: ペア! 2倍配当",
+          "timestamp": 1768639741478
+        },
+        {
+          "id": "173439e9-819e-4f81-8275-02c3a9bbbad8",
+          "type": "payment",
+          "amount": 100,
+          "description": "スロット: ハズレ...",
+          "timestamp": 1768639745903
+        },
+        {
+          "id": "fa1cd381-9dbb-49e4-8678-d7349886d43b",
+          "type": "payment",
+          "amount": 100,
+          "description": "スロット: ハズレ...",
+          "timestamp": 1768639748807
+        },
+        {
+          "id": "8ebef445-d4fd-4899-a857-ea3840f55a9f",
+          "type": "payment",
+          "amount": 100,
+          "description": "スロット: ハズレ...",
+          "timestamp": 1768639751599
+        },
+        {
+          "id": "6603c2d8-f6d1-4b74-9f55-75200a76c093",
+          "type": "payment",
+          "amount": 100,
+          "description": "スロット: ハズレ...",
+          "timestamp": 1768639754201
+        },
+        {
+          "id": "79dd5254-357e-48d4-9756-249426271c67",
+          "type": "income",
+          "amount": 100,
+          "description": "スロット: ペア! 2倍配当",
+          "timestamp": 1768639758433
+        },
+        {
+          "id": "8eda3857-c773-474a-869a-52db9e1f4702",
+          "type": "payment",
+          "amount": 100,
+          "description": "競馬: 外れ (馬5→2)",
+          "timestamp": 1768639772173
+        },
+        {
+          "id": "d599b9f7-5937-47db-a05e-c3b92cc9ea26",
+          "type": "income",
+          "amount": 150,
+          "description": "競馬: 的中! (馬1→1)",
+          "timestamp": 1768639778131
+        },
+        {
+          "id": "ac414b3b-f3dc-4bc8-9e56-53d5399424cd",
+          "type": "income",
+          "amount": 150,
+          "description": "競馬: 的中! (馬1→1)",
+          "timestamp": 1768639785459
+        },
+        {
+          "id": "184cb4d7-5510-47e8-bd61-09657015c373",
+          "type": "income",
+          "amount": 150,
+          "description": "競馬: 的中! (馬1→1)",
+          "timestamp": 1768639786226
+        },
+        {
+          "id": "61c13301-2468-4bc4-83bc-cbaaffc2cd54",
+          "type": "payment",
+          "amount": 5000,
+          "description": "競馬: 外れ (馬1→2)",
+          "timestamp": 1768639794346
+        },
+        {
+          "id": "3f40610e-1309-4dbc-918e-ae7e21261f6a",
+          "type": "payment",
+          "amount": 5000,
+          "description": "競馬: 外れ (馬1→2)",
+          "timestamp": 1768639802060
+        },
+        {
+          "id": "1dcba193-9662-4b9d-a75e-7eaab3163ad8",
+          "type": "payment",
+          "amount": 5000,
+          "description": "競馬: 外れ (馬2→1)",
+          "timestamp": 1768639807622
+        },
+        {
+          "id": "5b11b603-7f99-4493-9bcc-f002aa957b56",
+          "type": "income",
+          "amount": 7500,
+          "description": "競馬: 的中! (馬1→1)",
+          "timestamp": 1768639811160
+        },
+        {
+          "id": "e42285a6-1a27-471e-a109-f145d3c8a9bd",
+          "type": "payment",
+          "amount": 4000,
+          "description": "仕入れ: イチゴたっぷりショートケーキ x10",
+          "timestamp": 1768640627363
+        },
+        {
+          "id": "3f334167-910d-4fb2-9a7f-87de24ab1fd2",
+          "type": "payment",
+          "amount": 4000,
+          "description": "仕入れ: イチゴたっぷりショートケーキ x10",
+          "timestamp": 1768640628678
+        },
+        {
+          "id": "98eb4dd2-530e-4997-8d78-2efa771a6c96",
+          "type": "payment",
+          "amount": 3500,
+          "description": "仕入れ: ショートケーキ x10",
+          "timestamp": 1768640631015
+        },
+        {
+          "id": "3444e3d9-25ed-4a52-976f-8bc573386734",
+          "type": "payment",
+          "amount": 3500,
+          "description": "仕入れ: ショートケーキ x10",
+          "timestamp": 1768640631317
+        },
+        {
+          "id": "09e2221e-1912-4cde-85c9-acac104b643a",
+          "type": "income",
+          "amount": 700,
+          "senderId": "c6e0c017-c16a-464d-9e77-a41d5fd87aec",
+          "receiverId": "85aa5f67-e07c-4a9d-a35e-3500a2f52f08",
+          "description": "売上: ショートケーキ",
+          "timestamp": 1768640642451
+        },
+        {
+          "id": "34e488e9-74d4-4726-8be0-f16945c18ea2",
+          "type": "income",
+          "amount": 600,
+          "senderId": "c6e0c017-c16a-464d-9e77-a41d5fd87aec",
+          "receiverId": "85aa5f67-e07c-4a9d-a35e-3500a2f52f08",
+          "description": "売上: イチゴたっぷりショートケーキ",
+          "timestamp": 1768640652081
+        },
+        {
+          "id": "ebc07ae2-f323-4ca0-9a50-835beff9e916",
+          "type": "payment",
+          "amount": 3000,
+          "description": "仕入れ: チーズケーキ x10",
+          "timestamp": 1768640703374
+        },
+        {
+          "id": "66c100f5-42a3-43bc-b528-b29a19c49c87",
+          "type": "payment",
+          "amount": 3000,
+          "description": "仕入れ: チーズケーキ x10",
+          "timestamp": 1768640704305
+        },
+        {
+          "id": "f5adcaa6-17ac-4dd6-8cd1-8b4beb480c7a",
+          "type": "income",
+          "amount": 500,
+          "senderId": "c6e0c017-c16a-464d-9e77-a41d5fd87aec",
+          "receiverId": "85aa5f67-e07c-4a9d-a35e-3500a2f52f08",
+          "description": "売上: チーズケーキ",
+          "timestamp": 1768640748539
+        },
+        {
+          "id": "9c888338-edbc-44d0-a37d-284b58d1fc52",
+          "type": "income",
+          "amount": 500,
+          "senderId": "c6e0c017-c16a-464d-9e77-a41d5fd87aec",
+          "receiverId": "85aa5f67-e07c-4a9d-a35e-3500a2f52f08",
+          "description": "売上: チーズケーキ",
+          "timestamp": 1768640752494
+        },
+        {
+          "id": "dba04408-a69d-410a-8353-83d3f501a8da",
+          "type": "income",
+          "amount": 500,
+          "senderId": "c6e0c017-c16a-464d-9e77-a41d5fd87aec",
+          "receiverId": "85aa5f67-e07c-4a9d-a35e-3500a2f52f08",
+          "description": "売上: チーズケーキ",
+          "timestamp": 1768640757118
+        },
+        {
+          "id": "a293699b-ba9c-4eb3-b5ee-b024af377a79",
+          "type": "payment",
+          "amount": 3000,
+          "description": "仕入れ: バスクチーズケーキ x10",
+          "timestamp": 1768640806314
+        },
+        {
+          "id": "724ab551-c817-4f01-898b-655adcb359e4",
+          "type": "payment",
+          "amount": 3000,
+          "description": "仕入れ: バスクチーズケーキ x10",
+          "timestamp": 1768640807415
+        },
+        {
+          "id": "bc4f7a43-5bc6-46a0-8e2d-6aad556d5b45",
+          "type": "payment",
+          "amount": 3000,
+          "description": "仕入れ: レアチーズケーキ x10",
+          "timestamp": 1768640868739
+        },
+        {
+          "id": "e030d1d6-86ae-41d3-8608-15c70e9d1534",
+          "type": "payment",
+          "amount": 3000,
+          "description": "仕入れ: レアチーズケーキ x10",
+          "timestamp": 1768640869647
+        },
+        {
+          "id": "212a8707-45f7-421e-8f1a-49a5187ae307",
+          "type": "tax",
+          "amount": 4999410,
+          "senderId": "85aa5f67-e07c-4a9d-a35e-3500a2f52f08",
+          "description": "納税",
+          "timestamp": 1768640887009
+        },
+        {
+          "id": "23156533-ccde-4e55-8722-6191e4d229b7",
+          "type": "income",
+          "amount": 500,
+          "senderId": "c6e0c017-c16a-464d-9e77-a41d5fd87aec",
+          "receiverId": "85aa5f67-e07c-4a9d-a35e-3500a2f52f08",
+          "description": "売上: バスクチーズケーキ",
+          "timestamp": 1768640920177
+        },
+        {
+          "id": "780ec8bc-d41c-466c-b30d-9bfda40903cf",
+          "type": "income",
+          "amount": 500,
+          "senderId": "c6e0c017-c16a-464d-9e77-a41d5fd87aec",
+          "receiverId": "85aa5f67-e07c-4a9d-a35e-3500a2f52f08",
+          "description": "売上: レアチーズケーキ",
+          "timestamp": 1768640927104
+        },
+        {
+          "id": "999292f5-f937-4924-bc78-291abb0764a1",
+          "type": "payment",
+          "amount": 2000,
+          "description": "仕入れ: イチゴのフロマージュ x10",
+          "timestamp": 1768641000290
+        },
+        {
+          "id": "01153257-f367-40de-8ed4-45d69db944d9",
+          "type": "payment",
+          "amount": 2000,
+          "description": "仕入れ: イチゴのフロマージュ x10",
+          "timestamp": 1768641000292
+        },
+        {
+          "id": "264f82b6-d749-4bf0-ac88-739daf808ebd",
+          "type": "payment",
+          "amount": 1000,
+          "description": "仕入れ: 桃のタルト x10",
+          "timestamp": 1768641142620
+        },
+        {
+          "id": "9248046b-18f4-4dcb-a444-8ac43c0861f0",
+          "type": "payment",
+          "amount": 1000,
+          "description": "仕入れ: 桃のタルト x10",
+          "timestamp": 1768641143617
+        },
+        {
+          "id": "f3c48a09-1949-452a-bdba-901570e10fb0",
+          "type": "payment",
+          "amount": 3000,
+          "description": "仕入れ: フルーツタルト x10",
+          "timestamp": 1768641215056
+        },
+        {
+          "id": "b597b761-5577-471d-b5b5-e9a13ec57f97",
+          "type": "payment",
+          "amount": 3000,
+          "description": "仕入れ: フルーツタルト x10",
+          "timestamp": 1768641216099
+        },
+        {
+          "id": "37265081-f8b5-421f-b811-f1b15e96afb4",
+          "type": "payment",
+          "amount": 3000,
+          "description": "仕入れ: チーズタルト x10",
+          "timestamp": 1768641274821
+        },
+        {
+          "id": "1946d354-ae72-4539-901c-9425ac7a74ad",
+          "type": "payment",
+          "amount": 3000,
+          "description": "仕入れ: チーズタルト x10",
+          "timestamp": 1768641275815
+        },
+        {
+          "id": "a0b37fe8-ea84-4ce2-ac09-5b3b5c1b32c6",
+          "type": "payment",
+          "amount": 2000,
+          "description": "仕入れ: エッグタルト x10",
+          "timestamp": 1768641391981
+        },
+        {
+          "id": "a61a4a25-2704-4b72-a9ba-255157a02078",
+          "type": "payment",
+          "amount": 2000,
+          "description": "仕入れ: エッグタルト x10",
+          "timestamp": 1768641393909
+        },
+        {
+          "id": "96ab564d-827f-43e8-8ded-812ce2d17e1a",
+          "type": "payment",
+          "amount": 3000,
+          "description": "仕入れ: パンプキンタルト x10",
+          "timestamp": 1768641488769
+        },
+        {
+          "id": "d072bbad-79a6-46b4-a7e1-700af60bc348",
+          "type": "payment",
+          "amount": 3000,
+          "description": "仕入れ: パンプキンタルト x10",
+          "timestamp": 1768641489767
+        },
+        {
+          "id": "169b0c9a-4317-4947-bb15-4445982b012c",
+          "type": "income",
+          "amount": 1800,
+          "senderId": "e5a72cef-6372-4c32-b707-46e213d06d03",
+          "receiverId": "85aa5f67-e07c-4a9d-a35e-3500a2f52f08",
+          "description": "売上: 3商品",
+          "timestamp": 1768641553857
+        }
+      ],
+      "rating": 0,
+      "jobType": "normal",
+      "lastJobChangeTurn": 7,
+      "pointCards": [
+        {
+          "shopOwnerId": "e5a72cef-6372-4c32-b707-46e213d06d03",
+          "points": 2
+        }
+      ],
+      "arrestCount": 0,
+      "stolenAmount": 0,
+      "fanCount": 0,
+      "isInsured": true,
+      "propertyLevel": "house",
+      "health": 100,
+      "shopMenu": [
+        {
+          "id": "hnr1a3wjn",
+          "name": "ショートケーキ",
+          "cost": 350,
+          "price": 700,
+          "stock": 18,
+          "description": "大ぶりのイチゴが乗ったショートケーキ。"
+        },
+        {
+          "id": "dfqdmop41",
+          "name": "イチゴたっぷりショートケーキ",
+          "cost": 400,
+          "price": 600,
+          "stock": 18,
+          "description": "クリームではなく、いちごが主役のショートケーキ。\nいろいろな種類のいちごをご堪能あれ。"
+        },
+        {
+          "id": "53zcnim7s",
+          "name": "チーズケーキ",
+          "cost": 300,
+          "price": 500,
+          "stock": 16,
+          "description": "北海道産の牛乳を使用した、モッツァレラチーズとミルクチーズを合わせ作られた極上の一品。"
+        },
+        {
+          "id": "gv3mr2fdh",
+          "name": "バスクチーズケーキ",
+          "cost": 300,
+          "price": 500,
+          "stock": 19,
+          "description": "チーズケーキをこんがり焼き上げた一品。"
+        },
+        {
+          "id": "l4r361vq9",
+          "name": "レアチーズケーキ",
+          "cost": 300,
+          "price": 500,
+          "stock": 19,
+          "description": "口に入れればすぐに解けてしまう、魔法のようなチーズケーキ。\n甘さの海に溺れてみませんか？"
+        },
+        {
+          "id": "wwsv7j5d9",
+          "name": "イチゴのフロマージュ",
+          "cost": 200,
+          "price": 400,
+          "stock": 20,
+          "description": "優しいクリームの甘さと、いちごの甘酸っぱさ、そして中のスポンジとサンドされたカスタードクリームが光る一品。\nたっぷりのイチゴを味わいたい方必見。"
+        },
+        {
+          "id": "pl7hqgqje",
+          "name": "桃のタルト",
+          "cost": 100,
+          "price": 300,
+          "stock": 20,
+          "description": "山梨県産の桃を丸ごと使ったタルト。\n桃の甘さが引き立つ一品。"
+        },
+        {
+          "id": "chrqdrkkk",
+          "name": "フルーツタルト",
+          "cost": 300,
+          "price": 500,
+          "stock": 20,
+          "description": "全国各地から取り寄せた逸品級のフルーツを乗せたタルト。\n※季節により、のせるフルーツは異なります。"
+        },
+        {
+          "id": "8mx9ndj7y",
+          "name": "チーズタルト",
+          "cost": 300,
+          "price": 500,
+          "stock": 20,
+          "description": "砂糖不使用！\nチーズ本来の甘さで楽しめる、極上のタルト。"
+        },
+        {
+          "id": "o9aa2aabs",
+          "name": "エッグタルト",
+          "cost": 200,
+          "price": 500,
+          "stock": 20,
+          "description": "新潟県産の卵を贅沢に3つ使用したエッグタルト。\nスプーンで押せば中から半熟があふれ出す。"
+        },
+        {
+          "id": "1jxmojbpl",
+          "name": "パンプキンタルト",
+          "cost": 300,
+          "price": 500,
+          "stock": 20,
+          "description": "かぼちゃの素朴な甘みが広がる一品。"
+        }
+      ],
+      "landRank": 0,
+      "shopName": "ヴェト・ジュテ・ミラル",
+      "cardType": "stamp"
     }
   ],
   "stocks": [
     {
       "id": "s1",
       "name": "テック・フューチャー",
-      "price": 1070,
-      "previousPrice": 1000,
+      "price": 1270,
+      "previousPrice": 1230,
       "volatility": 0.1,
-      "isForbidden": false
+      "isForbidden": false,
+      "priceHistory": [
+        1010,
+        1080,
+        1120,
+        1230,
+        1270
+      ]
     },
     {
       "id": "s2",
       "name": "ハッピー・フーズ",
-      "price": 510,
-      "previousPrice": 500,
+      "price": 500,
+      "previousPrice": 480,
       "volatility": 0.05,
-      "isForbidden": false
+      "isForbidden": false,
+      "priceHistory": [
+        520,
+        510,
+        500,
+        480,
+        500
+      ]
     },
     {
       "id": "s3",
       "name": "ミラクル建設",
-      "price": 790,
-      "previousPrice": 800,
+      "price": 830,
+      "previousPrice": 850,
       "volatility": 0.08,
-      "isForbidden": false
+      "isForbidden": false,
+      "priceHistory": [
+        770,
+        750,
+        810,
+        850,
+        830
+      ]
     },
     {
       "id": "f1",
       "name": "シャドウ・コーポレーション",
-      "price": 3300,
-      "previousPrice": 5000,
+      "price": 2190,
+      "previousPrice": 1550,
       "volatility": 0.5,
-      "isForbidden": true
+      "isForbidden": true,
+      "priceHistory": [
+        2590,
+        1550,
+        2220,
+        1550,
+        2190
+      ]
     },
     {
       "id": "f2",
       "name": "ブラックバイオ研究所",
-      "price": 550,
-      "previousPrice": 2000,
+      "price": 510,
+      "previousPrice": 1090,
       "volatility": 0.8,
-      "isForbidden": true
+      "isForbidden": true,
+      "priceHistory": [
+        1320,
+        970,
+        1010,
+        1090,
+        510
+      ]
     },
     {
       "id": "f3",
       "name": "ネオカルト証券",
-      "price": 17010,
-      "previousPrice": 10000,
+      "price": 18330,
+      "previousPrice": 18880,
       "volatility": 1,
-      "isForbidden": true
+      "isForbidden": true,
+      "priceHistory": [
+        16290,
+        17010,
+        16620,
+        18880,
+        18330
+      ]
     }
   ],
   "requests": [
     {
-      "id": "1e277caf-00b0-410d-8c26-c6326748c0b4",
-      "type": "loan",
-      "requesterId": "e5a72cef-6372-4c32-b707-46e213d06d03",
+      "id": "028a0303-aeec-4908-82a4-95d6de5031ff",
+      "type": "transfer",
+      "requesterId": "d483e2a5-f105-4c23-8f41-d4ef113dc167",
       "amount": 100,
+      "details": "e5a72cef-6372-4c32-b707-46e213d06d03",
       "status": "approved",
-      "timestamp": 1768588731962
+      "timestamp": 1768634600975
     },
     {
-      "id": "cd64fec5-b970-4994-aeb4-7088bd8b42b0",
-      "type": "income",
+      "id": "3b1fbd44-8a21-4668-a90c-5c1a3d56707d",
+      "type": "transfer",
+      "requesterId": "d483e2a5-f105-4c23-8f41-d4ef113dc167",
+      "amount": 1000,
+      "details": "e5a72cef-6372-4c32-b707-46e213d06d03",
+      "status": "approved",
+      "timestamp": 1768635552656
+    },
+    {
+      "id": "536ed75a-8489-4802-8cb4-1be5e304b490",
+      "type": "buy_pet",
       "requesterId": "e5a72cef-6372-4c32-b707-46e213d06d03",
-      "amount": 12,
-      "details": "Work (youtuber): Score 128.1",
+      "amount": 0,
+      "details": "pet_fish",
       "status": "approved",
-      "timestamp": 1768589365454
+      "timestamp": 1768637501139
     },
     {
-      "id": "1ebf07eb-5245-48d5-b4c6-697ca294aa9f",
+      "id": "774442f6-c66c-4025-a0ff-92cf061250b2",
+      "type": "buy_pet",
+      "requesterId": "e5a72cef-6372-4c32-b707-46e213d06d03",
+      "amount": 0,
+      "details": "pet_hamster",
+      "status": "approved",
+      "timestamp": 1768637504171
+    },
+    {
+      "id": "551f8d3c-56bb-4420-bd2c-befa9a4455b4",
+      "type": "buy_pet",
+      "requesterId": "e5a72cef-6372-4c32-b707-46e213d06d03",
+      "amount": 0,
+      "details": "pet_bird",
+      "status": "approved",
+      "timestamp": 1768637510565
+    },
+    {
+      "id": "89598d89-65e1-4e0f-978c-8ad7c3e9e875",
+      "type": "buy_pet",
+      "requesterId": "e5a72cef-6372-4c32-b707-46e213d06d03",
+      "amount": 0,
+      "details": "pet_bird",
+      "status": "approved",
+      "timestamp": 1768637522491
+    },
+    {
+      "id": "37e8bb21-0e0e-4ce9-9bce-3838bd95f4cb",
+      "type": "transfer",
+      "requesterId": "c6e0c017-c16a-464d-9e77-a41d5fd87aec",
+      "amount": 1000,
+      "details": "e5a72cef-6372-4c32-b707-46e213d06d03",
+      "status": "approved",
+      "timestamp": 1768638774908
+    },
+    {
+      "id": "d9330004-85c9-41d7-994e-3ea0a2541ef1",
       "type": "bill",
-      "requesterId": "e5a72cef-6372-4c32-b707-46e213d06d03",
-      "amount": 100,
-      "details": "Bill Payment",
-      "status": "approved",
-      "timestamp": 1768590184145
+      "requesterId": "85aa5f67-e07c-4a9d-a35e-3500a2f52f08",
+      "amount": 50000000,
+      "details": "c6e0c017-c16a-464d-9e77-a41d5fd87aec",
+      "status": "rejected",
+      "timestamp": 1768639108662
     },
     {
-      "id": "a470def2-9230-4021-9392-84142aa007dd",
+      "id": "8555c178-6243-4f80-9994-77ab936ca83e",
+      "type": "buy_furniture",
+      "requesterId": "85aa5f67-e07c-4a9d-a35e-3500a2f52f08",
+      "amount": 0,
+      "details": "furn_chair",
+      "status": "approved",
+      "timestamp": 1768639887779
+    },
+    {
+      "id": "a8855a46-549a-4c25-b3ce-c50ed9939051",
+      "type": "buy_furniture",
+      "requesterId": "85aa5f67-e07c-4a9d-a35e-3500a2f52f08",
+      "amount": 0,
+      "details": "furn_table",
+      "status": "approved",
+      "timestamp": 1768639887781
+    },
+    {
+      "id": "21d75073-06c5-4489-bb41-534d8dba7d04",
+      "type": "buy_furniture",
+      "requesterId": "85aa5f67-e07c-4a9d-a35e-3500a2f52f08",
+      "amount": 0,
+      "details": "furn_bed",
+      "status": "approved",
+      "timestamp": 1768639890096
+    },
+    {
+      "id": "7fdf3cb0-e95f-4798-ab29-dce20ff4b15a",
+      "type": "buy_furniture",
+      "requesterId": "85aa5f67-e07c-4a9d-a35e-3500a2f52f08",
+      "amount": 0,
+      "details": "furn_tv",
+      "status": "approved",
+      "timestamp": 1768639891453
+    },
+    {
+      "id": "4413f06d-ee15-4726-a17a-c92cfe8760cd",
+      "type": "buy_furniture",
+      "requesterId": "85aa5f67-e07c-4a9d-a35e-3500a2f52f08",
+      "amount": 0,
+      "details": "furn_plant",
+      "status": "approved",
+      "timestamp": 1768639893324
+    },
+    {
+      "id": "b77cbc03-6744-4ab3-88d1-5f110742222b",
+      "type": "buy_furniture",
+      "requesterId": "85aa5f67-e07c-4a9d-a35e-3500a2f52f08",
+      "amount": 0,
+      "details": "furn_lamp",
+      "status": "approved",
+      "timestamp": 1768639894400
+    },
+    {
+      "id": "05b7ef24-a4cc-4cef-8b3e-448ac9ded772",
+      "type": "buy_furniture",
+      "requesterId": "85aa5f67-e07c-4a9d-a35e-3500a2f52f08",
+      "amount": 0,
+      "details": "furn_piano",
+      "status": "approved",
+      "timestamp": 1768639895322
+    },
+    {
+      "id": "fcfe0c34-2363-406d-9a7e-63cf9f02c3cd",
+      "type": "buy_pet",
+      "requesterId": "85aa5f67-e07c-4a9d-a35e-3500a2f52f08",
+      "amount": 0,
+      "details": "pet_dragon",
+      "status": "approved",
+      "timestamp": 1768639915927
+    },
+    {
+      "id": "fecdb222-0bec-4324-ae98-b71c164f3389",
+      "type": "buy_furniture",
+      "requesterId": "85aa5f67-e07c-4a9d-a35e-3500a2f52f08",
+      "amount": 0,
+      "details": "furn_chair",
+      "status": "approved",
+      "timestamp": 1768639933641
+    },
+    {
+      "id": "6703ede0-5d77-4647-9dc9-52f6c0613f01",
       "type": "buy_stock",
       "requesterId": "e5a72cef-6372-4c32-b707-46e213d06d03",
       "amount": 1,
       "details": "s1",
       "status": "approved",
-      "timestamp": 1768590227328
+      "timestamp": 1768641466383
     },
     {
-      "id": "80f13871-2288-4ac1-b41f-fe8b7caa2157",
-      "type": "bill",
+      "id": "ea064ca5-928c-493c-9782-6547ebde8b18",
+      "type": "bulk_purchase_shop_items",
       "requesterId": "e5a72cef-6372-4c32-b707-46e213d06d03",
-      "amount": 300,
-      "details": "d483e2a5-f105-4c23-8f41-d4ef113dc167",
+      "amount": 0,
+      "details": "{\"sellerId\":\"85aa5f67-e07c-4a9d-a35e-3500a2f52f08\",\"itemIds\":[\"hnr1a3wjn\",\"dfqdmop41\",\"53zcnim7s\"]}",
       "status": "approved",
-      "timestamp": 1768594792663
+      "timestamp": 1768641553853
+    },
+    {
+      "id": "39c3e8c4-69a1-4e88-bcca-b4905bfe32a8",
+      "type": "create_coupon",
+      "requesterId": "c6e0c017-c16a-464d-9e77-a41d5fd87aec",
+      "amount": 0,
+      "details": "{\"code\":\"UNTI\",\"discountPercent\":10,\"maxUses\":1,\"minPurchase\":10000}",
+      "status": "approved",
+      "timestamp": 1768641768150
+    },
+    {
+      "id": "9d04890d-5d32-4bc3-a306-1fa3dede1f6e",
+      "type": "restock_from_catalog",
+      "requesterId": "c6e0c017-c16a-464d-9e77-a41d5fd87aec",
+      "amount": 0,
+      "details": "{\"catalogItemId\":\"pet_dog\",\"category\":\"pet\",\"price\":3750,\"cost\":2500,\"quantity\":1,\"name\":\"イヌ\",\"emoji\":\"🐶\"}",
+      "status": "approved",
+      "timestamp": 1768641780433
+    },
+    {
+      "id": "c3826745-f572-419b-a2a8-911128fe8d56",
+      "type": "restock_from_catalog",
+      "requesterId": "d483e2a5-f105-4c23-8f41-d4ef113dc167",
+      "amount": 0,
+      "details": "{\"catalogItemId\":\"fur_lamp\",\"category\":\"furniture\",\"price\":450,\"cost\":300,\"quantity\":1,\"name\":\"ランプ\",\"emoji\":\"💡\"}",
+      "status": "approved",
+      "timestamp": 1768641913269
+    },
+    {
+      "id": "ce5aaddc-31eb-4cc4-b916-f1a9abc64d5c",
+      "type": "create_coupon",
+      "requesterId": "e5a72cef-6372-4c32-b707-46e213d06d03",
+      "amount": 0,
+      "details": "{\"code\":\"LINALINA0821\",\"discountPercent\":10,\"maxUses\":10,\"minPurchase\":0}",
+      "status": "approved",
+      "timestamp": 1768642732664
+    },
+    {
+      "id": "9fc009ac-b8fc-41d9-9961-62cf5baf371c",
+      "type": "bulk_purchase_shop_items",
+      "requesterId": "c6e0c017-c16a-464d-9e77-a41d5fd87aec",
+      "amount": 0,
+      "details": "{\"sellerId\":\"e5a72cef-6372-4c32-b707-46e213d06d03\",\"itemIds\":[\"2a9ajd5p3\",\"52i1qz11z\"],\"couponCode\":\"LINALINA0821\"}",
+      "status": "approved",
+      "timestamp": 1768642764578
+    },
+    {
+      "id": "a9140d33-5455-4654-9244-139c4ea071d5",
+      "type": "restock_from_catalog",
+      "requesterId": "c6e0c017-c16a-464d-9e77-a41d5fd87aec",
+      "amount": 0,
+      "details": "{\"catalogItemId\":\"fur_bed\",\"category\":\"furniture\",\"price\":1500,\"cost\":1000,\"quantity\":1,\"name\":\"ベッド\",\"emoji\":\"🛏️\"}",
+      "status": "approved",
+      "timestamp": 1768642795458
+    },
+    {
+      "id": "46544318-b3d8-4de6-8ce4-9d96e88d6161",
+      "type": "bulk_purchase_shop_items",
+      "requesterId": "c6e0c017-c16a-464d-9e77-a41d5fd87aec",
+      "amount": 0,
+      "details": "{\"sellerId\":\"e5a72cef-6372-4c32-b707-46e213d06d03\",\"cartItems\":{\"ocolnahfd\":4,\"sirn0xc1z\":6,\"csb7lu2bh\":6,\"ts3dbyp1s\":3,\"c9bluzu3r\":5,\"8so0vmafs\":10,\"i30edqmkv\":4,\"16cskvoeu\":4,\"cp8ysuxkz\":5,\"x2492r5bl\":4,\"38lq5twqx\":5,\"11qf2dy23\":4,\"x2vbxirxp\":9,\"8u4xyvdla\":5,\"52i1qz11z\":4,\"2a9ajd5p3\":9},\"couponCode\":\"LINALINA0821\"}",
+      "status": "approved",
+      "timestamp": 1768643128515
+    },
+    {
+      "id": "7f02499a-e398-4498-8ebe-3fac51e47a0f",
+      "type": "restock_from_catalog",
+      "requesterId": "c6e0c017-c16a-464d-9e77-a41d5fd87aec",
+      "amount": 0,
+      "details": "{\"catalogItemId\":\"fur_bed\",\"category\":\"furniture\",\"price\":1500,\"cost\":1000,\"quantity\":1,\"name\":\"ベッド\",\"emoji\":\"🛏️\"}",
+      "status": "pending",
+      "timestamp": 1768674286746
     }
   ],
   "marketStatus": "open",
-  "turn": 2,
+  "turn": 7,
   "isDay": true,
   "settings": {
     "taxRate": 0.1,
@@ -197,7 +3639,54 @@
     "salaryAutoSafeRate": 0.5
   },
   "news": [
-    "季節が summer に変わりました！"
+    {
+      "id": "8badeca1-2129-4006-a287-b12b54588bfa",
+      "message": "⚠️ あなたの店に「村人1」が来店しました！",
+      "timestamp": 1768673199671
+    },
+    {
+      "id": "526698a0-f24f-4058-86fa-87f231bf654e",
+      "message": "⚠️ あなたの店に「村人1」が来店しました！",
+      "timestamp": 1768640781531
+    },
+    {
+      "id": "6d51d6f9-ddd8-4589-8e30-71ebfbbf9752",
+      "message": "⚠️ あなたの店に「村人1」が来店しました！",
+      "timestamp": 1768637596451
+    },
+    {
+      "id": "57973f8e-2285-41d9-b3c1-b887492f95b0",
+      "message": "時間経過: 朝になりました ☀️",
+      "timestamp": 1768634933844
+    },
+    {
+      "id": "14e36eeb-2204-458a-beb2-cd6bb7cca537",
+      "message": "時間経過: 夜になりました 🌙",
+      "timestamp": 1768634931798
+    },
+    {
+      "id": "8a2863ff-8fa5-4b9d-9b6c-4034c33e4a50",
+      "message": "💰 1のお店で村人1が 426枚 のお買い上げ！",
+      "timestamp": 1768634922705
+    },
+    {
+      "id": "dba6bc0a-3929-4aeb-a54c-c8496da0e9a5",
+      "message": "⚠️ あなたの店に「村人1」が来店しました！",
+      "timestamp": 1768634836917
+    },
+    {
+      "id": "2b6cdfd4-775e-4711-95fa-14c94ceec945",
+      "message": "ゲームがリセットされました",
+      "timestamp": 1768633868979
+    },
+    "好景気到来！: 景気が良くなり、お店の売上が大幅アップ！",
+    "季節が winter に変わりました！",
+    "季節の変わり目により、税金が発生しました。",
+    "🏠 ともやが「貸し店舗「商店街」」を購入しました！",
+    "🏠 ともやが「アパート「ひまわり」」を購入しました！",
+    "🏠 ともやが「郊外の空き地 (土地)」を購入しました！",
+    "🏠 ともやが「駅前の一等地 (土地)」を購入しました！",
+    "🏠 ともやが「高級マンション「ヒルズ」」を購入しました！"
   ],
   "roulette": {
     "items": [
@@ -209,7 +3698,8 @@
       {
         "id": 2,
         "text": "宝くじ はずれ",
-        "effect": "none"
+        "effect": "none",
+        "weight": 3
       },
       {
         "id": 3,
@@ -233,9 +3723,118 @@
       }
     ],
     "currentResult": {
-      "text": "人気者になった (人気+10) (対象: 指定ユーザー)",
-      "timestamp": 1768590376029
+      "text": "宝くじ はずれ",
+      "timestamp": 1768641036481,
+      "targetUserId": "85aa5f67-e07c-4a9d-a35e-3500a2f52f08"
     }
   },
-  "season": "summer"
+  "season": "winter",
+  "lastTick": 1768634933844,
+  "isTimerRunning": false,
+  "products": [],
+  "activeNPCs": [
+    {
+      "id": "c2fdbe40-3db6-4332-870b-62144cc789e8",
+      "targetUserId": "e5a72cef-6372-4c32-b707-46e213d06d03",
+      "templateId": "npc_1768598636255",
+      "type": "npc_1768598636255",
+      "name": "村人1",
+      "description": "",
+      "entryTime": 1768637596451,
+      "leaveTime": 1768637656451,
+      "effectApplied": false
+    },
+    {
+      "id": "e2769c1e-ad91-4fa7-b1c0-44927c067281",
+      "targetUserId": "85aa5f67-e07c-4a9d-a35e-3500a2f52f08",
+      "templateId": "npc_1768598636255",
+      "type": "npc_1768598636255",
+      "name": "村人1",
+      "description": "",
+      "entryTime": 1768640781531,
+      "leaveTime": 1768640841531,
+      "effectApplied": false
+    },
+    {
+      "id": "c00bd1e3-f16c-4432-adf7-02ebea99e015",
+      "targetUserId": "d483e2a5-f105-4c23-8f41-d4ef113dc167",
+      "templateId": "npc_1768598636255",
+      "type": "npc_1768598636255",
+      "name": "村人1",
+      "description": "",
+      "entryTime": 1768673199671,
+      "leaveTime": 1768673259671,
+      "effectApplied": false
+    }
+  ],
+  "npcTemplates": [
+    {
+      "id": "npc_1768598636255",
+      "name": "村人1",
+      "description": "",
+      "duration": 60000,
+      "spawnRate": 80,
+      "actionType": "buy",
+      "minPayment": 100,
+      "maxPayment": 500
+    }
+  ],
+  "activeEvents": [
+    {
+      "name": "好景気到来！",
+      "description": "景気が良くなり、お店の売上が大幅アップ！",
+      "type": "boom",
+      "duration": 60000,
+      "effectValue": 1.5,
+      "id": "9fb8414d-f9f1-4b8e-bc20-4fd9de0f73c2",
+      "startTime": 1768638106930
+    }
+  ],
+  "properties": [
+    {
+      "id": "p1",
+      "name": "駅前の一等地 (土地)",
+      "type": "land",
+      "price": 10000,
+      "income": -500,
+      "description": "購入すると土地代がかかるが、店舗の売上が大幅UP",
+      "ownerId": "c6e0c017-c16a-464d-9e77-a41d5fd87aec"
+    },
+    {
+      "id": "p2",
+      "name": "郊外の空き地 (土地)",
+      "type": "land",
+      "price": 2000,
+      "income": -100,
+      "description": "安い土地。少しだけ売上に貢献",
+      "ownerId": "c6e0c017-c16a-464d-9e77-a41d5fd87aec"
+    },
+    {
+      "id": "p3",
+      "name": "アパート「ひまわり」",
+      "type": "apartment",
+      "price": 5000,
+      "income": 300,
+      "description": "安定した家賃収入が得られる",
+      "ownerId": "c6e0c017-c16a-464d-9e77-a41d5fd87aec"
+    },
+    {
+      "id": "p4",
+      "name": "貸し店舗「商店街」",
+      "type": "shop",
+      "price": 8000,
+      "income": 500,
+      "description": "テナント料が入る",
+      "ownerId": "c6e0c017-c16a-464d-9e77-a41d5fd87aec"
+    },
+    {
+      "id": "p5",
+      "name": "高級マンション「ヒルズ」",
+      "type": "mansion",
+      "price": 50000,
+      "income": 3000,
+      "description": "圧倒的な家賃収入。選ばれし者の証",
+      "ownerId": "c6e0c017-c16a-464d-9e77-a41d5fd87aec"
+    }
+  ]
 }

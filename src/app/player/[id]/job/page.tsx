@@ -1,139 +1,134 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useGame } from '@/context/GameContext';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
-import { BakerGame } from '@/components/minigames/BakerGame';
-import { DoctorGame } from '@/components/minigames/DoctorGame';
-import { YoutuberGame } from '@/components/minigames/YoutuberGame';
+import { JOB_GAME_CONFIGS, JobType } from '@/lib/jobData';
+import { JobApplicationModal } from '@/components/effects/JobApplicationModal';
 
 export default function JobPage() {
     const { currentUser, gameState } = useGame();
-    const [isPlaying, setIsPlaying] = useState(false);
-    const [lastResult, setLastResult] = useState<{ score: number, reward: number } | null>(null);
+    const router = useRouter();
+
+    const [modalJob, setModalJob] = useState<string | null>(null);
 
     if (!currentUser || !gameState) return <div>Loading...</div>;
 
+    // Cast to expected JobType, fallback to 'unemployed'
+    const currentJob = (currentUser.job as JobType) || 'unemployed';
+
     const currentTurn = gameState.turn;
     const turnsSinceChange = currentTurn - (currentUser.lastJobChangeTurn || 0);
-    const canChangeJob = currentUser.job === 'unemployed' || turnsSinceChange >= 4;
+    const canChangeJob = currentJob === 'unemployed' || turnsSinceChange >= 4;
 
-    const handleJobSelect = async (job: string) => {
-        if (!canChangeJob && job !== 'unemployed') {
-            alert('転職するには1年(4ターン)勤務する必要があります。');
+    const handleJobSelect = async (newJob: string) => {
+        if (newJob === currentJob) return;
+
+        if (!canChangeJob && newJob !== 'unemployed') {
+            alert(`転職するにはあと${4 - turnsSinceChange}ターンの勤務が必要です。`);
             return;
         }
 
-        if (confirm(job === 'unemployed' ? '辞職しますか？' : `${job} に就職しますか？`)) {
-            await fetch('/api/action', {
+        // Resign Logic (Instant)
+        if (newJob === 'unemployed') {
+            if (confirm('辞職しますか？')) {
+                await fetch('/api/action', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        type: 'change_job', // Force change for resign
+                        requesterId: currentUser.id,
+                        details: 'unemployed'
+                    }),
+                });
+                window.location.reload();
+            }
+            return;
+        }
+
+        // Application Logic (Modal)
+        setModalJob(newJob);
+    };
+
+    const runApplication = async () => {
+        if (!modalJob) return false;
+
+        try {
+            const res = await fetch('/api/action', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    type: 'change_job',
+                    type: 'apply_job',
                     requesterId: currentUser.id,
-                    details: job,
-                    amount: 0
+                    details: modalJob
                 }),
             });
-            window.location.reload();
+            const data = await res.json();
+            return data.success;
+        } catch (e) {
+            console.error(e);
+            return false;
         }
     };
 
-    const handleGameComplete = async (score: number, reward: number) => {
-        await fetch('/api/action', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                type: 'income',
-                requesterId: currentUser.id,
-                amount: reward,
-                details: `Work (${currentUser.job}): Score ${score}`
-            }),
-        });
-        setLastResult({ score, reward });
-        setIsPlaying(false);
+    const handleModalClose = () => {
+        setModalJob(null);
+        window.location.reload();
     };
 
-    // Job List
-    const jobs = [
-        { id: 'baker', name: 'パン屋さん', icon: '🍞', desc: '美味しいパンを焼こう' },
-        { id: 'doctor', name: 'お医者さん', icon: '🩺', desc: '患者さんを治そう' },
-        { id: 'youtuber', name: 'YouTuber', icon: '📹', desc: '動画を作って配信' },
-    ];
 
-    if (currentUser.job === 'unemployed') {
-        return (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                <h2 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <span>🏢</span> ハローワーク (職業選択)
-                </h2>
-                <Card padding="md" style={{ background: '#f0f9ff', border: '1px solid #bae6fd' }}>
-                    <p>新しい仕事を見つけましょう。</p>
-                    <p style={{ fontSize: '0.8rem', color: '#666' }}>※一度就職すると1年は転職できません。</p>
-                </Card>
-
-                {jobs.map(job => (
-                    <Card key={job.id} padding="md" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                        <div style={{ fontSize: '2.5rem' }}>{job.icon}</div>
-                        <div style={{ flex: 1 }}>
-                            <div style={{ fontWeight: 'bold', fontSize: '1.2rem' }}>{job.name}</div>
-                            <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>{job.desc}</div>
-                        </div>
-                        <Button onClick={() => handleJobSelect(job.id)}>就職する</Button>
-                    </Card>
-                ))}
-            </div>
-        );
-    }
-
-    // Work Result
-    if (lastResult) {
-        return (
-            <Card padding="lg" style={{ textAlign: 'center' }}>
-                <h2>お疲れ様！</h2>
-                <div style={{ fontSize: '1.2rem', margin: '1rem 0' }}>
-                    スコア: {lastResult.score}<br />
-                    報酬申請: <strong>{lastResult.reward}枚</strong>
-                </div>
-                <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>銀行員に承認されるとお金が入ります</p>
-                <Button onClick={() => setLastResult(null)} style={{ marginTop: '1rem' }}>戻る</Button>
-            </Card>
-        );
-    }
-
-    // Working Mode
-    const currentJob = jobs.find(j => j.id === currentUser.job) || { name: currentUser.job, icon: '💼' };
+    const jobList = Object.keys(JOB_GAME_CONFIGS).filter(k => k !== 'unemployed') as JobType[];
 
     return (
-        <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2rem' }}>
-                <div style={{ fontSize: '3rem' }}>{currentJob.icon}</div>
-                <div>
-                    <h2 style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>{currentJob.name}</h2>
-                    <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => handleJobSelect('unemployed')}
-                        disabled={!canChangeJob}
-                        style={{ opacity: canChangeJob ? 1 : 0.5 }}
-                    >
-                        {canChangeJob ? '辞職する' : `転職まであと ${4 - turnsSinceChange} ターン`}
-                    </Button>
-                </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', padding: '1rem' }}>
+            <h2 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <span>🏢</span> ハローワーク (職業選択)
+            </h2>
+
+            <Card padding="md" style={{ background: '#f0f9ff', border: '1px solid #bae6fd' }}>
+                <div style={{ fontWeight: 'bold' }}>現在の職業: {JOB_GAME_CONFIGS[currentJob]?.name || '無職'}</div>
+                {!canChangeJob && <div style={{ fontSize: '0.8rem', color: '#666' }}>転職可能まで: あと {4 - turnsSinceChange} ターン</div>}
+            </Card>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: '1rem' }}>
+                {jobList.map(job => (
+                    <Card key={job} padding="sm" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', textAlign: 'center', border: currentJob === job ? '2px solid #3b82f6' : '1px solid #eee' }}>
+                        <div style={{ fontWeight: 'bold' }}>{JOB_GAME_CONFIGS[job].name}</div>
+                        <div style={{ fontSize: '0.8rem', color: '#666' }}>{JOB_GAME_CONFIGS[job].description}</div>
+                        <div style={{ fontSize: '0.8rem', fontWeight: 'bold', color: '#f59e0b' }}>
+                            採用率: {JOB_GAME_CONFIGS[job].acceptanceRate ?? 100}%
+                        </div>
+                        <Button
+                            size="sm"
+                            onClick={() => handleJobSelect(job)}
+                            disabled={!canChangeJob || currentJob === job}
+                            variant={currentJob === job ? 'secondary' : 'primary'}
+                        >
+                            {currentJob === job ? '現職' : '求人に応募'}
+                        </Button>
+                    </Card>
+                ))}
+
+                {currentJob !== 'unemployed' && (
+                    <Card padding="sm" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: '#fee2e2' }}>
+                        <div style={{ fontWeight: 'bold', color: '#b91c1c' }}>辞職する</div>
+                        <Button size="sm" variant="danger" onClick={() => handleJobSelect('unemployed')} disabled={!canChangeJob}>
+                            無職になる
+                        </Button>
+                    </Card>
+                )}
             </div>
 
-            <Card padding="lg">
-                {currentUser.job === 'baker' && (
-                    <BakerGame onComplete={handleGameComplete} onExit={() => setIsPlaying(false)} />
-                )}
-                {currentUser.job === 'doctor' && (
-                    <DoctorGame onComplete={handleGameComplete} onExit={() => setIsPlaying(false)} />
-                )}
-                {currentUser.job === 'youtuber' && (
-                    <YoutuberGame onComplete={handleGameComplete} onExit={() => setIsPlaying(false)} />
-                )}
-            </Card>
+            {/* Application Modal */}
+            <JobApplicationModal
+                jobName={modalJob ? JOB_GAME_CONFIGS[modalJob as JobType]?.name || '' : ''}
+                isOpen={!!modalJob}
+                onClose={handleModalClose}
+                onComplete={() => { }}
+                simulateApiCall={runApplication}
+            />
         </div>
     );
 }

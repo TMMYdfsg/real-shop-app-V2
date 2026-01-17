@@ -1,13 +1,39 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useGame } from '@/context/GameContext';
 import { Card } from '@/components/ui/Card';
+import { Button } from '@/components/ui/Button';
+import { Modal } from '@/components/ui/Modal';
 
 export default function PlayerHome() {
     const { gameState, currentUser } = useGame();
+    const [isEditingName, setIsEditingName] = useState(false);
+    const [newName, setNewName] = useState('');
 
     if (!gameState || !currentUser) return <div>Loading...</div>;
+
+    const handleNameChange = async () => {
+        if (!newName.trim()) {
+            alert('名前を入力してください');
+            return;
+        }
+
+        try {
+            await fetch('/api/action', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    type: 'update_profile',
+                    requesterId: currentUser.id,
+                    details: JSON.stringify({ name: newName.trim() })
+                })
+            });
+            setIsEditingName(false);
+        } catch (error) {
+            alert('名前の変更に失敗しました');
+        }
+    };
 
     // 売上ランキング
     const ranking = [...gameState.users]
@@ -17,11 +43,35 @@ export default function PlayerHome() {
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
 
+            {/* Player Name Card */}
+            <Card padding="md" style={{ background: 'linear-gradient(135deg, #f3f4f6, #e5e7eb)', border: '2px solid var(--glass-border)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                        <div style={{ fontSize: '2rem' }}>👤</div>
+                        <div>
+                            <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>プレイヤー名</div>
+                            <div style={{ fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--text-primary)' }}>{currentUser.name}</div>
+                        </div>
+                    </div>
+                    <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => {
+                            setNewName(currentUser.name);
+                            setIsEditingName(true);
+                        }}
+                        style={{ fontSize: '1.2rem' }}
+                    >
+                        ✏️
+                    </Button>
+                </div>
+            </Card>
+
             {/* Main Stats */}
             <Card className="glass-panel" padding="lg" style={{ background: 'linear-gradient(135deg, var(--accent-color), #818cf8)', color: 'white', border: 'none' }}>
                 <div style={{ marginBottom: '0.5rem', opacity: 0.9 }}>現在の所持金</div>
                 <div style={{ fontSize: '2.5rem', fontWeight: 'bold' }}>
-                    {currentUser.balance.toLocaleString()} 枚
+                    {(currentUser.balance || 0).toLocaleString()} 枚
                 </div>
                 <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
                     <div>
@@ -71,6 +121,35 @@ export default function PlayerHome() {
                     </div>
                 ))}
             </div>
+
+            {/* Name Edit Modal */}
+            <Modal isOpen={isEditingName} onClose={() => setIsEditingName(false)} title="名前を変更">
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                    <div>
+                        <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>新しい名前</label>
+                        <input
+                            type="text"
+                            value={newName}
+                            onChange={(e) => setNewName(e.target.value)}
+                            placeholder="名前を入力してください"
+                            style={{
+                                width: '100%',
+                                padding: '0.75rem',
+                                border: '1px solid var(--glass-border)',
+                                borderRadius: 'var(--radius-sm)',
+                                fontSize: '1rem'
+                            }}
+                            onKeyPress={(e) => {
+                                if (e.key === 'Enter') handleNameChange();
+                            }}
+                        />
+                    </div>
+                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                        <Button fullWidth onClick={handleNameChange}>変更を保存</Button>
+                        <Button fullWidth variant="ghost" onClick={() => setIsEditingName(false)}>キャンセル</Button>
+                    </div>
+                </div>
+            </Modal>
         </div>
     );
 }

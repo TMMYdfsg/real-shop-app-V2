@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { useGame } from '@/context/GameContext';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
+import { StockChart } from '@/components/stock/StockChart';
 
 export default function StockPage() {
     const { gameState, currentUser } = useGame();
@@ -75,6 +76,9 @@ export default function StockPage() {
                                 </div>
                             </div>
                         </div>
+
+                        {/* Price Chart */}
+                        <StockChart stock={stock} />
 
                         <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
                             <input

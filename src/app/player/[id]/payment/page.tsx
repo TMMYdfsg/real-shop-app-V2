@@ -153,7 +153,7 @@ export default function PaymentPage() {
                 boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)'
             }}>
                 <div style={{ fontSize: '0.9rem', opacity: 0.9 }}>残高</div>
-                <div style={{ fontSize: '2.5rem', fontWeight: 'bold' }}>{currentUser.balance.toLocaleString()}</div>
+                <div style={{ fontSize: '2.5rem', fontWeight: 'bold' }}>{(currentUser.balance || 0).toLocaleString()}</div>
                 <div style={{ marginTop: '1rem', display: 'flex', gap: '1rem', justifyContent: 'center' }}>
                     <Button size="sm" variant="ghost" style={{ color: 'white', background: 'rgba(255,255,255,0.2)' }} onClick={() => setShowQR(true)}>
                         QR表示
@@ -207,7 +207,7 @@ export default function PaymentPage() {
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <div>
                             <h3 style={{ color: '#ef4444', fontWeight: 'bold' }}>未払いの税金</h3>
-                            <div style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>{unpaidTax.toLocaleString()}枚</div>
+                            <div style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>{(unpaidTax || 0).toLocaleString()}枚</div>
                         </div>
                         <Button
                             style={{ background: '#ef4444', color: 'white' }}

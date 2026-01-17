@@ -14,9 +14,10 @@ export default function RankingPage() {
         .filter(u => u.role === 'player')
         .map(u => {
             // 株保有額の計算
-            const stockValue = (u.stocks || []).reduce((sum: number, s: { stockId: string; quantity: number }) => {
-                const stock = gameState.stocks.find(st => st.id === s.stockId);
-                return sum + (s.quantity * (stock?.price || 0));
+            // 株保有額の計算
+            const stockValue = Object.entries(u.stocks || {}).reduce((sum, [stockId, quantity]) => {
+                const stock = gameState.stocks.find(st => st.id === stockId);
+                return sum + (quantity * (stock?.price || 0));
             }, 0);
 
             return {

@@ -22,7 +22,12 @@ export default function PointsPage() {
 
     return (
         <div>
-            <h2 style={{ fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '1rem' }}>ポイントカード・交換所</h2>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                <h2 style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>ポイントカード</h2>
+                <Button size="sm" onClick={() => window.location.href = `${window.location.pathname}/exchange`}>
+                    🎁 交換所へ
+                </Button>
+            </div>
 
             {cards.length === 0 && (
                 <Card padding="lg">

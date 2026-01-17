@@ -104,11 +104,11 @@ export default function BankerDashboard() {
                     <Card key={user.id} title={user.name + (user.debt > 0 ? ' ⚠️借金あり' : '')} padding="sm">
                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
                             <span>所持金:</span>
-                            <span style={{ fontWeight: 'bold' }}>{user.balance.toLocaleString()}枚</span>
+                            <span style={{ fontWeight: 'bold' }}>{(user.balance || 0).toLocaleString()}枚</span>
                         </div>
                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
                             <span>借金:</span>
-                            <span style={{ color: user.debt > 0 ? 'var(--danger-color)' : 'inherit', fontWeight: user.debt > 0 ? 'bold' : 'normal' }}>{user.debt.toLocaleString()}枚</span>
+                            <span style={{ color: user.debt > 0 ? 'var(--danger-color)' : 'inherit', fontWeight: user.debt > 0 ? 'bold' : 'normal' }}>{(user.debt || 0).toLocaleString()}枚</span>
                         </div>
                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
                             <span>職業:</span>
