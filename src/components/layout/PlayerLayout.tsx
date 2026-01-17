@@ -11,20 +11,16 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 import { EventAnnouncement, ActiveEventBar } from '@/components/effects/EventAnnouncement';
 
-export const PlayerLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const PlayerLayout: React.FC<{ children: React.ReactNode; id: string }> = ({ children, id }) => {
     const pathname = usePathname();
     const { currentUser, gameState, login } = useGame();
 
-    // Extract user ID from pathname and auto-login
+    // Extract user ID from props and auto-login
     useEffect(() => {
-        const match = pathname.match(/\/player\/([^\/]+)/);
-        if (match && match[1]) {
-            const userId = match[1];
-            if (!currentUser || currentUser.id !== userId) {
-                login(userId);
-            }
+        if (id && (!currentUser || currentUser.id !== id)) {
+            login(id);
         }
-    }, [pathname, currentUser, login]);
+    }, [id, currentUser, login]);
 
     // Notification logic kept simple for now
 
@@ -123,6 +119,7 @@ export const PlayerLayout: React.FC<{ children: React.ReactNode }> = ({ children
         { label: '借金', path: `${basePath}/debt`, icon: '💸' },
         { label: '支払い', path: `${basePath}/payment`, icon: '🧾' },
         { label: '履歴', path: `${basePath}/history`, icon: '📜' },
+        { label: 'スマホ', path: `${basePath}/smartphone`, icon: '📱' },
         { label: 'マイショップ', path: `${basePath}/shop`, icon: '🛍️' },
         { label: '不動産', path: `${basePath}/realestate`, icon: '🏠' },
         { label: 'ポイント', path: `${basePath}/points`, icon: '💳' },
@@ -267,7 +264,7 @@ export const PlayerLayout: React.FC<{ children: React.ReactNode }> = ({ children
 
             {/* Main Content with Page Transition */}
             <main style={{ padding: '1rem', maxWidth: '800px', margin: '0 auto' }}>
-                <Sidebar title={currentUser.name} items={navItems} role="player">
+                <Sidebar title={currentUser.name} items={navItems} role="player" player={currentUser}>
                     {!currentUser.isForbiddenUnlocked && (
                         <SecretCodeInput onUnlock={handleSecretUnlock} />
                     )}

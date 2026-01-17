@@ -5,7 +5,7 @@ import { useGame } from '@/context/GameContext';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { motion } from 'framer-motion';
-import { FURNITURE_ITEMS, PET_ITEMS } from '@/lib/gameData';
+import { FURNITURE_CATALOG, PET_CATALOG } from '@/lib/gameData';
 
 export default function RoomPage() {
     const { currentUser } = useGame();
@@ -16,12 +16,12 @@ export default function RoomPage() {
     const pets = currentUser.pets || [];
 
     const totalHappiness = [
-        ...furniture.map(id => FURNITURE_ITEMS.find(f => f.id === id)?.happinessBonus || 0),
-        ...pets.map(id => PET_ITEMS.find(p => p.id === id)?.happinessBonus || 0)
+        ...furniture.map(id => FURNITURE_CATALOG.find(f => f.id === id)?.happinessBonus || 0),
+        ...pets.map(id => PET_CATALOG.find(p => p.id === id)?.happinessBonus || 0)
     ].reduce((sum, val) => sum + val, 0);
 
     const handleBuyFurniture = async (itemId: string) => {
-        const item = FURNITURE_ITEMS.find(f => f.id === itemId);
+        const item = FURNITURE_CATALOG.find(f => f.id === itemId);
         if (!item) return;
 
         if (!confirm(`${item.name}を${item.price}枚で購入しますか？\n幸福度+${item.happinessBonus}`)) return;
@@ -38,7 +38,7 @@ export default function RoomPage() {
     };
 
     const handleBuyPet = async (petId: string) => {
-        const pet = PET_ITEMS.find(p => p.id === petId);
+        const pet = PET_CATALOG.find(p => p.id === petId);
         if (!pet) return;
 
         if (!confirm(`${pet.name}を${pet.price}枚で購入しますか？\n幸福度+${pet.happinessBonus}`)) return;
@@ -80,7 +80,7 @@ export default function RoomPage() {
                 ) : (
                     <div className="grid grid-cols-3 gap-2">
                         {furniture.map(id => {
-                            const item = FURNITURE_ITEMS.find(f => f.id === id);
+                            const item = FURNITURE_CATALOG.find(f => f.id === id);
                             if (!item) return null;
                             return (
                                 <div key={id} className="bg-green-50 p-3 rounded text-center border-2 border-green-300">
@@ -100,7 +100,7 @@ export default function RoomPage() {
                 ) : (
                     <div className="grid grid-cols-3 gap-2">
                         {pets.map(id => {
-                            const pet = PET_ITEMS.find(p => p.id === id);
+                            const pet = PET_CATALOG.find(p => p.id === id);
                             if (!pet) return null;
                             return (
                                 <div key={id} className="bg-blue-50 p-3 rounded text-center border-2 border-blue-300">
@@ -117,7 +117,7 @@ export default function RoomPage() {
             <Card padding="md" className="mb-6">
                 <h3 className="font-bold mb-3">🛍️ 家具を買う</h3>
                 <div className="space-y-2">
-                    {FURNITURE_ITEMS.map(item => {
+                    {FURNITURE_CATALOG.map(item => {
                         const owned = furniture.includes(item.id);
                         return (
                             <Card key={item.id} padding="sm" className={owned ? 'opacity-50' : ''}>
@@ -146,7 +146,7 @@ export default function RoomPage() {
             <Card padding="md">
                 <h3 className="font-bold mb-3">🐾 ペットを飼う</h3>
                 <div className="space-y-2">
-                    {PET_ITEMS.map(pet => {
+                    {PET_CATALOG.map(pet => {
                         const owned = pets.includes(pet.id);
                         return (
                             <Card key={pet.id} padding="sm" className={owned ? 'opacity-50' : ''}>

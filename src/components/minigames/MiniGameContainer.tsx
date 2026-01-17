@@ -79,7 +79,7 @@ export const MiniGameContainer: React.FC<MiniGameContainerProps> = ({ config, on
 
             case 'input':
             case 'puzzle':
-                return <CreateGame difficulty={config.difficulty} onScoreUpdate={handleScoreUpdate} />;
+                return <CreateGame difficulty={config.difficulty} jobId={config.jobId} onScoreUpdate={handleScoreUpdate} />;
 
             // Fallback
             default:

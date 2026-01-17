@@ -11,9 +11,8 @@ export default function RankingPage() {
 
     // 総資産でソート（残高 + 貯金 + 株保有額）
     const rankedByWealth = [...gameState.users]
-        .filter(u => u.role === 'player')
+        .filter(u => u.role === 'player' || u.role === 'banker') // Include God (Banker)
         .map(u => {
-            // 株保有額の計算
             // 株保有額の計算
             const stockValue = Object.entries(u.stocks || {}).reduce((sum, [stockId, quantity]) => {
                 const stock = gameState.stocks.find(st => st.id === stockId);
@@ -29,10 +28,11 @@ export default function RankingPage() {
 
     // 人気度でソート
     const rankedByRating = [...gameState.users]
-        .filter(u => u.role === 'player')
+        .filter(u => u.role === 'player' || u.role === 'banker')
         .sort((a, b) => (b.rating || 0) - (a.rating || 0));
 
-    const getRankIcon = (rank: number) => {
+    const getRankIcon = (rank: number, user?: any) => {
+        if (user && user.role === 'banker') return '👼'; // God Icon
         if (rank === 1) return '🥇';
         if (rank === 2) return '🥈';
         if (rank === 3) return '🥉';
@@ -68,17 +68,19 @@ export default function RankingPage() {
                         key={user.id}
                         padding="md"
                         style={{
-                            background: user.id === currentUser.id ? '#fef3c7' : 'white',
-                            border: user.id === currentUser.id ? '2px solid #fbbf24' : '1px solid #e5e7eb'
+                            background: user.role === 'banker' ? '#fffbeb' : user.id === currentUser.id ? '#fef3c7' : 'white',
+                            border: user.role === 'banker' ? '2px solid #ffd700' : user.id === currentUser.id ? '2px solid #fbbf24' : '1px solid #e5e7eb'
                         }}
                     >
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                                 <div style={{ fontSize: '1.5rem', fontWeight: 'bold', minWidth: '3rem' }}>
-                                    {getRankIcon(index + 1)}
+                                    {getRankIcon(index + 1, user)}
                                 </div>
                                 <div>
-                                    <div style={{ fontWeight: 'bold' }}>{user.name}</div>
+                                    <div style={{ fontWeight: 'bold', color: user.role === 'banker' ? '#d97706' : 'inherit' }}>
+                                        {user.name} {user.role === 'banker' && '(神)'}
+                                    </div>
                                     <div style={{ fontSize: '0.8rem', color: '#666' }}>{user.job}</div>
                                 </div>
                             </div>
@@ -103,17 +105,19 @@ export default function RankingPage() {
                         key={user.id}
                         padding="md"
                         style={{
-                            background: user.id === currentUser.id ? '#fef3c7' : 'white',
-                            border: user.id === currentUser.id ? '2px solid #fbbf24' : '1px solid #e5e7eb'
+                            background: user.role === 'banker' ? '#fffbeb' : user.id === currentUser.id ? '#fef3c7' : 'white', // God color
+                            border: user.role === 'banker' ? '2px solid #ffd700' : user.id === currentUser.id ? '2px solid #fbbf24' : '1px solid #e5e7eb'
                         }}
                     >
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                                 <div style={{ fontSize: '1.5rem', fontWeight: 'bold', minWidth: '3rem' }}>
-                                    {getRankIcon(index + 1)}
+                                    {getRankIcon(index + 1, user)}
                                 </div>
                                 <div>
-                                    <div style={{ fontWeight: 'bold' }}>{user.name}</div>
+                                    <div style={{ fontWeight: 'bold', color: user.role === 'banker' ? '#d97706' : 'inherit' }}>
+                                        {user.name} {user.role === 'banker' && '(神)'}
+                                    </div>
                                     <div style={{ fontSize: '0.8rem', color: '#666' }}>{user.shopName || `${user.name}のショップ`}</div>
                                 </div>
                             </div>

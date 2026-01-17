@@ -11,6 +11,7 @@ interface GameContextType {
     currentUser: User | undefined;
     login: (userId: string) => void;
     logout: () => void;
+    refresh: () => void; // データ再取得
 }
 
 const GameContext = createContext<GameContextType | undefined>(undefined);
@@ -18,7 +19,7 @@ const GameContext = createContext<GameContextType | undefined>(undefined);
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 export function GameProvider({ children }: { children: React.ReactNode }) {
-    const { data: gameState, error } = useSWR<GameState>('/api/game', fetcher, {
+    const { data: gameState, error, mutate } = useSWR<GameState>('/api/game', fetcher, {
         refreshInterval: 2000, // 2秒ごとにポーリング
     });
 
@@ -42,6 +43,10 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         localStorage.removeItem('real-shop-user-id');
     };
 
+    const refresh = () => {
+        mutate();
+    };
+
     const currentUser = gameState?.users.find(u => u.id === currentUserId);
 
     return (
@@ -51,7 +56,8 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
             isError: error,
             currentUser,
             login,
-            logout
+            logout,
+            refresh
         }}>
             {children}
         </GameContext.Provider>

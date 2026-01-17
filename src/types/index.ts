@@ -28,7 +28,7 @@ export interface Product {
 
 export interface Request {
     id: string;
-    type: 'loan' | 'repay' | 'income' | 'tax' | 'bill' | 'buy_stock' | 'sell_stock' | 'change_job' | 'unlock_forbidden' | 'transfer' | 'pay_tax';
+    type: 'loan' | 'repay' | 'income' | 'tax' | 'bill' | 'buy_stock' | 'sell_stock' | 'change_job' | 'unlock_forbidden' | 'transfer' | 'pay_tax' | 'city_buy_land' | 'city_build_place';
     requesterId: string;
     amount: number;
     details?: string; // 株のIDや備考など
@@ -90,13 +90,23 @@ export interface User {
 
     // Stats
     unpaidTax?: number;
-    catalogPoints?: number; // 仕入れなどで貯まるポイント
     arrestCount?: number;
     stolenAmount?: number;
     fanCount?: number;
 
+    // Employment
+    employmentStatus: 'employed' | 'unemployed' | 'retired';
+    jobTitle?: string; // 職種名
+    currentJobId?: string; // 現在の仕事ID
+    jobHistory: { jobId: string; timestamp: number }[]; // 職歴
+
+    // Market (shop)
+    shopItems: ShopItem[]; // 販売中の商品
+
     // Inventory
-    items: string[]; // item IDs
+    inventory?: any[]; // TODO: Define InventoryItem interface
+
+    // Trading Stock
     stocks: { [stockId: string]: number }; // stockId -> quantity
     forbiddenStocks?: { [stockId: string]: number };
     isForbiddenUnlocked?: boolean;
@@ -106,6 +116,8 @@ export interface User {
 
     // Points
     pointCards: PointCard[]; // お店ごとのポイント
+    catalogPoints?: number; // カタログポイント（システムアイテム交換用）
+    loyaltyPoints?: number; // ロイヤルティポイント（ユーザーアイテム交換用）
 
     // Economy & Health (New)
     shopName?: string;
@@ -126,11 +138,89 @@ export interface User {
     playerIcon?: string; // プレイヤーアイコンファイル名（例: 'icon1.png'） NEW
     shopWebsite?: ShopWebsite; // マイショップホームページ NEW
     pointExchangeItems?: PointExchangeItem[]; // ポイント交換所アイテム NEW
+
+    // City Simulator (Phase 1)
+    ownedLands: string[]; // Land IDs
+    ownedPlaces: string[]; // Place IDs
+    mainPlaceId?: string; // 本業のPlace ID
+    sidePlaceIds?: string[]; // 副業のPlace IDs
+
+    // Commuting & Transportation (Phase 2)
+    commuteMethod?: 'walk' | 'bicycle' | 'train' | 'bus' | 'taxi' | 'car';
+    ownedVehicles?: string[]; // 所有している車両ID (自転車・車)
+    hasLicense?: boolean; // 運転免許の有無 (Phase 2 legacy, keep for compatibility or migrate to qualifications)
+    homeLocationId?: string; // 自宅の場所
+    workLocationId?: string; // 職場の場所
+    commuteDistance?: number; // 通勤距離 (km)
+    lastCommuteTurn?: number; // 最後に通勤したターン
+    carFuel?: number; // 0-100 (自家用車用)
+    isLate?: boolean; // 遅刻フラグ
+    monthlyParkingCost?: number; // 駐車場代
+    region?: 'urban' | 'rural'; // 居住地域
+
+    // Qualifications & Exams (Phase 3)
+    qualifications?: string[]; // 取得済み資格IDリスト
+    examHistory?: ExamResult[]; // 受験履歴
+
+    // Banking & Finance (Phase 4)
+    creditScore?: number; // 信用スコア
+    loans?: Loan[];       // 借入リスト
+    insurances?: InsuranceContract[]; // 加入保険
+
+    // Health (Phase 4)
+    isHospitalized?: boolean; // 入院中フラグ
+
+    // Phase 5: Occupation & Life
+    lifeStats?: LifeStats;
+    family?: FamilyMember[];
+    partners?: string[]; // 恋愛対象NPC IDs
+    smartphone?: SmartphoneState;
+
+    // Commute (Updated / Phase 5)
+    commuteInfo?: {
+        method: 'walk' | 'bicycle' | 'train' | 'bus' | 'taxi' | 'car';
+        vehicleId?: string;
+        distance: number;
+        duration: number; // 分
+    };
+
+    // Audit & Security (Phase 6)
+    auditLogs?: AuditLog[];
+    suspicionScore?: number; // 0-100 (100で監査イベント確定)
+}
+
+// Phase 3: Qualifications
+export interface ExamResult {
+    qualificationId: string;
+    timestamp: number;
+    score: number;
+    passed: boolean;
+}
+
+export interface Qualification {
+    id: string;
+    name: string;
+    category: 'language' | 'business' | 'creative' | 'medical' | 'driving' | 'special' | 'hobby' | 'food';
+    difficulty: 1 | 2 | 3 | 4 | 5; // 1: Easy, 5: Hard
+    examFee: number;
+    description: string;
+    requirements?: string[]; // 前提資格ID
+    effects?: {
+        jobUnlock?: string[]; // 解放される職業
+        salaryBonus?: number; // 給与ボーナス(%)
+        statBonus?: {
+            intelligence?: number;
+            charisma?: number;
+        };
+    };
+    minigameType?: 'quiz' | 'typing' | 'action' | 'driving';
 }
 
 // Coupon System NEW
 export interface Coupon {
     id: string;
+    // ... (rest is same)
+
     shopOwnerId: string;     // クーポン発行者
     code: string;            // クーポンコード（例: "SALE20"）
     discountPercent: number; // 割引率（%）
@@ -173,6 +263,14 @@ export interface GameState {
     activeEvents: GameEvent[];
     properties: Property[];
     catalogInventory?: CatalogItem[]; // 仕入れ先カタログ（管理者が管理）
+
+    // City Simulator Data
+    lands: Land[];
+    places: Place[];
+
+    // Phase 4: Simulation
+    economy: EconomyState;
+    environment: EnvironmentState;
 }
 
 // CatalogItem - 仕入れ先カタログアイテム
@@ -206,17 +304,7 @@ export interface ShopWebsite {
 }
 
 // PointExchangeItem - ポイント交換所アイテム
-export interface PointExchangeItem {
-    id: string;
-    shopOwnerId: string;
-    name: string;
-    description: string;
-    pointCost: number;
-    rewardType: 'coupon' | 'discount' | 'item' | 'special';
-    rewardValue: any; // クーポンコード、割引率、アイテムIDなど
-    stock?: number;
-    emoji?: string;
-}
+// PointExchangeItem定義は後方に移動・統合されました
 
 export interface GameEvent {
     id: string;
@@ -346,3 +434,242 @@ export interface Pet {
     loyalty?: number;
     description?: string;
 }
+
+// Vehicles (Phase 2)
+export interface Vehicle {
+    id: string;
+    type: 'bicycle' | 'car';
+    name: string;
+    price: number;
+    speed: number; // 通勤時間短縮効果
+    fuelConsumption?: number; // 燃費 (車のみ)
+    reliability: number; // 故障・パンク率 (1-100)
+    maintenanceCost: number; // 維持費
+    image?: string;
+    description: string;
+    prestige?: number; // ステータス上昇効果
+}
+
+// PointExchangeItem - ポイント交換所アイテム
+export interface PointExchangeItem {
+    id: string;
+    shopOwnerId: string; // 所有者ID (User.id)
+    name: string;
+    description?: string;
+    pointCost: number;
+
+    // カテゴリー/タイプ
+    category?: 'furniture' | 'pet' | 'recipe' | 'special';
+
+    // システム互換性のため残すプロパティ
+    rewardType?: 'coupon' | 'discount' | 'item' | 'special';
+    rewardValue?: any;
+
+    emoji?: string;
+    stock?: number;
+    exchangedCount?: number;
+}
+
+// City Simulator Types
+export interface Location {
+    lat: number;
+    lng: number;
+}
+
+export interface Land {
+    id: string; // gridId (例: "135-35-10")
+    ownerId: string | null; // nullなら公有地/販売中
+    price: number; // 地価
+    location: Location;
+    address: string;
+    isForSale: boolean;
+    placeId?: string; // 建設されているPlace ID
+    polygon?: Array<{ lat: number; lng: number }>; // マップ描画用のポリゴン座標
+}
+
+export type PlaceType = 'restaurant' | 'retail' | 'office' | 'factory' | 'service';
+
+export interface Place {
+    id: string; // SKU/UUID
+    ownerId: string; // 所有者ID
+    name: string;
+    type: PlaceType;
+
+    // 地理情報
+    location: {
+        lat: number;
+        lng: number;
+        address: string; // 逆ジオコーディングまたは仮の住所
+        landId?: string; // 紐づく土地ID (Grid ID)
+    };
+
+    status: 'planning' | 'construction' | 'active' | 'closed' | 'bankrupted';
+
+    // 経営指標
+    level: number; // 規模ランク (1-5)
+    employees: string[]; // Employee ID list (NPC)
+    stats: {
+        capital: number; // 資本金
+        sales: number; // 月間売上
+        expenses: number; // 月間経費
+        profit: number; // 純利益
+        reputation: number; // 評判 (0-5)
+        customerCount: number; // 来客数
+    };
+
+    // リスク管理
+    licenses: string[]; // 取得済み許認可ID
+    insurances: string[]; // 加入済み保険ID
+
+    // UI/Customization
+    description?: string;
+    imageUrl?: string;
+    website?: ShopWebsite; // 既存のホームページ機能
+}
+
+// ==========================================
+// Phase 4: Banking & Simulation Types
+// ==========================================
+
+// Banking
+export interface Loan {
+    id: string;
+    name: string; // "住宅ローン", "事業拡大資金" etc.
+    amount: number; // 元金
+    remainingAmount: number; // 残高
+    interestRate: number; // 金利 (%)
+    isFixedRate: boolean; // 固定金利かどうか
+    monthlyPayment: number; // 毎ターン返済額
+    nextPaymentTurn: number;
+    status: 'active' | 'paid_off' | 'defaulted';
+    borrowedAt: number;
+}
+
+export interface InsuranceContract {
+    id: string;
+    type: 'fire' | 'health' | 'worker_comp';
+    name: string;
+    premium: number; // 毎ターン保険料
+    coverageAmount: number; // 補償限度額
+    expiresAt: number | null; // nullなら永続
+    joinedAt: number;
+}
+
+// Economy Simulation
+export interface EconomyState {
+    status: 'boom' | 'normal' | 'recession' | 'crisis'; // 景気
+    interestRate: number; // 政策金利 (%)
+    priceIndex: number; // 物価指数 (基準100)
+    marketTrend: 'bull' | 'bear' | 'stable';
+    taxRateAdjust: number; // 税率補正
+    lastUpdateTurn: number;
+}
+
+// Environment Simulation
+export interface EnvironmentState {
+    weather: 'sunny' | 'rain' | 'heavy_rain' | 'storm' | 'snow' | 'heatwave';
+    temperature: number;
+    season: 'spring' | 'summer' | 'autumn' | 'winter';
+    disaster?: {
+        type: 'earthquake' | 'typhoon' | 'fire' | 'pandemic';
+        name: string;
+        severity: number; // 1-5
+        remainingTurns: number;
+        affectedRegions?: string[]; // 地域ID
+    };
+    cityInfrastructure: {
+        power: number; // 稼働率 0-100
+        water: number;
+        network: number;
+    };
+    securityLevel: number; // 治安 0-100 (低いほど危険)
+}
+
+// ==========================================
+// Phase 5: Occupation & Career Types
+// ==========================================
+
+export type JobType = 'public' | 'medical' | 'creative' | 'technical' | 'service' | 'business' | 'freelance' | 'criminal' | 'agriculture' | 'educational';
+
+export interface Occupation {
+    id: string;
+    name: string;
+    type: JobType;
+    rank: number; // 階級 (1-10)
+    salary: number; // 基本給 (月給/ターン給)
+    requirements: {
+        qualifications?: string[]; // 必須資格
+        experience?: number; // 必要勤続年数
+        stats?: { [key: string]: number }; // 必要ステータス
+        prevJobId?: string | string[]; // 直前の職業（昇進ルート）
+    };
+    effects: {
+        stress: number; // ストレス増加量
+        health: number; // 健康影響
+        prestige: number; // 社会的信用
+    };
+    workTime: { start: number; end: number }; // 勤務時間 (0-24)
+    description: string;
+}
+
+export interface PartTimeJob {
+    id: string;
+    name: string;
+    hourlyWage: number;
+    type: JobType;
+    requirements: {
+        qualifications?: string[];
+    };
+    promotionTargetId?: string; // 昇格先の正社員職ID
+    experienceOverride: number; // 昇格に必要な勤務回数
+    effects: {
+        stress: number;
+        fatigue: number;
+    };
+    description: string;
+}
+
+// ==========================================
+// Phase 5: Life Simulation Types
+// ==========================================
+
+export interface LifeStats {
+    health: number; // 0-100 (0で入院)
+    hunger: number; // 0-100 (100で餓死リスク/衰弱)
+    stress: number; // 0-100 (高いと病気リスク)
+    fatigue: number; // 0-100 (疲労度)
+    hygiene: number; // 清潔度
+}
+
+export interface FamilyMember {
+    id: string; // NPC ID
+    relation: 'spouse' | 'child' | 'parent' | 'partner';
+    name: string;
+    age: number;
+    gender: 'male' | 'female' | 'other';
+    affection: number; // 親密度 0-100
+    occupation?: string;
+    school?: string; // 子供の場合
+}
+
+export interface SmartphoneState {
+    model: string;
+    apps: string[]; // Installed app IDs
+    broken: boolean;
+    battery: number;
+}
+
+// ==========================================
+// Phase 6: Audit & Security
+// ==========================================
+
+export interface AuditLog {
+    id: string;
+    userId: string;
+    actionType: 'high_value_transaction' | 'resale_attempt' | 'tax_evasion' | 'insider_trading' | 'suspicious_activity' | 'system_warning';
+    details: string; // JSON string
+    severity: 'info' | 'warning' | 'critical';
+    timestamp: number;
+}
+
+

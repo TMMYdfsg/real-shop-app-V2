@@ -1,5 +1,7 @@
 import { PlayerLayout } from '@/components/layout/PlayerLayout';
+import { use } from 'react';
 
-export default function Layout({ children }: { children: React.ReactNode }) {
-    return <PlayerLayout>{children}</PlayerLayout>;
+export default async function Layout({ children, params }: { children: React.ReactNode, params: Promise<{ id: string }> }) {
+    const { id } = await params;
+    return <PlayerLayout id={id}>{children}</PlayerLayout>;
 }

@@ -61,11 +61,17 @@ export default function PointsPage() {
                             {card.points > 10 && <div style={{ alignSelf: 'center', color: '#666' }}>+{card.points - 10}</div>}
                         </div>
 
-                        <div style={{ marginTop: '1rem', borderTop: '1px dashed #ccc', paddingTop: '0.5rem' }}>
-                            <p style={{ fontSize: '0.9rem', color: '#666', marginBottom: '0.5rem' }}>
-                                ※ 100枚のお買い物で1ポイント貯まります。<br />
-                                ※ 景品交換はお店の人に画面を見せてください。
+                        <div style={{ marginTop: '1rem', borderTop: '1px dashed #ccc', paddingTop: '0.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <p style={{ fontSize: '0.9rem', color: '#666' }}>
+                                ※ 100円で1ポイント
                             </p>
+                            <Button
+                                size="sm"
+                                variant="primary"
+                                onClick={() => window.location.href = `${window.location.pathname}/exchange/${card.shopOwnerId}`}
+                            >
+                                🎁 このお店で交換
+                            </Button>
                         </div>
                     </Card>
                 ))}

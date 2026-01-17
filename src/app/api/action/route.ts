@@ -4,6 +4,8 @@ import { Request as GameRequest } from '@/types';
 import crypto from 'crypto';
 
 import { JOB_GAME_CONFIGS, JobType } from '@/lib/jobData';
+import { GACHA_ITEMS } from '@/lib/gameData';
+import { logAudit, checkResalePrice } from '@/lib/audit';
 
 export async function POST(request: NextRequest) {
     try {
@@ -77,6 +79,73 @@ export async function POST(request: NextRequest) {
             });
             return NextResponse.json({ success: true });
         }
+
+        if (type === 'city_buy_land') {
+            const landId = details;
+            // 土地購入処理
+            updateGameState((state) => {
+                const user = state.users.find(u => u.id === requesterId);
+                const land = state.lands.find(l => l.id === landId);
+
+                if (user && land) {
+                    // バリデーション
+                    if (land.ownerId) return state; // 既に誰かが所有
+                    if (!land.isForSale) return state; // 非売品
+                    if (user.balance < land.price) return state; // 資金不足 (クライアントでもチェックするが念のため)
+
+                    // 支払い
+                    user.balance -= land.price;
+
+                    // 所有権移転
+                    land.ownerId = user.id;
+                    land.isForSale = false;
+
+                    // ユーザーの所有地リストに追加
+                    if (!user.ownedLands) user.ownedLands = [];
+                    user.ownedLands.push(land.id);
+
+                    // 履歴追加
+                    if (!user.transactions) user.transactions = [];
+                    user.transactions.push({
+                        id: crypto.randomUUID(),
+                        type: 'payment',
+                        amount: land.price,
+                        senderId: user.id,
+                        description: `土地購入 (${land.address})`,
+                        timestamp: Date.now()
+                    });
+                }
+                return state;
+            });
+            return NextResponse.json({ success: true, message: '土地を購入しました' });
+        }
+
+        if (type === 'city_update_land') {
+            const { landId, price, isForSale } = details;
+
+            updateGameState((state) => {
+                const user = state.users.find(u => u.id === requesterId);
+                const land = state.lands.find(l => l.id === landId);
+
+                if (user && land) {
+                    // 権限チェック: 所有者 or 銀行員 or 不動産屋
+                    const isOwner = land.ownerId === user.id;
+                    const isAdmin = user.role === 'banker' || user.job === 'real_estate_agent';
+
+                    if (!isOwner && !isAdmin) {
+                        return state; // 権限なし
+                    }
+
+                    // 更新
+                    if (price !== undefined) land.price = Number(price);
+                    if (isForSale !== undefined) land.isForSale = isForSale;
+                }
+                return state;
+            });
+            return NextResponse.json({ success: true, message: '土地情報を更新しました' });
+        }
+
+
 
         if (type === 'pay_tax') {
             updateGameState((state) => {
@@ -167,6 +236,76 @@ export async function POST(request: NextRequest) {
                         if (playerIcon !== undefined) user.playerIcon = playerIcon;
                     }
                 }
+                return state;
+            });
+            return NextResponse.json({ success: true });
+        }
+
+        if (type === 'create_website' || type === 'update_website') {
+            updateGameState((state) => {
+                const user = state.users.find(u => u.id === requesterId);
+                if (user && details) {
+                    const websiteData = JSON.parse(details);
+                    user.shopWebsite = {
+                        ...websiteData,
+                        ownerId: user.id
+                    };
+                }
+                return state;
+            });
+            return NextResponse.json({ success: true });
+        }
+
+        if (type === 'update_exchange_items') {
+            updateGameState((state) => {
+                const user = state.users.find(u => u.id === requesterId);
+                if (user && details) {
+                    const items = JSON.parse(details);
+                    user.pointExchangeItems = items;
+                }
+                return state;
+            });
+            return NextResponse.json({ success: true });
+        }
+
+        if (type === 'exchange_user_item') {
+            updateGameState((state) => {
+                const buyer = state.users.find(u => u.id === requesterId);
+                if (!buyer || !details) return state;
+
+                const { itemId, ownerId } = JSON.parse(details);
+                const owner = state.users.find(u => u.id === ownerId);
+
+                if (!owner || !owner.pointExchangeItems) return state;
+
+                const item = owner.pointExchangeItems.find(i => i.id === itemId);
+                if (!item) return state;
+
+                // 在庫とポイントチェック
+                if ((item.stock || 0) <= 0) return state;
+
+                // ロイヤルティポイントの初期化とチェック
+                if (!buyer.loyaltyPoints) buyer.loyaltyPoints = 0;
+                if (buyer.loyaltyPoints < item.pointCost) return state;
+
+                // ポイント消費
+                buyer.loyaltyPoints -= item.pointCost;
+
+                // 在庫減少
+                if (item.stock !== undefined) {
+                    item.stock -= 1;
+                }
+
+                // 交換カウント増加
+                if (item.exchangedCount !== undefined) {
+                    item.exchangedCount += 1;
+                } else {
+                    item.exchangedCount = 1;
+                }
+
+                // TODO: 交換したアイテムをbuyerのインベントリに追加する処理
+                // （現在は簡易実装、将来的にユーザーのインベントリを追加）
+
                 return state;
             });
             return NextResponse.json({ success: true });
@@ -728,19 +867,273 @@ export async function POST(request: NextRequest) {
 
                         // If it's land, update user landRank
                         if (property.type === 'land') {
-                            if (property.name.includes('一等地')) user.landRank = 3;
-                            else user.landRank = 1;
+                            user.landRank = (user.landRank || 0) + 1;
                         }
 
+                        // History
                         user.transactions.push({
-                            id: crypto.randomUUID(), type: 'payment', amount: property.price, description: `不動産購入: ${property.name}`, timestamp: Date.now()
+                            id: crypto.randomUUID(), type: 'payment', amount: property.price, senderId: user.id, description: `不動産購入: ${property.name}`, timestamp: Date.now()
                         });
-                        state.news.push(`🏠 ${user.name}が「${property.name}」を購入しました！`);
                     }
                 }
                 return state;
             });
             return NextResponse.json({ success: true });
+        }
+
+        // =====================================================
+        // PHASE 2: 通勤と移動システム
+        // =====================================================
+
+        // -----------------------------------------------------
+        // 車両購入 (buy_vehicle)
+        // -----------------------------------------------------
+        if (type === 'buy_vehicle') {
+            const vehicleId = details;
+
+            // 後で動的にインポートするか、データストア拡張時に組み込むのが望ましいが、簡易的にここで定義・参照
+            const { VEHICLE_CATALOG } = await import('@/lib/gameData');
+            const targetVehicle = VEHICLE_CATALOG.find(v => v.id === vehicleId);
+
+            if (!targetVehicle) {
+                return NextResponse.json({ error: '車両が見つかりません' }, { status: 404 });
+            }
+
+            updateGameState((state) => {
+                const user = state.users.find(u => u.id === requesterId);
+                if (user) {
+                    // 購入チェック
+                    if (user.balance < targetVehicle.price) {
+                        return state; // 残高不足 (クライアント側でもチェック推奨)
+                    }
+                    if (user.ownedVehicles?.includes(vehicleId)) {
+                        return state; // 既に所有している
+                    }
+
+                    // 免許チェック（車の場合）
+                    if (targetVehicle.type === 'car' && !user.hasLicense) {
+                        return state; // 免許がない
+                    }
+
+                    // 支払い
+                    user.balance -= targetVehicle.price;
+
+                    // 所有リストに追加
+                    if (!user.ownedVehicles) user.ownedVehicles = [];
+                    user.ownedVehicles.push(vehicleId);
+
+                    // 車の場合、ガソリン満タンで納車
+                    if (targetVehicle.type === 'car') {
+                        user.carFuel = 100;
+                    }
+
+                    // 履歴
+                    if (!user.transactions) user.transactions = [];
+                    user.transactions.push({
+                        id: crypto.randomUUID(),
+                        type: 'payment',
+                        amount: targetVehicle.price,
+                        senderId: user.id,
+                        description: `車両購入: ${targetVehicle.name}`,
+                        timestamp: Date.now()
+                    });
+                }
+                return state;
+            });
+            return NextResponse.json({ success: true, message: `${targetVehicle.name}を購入しました！` });
+        }
+
+        // -----------------------------------------------------
+        // 免許取得 (get_license)
+        // -----------------------------------------------------
+        if (type === 'get_license') {
+            const LICENSE_COST = 300000; // 教習所費用
+
+            updateGameState((state) => {
+                const user = state.users.find(u => u.id === requesterId);
+                if (user) {
+                    if (user.hasLicense) return state;
+                    if (user.balance < LICENSE_COST) return state;
+
+                    user.balance -= LICENSE_COST;
+                    user.hasLicense = true;
+
+                    if (!user.transactions) user.transactions = [];
+                    user.transactions.push({
+                        id: crypto.randomUUID(),
+                        type: 'payment',
+                        amount: LICENSE_COST,
+                        senderId: user.id,
+                        description: '運転免許取得費用',
+                        timestamp: Date.now()
+                    });
+                }
+                return state;
+            });
+            return NextResponse.json({ success: true, message: '運転免許を取得しました！' });
+        }
+
+        // -----------------------------------------------------
+        // 通勤設定 (config_commute)
+        // -----------------------------------------------------
+        if (type === 'config_commute') {
+            const { method, homeId, workId, distance, region } = JSON.parse(details);
+
+            updateGameState((state) => {
+                const user = state.users.find(u => u.id === requesterId);
+                if (user) {
+                    if (method) user.commuteMethod = method;
+                    if (homeId) user.homeLocationId = homeId;
+                    if (workId) user.workLocationId = workId;
+                    if (distance) user.commuteDistance = Number(distance);
+                    if (region) user.region = region;
+                }
+                return state;
+            });
+            return NextResponse.json({ success: true });
+        }
+
+        // -----------------------------------------------------
+        // 通勤実行 (commute)
+        // -----------------------------------------------------
+        if (type === 'commute') {
+            const { COMMUTE_EVENTS, VEHICLE_CATALOG } = await import('@/lib/gameData');
+
+            // クライアントからミニゲームのスコアなどの詳細を受け取る
+            const { minigameScore } = details ? JSON.parse(details) : { minigameScore: undefined };
+
+            let result = {
+                success: true,
+                message: '無事に出勤しました。',
+                late: false,
+                cost: 0,
+                event: null as any,
+                stressChange: 0,
+                minigameBonus: 0
+            };
+
+            updateGameState((state) => {
+                const user = state.users.find(u => u.id === requesterId);
+                if (!user) return state;
+
+                const method = user.commuteMethod || 'walk';
+                const distance = user.commuteDistance || 5; // Default 5km
+
+                // 1. コスト計算
+                let cost = 0;
+                if (method === 'train') cost = 500; // 一律
+                if (method === 'bus') cost = 220;
+                if (method === 'taxi') cost = 700 + (distance * 300); // 初乗り700 + 300/km
+
+                // 車の場合のガソリン消費
+                if (method === 'car') {
+                    // 車種特定
+                    const carId = user.ownedVehicles?.find(id => id.startsWith('car_'));
+                    const carData = VEHICLE_CATALOG.find(v => v.id === carId) || VEHICLE_CATALOG.find(v => v.id === 'car_kei');
+
+                    // 燃費計算 (ミニゲームで好成績なら燃費向上)
+                    let fuelEff = carData?.fuelConsumption || 10;
+                    if (minigameScore && minigameScore > 80) fuelEff *= 1.2; // 20% better fuel economy
+
+                    const fuelConsumed = Math.ceil(distance / fuelEff);
+                    user.carFuel = Math.max(0, (user.carFuel || 100) - fuelConsumed);
+
+                    // ガソリン代 (1L 170円換算)
+                    cost += fuelConsumed * 170;
+                }
+
+                if (cost > 0) {
+                    if (user.balance < cost && method !== 'car') {
+                        // 金欠で乗れない -> 徒歩になる
+                        result.success = false;
+                        result.message = 'お金がなくて交通機関を使えませんでした... 徒歩で向かいます。';
+                        result.late = true;
+                        result.stressChange = 20;
+                        return state;
+                    }
+                    user.balance -= cost;
+                    result.cost = cost;
+                }
+
+                // ミニゲームボーナス (運転ボーナス)
+                if (typeof minigameScore === 'number') {
+                    if (minigameScore === 100) {
+                        const bonus = 500;
+                        user.balance += bonus;
+                        result.minigameBonus = bonus;
+                        user.transactions.push({
+                            id: crypto.randomUUID(), type: 'income', amount: bonus, senderId: user.id, description: '安全運転ボーナス', timestamp: Date.now()
+                        });
+                    }
+                }
+
+                // 2. イベント判定
+                // 該当する移動手段のイベントをフィルタ
+                const possibleEvents = COMMUTE_EVENTS.filter(e => e.methods.includes(method));
+
+                // 抽選
+                for (const evt of possibleEvents) {
+                    // ミニゲームで高スコアなら事故回避
+                    if (minigameScore && minigameScore > 50 && (evt.type === 'accident' || evt.type === 'delay')) {
+                        continue;
+                    }
+
+                    if (Math.random() * 100 < evt.probability) {
+                        // イベント発生！
+                        result.event = evt;
+                        result.message = evt.description;
+
+                        // 効果適用
+                        if (evt.effects.late) {
+                            // ミニゲーム高スコアなら遅刻回避のチャンスあり？
+                            // まあ今回は事故回避だけで十分メリット
+                            result.late = true;
+                            user.isLate = true;
+                        }
+                        if (evt.effects.stress) {
+                            // user.stress += evt.effects.stress; // stressフィールドないのでhappinessを減らす
+                            user.happiness = Math.max(0, (user.happiness || 50) - evt.effects.stress);
+                            result.stressChange = evt.effects.stress;
+                        }
+                        if (evt.effects.cost) {
+                            user.balance -= evt.effects.cost;
+                            result.cost += evt.effects.cost;
+
+                            // 履歴
+                            user.transactions.push({
+                                id: crypto.randomUUID(),
+                                type: 'payment',
+                                amount: evt.effects.cost,
+                                senderId: user.id,
+                                description: `通勤トラブル: ${evt.type}`,
+                                timestamp: Date.now()
+                            });
+                        }
+                        if (evt.effects.health) {
+                            user.health = Math.max(0, (user.health || 100) + evt.effects.health);
+                        }
+
+                        break; // 1回につき1イベントまで
+                    }
+                }
+
+                // 3. 履歴保存
+                user.lastCommuteTurn = state.turn;
+                if (result.cost > 0) {
+                    user.transactions.push({
+                        id: crypto.randomUUID(),
+                        type: 'payment',
+                        amount: result.cost,
+                        senderId: user.id,
+                        description: `通勤費 (${method})`,
+                        timestamp: Date.now()
+                    });
+                }
+
+                return state;
+            });
+
+            return NextResponse.json(result);
         }
 
         if (type === 'update_shop_menu') {
@@ -754,6 +1147,62 @@ export async function POST(request: NextRequest) {
                 return state;
             });
             return NextResponse.json({ success: true });
+        }
+
+        // ガチャを回す
+        if (type === 'play_gacha') {
+            const { GACHA_ITEMS } = await import('@/lib/gameData');
+            let resultItems: any[] = [];
+
+            updateGameState((state) => {
+                const user = state.users.find(u => u.id === requesterId);
+                const { count } = details ? JSON.parse(details) : { count: 1 };
+                const cost = count * 300; // 1回300円 hardcoded for now
+
+                if (user && user.balance >= cost) {
+                    user.balance -= cost;
+
+                    for (let i = 0; i < count; i++) {
+                        const rand = Math.random() * 100;
+                        let rarity = 'common';
+                        if (rand < 5) rarity = 'legendary';
+                        else if (rand < 20) rarity = 'epic';
+                        else if (rand < 50) rarity = 'rare';
+
+                        const pool = GACHA_ITEMS.filter(item => item.rarity === rarity);
+                        // Fallback to common if pool is empty (shouldn't happen)
+                        const targetPool = pool.length > 0 ? pool : GACHA_ITEMS.filter(item => item.rarity === 'common');
+
+                        const item = targetPool[Math.floor(Math.random() * targetPool.length)];
+
+                        // Add to user collection
+                        if (!user.gachaCollection) user.gachaCollection = [];
+                        user.gachaCollection.push(item.id);
+
+                        // Also add to inventory logic if needed, but for now just collection ID
+                        // For display, we push full item to result
+                        resultItems.push(item);
+                    }
+
+                    // Add history
+                    if (!user.transactions) user.transactions = [];
+                    user.transactions.push({
+                        id: crypto.randomUUID(),
+                        type: 'payment',
+                        amount: cost,
+                        senderId: user.id,
+                        description: `ガチャ (${count}回)`,
+                        timestamp: Date.now()
+                    });
+                }
+                return state;
+            });
+
+            if (resultItems.length > 0) {
+                return NextResponse.json({ success: true, items: resultItems });
+            } else {
+                return NextResponse.json({ success: false, error: '資金不足またはエラー' });
+            }
         }
 
         if (type === 'restock_item') {
@@ -837,43 +1286,7 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ success: true });
         }
 
-        // ガチャを回す
-        if (type === 'play_gacha') {
-            let result: any = null;
 
-            updateGameState((state) => {
-                const user = state.users.find(u => u.id === requesterId);
-                if (!user || user.balance < 100) return state;
-
-                // 100枚消費
-                user.balance -= 100;
-
-                // ランダム抽選
-                const { GACHA_ITEMS } = require('@/lib/gameData');
-                const random = Math.random() * 100;
-                let cumulative = 0;
-
-                for (const item of GACHA_ITEMS) {
-                    cumulative += item.dropRate;
-                    if (random <= cumulative) {
-                        result = item;
-                        break;
-                    }
-                }
-
-                // コレクションに追加
-                if (result) {
-                    if (!user.gachaCollection) user.gachaCollection = [];
-                    if (!user.gachaCollection.includes(result.id)) {
-                        user.gachaCollection.push(result.id);
-                    }
-                }
-
-                return state;
-            });
-
-            return NextResponse.json({ success: true, item: result });
-        }
 
         // カタログから仕入れ
         // カタログから仕入れ
@@ -885,8 +1298,17 @@ export async function POST(request: NextRequest) {
                 const user = state.users.find(u => u.id === requesterId);
                 if (!user) return state;
 
+
                 const totalCost = cost * stock;
                 if (user.balance < totalCost) return state;
+
+                // 転売チェック (Phase 6)
+                const checkResult = checkResalePrice(cost, price);
+                if (checkResult !== 'ok') {
+                    const message = `転売疑惑: ${stock}個を仕入れ値${cost}円に対して${price}円で販売設定 (倍率: ${(price / cost).toFixed(1)}倍)`;
+                    // 警告or重大ログ
+                    logAudit(user, 'resale_attempt', JSON.stringify({ itemId, cost, price, stock }), checkResult);
+                }
 
                 user.balance -= totalCost;
 
@@ -1080,8 +1502,396 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ success: true, total: totalCost, discount });
         }
 
+        if (type === 'city_build_place') {
+            const { landId, name, type: placeType } = JSON.parse(details || '{}');
+
+            if (!landId || !name || !placeType) {
+                return NextResponse.json({ error: 'Missing build details' }, { status: 400 });
+            }
+
+            updateGameState((state) => {
+                const user = state.users.find(u => u.id === requesterId);
+                const land = state.lands.find(l => l.id === landId);
+
+                if (user && land) {
+                    // バリデーション
+                    if (land.ownerId !== user.id) return state; // 自分の土地でない
+                    if (land.placeId) return state; // 既に建物がある
+
+                    const COST_MAP: Record<string, number> = {
+                        'restaurant': 5000000,
+                        'retail': 4000000,
+                        'office': 8000000,
+                        'service': 3000000,
+                        'factory': 10000000
+                    };
+                    const cost = COST_MAP[placeType] || 5000000;
+
+                    if (user.balance < cost) return state;
+
+                    // 支払い
+                    user.balance -= cost;
+
+                    // Place生成
+                    const newPlaceId = crypto.randomUUID();
+                    const newPlace: any = { // Place型に合わせて詳細化が必要だが一旦anyで回避
+                        id: newPlaceId,
+                        ownerId: user.id,
+                        name,
+                        type: placeType,
+                        location: {
+                            lat: land.location.lat,
+                            lng: land.location.lng,
+                            address: land.address,
+                            landId: land.id
+                        },
+                        status: 'construction', // 最初は建設中
+                        level: 1,
+                        employees: [],
+                        stats: {
+                            capital: cost, // 初期資本＝建設費とする
+                            sales: 0,
+                            expenses: 0,
+                            profit: 0,
+                            reputation: 3,
+                            customerCount: 0
+                        },
+                        licenses: [],
+                        insurances: []
+                    };
+
+                    // データ更新
+                    if (!state.places) state.places = [];
+                    state.places.push(newPlace);
+
+                    land.placeId = newPlaceId;
+
+                    if (!user.ownedPlaces) user.ownedPlaces = [];
+                    user.ownedPlaces.push(newPlaceId);
+
+                    // 履歴追加
+                    if (!user.transactions) user.transactions = [];
+                    user.transactions.push({
+                        id: crypto.randomUUID(),
+                        type: 'payment',
+                        amount: cost,
+                        senderId: user.id,
+                        description: `施設建設 (${name})`,
+                        timestamp: Date.now()
+                    });
+
+                    logAudit(user, 'high_value_transaction', `施設建設: ${name} (${cost}円)`, 'info');
+                }
+                return state;
+            });
+            return NextResponse.json({ success: true, message: '建設を開始しました' });
+        }
+
+        // =====================================================
+        // PHASE 4: 銀行・シミュレーション
+        // =====================================================
+
+        // -----------------------------------------------------
+        // 融資申し込み (bank_loan_apply)
+        // -----------------------------------------------------
+        if (type === 'bank_loan_apply') {
+            const { amount, purpose, months } = JSON.parse(details);
+            const loanAmount = Number(amount);
+
+            updateGameState((state) => {
+                const user = state.users.find(u => u.id === requesterId);
+                const { calculateCreditScore } = require('@/lib/simulation'); // Dynamic import to avoid circular dependency if any
+
+                if (user) {
+                    // 信用スコア更新
+                    user.creditScore = calculateCreditScore(user);
+                    const score = user.creditScore || 500;
+
+                    // 審査ロジック
+                    const maxLoan = score * 10000; // 500点 -> 500万, 800点 -> 800万
+                    let interestRate = state.economy.interestRate + (1000 - score) / 100; // ベース金利 + リスクプレミアム
+
+                    // 不正スコアによるペナルティ
+                    if (user.suspicionScore && user.suspicionScore > 0) {
+                        interestRate += user.suspicionScore * 0.1; // 金利上乗せ
+                        if (user.suspicionScore > 50 && Math.random() < 0.8) {
+                            // 疑惑が高いと高確率で審査落ち
+                            return state;
+                        }
+                    }
+
+                    if (loanAmount > maxLoan) {
+                        return state; // 審査落ち (Reject response handled by returning unchanged state logic limitation? Need better error handling but ok for now)
+                    }
+
+                    // 監査ログ (高額融資の場合)
+                    if (loanAmount >= 10000000) {
+                        logAudit(user, 'high_value_transaction', `高額融資実行: ${loanAmount}円`, 'info');
+                    }
+
+                    // 融資実行
+                    user.balance += loanAmount;
+
+                    if (!user.loans) user.loans = [];
+                    const totalInterest = loanAmount * (interestRate / 100) * (months / 12); // Simple interest for now
+                    const totalRepay = loanAmount + totalInterest;
+
+                    user.loans.push({
+                        id: crypto.randomUUID(),
+                        name: purpose || '一般融資',
+                        amount: loanAmount,
+                        remainingAmount: totalRepay,
+                        interestRate: interestRate,
+                        isFixedRate: true,
+                        monthlyPayment: Math.ceil(totalRepay / months),
+                        nextPaymentTurn: state.turn + 1,
+                        status: 'active',
+                        borrowedAt: Date.now()
+                    });
+
+                    user.transactions.push({
+                        id: crypto.randomUUID(), type: 'income', amount: loanAmount, senderId: 'BANK', description: `融資実行: ${purpose}`, timestamp: Date.now()
+                    });
+                }
+                return state;
+            });
+            // Note: Error handling for logic rejection is implicit (balance doesn't increase)
+            // Ideally we check state diff or return explicit error, but sticking to pattern
+            return NextResponse.json({ success: true, message: '融資審査が完了しました' });
+        }
+
+        // -----------------------------------------------------
+        // 任意返済 (bank_repay)
+        // -----------------------------------------------------
+        if (type === 'bank_repay') {
+            const { loanId, repaymentAmount } = JSON.parse(details);
+            updateGameState((state) => {
+                const user = state.users.find(u => u.id === requesterId);
+                if (user && user.loans) {
+                    const loan = user.loans.find(l => l.id === loanId);
+                    if (loan && loan.status === 'active') {
+                        const pay = Math.min(Number(repaymentAmount), loan.remainingAmount, user.balance);
+                        if (pay > 0) {
+                            user.balance -= pay;
+                            loan.remainingAmount -= pay;
+                            if (loan.remainingAmount <= 0) {
+                                loan.remainingAmount = 0;
+                                loan.status = 'paid_off';
+                                if (!user.creditScore) user.creditScore = 500;
+                                user.creditScore += 20; // Bonus
+                            }
+
+                            user.transactions.push({
+                                id: crypto.randomUUID(), type: 'repay', amount: pay, senderId: user.id, description: `繰り上げ返済: ${loan.name}`, timestamp: Date.now()
+                            });
+                        }
+                    }
+                }
+                return state;
+            });
+            return NextResponse.json({ success: true });
+        }
+
+        // -----------------------------------------------------
+        // 銀行振込 (bank_transfer)
+        // -----------------------------------------------------
+        if (type === 'bank_transfer') {
+            const { targetId, transferAmount } = JSON.parse(details);
+            const val = Number(transferAmount);
+
+            updateGameState((state) => {
+                const sender = state.users.find(u => u.id === requesterId);
+                const receiver = state.users.find(u => u.id === targetId);
+
+                if (sender && receiver && sender.balance >= val) {
+                    sender.balance -= val;
+                    receiver.balance += val; // Direct to balance? or Deposit? Let's say balance for simplicity
+
+                    sender.transactions.push({
+                        id: crypto.randomUUID(), type: 'transfer', amount: val, senderId: sender.id, receiverId: receiver.id, description: `振込送信 -> ${receiver.name}`, timestamp: Date.now()
+                    });
+                    receiver.transactions.push({
+                        id: crypto.randomUUID(), type: 'income', amount: val, senderId: sender.id, receiverId: receiver.id, description: `振込受信 <- ${sender.name}`, timestamp: Date.now()
+                    });
+                }
+                return state;
+            });
+            return NextResponse.json({ success: true });
+        }
+
+        // -----------------------------------------------------
+        // 保険加入 (insurance_buy)
+        // -----------------------------------------------------
+        if (type === 'insurance_buy') {
+            const { insuranceType } = JSON.parse(details);
+            // hardcoded definitions for now
+            const INSURANCE_PLANS = {
+                'fire': { name: '火災保険', premium: 5000, coverage: 10000000 },
+                'health': { name: '医療保険', premium: 3000, coverage: 500000 },
+                'worker_comp': { name: '労災保険', premium: 1000, coverage: 2000000 }
+            };
+            const plan = INSURANCE_PLANS[insuranceType as keyof typeof INSURANCE_PLANS];
+
+            if (plan) {
+                updateGameState((state) => {
+                    const user = state.users.find(u => u.id === requesterId);
+                    if (user) {
+                        if (!user.insurances) user.insurances = [];
+                        if (user.insurances.some(i => i.type === insuranceType && (!i.expiresAt || i.expiresAt > Date.now()))) {
+                            return state; // Already joined
+                        }
+
+                        // Initial payment? Or just sign contract? Let's take first premium
+                        if (user.balance >= plan.premium) {
+                            user.balance -= plan.premium;
+                            user.insurances.push({
+                                id: crypto.randomUUID(),
+                                type: insuranceType as any,
+                                name: plan.name,
+                                premium: plan.premium,
+                                coverageAmount: plan.coverage,
+                                joinedAt: Date.now(),
+                                expiresAt: null // ongoing
+                            });
+                            user.transactions.push({
+                                id: crypto.randomUUID(), type: 'payment', amount: plan.premium, senderId: user.id, description: `保険加入: ${plan.name}`, timestamp: Date.now()
+                            });
+
+                            if (insuranceType === 'health') {
+                                user.isInsured = true; // Legacy flag sync
+                            }
+                        }
+                    }
+                    return state;
+                });
+                return NextResponse.json({ success: true });
+            }
+            return NextResponse.json({ success: false, message: 'Invalid plan' });
+        }
+
+        // -----------------------------------------------------
+        // 店舗別ポイント交換アイテム設定 (update_point_exchange_items)
+        // -----------------------------------------------------
+        if (type === 'update_point_exchange_items') {
+            const { items } = JSON.parse(details);
+            // items: PointExchangeItem[]
+
+            updateGameState((state) => {
+                const user = state.users.find(u => u.id === requesterId);
+                if (user) {
+                    user.pointExchangeItems = items;
+                }
+                return state;
+            });
+            return NextResponse.json({ success: true, message: '交換アイテムを更新しました' });
+        }
+
+        // -----------------------------------------------------
+        // 店舗別ポイント交換実行 (exchange_shop_item)
+        // -----------------------------------------------------
+        if (type === 'exchange_shop_item') {
+            const { shopOwnerId, itemId } = JSON.parse(details);
+
+            updateGameState((state) => {
+                const user = state.users.find(u => u.id === requesterId);
+                const shopOwner = state.users.find(u => u.id === shopOwnerId);
+
+                if (!user || !shopOwner) return state;
+
+                // 対象のポイントカードを探す
+                const card = user.pointCards?.find(c => c.shopOwnerId === shopOwnerId);
+                if (!card) return state; // ポイントカードを持っていない
+
+                // 交換アイテムを探す
+                const item = shopOwner.pointExchangeItems?.find(i => i.id === itemId);
+                if (!item) return state; // アイテムが存在しない
+
+                // コストチェック
+                if (card.points < item.pointCost) return state;
+
+                // 在庫チェック (在庫管理する場合)
+                if (item.stock !== undefined && item.stock <= 0) return state;
+
+                // ポイント消費
+                card.points -= item.pointCost;
+
+                // 在庫減少
+                if (item.stock !== undefined) {
+                    item.stock -= 1;
+                    item.exchangedCount = (item.exchangedCount || 0) + 1;
+                }
+
+                // ユーザーにアイテム付与
+                // NOTE: ここでは簡略化のため inventory に追加するロジックにするが、
+                // 実際には category に応じて furniture, pets, recipes など適切な場所に追加すべき
+                // 今回は inventory に統一、または category別処理を入れる
+
+                // とりあえずインベントリへ
+                if (!user.inventory) user.inventory = [];
+                // 既存アイテムがあればスタック、なければ新規
+                // itemId は UUID なのでユニーク前提だが、同じアイテムIDの場合はスタック
+                const existingInv = user.inventory.find(inv => inv.itemId === item.id); // item.id is unique exchange item id
+
+                // 交換アイテムのIDは交換所内でのIDなので、実体アイテムとしてのIDが必要かもしれない
+                // ここでは「交換アイテムそのもの」をインベントリに入れる（名前と説明をコピー）
+                if (existingInv) {
+                    existingInv.quantity += 1;
+                } else {
+                    user.inventory.push({
+                        id: crypto.randomUUID(),
+                        itemId: item.id, // source id
+                        name: item.name,
+                        quantity: 1,
+                        // type: item.category // need to extend InventoryItem type if strictly typed
+                    });
+                }
+
+                // 履歴
+                if (!user.transactions) user.transactions = [];
+                user.transactions.push({
+                    id: crypto.randomUUID(),
+                    type: 'payment',
+                    amount: 0,
+                    description: `ポイント交換: ${item.name} (${shopOwner.shopName || shopOwner.name}) -${item.pointCost}pt`,
+                    timestamp: Date.now()
+                });
+
+                // オーナー側にも通知履歴入れる？ (任意)
+
+                return state;
+            });
+
+            return NextResponse.json({ success: true, message: '交換が完了しました' });
+        }
+
+        // -----------------------------------------------------
+        // ターン経過処理 (next_turn)
+        // -----------------------------------------------------
+        if (type === 'next_turn') {
+            const { simulateTurn } = require('@/lib/simulation');
+
+            updateGameState((state) => {
+                // 1. Increment Turn
+                state.turn += 1;
+
+                // 2. Run Simulation
+                const newState = simulateTurn(state);
+
+                // 3. Reset Timer (if needed by client logic, or client calls timer_reset separately)
+                // Let's reset interval helpers
+                newState.timeRemaining = newState.settings.turnDuration;
+                newState.lastTick = Date.now();
+
+                return newState;
+            });
+            return NextResponse.json({ success: true, message: '新しいターンが始まりました' });
+        }
+
+        // 既存の汎用リクエスト保存処理 (他のアクション用)
+
         return NextResponse.json({ success: true, request: newRequest });
     } catch (error) {
         return NextResponse.json({ error: 'Failed to submit action' }, { status: 500 });
     }
 }
+

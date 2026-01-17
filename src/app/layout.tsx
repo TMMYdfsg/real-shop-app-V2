@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { GameProvider } from "@/context/GameContext";
+import { GlobalSalesNotification } from "@/components/notifications/GlobalSalesNotification";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -16,6 +17,7 @@ export default function RootLayout({
     <html lang="ja">
       <body>
         <GameProvider>
+          <GlobalSalesNotification />
           {children}
         </GameProvider>
       </body>

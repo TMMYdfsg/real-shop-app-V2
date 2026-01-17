@@ -1,6 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { GameState } from '@/types';
+import { generateLands } from '@/lib/cityData';
 
 const DATA_FILE_PATH = path.join(process.cwd(), 'data.json');
 
@@ -87,23 +88,67 @@ const INITIAL_STATE: GameState = {
         }
     ],
     activeEvents: [], // アクティブなイベント
-    properties: [] // 不動産リスト
+    properties: [], // 不動産リスト
+
+    // City Simulator Data
+    lands: generateLands(), // 初期化
+    places: [],
+
+    // Phase 4: Simulation
+    economy: {
+        status: 'normal',
+        interestRate: 5.0, // 5%
+        priceIndex: 100,
+        marketTrend: 'stable',
+        taxRateAdjust: 0,
+        lastUpdateTurn: 0
+    },
+    environment: {
+        weather: 'sunny',
+        temperature: 20,
+        season: 'spring',
+        cityInfrastructure: {
+            power: 100,
+            water: 100,
+            network: 100
+        },
+        securityLevel: 100
+    }
 };
 
 // データを読み込む
 export function getGameState(): GameState {
     try {
         if (!fs.existsSync(DATA_FILE_PATH)) {
+            // 初期状態の保存
             saveGameState(INITIAL_STATE);
             return INITIAL_STATE;
         }
         const data = fs.readFileSync(DATA_FILE_PATH, 'utf-8');
-        return JSON.parse(data);
+        const state = JSON.parse(data);
+
+        // マイグレーション / 初期化漏れ対策
+        if (!state.lands || state.lands.length === 0) {
+            state.lands = generateLands();
+        }
+        if (!state.places) {
+            state.places = [];
+        }
+        // Phase 4 Migration
+        if (!state.economy) {
+            state.economy = INITIAL_STATE.economy;
+        }
+        if (!state.environment) {
+            state.environment = INITIAL_STATE.environment;
+        }
+
+        return state;
     } catch (error) {
         console.error('Failed to read game state:', error);
         return INITIAL_STATE;
     }
 }
+
 
 // データを保存する
 export function saveGameState(state: GameState): void {

@@ -114,6 +114,17 @@ export function processGameTick(state: GameState): { newState: GameState, hasCha
                             if (recessionEvent) sales = Math.floor(sales * recessionEvent.effectValue);
 
                             u.balance += sales;
+
+                            // 履歴追加 (通知トリガー用)
+                            if (!u.transactions) u.transactions = [];
+                            u.transactions.push({
+                                id: crypto.randomUUID(),
+                                type: 'income',
+                                amount: sales,
+                                senderId: 'customer_sim', // システムによる一般客
+                                description: `売上: 一般客 (${customers}名)`,
+                                timestamp: Date.now()
+                            });
                         }
                     }
 
@@ -209,6 +220,17 @@ export function processGameTick(state: GameState): { newState: GameState, hasCha
                             const max = template?.maxPayment ?? 1000;
                             const sales = Math.floor(min + Math.random() * (max - min));
                             targetUser.balance += sales;
+
+                            // 履歴追加
+                            if (!targetUser.transactions) targetUser.transactions = [];
+                            targetUser.transactions.push({
+                                id: crypto.randomUUID(),
+                                type: 'income',
+                                amount: sales,
+                                senderId: npc.id,
+                                description: `売上: ${npc.name}`,
+                                timestamp: now
+                            });
 
                             newState.news.unshift({
                                 id: crypto.randomUUID(),

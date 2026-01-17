@@ -4,17 +4,20 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
+import { PlayerIcon } from '@/components/ui/PlayerIcon';
 import { motion, AnimatePresence } from 'framer-motion';
 import { VARIANTS, TRANSITIONS } from '@/lib/animation/tokens';
+import { User } from '@/types';
 
 interface SidebarProps {
     title?: string;
     items: { label: string; path: string; icon: string }[];
     role: 'banker' | 'player';
+    player?: User; // プレイヤー情報を追加
     children?: React.ReactNode;
 }
 
-export const Sidebar: React.FC<SidebarProps> = ({ title, items, role, children }) => {
+export const Sidebar: React.FC<SidebarProps> = ({ title, items, role, player, children }) => {
     const pathname = usePathname();
     const [isOpen, setIsOpen] = useState(false);
 
@@ -83,14 +86,29 @@ export const Sidebar: React.FC<SidebarProps> = ({ title, items, role, children }
                             }}
                         >
                             {title && (
-                                <motion.h2
+                                <motion.div
                                     initial={{ opacity: 0, y: -20 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ delay: 0.2 }}
-                                    style={{ marginBottom: '2rem', padding: '0 0.5rem', color: 'var(--accent-color)', fontWeight: 'bold' }}
+                                    style={{
+                                        marginBottom: '2rem',
+                                        padding: '0 0.5rem',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '0.75rem'
+                                    }}
                                 >
-                                    {title}
-                                </motion.h2>
+                                    {player && (
+                                        <PlayerIcon
+                                            playerIcon={player.playerIcon}
+                                            playerName={player.name}
+                                            size={48}
+                                        />
+                                    )}
+                                    <h2 style={{ color: 'var(--accent-color)', fontWeight: 'bold', margin: 0 }}>
+                                        {title}
+                                    </h2>
+                                </motion.div>
                             )}
 
                             <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
