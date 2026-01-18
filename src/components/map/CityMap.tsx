@@ -54,10 +54,9 @@ const CityMap: React.FC<CityMapProps> = ({
             addLog('API Key Present');
 
             try {
-                addLog('Setting options...');
                 setOptions({
-                    apiKey: apiKey,
-                    version: "weekly",
+                    key: apiKey,
+                    v: "weekly",
                     libraries: ["places", "marker", "routes", "geometry"]
                 });
 
