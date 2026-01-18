@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import { GameState } from '@/types';
-import { generateLands } from '@/lib/cityData';
+import { generateLands, BASE_LAT, BASE_LNG, GRID_SIZE_LAT, GRID_SIZE_LNG, GRID_ROWS, GRID_COLS } from '@/lib/cityData';
 
 const DATA_FILE_PATH = path.join(process.cwd(), 'data.json');
 
@@ -92,7 +92,44 @@ const INITIAL_STATE: GameState = {
 
     // City Simulator Data
     lands: generateLands(), // 初期化
-    places: [],
+    places: [
+        {
+            id: 'place_dealer',
+            ownerId: 'system',
+            name: 'カーディーラー・丸の内',
+            type: 'retail',
+            location: {
+                lat: BASE_LAT + (5 - GRID_ROWS / 2) * GRID_SIZE_LAT,
+                lng: BASE_LNG + (5 - GRID_COLS / 2) * GRID_SIZE_LNG,
+                address: '東京都千代田区丸の内 6-6',
+                landId: '5-5'
+            },
+            status: 'active',
+            level: 3,
+            employees: [],
+            stats: { capital: 100000000, sales: 0, expenses: 0, profit: 0, reputation: 5, customerCount: 0 },
+            licenses: [],
+            insurances: []
+        },
+        {
+            id: 'place_homecenter',
+            ownerId: 'system',
+            name: 'ホームセンター・丸の内',
+            type: 'retail',
+            location: {
+                lat: BASE_LAT + (5 - GRID_ROWS / 2) * GRID_SIZE_LAT,
+                lng: BASE_LNG + (15 - GRID_COLS / 2) * GRID_SIZE_LNG,
+                address: '東京都千代田区丸の内 6-16',
+                landId: '5-15'
+            },
+            status: 'active',
+            level: 2,
+            employees: [],
+            stats: { capital: 50000000, sales: 0, expenses: 0, profit: 0, reputation: 5, customerCount: 0 },
+            licenses: [],
+            insurances: []
+        }
+    ],
 
     // Phase 4: Simulation
     economy: {
@@ -113,7 +150,9 @@ const INITIAL_STATE: GameState = {
             network: 100
         },
         securityLevel: 100
-    }
+    },
+    eventRevision: 0,
+    processedIdempotencyKeys: []
 };
 
 // データを読み込む
@@ -131,8 +170,8 @@ export function getGameState(): GameState {
         if (!state.lands || state.lands.length === 0) {
             state.lands = generateLands();
         }
-        if (!state.places) {
-            state.places = [];
+        if (!state.places || state.places.length === 0) {
+            state.places = INITIAL_STATE.places;
         }
         // Phase 4 Migration
         if (!state.economy) {
@@ -140,6 +179,12 @@ export function getGameState(): GameState {
         }
         if (!state.environment) {
             state.environment = INITIAL_STATE.environment;
+        }
+        if (state.eventRevision === undefined) {
+            state.eventRevision = 0;
+        }
+        if (!state.processedIdempotencyKeys) {
+            state.processedIdempotencyKeys = [];
         }
 
         return state;
@@ -163,6 +208,10 @@ export function saveGameState(state: GameState): void {
 export function updateGameState(updater: (state: GameState) => GameState): GameState {
     const currentState = getGameState();
     const newState = updater(currentState);
+
+    // Auto-increment revision on any update
+    newState.eventRevision = (newState.eventRevision || 0) + 1;
+
     saveGameState(newState);
     return newState;
 }

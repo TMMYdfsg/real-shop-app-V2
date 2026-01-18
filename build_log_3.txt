@@ -1,0 +1,23 @@
+
+> real-shop-app-v2@0.1.0 build
+> next build
+
+   笆ｲ Next.js 15.1.0
+   - Environments: .env.local
+
+   Creating an optimized production build ...
+ 笨・Compiled successfully
+   Skipping linting
+   Checking validity of types ...
+Failed to compile.
+
+./src/app/api/setup/user/route.ts:16:15
+Type error: Type '{ id: string; name: any; role: UserRole; balance: number; deposit: number; debt: number; job: any; popularity: number; happiness: number; rating: number; inventory: never[]; stocks: {}; forbiddenStocks: {}; isForbiddenUnlocked: false; transactions: never[]; pointCards: never[]; }' is missing the following properties from type 'User': employmentStatus, jobHistory, shopItems, ownedLands, ownedPlaces
+
+  14 |         }
+  15 |
+> 16 |         const newUser: User = {
+     |               ^
+  17 |             id: crypto.randomUUID(), // Node 19+ or available in Edge/Workers
+  18 |             name,
+  19 |             role: role as Role,

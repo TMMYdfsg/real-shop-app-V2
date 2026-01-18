@@ -764,7 +764,7 @@ export async function POST(req: NextRequest) {
                         u.rating = 0;
                         u.job = 'unemployed';
                         u.jobType = 'normal';
-                        u.items = [];
+                        u.inventory = [];
                         u.stocks = {};
                         u.forbiddenStocks = {};
                         u.isForbiddenUnlocked = false;

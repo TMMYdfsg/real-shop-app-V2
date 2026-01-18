@@ -1,0 +1,24 @@
+
+> real-shop-app-v2@0.1.0 build
+> next build
+
+   笆ｲ Next.js 15.1.0
+   - Environments: .env.local
+
+   Creating an optimized production build ...
+ 笨・Compiled successfully
+   Skipping linting
+   Checking validity of types ...
+Failed to compile.
+
+./src/app/player/[id]/kitchen/page.tsx:99:75
+Type error: Type '{ children: Element; padding: "sm"; className: string; onClick: () => Promise<void>; }' is not assignable to type 'IntrinsicAttributes & CardProps'.
+  Property 'onClick' does not exist on type 'IntrinsicAttributes & CardProps'.
+
+   97 |                             whileTap={{ scale: 0.98 }}
+   98 |                         >
+>  99 |                             <Card padding="sm" className="cursor-pointer" onClick={() => handleBuyIngredient(ing.id)}>
+      |                                                                           ^
+  100 |                                 <div className="flex items-center gap-2">
+  101 |                                     <span className="text-3xl">{ing.emoji}</span>
+  102 |                                     <div className="flex-1">

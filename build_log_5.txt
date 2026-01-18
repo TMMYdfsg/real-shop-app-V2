@@ -1,0 +1,23 @@
+
+> real-shop-app-v2@0.1.0 build
+> next build
+
+   笆ｲ Next.js 15.1.0
+   - Environments: .env.local
+
+   Creating an optimized production build ...
+ 笨・Compiled successfully
+   Skipping linting
+   Checking validity of types ...
+Failed to compile.
+
+./src/app/player/[id]/commute/config/page.tsx:53:17
+Type error: Cannot find name 'refreshState'.
+
+  51 |             if (data.success) {
+  52 |                 alert('騾壼共險ｭ螳壹ｒ菫晏ｭ倥＠縺ｾ縺励◆・・);
+> 53 |                 refreshState();
+     |                 ^
+  54 |                 router.push(`/player/${playerId}`);
+  55 |             } else {
+  56 |                 alert('菫晏ｭ倥↓螟ｱ謨励＠縺ｾ縺励◆: ' + (data.message || 'Unknown error'));

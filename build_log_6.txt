@@ -1,0 +1,24 @@
+
+> real-shop-app-v2@0.1.0 build
+> next build
+
+   笆ｲ Next.js 15.1.0
+   - Environments: .env.local
+
+   Creating an optimized production build ...
+ 笨・Compiled successfully
+   Skipping linting
+   Checking validity of types ...
+Failed to compile.
+
+./src/app/player/[id]/commute/config/page.tsx:258:25
+Type error: Type '{ children: string; fullWidth: true; size: "lg"; onClick: () => Promise<void>; isLoading: boolean; }' is not assignable to type 'IntrinsicAttributes & ButtonProps'.
+  Property 'isLoading' does not exist on type 'IntrinsicAttributes & ButtonProps'.
+
+  256 |                         size="lg"
+  257 |                         onClick={handleSave}
+> 258 |                         isLoading={isSaving}
+      |                         ^
+  259 |                     >
+  260 |                         險ｭ螳壹ｒ菫晏ｭ倥☆繧・[0m
+  261 |                     </Button>

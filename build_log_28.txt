@@ -1,0 +1,23 @@
+
+> real-shop-app-v2@0.1.0 build
+> next build
+
+   笆ｲ Next.js 15.1.0
+   - Environments: .env.local
+
+   Creating an optimized production build ...
+ 笨・Compiled successfully
+   Skipping linting
+   Checking validity of types ...
+Failed to compile.
+
+./src/components/shop-website/WebsiteEditor.tsx:23:26
+Type error: Property 'template' does not exist on type 'ShopWebsite'. Did you mean 'templateId'?
+
+  21 | export const WebsiteEditor: React.FC<WebsiteEditorProps> = ({ currentWebsite, owner, onSave }) => {
+  22 |     const [selectedTemplate, setSelectedTemplate] = useState<TemplateType>(
+> 23 |         (currentWebsite?.template as TemplateType) || 'simple'
+     |                          ^
+  24 |     );
+  25 |     const [primaryColor, setPrimaryColor] = useState(currentWebsite?.customization.primaryColor || '#6366f1');
+  26 |     const [secondaryColor, setSecondaryColor] = useState(currentWebsite?.customization.secondaryColor || '#8b5cf6');

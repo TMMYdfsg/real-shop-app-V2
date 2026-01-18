@@ -5,6 +5,7 @@ interface ButtonProps extends HTMLMotionProps<"button"> {
     variant?: 'primary' | 'secondary' | 'danger' | 'ghost' | 'success' | 'outline';
     size?: 'sm' | 'md' | 'lg';
     fullWidth?: boolean;
+    isLoading?: boolean;
 }
 
 export const Button: React.FC<ButtonProps> = ({
@@ -13,6 +14,7 @@ export const Button: React.FC<ButtonProps> = ({
     size = 'md',
     fullWidth = false,
     className = '',
+    isLoading = false,
     style,
     ...props
 }) => {
@@ -80,8 +82,13 @@ export const Button: React.FC<ButtonProps> = ({
             whileTap={!props.disabled ? { scale: 0.95 } : {}}
             transition={{ type: 'spring', stiffness: 400, damping: 17 }}
             {...props}
+            disabled={props.disabled || isLoading}
         >
-            {children}
+            {isLoading ? (
+                <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span className="animate-spin">⏳</span> {children}
+                </span>
+            ) : children}
         </motion.button>
     );
 };

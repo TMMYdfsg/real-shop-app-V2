@@ -1,0 +1,23 @@
+
+> real-shop-app-v2@0.1.0 build
+> next build
+
+   笆ｲ Next.js 15.1.0
+   - Environments: .env.local
+
+   Creating an optimized production build ...
+ 笨・Compiled successfully
+   Skipping linting
+   Checking validity of types ...
+Failed to compile.
+
+./src/components/shop-website/templates/ElegantTemplate.tsx:161:49
+Type error: Property 'discountType' does not exist on type 'Coupon'.
+
+  159 |                                     </div>
+  160 |                                     <div className="text-2xl font-serif mb-4">
+> 161 |                                         {coupon.discountType === 'percentage'
+      |                                                 ^
+  162 |                                             ? `${coupon.discountValue}% Discount`
+  163 |                                             : `ﾂ･${coupon.discountValue} Off`}
+  164 |                                     </div>

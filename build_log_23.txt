@@ -1,0 +1,23 @@
+
+> real-shop-app-v2@0.1.0 build
+> next build
+
+   笆ｲ Next.js 15.1.0
+   - Environments: .env.local
+
+   Creating an optimized production build ...
+ 笨・Compiled successfully
+   Skipping linting
+   Checking validity of types ...
+Failed to compile.
+
+./src/components/points/PointExchangeManager.tsx:61:15
+Type error: Property 'shopOwnerId' is missing in type '{ exchangedCount: number; name: string; description: string; category: PointExchangeItem["category"]; pointCost: number; emoji: string; stock: number; id: string; }' but required in type 'PointExchangeItem'.
+
+  59 |
+  60 |     const handleSave = () => {
+> 61 |         const newItem: PointExchangeItem = {
+     |               ^
+  62 |             id: editingItem?.id || `item-${Date.now()}`,
+  63 |             ...formData,
+  64 |             exchangedCount: editingItem?.exchangedCount || 0

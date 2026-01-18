@@ -20,10 +20,65 @@ const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 export function GameProvider({ children }: { children: React.ReactNode }) {
     const { data: gameState, error, mutate } = useSWR<GameState>('/api/game', fetcher, {
-        refreshInterval: 2000, // 2秒ごとにポーリング
+        refreshInterval: 0, // SSE導入によりポーリング停止 (0は無効化)
+        revalidateOnFocus: true,
     });
 
     const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+
+    // --- Phase 8: Real-time Sync (SSE) ---
+    useEffect(() => {
+        let eventSource: EventSource | null = null;
+        let reconnectTimeout: NodeJS.Timeout;
+        let retryCount = 0;
+
+        const connectSSE = () => {
+            console.log('Connecting to SSE...');
+            eventSource = new EventSource('/api/events');
+
+            eventSource.onmessage = (event) => {
+                try {
+                    const data = JSON.parse(event.data);
+                    if (data.type === 'game_update') {
+                        console.log('Game update received via SSE, revalidating...', data);
+                        mutate(); // SWRの状態を最新化
+                    } else if (data.type === 'reconnect') {
+                        console.log('Server requested reconnection');
+                        eventSource?.close();
+                        connectSSE();
+                    }
+                } catch (e) {
+                    console.error('Failed to parse SSE message:', e);
+                }
+            };
+
+            eventSource.onopen = () => {
+                console.log('SSE connected');
+                retryCount = 0; // 成功したらリセット
+            };
+
+            eventSource.onerror = (err) => {
+                console.error('SSE error:', err);
+                console.log('SSE ReadyState:', eventSource?.readyState);
+                eventSource?.close();
+
+                // 指数バックオフによる再接続
+                const delay = Math.min(1000 * Math.pow(2, retryCount), 30000);
+                console.log(`Reconnecting in ${delay}ms...`);
+                reconnectTimeout = setTimeout(() => {
+                    retryCount++;
+                    connectSSE();
+                }, delay);
+            };
+        };
+
+        connectSSE();
+
+        return () => {
+            if (eventSource) eventSource.close();
+            if (reconnectTimeout) clearTimeout(reconnectTimeout);
+        };
+    }, [mutate]);
 
     // ローカルストレージからログイン状態復帰 (簡易的)
     useEffect(() => {

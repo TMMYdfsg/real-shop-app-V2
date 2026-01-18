@@ -1,0 +1,23 @@
+
+> real-shop-app-v2@0.1.0 build
+> next build
+
+   笆ｲ Next.js 15.1.0
+   - Environments: .env.local
+
+   Creating an optimized production build ...
+ 笨・Compiled successfully
+   Skipping linting
+   Checking validity of types ...
+Failed to compile.
+
+./src/app/api/setup/user/route.ts:27:13
+Type error: Object literal may only specify known properties, and 'items' does not exist in type 'User'.
+
+  25 |             happiness: 50,
+  26 |             rating: 3, // 蛻晄悄隧穂ｾ｡: 3縺､譏・[39m
+> 27 |             items: [],
+     |             ^
+  28 |             stocks: {},
+  29 |             forbiddenStocks: {},
+  30 |             isForbiddenUnlocked: false,

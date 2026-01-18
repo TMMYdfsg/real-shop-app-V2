@@ -6,15 +6,27 @@ import crypto from 'crypto';
 import { JOB_GAME_CONFIGS, JobType } from '@/lib/jobData';
 import { GACHA_ITEMS } from '@/lib/gameData';
 import { logAudit, checkResalePrice } from '@/lib/audit';
+import { eventManager } from '@/lib/eventManager';
+import { getGameState } from '@/lib/dataStore';
 
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
-        const { type, requesterId, amount, details } = body;
+        const { type, requesterId, amount, details, idempotencyKey } = body;
 
         if (!type || !requesterId) {
             return NextResponse.json({ error: 'Missing fields' }, { status: 400 });
         }
+
+        // --- 1. Idempotency Check ---
+        if (idempotencyKey) {
+            const state = getGameState();
+            if (state.processedIdempotencyKeys?.includes(idempotencyKey)) {
+                return NextResponse.json({ success: true, message: 'Already processed (Idempotent)' });
+            }
+        }
+
+        let eventToBroadcast: any = null;
 
         const newRequest: GameRequest = {
             id: crypto.randomUUID(),
@@ -23,7 +35,8 @@ export async function POST(request: NextRequest) {
             amount: Number(amount) || 0,
             details,
             status: 'pending',
-            timestamp: Date.now()
+            timestamp: Date.now(),
+            idempotencyKey
         };
 
         if (type === 'apply_job') {
@@ -114,10 +127,68 @@ export async function POST(request: NextRequest) {
                         description: `土地購入 (${land.address})`,
                         timestamp: Date.now()
                     });
+
+                    // --- Phase 8: Record Idempotency ---
+                    if (idempotencyKey) state.processedIdempotencyKeys.push(idempotencyKey);
                 }
                 return state;
             });
+            eventManager.broadcast({
+                type: 'STATE_SYNC',
+                payload: { type: 'land_purchased', landId },
+                timestamp: Date.now(),
+                revision: 0 // Will be set or not used directly if we just refresh
+            });
             return NextResponse.json({ success: true, message: '土地を購入しました' });
+        }
+
+        if (type === 'city_buy_address') {
+            const { address, location, polygon, price } = JSON.parse(details);
+            updateGameState((state) => {
+                const user = state.users.find(u => u.id === requesterId);
+                if (user) {
+                    if (user.balance < price) return state;
+
+                    user.balance -= price;
+                    const landId = `addr_${crypto.randomUUID()}`;
+                    const newLand = {
+                        id: landId,
+                        ownerId: user.id,
+                        price,
+                        location,
+                        address,
+                        isForSale: false,
+                        polygon
+                    };
+
+                    if (!state.lands) state.lands = [];
+                    state.lands.push(newLand);
+
+                    if (!user.ownedLands) user.ownedLands = [];
+                    user.ownedLands.push(landId);
+
+                    if (!user.transactions) user.transactions = [];
+                    user.transactions.push({
+                        id: crypto.randomUUID(),
+                        type: 'payment',
+                        amount: price,
+                        senderId: user.id,
+                        description: `住所指定購入 (${address})`,
+                        timestamp: Date.now()
+                    });
+
+                    // --- Phase 8: Record Idempotency ---
+                    if (idempotencyKey) state.processedIdempotencyKeys.push(idempotencyKey);
+                }
+                return state;
+            });
+            eventManager.broadcast({
+                type: 'STATE_SYNC',
+                payload: { type: 'address_land_purchased', address },
+                timestamp: Date.now(),
+                revision: 0
+            });
+            return NextResponse.json({ success: true, message: '住所指定で土地を購入しました' });
         }
 
         if (type === 'city_update_land') {
@@ -404,8 +475,7 @@ export async function POST(request: NextRequest) {
                         timestamp: Date.now()
                     });
 
-                    // ポイント付与
-                    const points = Math.floor(item.price / 100);
+                    const points = Math.floor(item.price * 0.01); // 1% points
                     if (points > 0) {
                         if (!buyer.pointCards) buyer.pointCards = [];
                         let card = buyer.pointCards.find(c => c.shopOwnerId === seller.id);
@@ -415,10 +485,38 @@ export async function POST(request: NextRequest) {
                         }
                         card.points += points;
                     }
+
+                    // --- Phase 8: Record Idempotency ---
+                    if (idempotencyKey) state.processedIdempotencyKeys.push(idempotencyKey);
+
+                    // --- Phase 8: Event Broadcast ---
+                    eventToBroadcast = {
+                        type: 'SALES_NOTIFICATION',
+                        payload: {
+                            buyerName: buyer.name,
+                            itemName: item.name,
+                            price: item.price,
+                            sellerId: seller.id
+                        },
+                        timestamp: Date.now(),
+                        revision: 0
+                    };
                 }
 
                 return state;
             });
+
+            if (eventToBroadcast) {
+                eventManager.broadcast(eventToBroadcast);
+                // Also general sync
+                eventManager.broadcast({
+                    type: 'INVENTORY_UPDATED',
+                    payload: { sellerId: JSON.parse(details).sellerId },
+                    timestamp: Date.now(),
+                    revision: 0
+                });
+            }
+
             return NextResponse.json({ success: true });
         }
 
@@ -937,9 +1035,21 @@ export async function POST(request: NextRequest) {
                         description: `車両購入: ${targetVehicle.name}`,
                         timestamp: Date.now()
                     });
+
+                    // --- Phase 8: Record Idempotency ---
+                    if (idempotencyKey) state.processedIdempotencyKeys.push(idempotencyKey);
                 }
                 return state;
             });
+
+            // --- Phase 8: Event Broadcast ---
+            eventManager.broadcast({
+                type: 'STATE_SYNC',
+                payload: { type: 'vehicle_purchased', vehicleId, requesterId },
+                timestamp: Date.now(),
+                revision: 0
+            });
+
             return NextResponse.json({ success: true, message: `${targetVehicle.name}を購入しました！` });
         }
 
@@ -1652,11 +1762,29 @@ export async function POST(request: NextRequest) {
                     user.transactions.push({
                         id: crypto.randomUUID(), type: 'income', amount: loanAmount, senderId: 'BANK', description: `融資実行: ${purpose}`, timestamp: Date.now()
                     });
+
+                    // --- Phase 8: Record Idempotency ---
+                    if (idempotencyKey) state.processedIdempotencyKeys.push(idempotencyKey);
+
+                    // --- Phase 8: Global Notification ---
+                    eventToBroadcast = {
+                        type: 'ADMIN_MESSAGE',
+                        payload: {
+                            message: `🏦 ${user.name}様に ${loanAmount.toLocaleString()}円 の融資が実行されました。`,
+                            severity: 'info'
+                        },
+                        timestamp: Date.now(),
+                        revision: 0
+                    };
                 }
                 return state;
             });
-            // Note: Error handling for logic rejection is implicit (balance doesn't increase)
-            // Ideally we check state diff or return explicit error, but sticking to pattern
+
+            if (eventToBroadcast) {
+                eventManager.broadcast(eventToBroadcast);
+                eventManager.broadcast({ type: 'STATE_SYNC', payload: { type: 'loan_approved' }, timestamp: Date.now(), revision: 0 });
+            }
+
             return NextResponse.json({ success: true, message: '融資審査が完了しました' });
         }
 
@@ -1684,11 +1812,23 @@ export async function POST(request: NextRequest) {
                             user.transactions.push({
                                 id: crypto.randomUUID(), type: 'repay', amount: pay, senderId: user.id, description: `繰り上げ返済: ${loan.name}`, timestamp: Date.now()
                             });
+
+                            // --- Phase 8: Record Idempotency ---
+                            if (idempotencyKey) state.processedIdempotencyKeys.push(idempotencyKey);
                         }
                     }
                 }
                 return state;
             });
+
+            // --- Phase 8: Event Broadcast ---
+            eventManager.broadcast({
+                type: 'STATE_SYNC',
+                payload: { type: 'loan_repaid', requesterId },
+                timestamp: Date.now(),
+                revision: 0
+            });
+
             return NextResponse.json({ success: true });
         }
 

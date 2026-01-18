@@ -111,7 +111,7 @@ export const SimpleTemplate: React.FC<TemplateProps> = ({ website, owner }) => {
                         クーポン
                     </h2>
                     <div className="space-y-4">
-                        {owner.coupons.filter(c => new Date(c.expiresAt) > new Date()).map((coupon) => (
+                        {owner.coupons.filter(c => c.expiresAt && new Date(c.expiresAt) > new Date()).map((coupon) => (
                             <div
                                 key={coupon.id}
                                 className="bg-white rounded-lg shadow-sm p-4 border-2"
@@ -121,13 +121,11 @@ export const SimpleTemplate: React.FC<TemplateProps> = ({ website, owner }) => {
                                     <div>
                                         <h3 className="font-semibold text-gray-900">{coupon.code}</h3>
                                         <p className="text-sm text-gray-600">
-                                            {coupon.discountType === 'percentage'
-                                                ? `${coupon.discountValue}% OFF`
-                                                : `¥${coupon.discountValue} OFF`}
+                                            {`${coupon.discountPercent}% OFF`}
                                         </p>
                                     </div>
                                     <div className="text-xs text-gray-500">
-                                        {coupon.usageLimit && `残り${coupon.usageLimit}回`}
+                                        {coupon.maxUses && `残り${coupon.maxUses}回`}
                                     </div>
                                 </div>
                             </div>

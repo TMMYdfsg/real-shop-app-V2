@@ -1,0 +1,23 @@
+
+> real-shop-app-v2@0.1.0 build
+> next build
+
+   笆ｲ Next.js 15.1.0
+   - Environments: .env.local
+
+   Creating an optimized production build ...
+ 笨・Compiled successfully
+   Skipping linting
+   Checking validity of types ...
+Failed to compile.
+
+./src/app/player/[id]/shop/vehicles/page.tsx:45:17
+Type error: Cannot find name 'refreshState'.
+
+  43 |             if (data.success) {
+  44 |                 alert(data.message);
+> 45 |                 refreshState();
+     |                 ^
+  46 |             } else {
+  47 |                 alert('繧ｨ繝ｩ繝ｼ: ' + data.message);
+  48 |             }

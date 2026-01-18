@@ -1,0 +1,23 @@
+
+> real-shop-app-v2@0.1.0 build
+> next build
+
+   笆ｲ Next.js 15.1.0
+   - Environments: .env.local
+
+   Creating an optimized production build ...
+ 笨・Compiled successfully
+   Skipping linting
+   Checking validity of types ...
+Failed to compile.
+
+./src/components/minigames/games/DrivingGame.tsx:23:24
+Type error: Expected 1 arguments, but got 0.
+
+  21 |
+  22 |     // Game loop ref
+> 23 |     const requestRef = useRef<number>();
+     |                        ^
+  24 |     const startTimeRef = useRef<number>();
+  25 |
+  26 |     // Objects state

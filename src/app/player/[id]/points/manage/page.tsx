@@ -47,6 +47,7 @@ export default function PointExchangeManagePage() {
             <PointExchangeManager
                 currentItems={currentUser.pointExchangeItems || []}
                 onUpdate={handleUpdate}
+                shopOwnerId={currentUser.id}
             />
         </div>
     );

@@ -149,7 +149,7 @@ export const HorseRaceGame: React.FC<HorseRaceGameProps> = ({ balance, onBet }) 
 
                         <motion.div
                             animate={{ left: `${horse.position}%` }}
-                            transition={{ type: 'linear', duration: 0.05 }}
+                            transition={{ ease: 'linear', duration: 0.05 }}
                             style={{
                                 position: 'absolute',
                                 top: '50%',

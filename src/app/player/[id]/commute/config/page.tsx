@@ -11,7 +11,7 @@ import { VEHICLE_CATALOG } from '@/lib/gameData';
 export default function CommuteConfigPage() {
     const params = useParams();
     const router = useRouter();
-    const { currentUser, refreshState } = useGame();
+    const { currentUser, refresh } = useGame();
     const playerId = params.id as string;
 
     const [region, setRegion] = useState<'urban' | 'rural'>('urban');
@@ -50,7 +50,7 @@ export default function CommuteConfigPage() {
             const data = await res.json();
             if (data.success) {
                 alert('通勤設定を保存しました！');
-                refreshState();
+                refresh();
                 router.push(`/player/${playerId}`);
             } else {
                 alert('保存に失敗しました: ' + (data.message || 'Unknown error'));
@@ -110,8 +110,8 @@ export default function CommuteConfigPage() {
                             <button
                                 onClick={() => setRegion('urban')}
                                 className={`p-4 rounded-xl border-2 transition-all ${region === 'urban'
-                                        ? 'border-indigo-500 bg-indigo-50 text-indigo-700'
-                                        : 'border-gray-200 hover:border-gray-300'
+                                    ? 'border-indigo-500 bg-indigo-50 text-indigo-700'
+                                    : 'border-gray-200 hover:border-gray-300'
                                     }`}
                             >
                                 <div className="text-3xl mb-2">🏙️</div>
@@ -123,8 +123,8 @@ export default function CommuteConfigPage() {
                             <button
                                 onClick={() => setRegion('rural')}
                                 className={`p-4 rounded-xl border-2 transition-all ${region === 'rural'
-                                        ? 'border-green-500 bg-green-50 text-green-700'
-                                        : 'border-gray-200 hover:border-gray-300'
+                                    ? 'border-green-500 bg-green-50 text-green-700'
+                                    : 'border-gray-200 hover:border-gray-300'
                                     }`}
                             >
                                 <div className="text-3xl mb-2">⛰️</div>

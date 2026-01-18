@@ -20,8 +20,8 @@ export const DrivingGame: React.FC<DrivingGameProps> = ({ onComplete, difficulty
     const [lane, setLane] = useState(1);
 
     // Game loop ref
-    const requestRef = useRef<number>();
-    const startTimeRef = useRef<number>();
+    const requestRef = useRef<number | null>(null);
+    const startTimeRef = useRef<number | null>(null);
 
     // Objects state
     const [objects, setObjects] = useState<{ id: number, lane: number, y: number, type: 'obstacle' | 'coin' }[]>([]);
@@ -136,7 +136,7 @@ export const DrivingGame: React.FC<DrivingGameProps> = ({ onComplete, difficulty
     // We used 'lane' state directly in the loop above which captures the INITIAL 'lane' value due to closure.
     // FIX: use a ref for current lane to access it in loop.
     const laneRef = useRef(lane);
-    useEffect(() => laneRef.current = lane, [lane]);
+    useEffect(() => { laneRef.current = lane; }, [lane]);
 
     // Redefine loop to use refs for collision logic
     const updateGame = () => {

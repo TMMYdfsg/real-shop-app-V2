@@ -1,0 +1,23 @@
+
+> real-shop-app-v2@0.1.0 build
+> next build
+
+   笆ｲ Next.js 15.1.0
+   - Environments: .env.local
+
+   Creating an optimized production build ...
+ 笨・Compiled successfully
+   Skipping linting
+   Checking validity of types ...
+Failed to compile.
+
+./src/app/player/[id]/items/page.tsx:9:10
+Type error: Module '"@/types"' has no exported member 'InventoryItem'.
+
+   7 | import { Button } from '@/components/ui/Button';
+   8 | import { Modal } from '@/components/ui/Modal';
+>  9 | import { InventoryItem, ShopItem } from '@/types';
+     |          ^
+  10 | import { INGREDIENTS } from '@/lib/gameData';
+  11 |
+  12 | export default function ItemsPage({ params }: { params: Promise<{ id: string }> }) {

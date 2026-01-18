@@ -10,6 +10,7 @@ import { Modal } from '@/components/ui/Modal';
 interface PointExchangeManagerProps {
     currentItems: PointExchangeItem[];
     onUpdate: (items: PointExchangeItem[]) => void;
+    shopOwnerId: string;
 }
 
 const CATEGORIES = [
@@ -19,7 +20,7 @@ const CATEGORIES = [
     { id: 'special' as const, name: '特別アイテム', emoji: '✨' }
 ];
 
-export const PointExchangeManager: React.FC<PointExchangeManagerProps> = ({ currentItems, onUpdate }) => {
+export const PointExchangeManager: React.FC<PointExchangeManagerProps> = ({ currentItems, onUpdate, shopOwnerId }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingItem, setEditingItem] = useState<PointExchangeItem | null>(null);
     const [formData, setFormData] = useState({
@@ -60,6 +61,7 @@ export const PointExchangeManager: React.FC<PointExchangeManagerProps> = ({ curr
     const handleSave = () => {
         const newItem: PointExchangeItem = {
             id: editingItem?.id || `item-${Date.now()}`,
+            shopOwnerId,
             ...formData,
             exchangedCount: editingItem?.exchangedCount || 0
         };

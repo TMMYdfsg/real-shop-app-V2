@@ -1,0 +1,29 @@
+
+> real-shop-app-v2@0.1.0 build
+> next build
+
+   笆ｲ Next.js 15.1.0
+   - Environments: .env.local
+
+   Creating an optimized production build ...
+ 笨・Compiled successfully
+   Skipping linting
+   Checking validity of types ...
+Failed to compile.
+
+./src/components/shop-website/templates/ElegantTemplate.tsx:128:95
+Type error: No overload matches this call.
+  Overload 1 of 4, '(value: string | number | Date): Date', gave the following error.
+    Argument of type 'number | undefined' is not assignable to parameter of type 'string | number | Date'.
+      Type 'undefined' is not assignable to type 'string | number | Date'.
+  Overload 2 of 4, '(value: string | number): Date', gave the following error.
+    Argument of type 'number | undefined' is not assignable to parameter of type 'string | number'.
+      Type 'undefined' is not assignable to type 'string | number'.
+
+  126 |
+  127 |             {/* 繧ｯ繝ｼ繝昴Φ繧ｻ繧ｯ繧ｷ繝ｧ繝ｳ */}
+> 128 |             {customization.showCoupons && owner.coupons && owner.coupons.filter(c => new Date(c.expiresAt) > new Date()).length > 0 && (
+      |                                                                                               ^
+  129 |                 <div className="max-w-5xl mx-auto px-8 py-16">
+  130 |                     <motion.div
+  131 |                         initial={{ opacity: 0 }}

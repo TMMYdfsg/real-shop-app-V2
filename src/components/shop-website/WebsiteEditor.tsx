@@ -20,7 +20,7 @@ type TemplateType = 'simple' | 'modern' | 'colorful' | 'elegant';
 
 export const WebsiteEditor: React.FC<WebsiteEditorProps> = ({ currentWebsite, owner, onSave }) => {
     const [selectedTemplate, setSelectedTemplate] = useState<TemplateType>(
-        (currentWebsite?.template as TemplateType) || 'simple'
+        (currentWebsite?.templateId as TemplateType) || 'simple'
     );
     const [primaryColor, setPrimaryColor] = useState(currentWebsite?.customization.primaryColor || '#6366f1');
     const [secondaryColor, setSecondaryColor] = useState(currentWebsite?.customization.secondaryColor || '#8b5cf6');
@@ -28,6 +28,7 @@ export const WebsiteEditor: React.FC<WebsiteEditorProps> = ({ currentWebsite, ow
     const [shopDescription, setShopDescription] = useState(currentWebsite?.customization.shopDescription || '');
     const [showProducts, setShowProducts] = useState(currentWebsite?.customization.showProducts ?? true);
     const [showCoupons, setShowCoupons] = useState(currentWebsite?.customization.showCoupons ?? true);
+    const [layout, setLayout] = useState<'single' | 'grid' | 'list'>(currentWebsite?.customization.layout || 'grid');
     const [isPublished, setIsPublished] = useState(currentWebsite?.isPublished ?? false);
 
     const [previewMode, setPreviewMode] = useState(false);
@@ -42,14 +43,15 @@ export const WebsiteEditor: React.FC<WebsiteEditorProps> = ({ currentWebsite, ow
     const handleSave = () => {
         const website: ShopWebsite = {
             ownerId: owner.id,
-            template: selectedTemplate,
+            templateId: selectedTemplate,
             customization: {
                 primaryColor,
                 secondaryColor,
                 welcomeMessage,
                 shopDescription,
                 showProducts,
-                showCoupons
+                showCoupons,
+                layout
             },
             isPublished,
             createdAt: currentWebsite?.createdAt || Date.now(),
@@ -60,14 +62,15 @@ export const WebsiteEditor: React.FC<WebsiteEditorProps> = ({ currentWebsite, ow
 
     const previewWebsite: ShopWebsite = {
         ownerId: owner.id,
-        template: selectedTemplate,
+        templateId: selectedTemplate,
         customization: {
             primaryColor,
             secondaryColor,
             welcomeMessage,
             shopDescription,
             showProducts,
-            showCoupons
+            showCoupons,
+            layout
         },
         isPublished,
         createdAt: Date.now(),

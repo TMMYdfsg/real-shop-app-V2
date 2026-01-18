@@ -6,9 +6,9 @@ export const ANIM = {
         slower: 1.2
     },
     ease: {
-        default: [0.25, 0.1, 0.25, 1.0], // cubic-bezier(0.25, 0.1, 0.25, 1.0) approx to ease
-        outBack: [0.175, 0.885, 0.32, 1.275], // soft bounce
-        inOut: [0.42, 0, 0.58, 1]
+        default: [0.25, 0.1, 0.25, 1.0] as const, // cubic-bezier(0.25, 0.1, 0.25, 1.0) approx to ease
+        outBack: [0.175, 0.885, 0.32, 1.275] as const, // soft bounce
+        inOut: [0.42, 0, 0.58, 1] as const
     }
 };
 

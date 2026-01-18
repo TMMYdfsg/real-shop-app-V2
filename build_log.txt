@@ -1,0 +1,23 @@
+
+> real-shop-app-v2@0.1.0 build
+> next build
+
+   笆ｲ Next.js 15.1.0
+   - Environments: .env.local
+
+   Creating an optimized production build ...
+ 笨・Compiled successfully
+   Skipping linting
+   Checking validity of types ...
+Failed to compile.
+
+./src/app/api/admin/route.ts:767:27
+Type error: Property 'items' does not exist on type 'User'.
+
+  765 |                         u.job = 'unemployed';
+  766 |                         u.jobType = 'normal';
+> 767 |                         u.items = [];
+      |                           ^
+  768 |                         u.stocks = {};
+  769 |                         u.forbiddenStocks = {};
+  770 |                         u.isForbiddenUnlocked = false;

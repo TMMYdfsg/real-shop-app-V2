@@ -6,6 +6,7 @@ import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { motion } from 'framer-motion';
 import { INGREDIENTS, RECIPES } from '@/lib/gameData';
+import { Recipe } from '@/types';
 
 export default function KitchenPage() {
     const { currentUser } = useGame();
@@ -94,8 +95,10 @@ export default function KitchenPage() {
                             key={ing.id}
                             whileHover={{ scale: 1.02 }}
                             whileTap={{ scale: 0.98 }}
+                            onClick={() => handleBuyIngredient(ing.id)}
+                            className="cursor-pointer"
                         >
-                            <Card padding="sm" className="cursor-pointer" onClick={() => handleBuyIngredient(ing.id)}>
+                            <Card padding="sm">
                                 <div className="flex items-center gap-2">
                                     <span className="text-3xl">{ing.emoji}</span>
                                     <div className="flex-1">
@@ -132,15 +135,15 @@ export default function KitchenPage() {
                                             })}
                                         </div>
                                         <div className="text-xs text-green-600 mt-1">
-                                            {recipe.effects.healthBonus && `❤️+${recipe.effects.healthBonus} `}
-                                            {recipe.effects.happinessBonus && `😊+${recipe.effects.happinessBonus} `}
-                                            {recipe.effects.balanceBonus && `💰+${recipe.effects.balanceBonus}`}
+                                            {recipe.effects?.healthBonus && `❤️+${recipe.effects.healthBonus} `}
+                                            {recipe.effects?.happinessBonus && `😊+${recipe.effects.happinessBonus} `}
+                                            {recipe.effects?.balanceBonus && `💰+${recipe.effects.balanceBonus}`}
                                         </div>
                                     </div>
                                     <Button
                                         size="sm"
                                         disabled={!canCook}
-                                        onClick={() => handleCook(recipe.id)}
+                                        onClick={() => handleCook(recipe)}
                                     >
                                         調理
                                     </Button>

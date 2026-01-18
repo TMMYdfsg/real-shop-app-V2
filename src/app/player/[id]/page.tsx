@@ -150,11 +150,13 @@ export default function PlayerHome({ params }: { params: Promise<{ id: string }>
                     <div style={{ fontSize: '0.8rem' }}>人気度</div>
                     <div style={{ fontWeight: 'bold' }}>{currentUser.popularity}</div>
                 </Card>
-                <Card padding="sm" style={{ textAlign: 'center', cursor: 'pointer' }} onClick={() => setShowBank(true)}>
-                    <div style={{ fontSize: '2rem' }}>📊</div>
-                    <div style={{ fontSize: '0.8rem' }}>信用スコア</div>
-                    <div style={{ fontWeight: 'bold' }}>{currentUser.creditScore || 500}</div>
-                </Card>
+                <div style={{ cursor: 'pointer' }} onClick={() => setShowBank(true)}>
+                    <Card padding="sm" style={{ textAlign: 'center' }}>
+                        <div style={{ fontSize: '2rem' }}>📊</div>
+                        <div style={{ fontSize: '0.8rem' }}>信用スコア</div>
+                        <div style={{ fontWeight: 'bold' }}>{currentUser.creditScore || 500}</div>
+                    </Card>
+                </div>
             </div>
 
             {/* Ranking */}

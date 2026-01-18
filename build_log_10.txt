@@ -1,0 +1,23 @@
+
+> real-shop-app-v2@0.1.0 build
+> next build
+
+   笆ｲ Next.js 15.1.0
+   - Environments: .env.local
+
+   Creating an optimized production build ...
+ 笨・Compiled successfully
+   Skipping linting
+   Checking validity of types ...
+Failed to compile.
+
+./src/app/player/[id]/kitchen/page.tsx:138:46
+Type error: 'recipe.effects' is possibly 'undefined'.
+
+  136 |                                         </div>
+  137 |                                         <div className="text-xs text-green-600 mt-1">
+> 138 |                                             {recipe.effects.healthBonus && `笶､・・${recipe.effects.healthBonus} `}
+      |                                              ^
+  139 |                                             {recipe.effects.happinessBonus && `・+${recipe.effects.happinessBonus} `}
+  140 |                                             {recipe.effects.balanceBonus && `腸+${recipe.effects.balanceBonus}`}
+  141 |                                         </div>

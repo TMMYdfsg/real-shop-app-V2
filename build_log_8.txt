@@ -1,0 +1,23 @@
+
+> real-shop-app-v2@0.1.0 build
+> next build
+
+   笆ｲ Next.js 15.1.0
+   - Environments: .env.local
+
+   Creating an optimized production build ...
+ 笨・Compiled successfully
+   Skipping linting
+   Checking validity of types ...
+Failed to compile.
+
+./src/app/player/[id]/kitchen/page.tsx:35:39
+Type error: Cannot find name 'Recipe'.
+
+  33 |     };
+  34 |
+> 35 |     const handleCook = async (recipe: Recipe) => {
+     |                                       ^
+  36 |         if (!currentUser) return;
+  37 |
+  38 |         // 繧ｪ繝悶ず繧ｧ繧ｯ繝亥ｽ｢蠑上・ingredients縺ｫ蟇ｾ蠢・[39m

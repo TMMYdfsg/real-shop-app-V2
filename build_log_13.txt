@@ -1,0 +1,23 @@
+
+> real-shop-app-v2@0.1.0 build
+> next build
+
+   笆ｲ Next.js 15.1.0
+   - Environments: .env.local
+
+   Creating an optimized production build ...
+ 笨・Compiled successfully
+   Skipping linting
+   Checking validity of types ...
+Failed to compile.
+
+./src/app/player/[id]/shop/vehicles/page.tsx:16:26
+Type error: Property 'refreshState' does not exist on type 'GameContextType'.
+
+  14 |     const params = useParams();
+  15 |     const router = useRouter();
+> 16 |     const { currentUser, refreshState } = useGame();
+     |                          ^
+  17 |     const playerId = params.id as string;
+  18 |
+  19 |     const [activeTab, setActiveTab] = useState<'bicycle' | 'car'>('bicycle');

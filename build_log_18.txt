@@ -1,0 +1,23 @@
+
+> real-shop-app-v2@0.1.0 build
+> next build
+
+   笆ｲ Next.js 15.1.0
+   - Environments: .env.local
+
+   Creating an optimized production build ...
+ 笨・Compiled successfully
+   Skipping linting
+   Checking validity of types ...
+Failed to compile.
+
+./src/components/minigames/games/DrivingGame.tsx:139:21
+Type error: Type 'number' is not assignable to type 'void | Destructor'.
+
+  137 |     // FIX: use a ref for current lane to access it in loop.
+  138 |     const laneRef = useRef(lane);
+> 139 |     useEffect(() => laneRef.current = lane, [lane]);
+      |                     ^
+  140 |
+  141 |     // Redefine loop to use refs for collision logic
+  142 |     const updateGame = () => {

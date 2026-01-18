@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { MiniGameConfig } from '@/types';
+import { MiniGameConfig, JobType } from '@/types';
+import { JobType as JobTypeData } from '@/lib/jobData';
 import { MiniGameFrame } from './MiniGameFrame';
 
 // New Animated Components
@@ -75,7 +76,7 @@ export const MiniGameContainer: React.FC<MiniGameContainerProps> = ({ config, on
                 return <TapGame difficulty={config.difficulty} jobId={config.jobId} onScoreUpdate={handleScoreUpdate} />;
 
             case 'choice':
-                return <ChoiceGame jobId={config.jobId} difficulty={config.difficulty} onScoreUpdate={handleScoreUpdate} />;
+                return <ChoiceGame jobId={config.jobId as unknown as JobTypeData} difficulty={config.difficulty} onScoreUpdate={handleScoreUpdate} />;
 
             case 'input':
             case 'puzzle':

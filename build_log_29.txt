@@ -1,0 +1,23 @@
+
+> real-shop-app-v2@0.1.0 build
+> next build
+
+   笆ｲ Next.js 15.1.0
+   - Environments: .env.local
+
+   Creating an optimized production build ...
+ 笨・Compiled successfully
+   Skipping linting
+   Checking validity of types ...
+Failed to compile.
+
+./src/components/shop-website/WebsiteEditor.tsx:46:13
+Type error: Property 'layout' is missing in type '{ primaryColor: string; secondaryColor: string; welcomeMessage: string; shopDescription: string; showProducts: boolean; showCoupons: boolean; }' but required in type '{ primaryColor: string; secondaryColor: string; shopDescription: string; welcomeMessage: string; showProducts: boolean; showCoupons: boolean; layout: "single" | "grid" | "list"; }'.
+
+  44 |             ownerId: owner.id,
+  45 |             template: selectedTemplate,
+> 46 |             customization: {
+     |             ^
+  47 |                 primaryColor,
+  48 |                 secondaryColor,
+  49 |                 welcomeMessage,

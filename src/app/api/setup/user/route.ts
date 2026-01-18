@@ -24,12 +24,18 @@ export async function POST(request: Request) {
             popularity: 50,
             happiness: 50,
             rating: 3, // 初期評価: 3つ星
-            items: [],
+            inventory: [],
             stocks: {},
             forbiddenStocks: {},
             isForbiddenUnlocked: false,
             transactions: [], // 取引履歴
-            pointCards: [] // ポイントカード
+            pointCards: [], // ポイントカード
+            employmentStatus: 'unemployed',
+            jobHistory: [],
+            shopItems: [],
+            ownedLands: [],
+            ownedPlaces: [],
+            shopMenu: []
         };
 
         updateGameState((state) => {

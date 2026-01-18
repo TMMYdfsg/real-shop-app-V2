@@ -13,7 +13,7 @@ import { Vehicle } from '@/types';
 export default function VehicleShopPage() {
     const params = useParams();
     const router = useRouter();
-    const { currentUser, refreshState } = useGame();
+    const { currentUser, refresh } = useGame();
     const playerId = params.id as string;
 
     const [activeTab, setActiveTab] = useState<'bicycle' | 'car'>('bicycle');
@@ -42,7 +42,7 @@ export default function VehicleShopPage() {
             const data = await res.json();
             if (data.success) {
                 alert(data.message);
-                refreshState();
+                refresh();
             } else {
                 alert('エラー: ' + data.message);
             }
@@ -72,7 +72,7 @@ export default function VehicleShopPage() {
             const data = await res.json();
             if (data.success) {
                 alert(data.message);
-                refreshState();
+                refresh();
                 setSelectedVehicle(null);
             } else {
                 alert('購入失敗: ' + (data.message || data.error));
@@ -145,8 +145,8 @@ export default function VehicleShopPage() {
                     <button
                         onClick={() => setActiveTab('bicycle')}
                         className={`flex-1 py-2 text-sm font-bold rounded-md transition-all ${activeTab === 'bicycle'
-                                ? 'bg-white text-indigo-600 shadow-sm'
-                                : 'text-gray-600 hover:text-gray-800'
+                            ? 'bg-white text-indigo-600 shadow-sm'
+                            : 'text-gray-600 hover:text-gray-800'
                             }`}
                     >
                         🚲 自転車
@@ -154,8 +154,8 @@ export default function VehicleShopPage() {
                     <button
                         onClick={() => setActiveTab('car')}
                         className={`flex-1 py-2 text-sm font-bold rounded-md transition-all ${activeTab === 'car'
-                                ? 'bg-white text-indigo-600 shadow-sm'
-                                : 'text-gray-600 hover:text-gray-800'
+                            ? 'bg-white text-indigo-600 shadow-sm'
+                            : 'text-gray-600 hover:text-gray-800'
                             }`}
                     >
                         🚗 自動車

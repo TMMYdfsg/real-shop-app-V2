@@ -1,0 +1,24 @@
+
+> real-shop-app-v2@0.1.0 build
+> next build
+
+   笆ｲ Next.js 15.1.0
+   - Environments: .env.local
+
+   Creating an optimized production build ...
+ 笨・Compiled successfully
+   Skipping linting
+   Checking validity of types ...
+Failed to compile.
+
+./src/app/player/[id]/page.tsx:153:87
+Type error: Type '{ children: Element[]; padding: "sm"; style: { textAlign: "center"; cursor: "pointer"; }; onClick: () => void; }' is not assignable to type 'IntrinsicAttributes & CardProps'.
+  Property 'onClick' does not exist on type 'IntrinsicAttributes & CardProps'.
+
+  151 |                     <div style={{ fontWeight: 'bold' }}>{currentUser.popularity}</div>
+  152 |                 </Card>
+> 153 |                 <Card padding="sm" style={{ textAlign: 'center', cursor: 'pointer' }} onClick={() => setShowBank(true)}>
+      |                                                                                       ^
+  154 |                     <div style={{ fontSize: '2rem' }}>投</div>
+  155 |                     <div style={{ fontSize: '0.8rem' }}>菫｡逕ｨ繧ｹ繧ｳ繧｢</div>
+  156 |                     <div style={{ fontWeight: 'bold' }}>{currentUser.creditScore || 500}</div>

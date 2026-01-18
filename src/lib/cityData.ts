@@ -1,12 +1,12 @@
 import { Land, Place, PlaceType } from '@/types';
 
 // 東京駅周辺の座標を基準とする
-const BASE_LAT = 35.681236;
-const BASE_LNG = 139.767125;
-const GRID_SIZE_LAT = 0.001; // 約110m
-const GRID_SIZE_LNG = 0.001; // 約90m
-const GRID_ROWS = 20; // 20x20のグリッド = 400区画
-const GRID_COLS = 20;
+export const BASE_LAT = 35.681236;
+export const BASE_LNG = 139.767125;
+export const GRID_SIZE_LAT = 0.001; // 約110m
+export const GRID_SIZE_LNG = 0.001; // 約90m
+export const GRID_ROWS = 20; // 20x20のグリッド = 400区画
+export const GRID_COLS = 20;
 
 // グリッドIDの生成 (例: "10-15")
 export const getGridId = (row: number, col: number): string => `${row}-${col}`;

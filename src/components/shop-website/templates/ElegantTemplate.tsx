@@ -125,7 +125,7 @@ export const ElegantTemplate: React.FC<TemplateProps> = ({ website, owner }) => 
             )}
 
             {/* クーポンセクション */}
-            {customization.showCoupons && owner.coupons && owner.coupons.filter(c => new Date(c.expiresAt) > new Date()).length > 0 && (
+            {customization.showCoupons && owner.coupons && owner.coupons.filter(c => c.expiresAt && new Date(c.expiresAt) > new Date()).length > 0 && (
                 <div className="max-w-5xl mx-auto px-8 py-16">
                     <motion.div
                         initial={{ opacity: 0 }}
@@ -141,7 +141,7 @@ export const ElegantTemplate: React.FC<TemplateProps> = ({ website, owner }) => 
                         </h2>
                     </motion.div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {owner.coupons.filter(c => new Date(c.expiresAt) > new Date()).map((coupon, index) => (
+                        {owner.coupons.filter(c => c.expiresAt && new Date(c.expiresAt) > new Date()).map((coupon, index) => (
                             <motion.div
                                 key={coupon.id}
                                 initial={{ opacity: 0, scale: 0.9 }}
@@ -158,13 +158,11 @@ export const ElegantTemplate: React.FC<TemplateProps> = ({ website, owner }) => 
                                         {coupon.code}
                                     </div>
                                     <div className="text-2xl font-serif mb-4">
-                                        {coupon.discountType === 'percentage'
-                                            ? `${coupon.discountValue}% Discount`
-                                            : `¥${coupon.discountValue} Off`}
+                                        {`${coupon.discountPercent}% Discount`}
                                     </div>
-                                    {coupon.usageLimit && (
+                                    {coupon.maxUses && (
                                         <div className="text-sm text-gray-600 font-serif italic">
-                                            Limited to {coupon.usageLimit} uses
+                                            Limited to {coupon.maxUses} uses
                                         </div>
                                     )}
                                 </div>

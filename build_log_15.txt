@@ -1,0 +1,23 @@
+
+> real-shop-app-v2@0.1.0 build
+> next build
+
+   笆ｲ Next.js 15.1.0
+   - Environments: .env.local
+
+   Creating an optimized production build ...
+ 笨・Compiled successfully
+   Skipping linting
+   Checking validity of types ...
+Failed to compile.
+
+./src/components/casino/HorseRaceGame.tsx:152:43
+Type error: Type '"linear"' is not assignable to type 'AnimationGeneratorType | undefined'.
+
+  150 |                         <motion.div
+  151 |                             animate={{ left: `${horse.position}%` }}
+> 152 |                             transition={{ type: 'linear', duration: 0.05 }}
+      |                                           ^
+  153 |                             style={{
+  154 |                                 position: 'absolute',
+  155 |                                 top: '50%',

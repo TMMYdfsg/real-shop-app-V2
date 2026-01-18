@@ -1,0 +1,23 @@
+
+> real-shop-app-v2@0.1.0 build
+> next build
+
+   笆ｲ Next.js 15.1.0
+   - Environments: .env.local
+
+   Creating an optimized production build ...
+ 笨・Compiled successfully
+   Skipping linting
+   Checking validity of types ...
+Failed to compile.
+
+./src/components/minigames/MiniGameContainer.tsx:78:36
+Type error: Type 'string' is not assignable to type 'JobType'.
+
+  76 |
+  77 |             case 'choice':
+> 78 |                 return <ChoiceGame jobId={config.jobId} difficulty={config.difficulty} onScoreUpdate={handleScoreUpdate} />;
+     |                                    ^
+  79 |
+  80 |             case 'input':
+  81 |             case 'puzzle':

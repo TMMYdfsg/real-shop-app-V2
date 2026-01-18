@@ -115,6 +115,7 @@ export const PlayerLayout: React.FC<{ children: React.ReactNode; id: string }> =
 
     const basePath = `/player/${currentUser.id}`;
     const navItems = [
+        { label: 'マップ', path: `${basePath}/map`, icon: '🗺️' },
         { label: '収入', path: `${basePath}`, icon: '💰' },
         { label: '借金', path: `${basePath}/debt`, icon: '💸' },
         { label: '支払い', path: `${basePath}/payment`, icon: '🧾' },

@@ -28,12 +28,20 @@ export interface Product {
 
 export interface Request {
     id: string;
-    type: 'loan' | 'repay' | 'income' | 'tax' | 'bill' | 'buy_stock' | 'sell_stock' | 'change_job' | 'unlock_forbidden' | 'transfer' | 'pay_tax' | 'city_buy_land' | 'city_build_place';
+    type: 'loan' | 'repay' | 'income' | 'tax' | 'bill' | 'buy_stock' | 'sell_stock' | 'change_job' | 'unlock_forbidden' | 'transfer' | 'pay_tax' | 'city_buy_land' | 'city_build_place' | 'city_buy_address' | 'buy_vehicle' | 'restock_items';
     requesterId: string;
     amount: number;
-    details?: string; // 株のIDや備考など
+    details?: string;
     status: 'pending' | 'approved' | 'rejected';
     timestamp: number;
+    idempotencyKey?: string; // Duplicate request prevention
+}
+
+export interface InventoryItem {
+    id: string; // Unique instance ID
+    itemId: string; // Master template ID (e.g., 'ing_rice')
+    quantity: number;
+    name?: string; // Optional override
 }
 
 export interface ShopItem {
@@ -104,7 +112,7 @@ export interface User {
     shopItems: ShopItem[]; // 販売中の商品
 
     // Inventory
-    inventory?: any[]; // TODO: Define InventoryItem interface
+    inventory?: InventoryItem[];
 
     // Trading Stock
     stocks: { [stockId: string]: number }; // stockId -> quantity
@@ -271,6 +279,18 @@ export interface GameState {
     // Phase 4: Simulation
     economy: EconomyState;
     environment: EnvironmentState;
+
+    // Phase 8: Real-time & Synchronization
+    eventRevision: number; // Increment on every state change
+    lastEvent?: GameEventData;
+    processedIdempotencyKeys: string[]; // Track processed keys (last 1000 or so)
+}
+
+export interface GameEventData {
+    type: 'INVENTORY_UPDATED' | 'SALES_NOTIFICATION' | 'PRICE_CHANGED' | 'ADMIN_MESSAGE' | 'STATE_SYNC';
+    payload: any;
+    timestamp: number;
+    revision: number;
 }
 
 // CatalogItem - 仕入れ先カタログアイテム
