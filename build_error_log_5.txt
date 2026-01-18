@@ -1,0 +1,23 @@
+
+> real-shop-app-v2@0.1.0 build
+> next build
+
+   笆ｲ Next.js 15.1.0
+   - Environments: .env.local, .env
+
+   Creating an optimized production build ...
+ 笨・Compiled successfully
+   Skipping linting
+   Checking validity of types ...
+Failed to compile.
+
+./src/lib/db.ts:6:5
+Type error: Object literal may only specify known properties, and 'datasources' does not exist in type 'Subset<PrismaClientOptions, PrismaClientOptions>'.
+
+  4 |
+  5 | export const prisma = globalForPrisma.prisma || new PrismaClient({
+> 6 |     datasources: {
+    |     ^
+  7 |         db: {
+  8 |             url: process.env.DATABASE_URL,
+  9 |         },

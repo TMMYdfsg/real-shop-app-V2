@@ -248,6 +248,18 @@ export interface GameSettings {
     turnDuration: number; // 1ターンの時間(ミリ秒)
 }
 
+export interface NewsItem {
+    id: string;
+    message: string;
+    timestamp: number;
+}
+
+export interface RouletteResult {
+    text: string;
+    timestamp: number;
+    targetUserId?: string;
+}
+
 export interface GameState {
     users: User[];
     stocks: Stock[];
@@ -259,10 +271,10 @@ export interface GameState {
     lastTick: number; // 最後の時間更新
     timeRemaining: number; // 次のターンまでの残り時間(ms)
     settings: GameSettings;
-    news: ({ id: string; message: string; timestamp: number } | string)[]; // ニュースログ (文字列またはオブジェクト)
+    news: (NewsItem | string)[]; // ニュースログ (文字列またはオブジェクト)
     roulette: {
         items: { id: number; text: string; effect: string; weight?: number }[];
-        currentResult: { text: string; timestamp: number; targetUserId?: string } | null;
+        currentResult: RouletteResult | null;
     };
     season: 'spring' | 'summer' | 'autumn' | 'winter';
     products: Product[];
@@ -639,6 +651,7 @@ export interface PartTimeJob {
     type: JobType;
     requirements: {
         qualifications?: string[];
+        stats?: { [key: string]: number };
     };
     promotionTargetId?: string; // 昇格先の正社員職ID
     experienceOverride: number; // 昇格に必要な勤務回数

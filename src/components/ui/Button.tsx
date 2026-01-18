@@ -86,9 +86,9 @@ export const Button: React.FC<ButtonProps> = ({
         >
             {isLoading ? (
                 <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <span className="animate-spin">⏳</span> {children}
+                    <span className="animate-spin">⏳</span> <>{children}</>
                 </span>
-            ) : children}
+            ) : <>{children}</>}
         </motion.button>
     );
 };

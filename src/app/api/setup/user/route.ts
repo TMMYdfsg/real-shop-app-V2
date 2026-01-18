@@ -3,6 +3,8 @@ import { updateGameState } from '@/lib/dataStore';
 import { User, Role } from '@/types';
 // import { v4 as uuidv4 } from 'uuid'; // Removed
 
+export const dynamic = 'force-dynamic';
+
 
 export async function POST(request: Request) {
     try {
@@ -38,7 +40,7 @@ export async function POST(request: Request) {
             shopMenu: []
         };
 
-        updateGameState((state) => {
+        await updateGameState((state) => {
             // 重複チェックなどは省略
             state.users.push(newUser);
             return state;

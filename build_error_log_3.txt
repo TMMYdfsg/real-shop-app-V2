@@ -1,0 +1,24 @@
+
+> real-shop-app-v2@0.1.0 build
+> next build
+
+   笆ｲ Next.js 15.1.0
+   - Environments: .env.local, .env
+
+   Creating an optimized production build ...
+ 笨・Compiled successfully
+   Skipping linting
+   Checking validity of types ...
+Failed to compile.
+
+./src/lib/dataStore.ts:484:21
+Type error: Type 'string | undefined' is not assignable to type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+
+  482 |                     lng: place.location.lng,
+  483 |                     address: place.location.address,
+> 484 |                     landId: place.location.landId,
+      |                     ^
+  485 |                     stats: place.stats as any
+  486 |                 }
+  487 |             });

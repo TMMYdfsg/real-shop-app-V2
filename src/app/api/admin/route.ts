@@ -3,6 +3,8 @@ import { updateGameState } from '@/lib/dataStore';
 import { GameState, User, Transaction } from '@/types';
 import crypto from 'crypto';
 
+export const dynamic = 'force-dynamic';
+
 // Helper for adding transactions (placed outside main function or inside if preferred scope allows)
 const addHistory = (user: User, type: Transaction['type'], amount: number, description: string, targetId?: string, senderId?: string) => {
     if (!user.transactions) user.transactions = [];
@@ -25,7 +27,7 @@ export async function POST(req: NextRequest) {
         // ... (change_season block skipped for brevity in this replacement if not needed, but we keep structure)
         if (action === 'change_season') {
             // ... existing change_season logic ...
-            updateGameState((state) => {
+            await updateGameState((state) => {
                 if (season) state.season = season;
                 state.news.push(`季節が ${season} に変わりました！`);
                 // 税金発生
@@ -44,7 +46,7 @@ export async function POST(req: NextRequest) {
         if (action === 'approve' || action === 'reject') {
             if (!requestId) return NextResponse.json({ error: 'RequestId required' }, { status: 400 });
 
-            updateGameState((state) => {
+            await updateGameState((state) => {
                 const reqIndex = state.requests.findIndex(r => r.id === requestId);
                 if (reqIndex === -1) return state;
 
@@ -181,7 +183,7 @@ export async function POST(req: NextRequest) {
         // ターン進行 (Next Turn)
         // -----------------------------------------------------
         if (action === 'next_turn') {
-            updateGameState((state) => {
+            await updateGameState((state) => {
                 if (state.isDay) {
                     state.isDay = false;
                 } else {
@@ -364,7 +366,7 @@ export async function POST(req: NextRequest) {
             const targetUserId = requestId;
             const cost = Number(amount) || 0;
 
-            updateGameState((state) => {
+            await updateGameState((state) => {
                 const items = state.roulette.items;
                 const randomItem = items[Math.floor(Math.random() * items.length)];
 
@@ -424,7 +426,7 @@ export async function POST(req: NextRequest) {
             const stockId = requestId;
             const newPrice = Number(amount);
 
-            updateGameState((state) => {
+            await updateGameState((state) => {
                 const stock = state.stocks.find(s => s.id === stockId);
                 if (stock) {
                     stock.price = newPrice;
@@ -439,7 +441,7 @@ export async function POST(req: NextRequest) {
         // -----------------------------------------------------
         if (action === 'update_roulette_config') {
             const { items } = body; // items: { id, text, effect }[]
-            updateGameState((state) => {
+            await updateGameState((state) => {
                 if (items && Array.isArray(items)) {
                     state.roulette.items = items;
                 }
@@ -453,7 +455,7 @@ export async function POST(req: NextRequest) {
         // -----------------------------------------------------
         if (action === 'update_products') {
             const { products } = body; // products: Product[]
-            updateGameState((state) => {
+            await updateGameState((state) => {
                 if (products && Array.isArray(products)) {
                     state.products = products;
                 }
@@ -464,7 +466,7 @@ export async function POST(req: NextRequest) {
 
 
         if (action === 'approve_all_requests') {
-            updateGameState((state) => {
+            await updateGameState((state) => {
                 const pendingRequests = state.requests.filter(r => r.status === 'pending');
 
                 pendingRequests.forEach(req => {
@@ -596,7 +598,7 @@ export async function POST(req: NextRequest) {
 
         if (action === 'delete_active_npc') {
             const { npcId } = body;
-            updateGameState((state) => {
+            await updateGameState((state) => {
                 if (state.activeNPCs) {
                     state.activeNPCs = state.activeNPCs.filter(n => n.id !== npcId);
                 }
@@ -608,7 +610,7 @@ export async function POST(req: NextRequest) {
         if (action === 'spawn_npc') {
             const { targetUserId, templateId } = body;
 
-            updateGameState((state) => {
+            await updateGameState((state) => {
                 const template = state.npcTemplates?.find(t => t.id === templateId);
                 // Fallback to old behavior or default if template not found (safety)
                 const def = template || state.npcTemplates?.[0];
@@ -642,7 +644,7 @@ export async function POST(req: NextRequest) {
 
         if (action === 'update_npc_templates') {
             const { templates } = body;
-            updateGameState((state) => {
+            await updateGameState((state) => {
                 if (templates && Array.isArray(templates)) {
                     state.npcTemplates = templates;
                 }
@@ -656,7 +658,7 @@ export async function POST(req: NextRequest) {
         // -----------------------------------------------------
         if (action === 'force_change_job') {
             const { targetUserId, newJob } = body;
-            updateGameState((state) => {
+            await updateGameState((state) => {
                 const user = state.users.find(u => u.id === targetUserId);
                 if (user) {
                     user.job = newJob || 'unemployed';
@@ -678,7 +680,7 @@ export async function POST(req: NextRequest) {
         // -----------------------------------------------------
         if (action === 'distribute_grant') {
             const { amount, message } = body;
-            updateGameState((state) => {
+            await updateGameState((state) => {
                 let count = 0;
                 state.users.forEach(u => {
                     if (u.role === 'player') {
@@ -698,7 +700,7 @@ export async function POST(req: NextRequest) {
         // -----------------------------------------------------
         if (action === 'trigger_event') {
             const { eventTemplate, targetUserId } = body;
-            updateGameState((state) => {
+            await updateGameState((state) => {
                 if (!state.activeEvents) state.activeEvents = [];
                 const newEvent = {
                     ...eventTemplate,
@@ -739,7 +741,7 @@ export async function POST(req: NextRequest) {
 
         if (action === 'end_event') {
             const { eventId } = body;
-            updateGameState((state) => {
+            await updateGameState((state) => {
                 if (state.activeEvents) {
                     state.activeEvents = state.activeEvents.filter(e => e.id !== eventId);
                 }
@@ -752,7 +754,7 @@ export async function POST(req: NextRequest) {
         // ゲーム初期化 (Reset Game)
         // -----------------------------------------------------
         if (action === 'reset_game') {
-            updateGameState((state) => {
+            await updateGameState((state) => {
                 // 1. Reset Users (Keep ID, Name, Role)
                 state.users.forEach(u => {
                     if (u.role === 'player') {
@@ -824,7 +826,7 @@ export async function POST(req: NextRequest) {
         if (type === 'god_mode_update') {
             const { userId, updates } = body;
 
-            updateGameState((state) => {
+            await updateGameState((state) => {
                 const user = state.users.find(u => u.id === userId);
                 if (!user) return state;
 
@@ -865,7 +867,7 @@ export async function POST(req: NextRequest) {
         }
 
         if (type === 'god_mode_reset_all') {
-            updateGameState((state) => {
+            await updateGameState((state) => {
                 state.users.forEach(u => {
                     if (u.role === 'player') {
                         u.balance = 2000;

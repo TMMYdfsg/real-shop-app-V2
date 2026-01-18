@@ -16,7 +16,7 @@ export const WebsiteViewer: React.FC<WebsiteViewerProps> = ({ website, owner }) 
     const renderTemplate = () => {
         const props = { website, owner };
 
-        switch (website.template) {
+        switch (website.templateId) {
             case 'simple':
                 return <SimpleTemplate {...props} />;
             case 'modern':

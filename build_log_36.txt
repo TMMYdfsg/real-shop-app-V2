@@ -1,0 +1,23 @@
+
+> real-shop-app-v2@0.1.0 build
+> next build
+
+   笆ｲ Next.js 15.1.0
+   - Environments: .env.local
+
+   Creating an optimized production build ...
+ 笨・Compiled successfully
+   Skipping linting
+   Checking validity of types ...
+Failed to compile.
+
+./src/lib/gameData.ts:568:45
+Type error: Object literal may only specify known properties, and 'stats' does not exist in type '{ qualifications?: string[] | undefined; }'.
+
+  566 |         type: 'educational',
+  567 |         hourlyWage: 2500,
+> 568 |         requirements: { qualifications: [], stats: { intelligence: 60 } },
+      |                                             ^
+  569 |         effects: { stress: 8, fatigue: 5 },
+  570 |         description: '蟄ｦ逕溘↓蜍牙ｼｷ繧呈蕗縺医ｋ莉穂ｺ九るｭ閼ｳ蜉ｴ蜒阪・
+  571 |     },

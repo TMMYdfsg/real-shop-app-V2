@@ -1,0 +1,24 @@
+
+> real-shop-app-v2@0.1.0 build
+> next build
+
+   笆ｲ Next.js 15.1.0
+   - Environments: .env.local
+
+   Creating an optimized production build ...
+ 笨・Compiled successfully
+   Skipping linting
+   Checking validity of types ...
+Failed to compile.
+
+./src/components/smartphone/apps/JobBoardApp.tsx:89:131
+Type error: Property 'experience' does not exist on type '{ qualifications?: string[] | undefined; experience?: number | undefined; stats?: { [key: string]: number; } | undefined; prevJobId?: string | string[] | undefined; } | { qualifications?: string[] | undefined; }'.
+  Property 'experience' does not exist on type '{ qualifications?: string[] | undefined; }'.
+
+  87 |                             ))}
+  88 |                             {experienceReq && <li>螳溷漁邨碁ｨ・[33m: {experienceReq}蟷ｴ莉･荳・[33m</li>}
+> 89 |                             {Object.keys(selectedJob.requirements.qualifications || {}).length === 0 && !selectedJob.requirements.experience && <li>迚ｹ縺ｫ縺ｪ縺・[33m</li>}
+     |                                                                                                                                   ^
+  90 |                         </ul>
+  91 |                     </div>
+  92 |

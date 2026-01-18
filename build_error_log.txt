@@ -1,0 +1,22 @@
+
+> real-shop-app-v2@0.1.0 build
+> next build
+
+   笆ｲ Next.js 15.1.0
+   - Environments: .env.local, .env
+
+   Creating an optimized production build ...
+ 笨・Compiled successfully
+   Skipping linting
+   Checking validity of types ...
+Failed to compile.
+
+./src/lib/dataStore.ts:2:104
+Type error: Module '"@/types"' has no exported member 'News'.
+
+  1 | import { prisma } from '@/lib/db';
+> 2 | import { GameState, User, Stock, Request, Product, Transaction, Place, Land, NPC, GameEvent, Property, News, RouletteResult, CatalogItem } from '@/types';
+    |                                                                                                        ^
+  3 | import { generateLands, BASE_LAT, BASE_LNG, GRID_SIZE_LAT, GRID_SIZE_LNG, GRID_ROWS, GRID_COLS } from '@/lib/cityData';
+  4 |
+  5 | // Re-export INITIAL_STATE for reference, though logic uses DB defaults

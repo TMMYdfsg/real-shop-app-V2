@@ -1,0 +1,336 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ==========================================
+// Core Game Models
+// ==========================================
+
+model GameSettings {
+  id                  String  @id @default("singleton")
+  taxRate             Float
+  insuranceRate       Float
+  interestRate        Float
+  salaryAutoSafeRate  Float
+  turnDuration        Int
+  turn                Int     @default(1)
+  isDay               Boolean @default(true)
+  isTimerRunning      Boolean @default(true)
+  lastTick            BigInt
+  timeRemaining       Int
+  marketStatus        String  @default("open")
+  season              String  @default("spring")
+  eventRevision       Int     @default(0)
+  economyStatus       String  @default("normal")
+  economyInterestRate Float   @default(5.0)
+  priceIndex          Float   @default(100.0)
+  marketTrend         String  @default("stable")
+  taxRateAdjust       Float   @default(0.0)
+  lastUpdateTurn      Int     @default(0)
+  envWeather          String  @default("sunny")
+  envTemperature      Int     @default(20)
+  envSeason           String  @default("spring")
+  infraPower          Int     @default(100)
+  infraWater          Int     @default(100)
+  infraNetwork        Int     @default(100)
+  securityLevel       Int     @default(100)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+}
+
+model User {
+  id                   String   @id
+  name                 String
+  role                 String
+  balance              Float
+  deposit              Float
+  debt                 Float
+  popularity           Int
+  happiness            Int
+  rating               Int
+  job                  String
+  jobType              String?
+  lastJobChangeTurn    Int?
+  unpaidTax            Float?
+  arrestCount          Int?
+  stolenAmount         Float?
+  fanCount             Int?
+  employmentStatus     String
+  jobTitle             String?
+  currentJobId         String?
+  shopName             String?
+  cardType             String?
+  isInsured            Boolean?
+  propertyLevel        String?
+  health               Int?
+  landRank             Int?
+  commuteMethod        String?
+  hasLicense           Boolean?
+  homeLocationId       String?
+  workLocationId       String?
+  commuteDistance      Float?
+  lastCommuteTurn      Int?
+  carFuel              Float?
+  isLate               Boolean?
+  monthlyParkingCost   Float?
+  region               String?
+  creditScore          Int?
+  isHospitalized       Boolean?
+  suspicionScore       Int?
+  playerIcon           String?
+  
+  // JSON fields for complex data
+  stocks               Json?    // { stockId: quantity }
+  forbiddenStocks      Json?
+  isForbiddenUnlocked  Boolean  @default(false)
+  inventory            Json?    // InventoryItem[]
+  shopItems            Json?    // ShopItem[]
+  shopMenu             Json?    // ShopItem[]
+  pointCards           Json?    // PointCard[]
+  catalogPoints        Int?
+  loyaltyPoints        Int?
+  ingredients          Json?
+  collection           Json?
+  furniture            Json?
+  pets                 Json?
+  coupons              Json?
+  gachaCollection      Json?
+  shopWebsite          Json?
+  pointExchangeItems   Json?
+  ownedLands           Json?
+  ownedPlaces          Json?
+  mainPlaceId          String?
+  sidePlaceIds         Json?
+  ownedVehicles        Json?
+  qualifications       Json?
+  examHistory          Json?
+  loans                Json?
+  insurances           Json?
+  lifeStats            Json?
+  family               Json?
+  partners             Json?
+  smartphone           Json?
+  commuteInfo          Json?
+  auditLogs            Json?
+  jobHistory           Json?
+  
+  transactions         Transaction[]
+  requests             Request[]
+  
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+}
+
+model Stock {
+  id            String   @id
+  name          String
+  price         Float
+  previousPrice Float
+  volatility    Float
+  isForbidden   Boolean
+  priceHistory  Json?    // number[]
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Request {
+  id              String   @id
+  type            String
+  requesterId     String
+  amount          Float
+  details         String?
+  status          String
+  timestamp       BigInt
+  idempotencyKey  String?
+  
+  user            User     @relation(fields: [requesterId], references: [id])
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  @@index([requesterId])
+  @@index([status])
+}
+
+model Transaction {
+  id          String   @id
+  type        String
+  amount      Float
+  senderId    String?
+  receiverId  String?
+  description String
+  timestamp   BigInt
+  
+  user        User?    @relation(fields: [receiverId], references: [id])
+  
+  createdAt   DateTime @default(now())
+  
+  @@index([receiverId])
+  @@index([senderId])
+}
+
+model Product {
+  id          String   @id
+  sellerId    String
+  name        String
+  price       Float
+  isSold      Boolean
+  description String?
+  condition   String?
+  comment     String?
+  imageUrl    String?
+  createdAt   BigInt?
+  soldAt      BigInt?
+  buyerId     String?
+  
+  @@index([sellerId])
+  @@index([isSold])
+}
+
+model Land {
+  id          String   @id
+  lat         Float
+  lng         Float
+  address     String
+  price       Float
+  ownerId     String?
+  type        String
+  size        Float
+  zoning      String
+  status      String
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@index([ownerId])
+}
+
+model Place {
+  id          String   @id
+  ownerId     String
+  name        String
+  type        String
+  status      String
+  level       Int
+  lat         Float
+  lng         Float
+  address     String
+  landId      String
+  stats       Json?
+  employees   Json?
+  licenses    Json?
+  insurances  Json?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@index([ownerId])
+}
+
+model NPC {
+  id              String   @id
+  targetUserId    String
+  templateId      String
+  type            String
+  name            String
+  description     String
+  entryTime       BigInt
+  leaveTime       BigInt
+  effectApplied   Boolean
+  
+  createdAt       DateTime @default(now())
+  
+  @@index([targetUserId])
+}
+
+model NPCTemplate {
+  id              String   @id
+  name            String
+  description     String
+  duration        Int
+  spawnRate       Int
+  actionType      String
+  minPayment      Int?
+  maxPayment      Int?
+  minStealItems   Int?
+  maxStealItems   Int?
+  minStealAmount  Int?
+  maxStealAmount  Int?
+  
+  createdAt       DateTime @default(now())
+}
+
+model GameEvent {
+  id          String   @id
+  name        String
+  description String
+  type        String
+  startTime   BigInt
+  duration    Int
+  effectValue Float
+  targetUserId String?
+  
+  createdAt   DateTime @default(now())
+  
+  @@index([targetUserId])
+}
+
+model Property {
+  id          String   @id
+  name        String
+  type        String
+  price       Float
+  income      Float
+  ownerId     String?
+  description String?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@index([ownerId])
+}
+
+model News {
+  id          String   @id
+  message     String
+  timestamp   BigInt
+  
+  createdAt   DateTime @default(now())
+}
+
+model RouletteResult {
+  id          String   @id @default("singleton")
+  text        String
+  timestamp   BigInt
+  targetUserId String?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model IdempotencyKey {
+  key         String   @id
+  createdAt   DateTime @default(now())
+  
+  @@index([createdAt])
+}
+
+model CatalogItem {
+  id             String   @id
+  name           String
+  category       String
+  emoji          String
+  wholesalePrice Float
+  stock          Int
+  description    String?
+  
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}

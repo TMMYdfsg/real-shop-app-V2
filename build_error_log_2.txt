@@ -1,0 +1,23 @@
+
+> real-shop-app-v2@0.1.0 build
+> next build
+
+   笆ｲ Next.js 15.1.0
+   - Environments: .env.local, .env
+
+   Creating an optimized production build ...
+ 笨・Compiled successfully
+   Skipping linting
+   Checking validity of types ...
+Failed to compile.
+
+./src/lib/dataStore.ts:319:23
+Type error: Property 'lastTick' does not exist on type 'GameSettings'.
+
+  317 |     // Increment revision
+  318 |     newState.eventRevision = (newState.eventRevision || 0) + 1;
+> 319 |     newState.settings.lastTick = Date.now(); // Ensure tick update
+      |                       ^
+  320 |
+  321 |     // SAVE BACK TO DB (Critical Phase)
+  322 |     try {

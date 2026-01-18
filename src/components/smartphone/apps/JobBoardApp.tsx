@@ -86,7 +86,7 @@ export const JobBoardApp: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                                 <li key={q}>必須資格: {q}</li> // TODO: Resolve name
                             ))}
                             {experienceReq && <li>実務経験: {experienceReq}年以上</li>}
-                            {Object.keys(selectedJob.requirements.qualifications || {}).length === 0 && !selectedJob.requirements.experience && <li>特になし</li>}
+                            {Object.keys(selectedJob.requirements.qualifications || {}).length === 0 && !('experience' in selectedJob.requirements) && <li>特になし</li>}
                         </ul>
                     </div>
 

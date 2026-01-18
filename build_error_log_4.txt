@@ -1,0 +1,44 @@
+
+> real-shop-app-v2@0.1.0 build
+> next build
+
+   笆ｲ Next.js 15.1.0
+   - Environments: .env.local, .env
+
+   Creating an optimized production build ...
+ 笨・Compiled successfully
+   Skipping linting
+   Checking validity of types ...
+   Collecting page data ...
+Error [PrismaClientInitializationError]: `PrismaClient` needs to be constructed with a non-empty, valid `PrismaClientOptions`:
+
+```
+new PrismaClient({
+  ...
+})
+```
+
+or
+
+```
+constructor() {
+  super({ ... });
+}
+```
+          
+    at 31839 (C:\Users\tomoy\Desktop\program code\real-shop-app V2\.next\server\chunks\6915.js:1:180)
+    at t (C:\Users\tomoy\Desktop\program code\real-shop-app V2\.next\server\webpack-runtime.js:1:128)
+    at 99848 (C:\Users\tomoy\Desktop\program code\real-shop-app V2\.next\server\app\api\admin\route.js:1:830)
+    at t (C:\Users\tomoy\Desktop\program code\real-shop-app V2\.next\server\webpack-runtime.js:1:128)
+    at a (C:\Users\tomoy\Desktop\program code\real-shop-app V2\.next\server\app\api\admin\route.js:1:16792)
+    at <unknown> (C:\Users\tomoy\Desktop\program code\real-shop-app V2\.next\server\app\api\admin\route.js:1:16830)
+    at t.X (C:\Users\tomoy\Desktop\program code\real-shop-app V2\.next\server\webpack-runtime.js:1:1206)
+    at <unknown> (C:\Users\tomoy\Desktop\program code\real-shop-app V2\.next\server\app\api\admin\route.js:1:16805)
+    at Object.<anonymous> (C:\Users\tomoy\Desktop\program code\real-shop-app V2\.next\server\app\api\admin\route.js:1:16858) {
+  clientVersion: '7.2.0',
+  errorCode: undefined,
+  retryable: undefined
+}
+
+> Build error occurred
+[Error: Failed to collect page data for /api/admin] { type: 'Error' }

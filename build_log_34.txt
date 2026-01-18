@@ -1,0 +1,24 @@
+
+> real-shop-app-v2@0.1.0 build
+> next build
+
+   笆ｲ Next.js 15.1.0
+   - Environments: .env.local
+
+   Creating an optimized production build ...
+ 笨・Compiled successfully
+   Skipping linting
+   Checking validity of types ...
+Failed to compile.
+
+./src/components/ui/Button.tsx:89:61
+Type error: Type 'ReactNode | MotionValueNumber | MotionValueString' is not assignable to type 'ReactNode'.
+  Type 'MotionValueNumber' is not assignable to type 'ReactNode'.
+
+  87 |             {isLoading ? (
+  88 |                 <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+> 89 |                     <span className="animate-spin">竢ｳ</span> {children}
+     |                                                             ^
+  90 |                 </span>
+  91 |             ) : children}
+  92 |         </motion.button>

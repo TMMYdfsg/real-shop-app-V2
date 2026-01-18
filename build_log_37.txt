@@ -1,0 +1,23 @@
+
+> real-shop-app-v2@0.1.0 build
+> next build
+
+   笆ｲ Next.js 15.1.0
+   - Environments: .env.local
+
+   Creating an optimized production build ...
+ 笨・Compiled successfully
+   Skipping linting
+   Checking validity of types ...
+Failed to compile.
+
+./src/lib/gameData.ts:563:5
+Type error: Property 'experienceOverride' is missing in type '{ id: string; name: string; type: "educational"; hourlyWage: number; requirements: { qualifications: never[]; stats: { intelligence: number; }; }; effects: { stress: number; fatigue: number; }; description: string; }' but required in type 'PartTimeJob'.
+
+  561 |         description: '菴灘鴨蜍晁ｲ縺ｮ迴ｾ蝣ｴ莉穂ｺ九らｵｦ譁吶・濶ｯ縺・・
+  562 |     },
+> 563 |     {
+      |     ^
+  564 |         id: 'part_tutor',
+  565 |         name: '螳ｶ蠎ｭ謨吝ｸｫ',
+  566 |         type: 'educational',

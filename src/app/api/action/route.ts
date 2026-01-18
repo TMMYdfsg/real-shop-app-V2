@@ -9,6 +9,8 @@ import { logAudit, checkResalePrice } from '@/lib/audit';
 import { eventManager } from '@/lib/eventManager';
 import { getGameState } from '@/lib/dataStore';
 
+export const dynamic = 'force-dynamic';
+
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
@@ -20,7 +22,7 @@ export async function POST(request: NextRequest) {
 
         // --- 1. Idempotency Check ---
         if (idempotencyKey) {
-            const state = getGameState();
+            const state = await getGameState();
             if (state.processedIdempotencyKeys?.includes(idempotencyKey)) {
                 return NextResponse.json({ success: true, message: 'Already processed (Idempotent)' });
             }
@@ -54,7 +56,7 @@ export async function POST(request: NextRequest) {
             const isSuccess = Math.random() * 100 < rate;
 
             if (isSuccess) {
-                updateGameState((state) => {
+                await updateGameState((state) => {
                     const user = state.users.find(u => u.id === requesterId);
                     if (user) {
                         user.job = newJobName;
@@ -75,7 +77,7 @@ export async function POST(request: NextRequest) {
         }
 
         if (type === 'change_job') {
-            updateGameState((state) => {
+            await updateGameState((state) => {
                 const user = state.users.find(u => u.id === requesterId);
                 if (user) {
                     const newJob = details || 'unemployed';
@@ -96,7 +98,7 @@ export async function POST(request: NextRequest) {
         if (type === 'city_buy_land') {
             const landId = details;
             // 土地購入処理
-            updateGameState((state) => {
+            await updateGameState((state) => {
                 const user = state.users.find(u => u.id === requesterId);
                 const land = state.lands.find(l => l.id === landId);
 
@@ -144,7 +146,7 @@ export async function POST(request: NextRequest) {
 
         if (type === 'city_buy_address') {
             const { address, location, polygon, price } = JSON.parse(details);
-            updateGameState((state) => {
+            await updateGameState((state) => {
                 const user = state.users.find(u => u.id === requesterId);
                 if (user) {
                     if (user.balance < price) return state;
@@ -194,7 +196,7 @@ export async function POST(request: NextRequest) {
         if (type === 'city_update_land') {
             const { landId, price, isForSale } = details;
 
-            updateGameState((state) => {
+            await updateGameState((state) => {
                 const user = state.users.find(u => u.id === requesterId);
                 const land = state.lands.find(l => l.id === landId);
 
@@ -219,7 +221,7 @@ export async function POST(request: NextRequest) {
 
 
         if (type === 'pay_tax') {
-            updateGameState((state) => {
+            await updateGameState((state) => {
                 const user = state.users.find(u => u.id === requesterId);
                 if (user) {
                     const payAmount = Number(amount);
@@ -245,7 +247,7 @@ export async function POST(request: NextRequest) {
         }
 
         if (type === 'unlock_forbidden') {
-            updateGameState((state) => {
+            await updateGameState((state) => {
                 // Unlock for everyone
                 state.users.forEach(u => u.isForbiddenUnlocked = true);
                 return state;
@@ -254,7 +256,7 @@ export async function POST(request: NextRequest) {
         }
 
         if (type === 'deposit') {
-            updateGameState((state) => {
+            await updateGameState((state) => {
                 const user = state.users.find(u => u.id === requesterId);
                 if (user) {
                     const val = Number(amount);
@@ -274,7 +276,7 @@ export async function POST(request: NextRequest) {
         }
 
         if (type === 'withdraw') {
-            updateGameState((state) => {
+            await updateGameState((state) => {
                 const user = state.users.find(u => u.id === requesterId);
                 if (user) {
                     const val = Number(amount);
@@ -294,7 +296,7 @@ export async function POST(request: NextRequest) {
         }
 
         if (type === 'update_profile') {
-            updateGameState((state) => {
+            await updateGameState((state) => {
                 const user = state.users.find(u => u.id === requesterId);
                 if (user) {
                     if (details) {
@@ -313,7 +315,7 @@ export async function POST(request: NextRequest) {
         }
 
         if (type === 'create_website' || type === 'update_website') {
-            updateGameState((state) => {
+            await updateGameState((state) => {
                 const user = state.users.find(u => u.id === requesterId);
                 if (user && details) {
                     const websiteData = JSON.parse(details);
@@ -328,7 +330,7 @@ export async function POST(request: NextRequest) {
         }
 
         if (type === 'update_exchange_items') {
-            updateGameState((state) => {
+            await updateGameState((state) => {
                 const user = state.users.find(u => u.id === requesterId);
                 if (user && details) {
                     const items = JSON.parse(details);
@@ -340,7 +342,7 @@ export async function POST(request: NextRequest) {
         }
 
         if (type === 'exchange_user_item') {
-            updateGameState((state) => {
+            await updateGameState((state) => {
                 const buyer = state.users.find(u => u.id === requesterId);
                 if (!buyer || !details) return state;
 
@@ -383,7 +385,7 @@ export async function POST(request: NextRequest) {
         }
 
         if (type === 'purchase_product') {
-            updateGameState((state) => {
+            await updateGameState((state) => {
                 const user = state.users.find(u => u.id === requesterId); // Buyer
                 if (!user) return state;
 
@@ -433,7 +435,7 @@ export async function POST(request: NextRequest) {
 
         // ShopMenuからの商品購入
         if (type === 'purchase_shop_item') {
-            updateGameState((state) => {
+            await updateGameState((state) => {
                 const buyer = state.users.find(u => u.id === requesterId);
                 if (!buyer) return state;
 
@@ -523,7 +525,7 @@ export async function POST(request: NextRequest) {
         // ポイント交換アクション
         if (type === 'exchange_point') {
             const { getGameState } = await import('@/lib/dataStore');
-            const state = getGameState();
+            const state = await getGameState();
             const user = state.users.find(u => u.id === requesterId);
 
             if (!user) {
@@ -543,7 +545,7 @@ export async function POST(request: NextRequest) {
                 return NextResponse.json({ error: 'ポイントが足りません' }, { status: 400 });
             }
 
-            updateGameState((s) => {
+            await updateGameState((s) => {
                 const u = s.users.find(x => x.id === requesterId);
                 if (u && u.pointCards) {
                     // ポイント消費: 古いカードから順に減らす
@@ -588,7 +590,7 @@ export async function POST(request: NextRequest) {
 
         // タイマー管理アクション
         if (type === 'timer_start') {
-            updateGameState((state) => {
+            await updateGameState((state) => {
                 state.isTimerRunning = true;
                 state.lastTick = Date.now();
                 return state;
@@ -597,7 +599,7 @@ export async function POST(request: NextRequest) {
         }
 
         if (type === 'timer_stop') {
-            updateGameState((state) => {
+            await updateGameState((state) => {
                 state.isTimerRunning = false;
                 return state;
             });
@@ -608,7 +610,7 @@ export async function POST(request: NextRequest) {
             const params = details ? JSON.parse(details) : { minutes: 5, seconds: 0 };
             const newTime = (params.minutes * 60 * 1000) + (params.seconds * 1000);
 
-            updateGameState((state) => {
+            await updateGameState((state) => {
                 state.timeRemaining = newTime;
                 state.lastTick = Date.now();
                 return state;
@@ -617,7 +619,7 @@ export async function POST(request: NextRequest) {
         }
 
         if (type === 'timer_reset') {
-            updateGameState((state) => {
+            await updateGameState((state) => {
                 state.timeRemaining = state.settings.turnDuration;
                 state.lastTick = Date.now();
                 state.isTimerRunning = true;
@@ -629,7 +631,7 @@ export async function POST(request: NextRequest) {
         // 特殊職業アクション
         if (type === 'arrest' || type === 'steal' || type === 'perform') {
             const { getGameState } = await import('@/lib/dataStore');
-            const state = getGameState();
+            const state = await getGameState();
             const user = state.users.find(u => u.id === requesterId);
 
             if (!user) {
@@ -644,7 +646,7 @@ export async function POST(request: NextRequest) {
                 if (!target || !((target.unpaidTax && target.unpaidTax > 0) || target.jobType === 'thief')) {
                     return NextResponse.json({ error: '逮捕できません' }, { status: 400 });
                 }
-                updateGameState((s) => {
+                await updateGameState((s) => {
                     const u = s.users.find(x => x.id === requesterId);
                     if (u) {
                         u.balance += 300;
@@ -677,7 +679,7 @@ export async function POST(request: NextRequest) {
                     const victim = state.users.find(u => u.id === details);
                     if (!victim) return NextResponse.json({ error: 'Target not found' }, { status: 404 });
                     const actual = Math.min(amt, victim.balance);
-                    updateGameState((s) => {
+                    await updateGameState((s) => {
                         const u = s.users.find(x => x.id === requesterId);
                         const v = s.users.find(x => x.id === details);
                         if (u && v) {
@@ -701,7 +703,7 @@ export async function POST(request: NextRequest) {
                     });
                     return NextResponse.json({ success: true, message: `${actual}枚を盗みました！` });
                 } else {
-                    updateGameState((s) => {
+                    await updateGameState((s) => {
                         const u = s.users.find(x => x.id === requesterId);
                         if (u) {
                             u.balance -= 500;
@@ -729,7 +731,7 @@ export async function POST(request: NextRequest) {
                     return NextResponse.json({ error: 'アイドルのみ実行可能' }, { status: 403 });
                 }
                 const earning = 200 + (user.rating || 0) * 50;
-                updateGameState((s) => {
+                await updateGameState((s) => {
                     const u = s.users.find(x => x.id === requesterId);
                     if (u) {
                         u.balance += earning;
@@ -1349,7 +1351,7 @@ export async function POST(request: NextRequest) {
             };
 
             if (SECRET_CODES[code]) {
-                updateGameState((state) => {
+                await updateGameState((state) => {
                     const user = state.users.find(u => u.id === requesterId);
                     if (user) {
                         user.isForbiddenUnlocked = true;
@@ -1873,7 +1875,7 @@ export async function POST(request: NextRequest) {
             const plan = INSURANCE_PLANS[insuranceType as keyof typeof INSURANCE_PLANS];
 
             if (plan) {
-                updateGameState((state) => {
+                await updateGameState((state) => {
                     const user = state.users.find(u => u.id === requesterId);
                     if (user) {
                         if (!user.insurances) user.insurances = [];

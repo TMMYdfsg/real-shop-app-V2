@@ -565,8 +565,9 @@ export const PART_TIME_JOBS: PartTimeJob[] = [
         name: '家庭教師',
         type: 'educational',
         hourlyWage: 2500,
-        requirements: { stats: { intelligence: 60 } },
+        requirements: { qualifications: [], stats: { intelligence: 60 } },
         effects: { stress: 8, fatigue: 5 },
+        experienceOverride: 100,
         description: '学生に勉強を教える仕事。頭脳労働。'
     },
     {
@@ -576,6 +577,7 @@ export const PART_TIME_JOBS: PartTimeJob[] = [
         hourlyWage: 1500, // 歩合制だが簡易化
         requirements: {}, // 自転車など
         effects: { stress: 5, fatigue: 15 },
+        experienceOverride: 100,
         description: '自転車で料理を届ける仕事。体力が必要。'
     }
 ];

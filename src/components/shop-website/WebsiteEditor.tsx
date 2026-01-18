@@ -42,6 +42,7 @@ export const WebsiteEditor: React.FC<WebsiteEditorProps> = ({ currentWebsite, ow
 
     const handleSave = () => {
         const website: ShopWebsite = {
+            id: currentWebsite?.id || `website-${Date.now()}`,
             ownerId: owner.id,
             templateId: selectedTemplate,
             customization: {
@@ -61,6 +62,7 @@ export const WebsiteEditor: React.FC<WebsiteEditorProps> = ({ currentWebsite, ow
     };
 
     const previewWebsite: ShopWebsite = {
+        id: currentWebsite?.id || `website-${Date.now()}`,
         ownerId: owner.id,
         templateId: selectedTemplate,
         customization: {

@@ -1,0 +1,23 @@
+
+> real-shop-app-v2@0.1.0 build
+> next build
+
+   笆ｲ Next.js 15.1.0
+   - Environments: .env.local
+
+   Creating an optimized production build ...
+ 笨・Compiled successfully
+   Skipping linting
+   Checking validity of types ...
+Failed to compile.
+
+./src/components/shop-website/WebsiteEditor.tsx:44:15
+Type error: Property 'id' is missing in type '{ ownerId: string; templateId: TemplateType; customization: { primaryColor: string; secondaryColor: string; welcomeMessage: string; shopDescription: string; showProducts: boolean; showCoupons: boolean; layout: "single" | ... 1 more ... | "list"; }; isPublished: boolean; createdAt: number; updatedAt: number; }' but required in type 'ShopWebsite'.
+
+  42 |
+  43 |     const handleSave = () => {
+> 44 |         const website: ShopWebsite = {
+     |               ^
+  45 |             ownerId: owner.id,
+  46 |             templateId: selectedTemplate,
+  47 |             customization: {

@@ -1,0 +1,23 @@
+
+> real-shop-app-v2@0.1.0 build
+> next build
+
+   笆ｲ Next.js 15.1.0
+   - Environments: .env.local
+
+   Creating an optimized production build ...
+ 笨・Compiled successfully
+   Skipping linting
+   Checking validity of types ...
+Failed to compile.
+
+./src/components/shop-website/WebsiteViewer.tsx:19:25
+Type error: Property 'template' does not exist on type 'ShopWebsite'. Did you mean 'templateId'?
+
+  17 |         const props = { website, owner };
+  18 |
+> 19 |         switch (website.template) {
+     |                         ^
+  20 |             case 'simple':
+  21 |                 return <SimpleTemplate {...props} />;
+  22 |             case 'modern':
