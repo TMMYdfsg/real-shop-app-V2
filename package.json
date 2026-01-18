@@ -40,6 +40,6 @@
     "eslint": "^8",
     "eslint-config-next": "15.0.3",
     "local-ssl-proxy": "^2.0.5",
-    "typescript": "^5"
+    "typescript": "^5.9.3"
   }
 }
