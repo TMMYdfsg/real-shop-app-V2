@@ -14,7 +14,7 @@ export async function POST(
 ) {
     try {
         const { id } = params;
-        const cookieStore = cookies();
+        const cookieStore = await cookies();
         const playerId = cookieStore.get('playerId')?.value;
 
         if (!playerId) {

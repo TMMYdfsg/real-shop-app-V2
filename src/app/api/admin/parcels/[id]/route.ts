@@ -14,7 +14,7 @@ export async function PATCH(
 ) {
     try {
         const { id } = params;
-        const cookieStore = cookies();
+        const cookieStore = await cookies();
         const playerId = cookieStore.get('playerId')?.value;
 
         if (!playerId) {
@@ -72,7 +72,7 @@ export async function DELETE(
 ) {
     try {
         const { id } = params;
-        const cookieStore = cookies();
+        const cookieStore = await cookies();
         const playerId = cookieStore.get('playerId')?.value;
 
         if (!playerId) {

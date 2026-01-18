@@ -10,7 +10,7 @@ export const dynamic = 'force-dynamic';
  */
 export async function GET() {
     try {
-        const cookieStore = cookies();
+        const cookieStore = await cookies();
         const playerId = cookieStore.get('playerId')?.value;
 
         if (!playerId) {
@@ -68,7 +68,7 @@ export async function GET() {
  */
 export async function POST(req: NextRequest) {
     try {
-        const cookieStore = cookies();
+        const cookieStore = await cookies();
         const playerId = cookieStore.get('playerId')?.value;
 
         if (!playerId) {
