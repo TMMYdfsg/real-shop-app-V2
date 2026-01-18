@@ -141,7 +141,7 @@ export default function PhoneApp() {
             setMicrophoneTrack(track);
 
             if (track && client.publish) {
-                await client.publish([track]);
+                await client.publish([track as any]);
             }
 
             console.log('[Phone] Joined voice channel:', channelId);

@@ -129,6 +129,36 @@ const INITIAL_STATE_VALUES: GameState = {
 };
 
 // ==========================================
+// Utility Functions
+// ==========================================
+
+/**
+ * オブジェクト内のすべてのBigIntをNumberに変換
+ * JSON.stringify() で安全にシリアライズできるようにする
+ */
+export function convertBigIntToNumber<T>(obj: T): T {
+    if (obj === null || obj === undefined) return obj;
+
+    if (typeof obj === 'bigint') {
+        return Number(obj) as unknown as T;
+    }
+
+    if (Array.isArray(obj)) {
+        return obj.map(item => convertBigIntToNumber(item)) as unknown as T;
+    }
+
+    if (typeof obj === 'object') {
+        const converted: any = {};
+        for (const key in obj) {
+            converted[key] = convertBigIntToNumber(obj[key]);
+        }
+        return converted;
+    }
+
+    return obj;
+}
+
+// ==========================================
 // Initialization Logic
 // ==========================================
 
@@ -212,9 +242,15 @@ export async function getGameState(): Promise<GameState> {
         ]);
 
         // Map DB types to GameState types (handling JSON fields)
-        const mappedUsers = users.map(u => ({
+        const mappedUsers = users.map((u: any) => ({
             ...u,
-            createdAt: undefined, updatedAt: undefined, // remove DB metadata if needed
+            createdAt: undefined, updatedAt: undefined,
+            transactions: u.transactions?.map((t: any) => ({
+                ...t,
+                timestamp: Number(t.timestamp),
+                createdAt: undefined
+            })) || [],
+            requests: undefined,
             stocks: (u.stocks as any) || {},
             forbiddenStocks: (u.forbiddenStocks as any) || {},
             inventory: (u.inventory as any) || [],
@@ -226,10 +262,9 @@ export async function getGameState(): Promise<GameState> {
             ownedPlaces: (u.ownedPlaces as any) || [],
             ownedVehicles: (u.ownedVehicles as any) || [],
             qualifications: (u.qualifications as any) || [],
-            // ... map other JSON fields ...
         })) as unknown as User[];
 
-        const mappedPlaces = places.map(p => ({
+        const mappedPlaces = places.map((p: any) => ({
             ...p,
             location: {
                 lat: p.lat,
@@ -246,12 +281,12 @@ export async function getGameState(): Promise<GameState> {
         return {
             users: mappedUsers,
             stocks: stocks as unknown as Stock[],
-            requests: requests.map(r => ({ ...r, timestamp: Number(r.timestamp) })) as unknown as Request[],
-            products: products.map(p => ({ ...p, createdAt: Number(p.createdAt), soldAt: p.soldAt ? Number(p.soldAt) : undefined })) as unknown as Product[],
+            requests: requests.map((r: any) => ({ ...r, timestamp: Number(r.timestamp) })) as unknown as Request[],
+            products: products.map((p: any) => ({ ...p, createdAt: Number(p.createdAt), soldAt: p.soldAt ? Number(p.soldAt) : undefined })) as unknown as Product[],
             lands: lands as unknown as Land[],
             places: mappedPlaces,
-            activeNPCs: npcs.map(n => ({ ...n, entryTime: Number(n.entryTime), leaveTime: Number(n.leaveTime) })) as unknown as NPC[],
-            activeEvents: events.map(e => ({ ...e, startTime: Number(e.startTime) })) as unknown as GameEvent[],
+            activeNPCs: npcs.map((n: any) => ({ ...n, entryTime: Number(n.entryTime), leaveTime: Number(n.leaveTime) })) as unknown as NPC[],
+            activeEvents: events.map((e: any) => ({ ...e, startTime: Number(e.startTime) })) as unknown as GameEvent[],
 
             // Settings & Globals from GameSettings model
             turn: settings.turn,
@@ -291,7 +326,7 @@ export async function getGameState(): Promise<GameState> {
             },
 
             // Static/Aux Data
-            news: news.map(n => ({ ...n, timestamp: Number(n.timestamp) })) as unknown as NewsItem[],
+            news: news.map((n: any) => ({ ...n, timestamp: Number(n.timestamp) })) as unknown as NewsItem[],
             roulette: INITIAL_STATE_VALUES.roulette, // Fallback: Memory only for now
             npcTemplates: INITIAL_STATE_VALUES.npcTemplates, // Static
             properties: [], // Deprecated or load from DB if needed
@@ -409,7 +444,7 @@ export async function updateGameState(updater: (state: GameState) => GameState |
                     id: user.id,
                     name: user.name,
                     role: user.role,
-                    balance: user.balance,
+                    balance: user.balance, // 必須フィールド
                     deposit: user.deposit || 0,
                     debt: user.debt || 0,
                     popularity: user.popularity || 0,
@@ -417,10 +452,20 @@ export async function updateGameState(updater: (state: GameState) => GameState |
                     rating: user.rating || 3,
                     job: user.job || 'unemployed',
                     employmentStatus: user.employmentStatus || 'unemployed',
-                    // ... minimal required fields ...
+                    // JSON フィールドのデフォルト値
                     shopItems: (user.shopItems as any) || [],
                     stocks: (user.stocks as any) || {},
-                    // Default fallback for required JSONs
+                    forbiddenStocks: (user.forbiddenStocks as any) || {},
+                    isForbiddenUnlocked: user.isForbiddenUnlocked || false,
+                    inventory: (user.inventory as any) || [],
+                    shopMenu: (user.shopMenu as any) || [],
+                    pointCards: (user.pointCards as any) || [],
+                    collection: (user.collection as any) || {},
+                    ownedLands: (user.ownedLands as any) || [],
+                    ownedPlaces: (user.ownedPlaces as any) || [],
+                    ownedVehicles: (user.ownedVehicles as any) || [],
+                    qualifications: (user.qualifications as any) || [],
+                    jobHistory: (user.jobHistory as any) || null
                 }
             });
         }

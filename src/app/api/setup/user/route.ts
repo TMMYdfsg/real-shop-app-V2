@@ -15,11 +15,17 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'Name and Role are required' }, { status: 400 });
         }
 
+        // balanceの計算（NaNチェック付き）
+        const initialBalance = role === 'banker' ? 1000000 : 100;
+        if (isNaN(initialBalance) || !isFinite(initialBalance)) {
+            return NextResponse.json({ error: 'Invalid balance calculation' }, { status: 500 });
+        }
+
         const newUser: User = {
             id: crypto.randomUUID(), // Node 19+ or available in Edge/Workers
             name,
             role: role as Role,
-            balance: role === 'banker' ? 1000000 : 100, // 銀行員は多めに、プレイヤーは少なめ
+            balance: initialBalance, // 銀行員は多めに、プレイヤーは少なめ
             deposit: 0,
             debt: 0,
             job: job || 'unemployed',
@@ -48,6 +54,7 @@ export async function POST(request: Request) {
 
         return NextResponse.json({ success: true, user: newUser });
     } catch (error) {
+        console.error('User creation error:', error);
         return NextResponse.json({ error: 'Failed to create user' }, { status: 500 });
     }
 }

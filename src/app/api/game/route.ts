@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getGameState, updateGameState } from '@/lib/dataStore';
+import { getGameState, updateGameState, convertBigIntToNumber } from '@/lib/dataStore';
 import { processGameTick } from '@/lib/gameLogic';
 
 export const dynamic = 'force-dynamic';
@@ -15,7 +15,10 @@ export async function GET() {
         finalState = await updateGameState(() => newState);
     }
 
-    return NextResponse.json(finalState, {
+    // BigIntを安全にシリアライズ可能な形式に変換
+    const safeState = convertBigIntToNumber(finalState);
+
+    return NextResponse.json(safeState, {
         headers: {
             'Cache-Control': 'no-store, max-age=0',
         },
