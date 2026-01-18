@@ -73,6 +73,7 @@ export async function GET() {
             unreadCount: totalUnreadCount,
             latestMessage: unreadMessages[0] || null,
             incomingCall: incomingCall || null,
+            myId: playerId,
         });
     } catch (error) {
         console.error('[API] Error checking notifications:', error);

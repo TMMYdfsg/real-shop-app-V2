@@ -20,6 +20,7 @@ interface NotificationData {
             name: string;
         };
     } | null;
+    myId: string;
 }
 
 export default function CommunicationNotifier() {
@@ -79,7 +80,9 @@ export default function CommunicationNotifier() {
                 n.onclick = () => {
                     window.focus();
                     n.close();
-                    router.push('/smartphone?app=messenger');
+                    if (notif?.myId) {
+                        router.push(`/player/${notif.myId}?app=messenger`); // app=message に統一した方が良いが、Notifier上は一旦 messenger で query param処理側で吸収するか、統一する
+                    }
                 };
             } catch (e) {
                 console.error('Desktop notification failed:', e);
@@ -99,11 +102,15 @@ export default function CommunicationNotifier() {
 
     const handleMessageClick = () => {
         setShowMsgToast(false);
-        router.push('/smartphone?app=messenger');
+        if (notif?.myId) {
+            router.push(`/player/${notif.myId}?app=message`);
+        }
     };
 
     const handleAnswerCall = (callId: string) => {
-        router.push(`/smartphone?app=phone&action=answer&callId=${callId}`);
+        if (notif?.myId) {
+            router.push(`/player/${notif.myId}?app=phone&action=answer&callId=${callId}`);
+        }
     };
 
     return (

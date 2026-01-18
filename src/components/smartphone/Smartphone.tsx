@@ -101,7 +101,7 @@ export const Smartphone: React.FC<SmartphoneProps> = ({ onOpenApp }) => {
 
                         {/* Dock (Static at bottom on Home Screen) */}
                         <div className="absolute bottom-4 left-4 right-4 h-20 bg-white/10 rounded-3xl backdrop-blur-md grid grid-cols-4 gap-4 p-3 z-10">
-                            <div className="w-full h-full bg-green-500 rounded-xl flex items-center justify-center text-2xl cursor-pointer hover:bg-green-400">📞</div>
+                            <div onClick={() => handleAppClick('phone')} className="w-full h-full bg-green-500 rounded-xl flex items-center justify-center text-2xl cursor-pointer hover:bg-green-400">📞</div>
                             <div className="w-full h-full bg-blue-400 rounded-xl flex items-center justify-center text-2xl cursor-pointer hover:bg-blue-300">🌐</div>
                             <div className="w-full h-full bg-gray-700 rounded-xl flex items-center justify-center text-2xl cursor-pointer hover:bg-gray-600">⚙️</div>
                         </div>
