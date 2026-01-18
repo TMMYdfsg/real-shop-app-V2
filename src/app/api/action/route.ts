@@ -607,8 +607,17 @@ export async function POST(request: NextRequest) {
         }
 
         if (type === 'timer_update') {
-            const params = details ? JSON.parse(details) : { minutes: 5, seconds: 0 };
-            const newTime = (params.minutes * 60 * 1000) + (params.seconds * 1000);
+            const params = details ? JSON.parse(details) : { days: 0, hours: 0, minutes: 5, seconds: 0 };
+            const days = Number(params.days) || 0;
+            const hours = Number(params.hours) || 0;
+            const minutes = Number(params.minutes) || 0;
+            const seconds = Number(params.seconds) || 0;
+
+            const newTime =
+                (days * 24 * 60 * 60 * 1000) +
+                (hours * 60 * 60 * 1000) +
+                (minutes * 60 * 1000) +
+                (seconds * 1000);
 
             await updateGameState((state) => {
                 state.timeRemaining = newTime;

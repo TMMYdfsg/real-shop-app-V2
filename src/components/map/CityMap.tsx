@@ -40,7 +40,12 @@ const CityMap: React.FC<CityMapProps> = ({
     const addLog = (msg: string) => setDebugLogs(prev => [...prev.slice(-4), `${new Date().toLocaleTimeString()} ${msg}`]);
 
     // Map Initialization
+    const isMapInitialized = useRef(false);
+
     useEffect(() => {
+        if (isMapInitialized.current) return;
+        isMapInitialized.current = true;
+
         addLog('CityMap Mounted');
 
         const initMap = async () => {
@@ -54,11 +59,16 @@ const CityMap: React.FC<CityMapProps> = ({
             addLog('API Key Present');
 
             try {
-                setOptions({
-                    key: apiKey,
-                    v: "weekly",
-                    libraries: ["places", "marker", "routes", "geometry"]
-                });
+                // Ignore errors if options are already set
+                try {
+                    setOptions({
+                        key: apiKey,
+                        v: "weekly",
+                        libraries: ["places", "marker", "routes", "geometry"]
+                    });
+                } catch (e) {
+                    console.warn("Google Maps options already set", e);
+                }
 
                 addLog('Loading Maps Library...');
                 const { Map } = await importLibrary("maps") as google.maps.MapsLibrary;
