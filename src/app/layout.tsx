@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { GameProvider } from "@/context/GameContext";
 import { GlobalSalesNotification } from "@/components/notifications/GlobalSalesNotification";
+import CommunicationNotifier from "@/components/notifications/CommunicationNotifier";
 import HelpFloatingButton from "@/components/HelpFloatingButton";
 import "./globals.css";
 
@@ -19,6 +20,7 @@ export default function RootLayout({
       <body>
         <GameProvider>
           <GlobalSalesNotification />
+          <CommunicationNotifier />
           <HelpFloatingButton />
           {children}
         </GameProvider>

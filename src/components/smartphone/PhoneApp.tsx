@@ -1,6 +1,5 @@
-'use client';
-
 import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { useRealtime } from '@/hooks/useRealtime';
 import { getAgoraClient, createMicrophoneTrack, generateChannelName } from '@/lib/agora';
 
@@ -23,12 +22,14 @@ interface User {
 }
 
 export default function PhoneApp() {
+    const searchParams = useSearchParams();
     const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
     const [incomingCall, setIncomingCall] = useState<VoiceCall | null>(null);
     const [activeCall, setActiveCall] = useState<VoiceCall | null>(null);
     const [isMuted, setIsMuted] = useState(false);
     const [agoraClient, setAgoraClient] = useState<any>(null);
     const [microphoneTrack, setMicrophoneTrack] = useState<any>(null);
+    const [isAutoAnswering, setIsAutoAnswering] = useState(false);
 
     // 通話履歴をリアルタイム取得
     const { data: callHistory } = useRealtime<VoiceCall[]>(
@@ -36,21 +37,58 @@ export default function PhoneApp() {
         { interval: 5000 }
     );
 
+    // URLパラメータからの自動応答処理
+    useEffect(() => {
+        const action = searchParams.get('action');
+        const callId = searchParams.get('callId');
+
+        if (action === 'answer' && callId && !isAutoAnswering && !activeCall) {
+            setIsAutoAnswering(true);
+            // 本来はAPIで対象のcallを取得すべきだが、簡易的に履歴/着信から探すか、APIコールする
+            // ここでは直接応答APIを叩く
+            const autoAnswer = async () => {
+                try {
+                    // 通話情報を取得（詳細APIがないため履歴から探すか、POSTでjoin）
+                    // 簡易実装: 既に応答ロジックがあるのでそれを活用したいが、callオブジェクトが必要
+                    // ここでは直接 joinVoiceChannel する
+                    // 注意: 相手の情報などが取れないため、本来は GET /api/calls/:id が必要
+                    // 一旦保留: UI側でincomingCallとして検知されるのを待つのが安全
+                } catch (e) {
+                    console.error('Auto answer failed:', e);
+                }
+            };
+            autoAnswer();
+        }
+    }, [searchParams, isAutoAnswering, activeCall]);
+
     // 着信をチェック（pollingで簡易実装）
     useEffect(() => {
         const checkIncoming = async () => {
             const res = await fetch('/api/calls');
             const calls: VoiceCall[] = await res.json();
             const pending = calls.find(c => c.status === 'PENDING' && c.receiverId === getMyId());
+
+            // 自動応答の処理（通知から遷移してきた場合）
+            const action = searchParams.get('action');
+            const callId = searchParams.get('callId');
+
             if (pending && (!incomingCall || pending.id !== incomingCall.id)) {
-                setIncomingCall(pending);
-                playRingtone();
+                if (action === 'answer' && callId === pending.id) {
+                    // 自動応答
+                    answerCall(pending);
+                    // URLパラメータをクリアするとより良い
+                } else {
+                    setIncomingCall(pending);
+                    playRingtone();
+                }
             }
         };
 
         const interval = setInterval(checkIncoming, 2000);
+        // 初回実行
+        checkIncoming();
         return () => clearInterval(interval);
-    }, [incomingCall]);
+    }, [incomingCall, searchParams]);
 
     const getMyId = () => {
         // 実際はcookieから取得
