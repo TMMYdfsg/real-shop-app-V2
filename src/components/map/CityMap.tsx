@@ -36,17 +36,23 @@ const CityMap: React.FC<CityMapProps> = ({
     const [error, setError] = useState<string | null>(null);
     const [debugLogs, setDebugLogs] = useState<string[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const initializingRef = useRef(false);
 
     const addLog = (msg: string) => setDebugLogs(prev => [...prev.slice(-4), `${new Date().toLocaleTimeString()} ${msg}`]);
 
     // Map Initialization
-    const isMapInitialized = useRef(false);
-
     useEffect(() => {
-        if (isMapInitialized.current) return;
-        isMapInitialized.current = true;
+        if (map || initializingRef.current) return;
+        initializingRef.current = true;
 
         addLog('CityMap Mounted');
+
+        // Capture Auth Failures
+        // @ts-ignore
+        window.gm_authFailure = () => {
+            addLog('ERROR: Google Maps Auth Failure! Check API Key & Referrer.');
+            setError('Google Maps Auth Failure');
+        };
 
         const initMap = async () => {
             const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
@@ -59,16 +65,14 @@ const CityMap: React.FC<CityMapProps> = ({
             addLog('API Key Present');
 
             try {
-                // Ignore errors if options are already set
-                try {
-                    setOptions({
-                        key: apiKey,
-                        v: "weekly",
-                        libraries: ["places", "marker", "routes", "geometry"]
-                    });
-                } catch (e) {
-                    console.warn("Google Maps options already set", e);
-                }
+                // Determine Map ID based on environment or default
+                // Using a demo map ID can sometimes help ensure vector rendering works if that was the issue
+                const mapId = "DEMO_MAP_ID";
+
+                setOptions({
+                    key: apiKey,
+                    v: "weekly",
+                });
 
                 addLog('Loading Maps Library...');
                 const { Map } = await importLibrary("maps") as google.maps.MapsLibrary;
@@ -79,10 +83,12 @@ const CityMap: React.FC<CityMapProps> = ({
                     const newMap = new Map(mapRef.current, {
                         center: { lat: initialLat, lng: initialLng },
                         zoom: zoom,
+                        mapId: mapId, // Explicitly set MapId
                         disableDefaultUI: false,
                         mapTypeControl: false,
                         streetViewControl: false,
                         fullscreenControl: false,
+                        backgroundColor: '#f0f0f0', // Visible background color
                     });
                     setMap(newMap);
                     addLog('Map Initialized Successfully');
@@ -98,9 +104,7 @@ const CityMap: React.FC<CityMapProps> = ({
             }
         };
 
-        if (!map) {
-            initMap();
-        }
+        initMap();
     }, [initialLat, initialLng, zoom]);
 
     // Commuting State
