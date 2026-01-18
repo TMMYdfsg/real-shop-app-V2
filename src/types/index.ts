@@ -11,6 +11,18 @@ export interface Stock {
     isForbidden: boolean;
 }
 
+export interface Crypto {
+    id: string;
+    name: string;
+    symbol: string;
+    price: number;
+    previousPrice: number;
+    volatility: number;
+    priceHistory?: number[]; // チャート用履歴
+    creatorId: string;
+    description?: string;
+}
+
 export interface Product {
     id: string;
     sellerId: string;
@@ -147,6 +159,9 @@ export interface User {
     shopWebsite?: ShopWebsite; // マイショップホームページ NEW
     pointExchangeItems?: PointExchangeItem[]; // ポイント交換所アイテム NEW
 
+    // Virtual Currency
+    cryptoHoldings?: { [cryptoId: string]: number }; // 仮想通貨保有数 { cryptoId: amount }
+
     // City Simulator (Phase 1)
     ownedLands: string[]; // Land IDs
     ownedPlaces: string[]; // Place IDs
@@ -263,6 +278,7 @@ export interface RouletteResult {
 export interface GameState {
     users: User[];
     stocks: Stock[];
+    cryptos: Crypto[]; // 仮想通貨リスト
     requests: Request[];
     marketStatus: 'open' | 'closed'; // 昼夜連動など
     turn: number;

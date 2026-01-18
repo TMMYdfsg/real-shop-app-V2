@@ -1,8 +1,7 @@
-import React from 'react';
-import { Stock } from '@/types';
+import { Stock, Crypto } from '@/types';
 
 interface StockChartProps {
-    stock: Stock;
+    stock: Stock | Crypto;
 }
 
 export const StockChart: React.FC<StockChartProps> = ({ stock }) => {

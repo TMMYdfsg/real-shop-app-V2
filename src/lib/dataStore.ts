@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/db';
-import { GameState, User, Stock, Request, Product, Transaction, Place, Land, NPC, GameEvent, Property, NewsItem, RouletteResult, CatalogItem } from '@/types';
+import { GameState, User, Stock, Crypto, Request, Product, Transaction, Place, Land, NPC, GameEvent, Property, NewsItem, RouletteResult, CatalogItem } from '@/types';
 import { generateLands, BASE_LAT, BASE_LNG, GRID_SIZE_LAT, GRID_SIZE_LNG, GRID_ROWS, GRID_COLS } from '@/lib/cityData';
 
 // Re-export INITIAL_STATE for reference, though logic uses DB defaults
@@ -14,6 +14,7 @@ const INITIAL_STATE_VALUES: GameState = {
         { id: 'f2', name: 'ブラックバイオ研究所', price: 2000, previousPrice: 2000, volatility: 0.8, isForbidden: true },
         { id: 'f3', name: 'ネオカルト証券', price: 10000, previousPrice: 10000, volatility: 1.0, isForbidden: true },
     ],
+    cryptos: [],
     requests: [],
     marketStatus: 'open',
     turn: 1,
@@ -228,7 +229,9 @@ export async function getGameState(): Promise<GameState> {
             places,
             npcs,
             events,
-            news
+            events,
+            news,
+            cryptos
         ] = await Promise.all([
             prisma.user.findMany({ include: { transactions: true, requests: true } }),
             prisma.stock.findMany(),
@@ -237,8 +240,10 @@ export async function getGameState(): Promise<GameState> {
             prisma.land.findMany(),
             prisma.place.findMany(),
             prisma.nPC.findMany(),
+            prisma.nPC.findMany(),
             prisma.gameEvent.findMany(),
-            prisma.news.findMany({ orderBy: { createdAt: 'desc' }, take: 50 })
+            prisma.news.findMany({ orderBy: { createdAt: 'desc' }, take: 50 }),
+            prisma.crypto.findMany()
         ]);
 
         // Map DB types to GameState types (handling JSON fields)
@@ -261,7 +266,9 @@ export async function getGameState(): Promise<GameState> {
             ownedLands: (u.ownedLands as any) || [],
             ownedPlaces: (u.ownedPlaces as any) || [],
             ownedVehicles: (u.ownedVehicles as any) || [],
+            ownedVehicles: (u.ownedVehicles as any) || [],
             qualifications: (u.qualifications as any) || [],
+            cryptoHoldings: (u.cryptoHoldings as any) || {},
         })) as unknown as User[];
 
         const mappedPlaces = places.map((p: any) => ({
@@ -281,6 +288,7 @@ export async function getGameState(): Promise<GameState> {
         return {
             users: mappedUsers,
             stocks: stocks as unknown as Stock[],
+            cryptos: cryptos.map((c: any) => ({ ...c, priceHistory: (c.priceHistory as any) || [] })) as unknown as Crypto[],
             requests: requests.map((r: any) => ({ ...r, timestamp: Number(r.timestamp) })) as unknown as Request[],
             products: products.map((p: any) => ({ ...p, createdAt: Number(p.createdAt), soldAt: p.soldAt ? Number(p.soldAt) : undefined })) as unknown as Product[],
             lands: lands as unknown as Land[],
@@ -428,7 +436,9 @@ export async function updateGameState(updater: (state: GameState) => GameState |
                     pointExchangeItems: user.pointExchangeItems as any,
                     ownedLands: user.ownedLands as any,
                     ownedPlaces: user.ownedPlaces as any,
+                    ownedPlaces: user.ownedPlaces as any,
                     ownedVehicles: user.ownedVehicles as any,
+                    cryptoHoldings: user.cryptoHoldings as any,
                     qualifications: user.qualifications as any,
                     examHistory: user.examHistory as any,
                     loans: user.loans as any,
@@ -464,6 +474,7 @@ export async function updateGameState(updater: (state: GameState) => GameState |
                     ownedLands: (user.ownedLands as any) || [],
                     ownedPlaces: (user.ownedPlaces as any) || [],
                     ownedVehicles: (user.ownedVehicles as any) || [],
+                    cryptoHoldings: (user.cryptoHoldings as any) || {},
                     qualifications: (user.qualifications as any) || [],
                     jobHistory: (user.jobHistory as any) || null
                 }

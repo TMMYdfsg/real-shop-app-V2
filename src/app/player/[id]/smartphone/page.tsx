@@ -10,6 +10,7 @@ import { BankApp } from '@/components/smartphone/apps/BankApp';
 // Import Communication Apps
 import MessengerApp from '@/components/smartphone/MessengerApp';
 import PhoneApp from '@/components/smartphone/PhoneApp';
+import { CryptoApp } from '@/components/smartphone/CryptoApp';
 import { useRouter, useSearchParams } from 'next/navigation';
 
 // App Icons
@@ -23,6 +24,7 @@ const APPS = [
     { id: 'shopping', name: '通販', icon: '🛒', color: 'bg-orange-500', description: '準備中' },
     { id: 'message', name: 'メッセージ', icon: '💬', color: 'bg-green-400', description: 'メッセージの送受信' },
     { id: 'phone', name: '電話', icon: '📞', color: 'bg-green-500', description: '通話・履歴' },
+    { id: 'crypto', name: '仮想通貨', icon: '🚀', color: 'bg-indigo-600', description: '取引・チャート' },
 ];
 
 export default function SmartphonePage({ params }: { params: Promise<{ id: string }> }) {
@@ -111,6 +113,11 @@ export default function SmartphonePage({ params }: { params: Promise<{ id: strin
             <Modal isOpen={activeApp === 'phone'} onClose={() => setActiveApp(null)} title="電話">
                 <div className="h-[500px]">
                     <PhoneApp />
+                </div>
+            </Modal>
+            <Modal isOpen={activeApp === 'crypto'} onClose={() => setActiveApp(null)} title="仮想通貨">
+                <div className="h-[600px]">
+                    <CryptoApp />
                 </div>
             </Modal>
         </div>

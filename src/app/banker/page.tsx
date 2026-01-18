@@ -5,9 +5,12 @@ import { useGame } from '@/context/GameContext';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 
+import { CryptoManager } from '@/components/admin/CryptoManager';
+
 export default function BankerDashboard() {
     const { gameState } = useGame();
     const [showRequests, setShowRequests] = React.useState(false);
+    const [showCrypto, setShowCrypto] = React.useState(false);
 
     if (!gameState) return <div>Loading...</div>;
 
@@ -64,11 +67,30 @@ export default function BankerDashboard() {
                     </Button>
                 </Card>
 
+                {/* Crypto Manager Toggle Card */}
+                <Card title="仮想通貨設定" padding="md">
+                    <div className="text-3xl mb-2">🚀</div>
+                    <Button
+                        size="sm"
+                        variant="primary"
+                        onClick={() => setShowCrypto(!showCrypto)}
+                    >
+                        {showCrypto ? '閉じる' : '管理画面を開く'}
+                    </Button>
+                </Card>
+
                 {/* Players Card */}
                 <Card title="参加プレイヤー" padding="md">
                     <div style={{ fontSize: '2rem', fontWeight: 'bold' }}>{gameState.users.filter(u => u.role === 'player').length}人</div>
                 </Card>
             </div>
+
+            {/* Crypto Manager Section */}
+            {showCrypto && (
+                <div className="mb-8 animate-fade-in">
+                    <CryptoManager />
+                </div>
+            )}
 
             {/* Requests List Section */}
             {showRequests && (

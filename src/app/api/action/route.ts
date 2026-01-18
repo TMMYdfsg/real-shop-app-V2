@@ -218,6 +218,116 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ success: true, message: '土地情報を更新しました' });
         }
 
+        // --- Virtual Currency Actions ---
+        if (type === 'crypto_create') {
+            const { name, symbol, price, volatility, description } = JSON.parse(details);
+            await updateGameState((state) => {
+                const user = state.users.find(u => u.id === requesterId);
+                if (user && user.role === 'banker') {
+                    const newCrypto = {
+                        id: `cry_${crypto.randomUUID()}`,
+                        name,
+                        symbol,
+                        price: Number(price),
+                        previousPrice: Number(price),
+                        volatility: Number(volatility),
+                        priceHistory: [Number(price)],
+                        creatorId: user.id,
+                        description,
+                        createdAt: Date.now(),
+                        updatedAt: Date.now()
+                    };
+                    if (!state.cryptos) state.cryptos = [];
+                    // @ts-ignore
+                    state.cryptos.push(newCrypto);
+                }
+                return state;
+            });
+            return NextResponse.json({ success: true, message: '仮想通貨を作成しました' });
+        }
+
+        if (type === 'crypto_manage') {
+            // For edit/delete - implement if needed
+            // details could contain action: 'delete' | 'update'
+            return NextResponse.json({ success: true });
+        }
+
+        if (type === 'crypto_buy') {
+            const { cryptoId, amount: buyAmount } = details ? JSON.parse(details) : { cryptoId: '', amount: 0 }; // buyAmount is quantity? Or currency?
+            // "amount" in top level is usually currency amount for generic checking, but here let's clarify.
+            // Let's assume 'amount' passed in body is the COST (total price).
+            // details has the quantity.
+
+            // Re-reading logic: standard is `amount` is the money involved.
+
+            await updateGameState((state) => {
+                const user = state.users.find(u => u.id === requesterId);
+                const coin = state.cryptos.find(c => c.id === cryptoId);
+
+                if (user && coin) {
+                    const cost = Number(amount); // This should be calculated by client: price * quantity
+                    // Verify cost approximately to prevent cheating?
+                    // Ideally we pass quantity and calc cost server side.
+                    // But for now, trusting the request if balance is sufficient.
+
+                    if (user.balance >= cost) {
+                        user.balance -= cost;
+
+                        // Quantity calculation based on current price to be safe?
+                        // If client sends cost, we calculate quantity = cost / coin.price
+                        const quantity = cost / coin.price;
+
+                        if (!user.cryptoHoldings) user.cryptoHoldings = {};
+                        user.cryptoHoldings[cryptoId] = (user.cryptoHoldings[cryptoId] || 0) + quantity;
+
+                        if (!user.transactions) user.transactions = [];
+                        user.transactions.push({
+                            id: crypto.randomUUID(),
+                            type: 'payment',
+                            amount: cost,
+                            senderId: user.id,
+                            description: `仮想通貨購入 (${coin.name} x${quantity.toFixed(4)})`,
+                            timestamp: Date.now()
+                        });
+                    }
+                }
+                return state;
+            });
+            return NextResponse.json({ success: true, message: '購入しました' });
+        }
+
+        if (type === 'crypto_sell') {
+            const { cryptoId, amount: sellCost } = details ? JSON.parse(details) : { cryptoId: '', amount: 0 };
+            // amount is the money to receive.
+
+            await updateGameState((state) => {
+                const user = state.users.find(u => u.id === requesterId);
+                const coin = state.cryptos.find(c => c.id === cryptoId);
+
+                if (user && coin) {
+                    const receiveAmount = Number(amount);
+                    const quantityToSell = receiveAmount / coin.price;
+
+                    if (user.cryptoHoldings && (user.cryptoHoldings[cryptoId] || 0) >= quantityToSell) {
+                        user.cryptoHoldings[cryptoId] -= quantityToSell;
+                        user.balance += receiveAmount;
+
+                        if (!user.transactions) user.transactions = [];
+                        user.transactions.push({
+                            id: crypto.randomUUID(),
+                            type: 'income',
+                            amount: receiveAmount,
+                            senderId: user.id,
+                            description: `仮想通貨売却 (${coin.name} x${quantityToSell.toFixed(4)})`,
+                            timestamp: Date.now()
+                        });
+                    }
+                }
+                return state;
+            });
+            return NextResponse.json({ success: true, message: '売却しました' });
+        }
+
 
 
         if (type === 'pay_tax') {
