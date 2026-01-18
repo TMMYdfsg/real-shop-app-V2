@@ -1,0 +1,69 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/lib/db';
+import { cookies } from 'next/headers';
+
+export const dynamic = 'force-dynamic';
+
+/**
+ * PATCH /api/calls/:id
+ * 通話ステータスを更新
+ */
+export async function PATCH(
+    req: NextRequest,
+    { params }: { params: { id: string } }
+) {
+    try {
+        const { id } = params;
+        const cookieStore = await cookies();
+        const playerId = cookieStore.get('playerId')?.value;
+
+        if (!playerId) {
+            return NextResponse.json(
+                { error: 'ログインが必要です' },
+                { status: 401 }
+            );
+        }
+
+        const body = await req.json();
+        const { status, duration } = body;
+
+        const call = await prisma.voiceCall.findUnique({
+            where: { id },
+        });
+
+        if (!call) {
+            return NextResponse.json(
+                { error: '通話が見つかりません' },
+                { status: 404 }
+            );
+        }
+
+        // 権限チェック
+        if (call.callerId !== playerId && call.receiverId !== playerId) {
+            return NextResponse.json(
+                { error: '権限がありません' },
+                { status: 403 }
+            );
+        }
+
+        const updateData: any = {};
+        if (status) updateData.status = status;
+        if (duration !== undefined) updateData.duration = duration;
+        if (status === 'ENDED' || status === 'DECLINED' || status === 'MISSED') {
+            updateData.endedAt = new Date();
+        }
+
+        const updatedCall = await prisma.voiceCall.update({
+            where: { id },
+            data: updateData,
+        });
+
+        return NextResponse.json(updatedCall);
+    } catch (error) {
+        console.error('[API] Error updating call:', error);
+        return NextResponse.json(
+            { error: '通話の更新に失敗しました' },
+            { status: 500 }
+        );
+    }
+}
