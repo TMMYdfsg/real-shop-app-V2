@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useRealtime } from '@/hooks/useRealtime';
+import { useGame } from '@/context/GameContext';
 import { getAgoraClient, createMicrophoneTrack, generateChannelName } from '@/lib/agora';
 
 interface VoiceCall {
@@ -91,8 +92,7 @@ export default function PhoneApp() {
     }, [incomingCall, searchParams]);
 
     const getMyId = () => {
-        // 実際はcookieから取得
-        return 'current-user-id';
+        return currentUser?.id || '';
     };
 
     const initiateCall = async (receiverId: string) => {
@@ -215,9 +215,17 @@ export default function PhoneApp() {
         console.log('[Phone] 📞 Incoming call!');
     };
 
+    const { gameState, currentUser } = useGame();
+    // ... existing state ...
+
+    // ... existing hooks ...
+
+    // Filter users for the contact list (exclude self)
+    const contacts = gameState?.users.filter(u => u.id !== currentUser?.id) || [];
+
     return (
-        <div className="h-full bg-gradient-to-b from-gray-50 to-gray-100">
-            {/* 着信UI */}
+        <div className="h-full bg-gradient-to-b from-gray-50 to-gray-100 flex flex-col">
+            {/* ... Incoming/Active Call UI (unchanged) ... */}
             {incomingCall && (
                 <div className="absolute inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
                     <div className="bg-white rounded-2xl p-8 max-w-sm w-full text-center">
@@ -244,7 +252,6 @@ export default function PhoneApp() {
                 </div>
             )}
 
-            {/* 通話中UI */}
             {activeCall && (
                 <div className="h-full flex flex-col items-center justify-center bg-gradient-to-b from-blue-500 to-purple-600 text-white">
                     <div className="w-32 h-32 bg-white bg-opacity-20 rounded-full mb-6 flex items-center justify-center text-6xl">
@@ -272,46 +279,68 @@ export default function PhoneApp() {
                 </div>
             )}
 
-            {/* 通話履歴 */}
+            {/* Contacts & History List */}
             {!activeCall && !incomingCall && (
-                <div>
-                    <div className="p-4 bg-green-600 text-white font-bold">
-                        📞 電話
+                <div className="flex-1 flex flex-col overflow-hidden">
+                    <div className="p-4 bg-green-600 text-white font-bold flex justify-between items-center">
+                        <span>📞 電話</span>
+                        {/* Tab Switcher could go here if needed */}
                     </div>
-                    <div className="p-4">
-                        <div className="mb-4">
-                            <input
-                                type="text"
-                                placeholder="ユーザーIDを入力..."
-                                className="w-full px-4 py-2 border rounded-lg"
-                                onChange={(e) => setSelectedUserId(e.target.value)}
-                            />
-                            <button
-                                onClick={() => selectedUserId && initiateCall(selectedUserId)}
-                                disabled={!selectedUserId}
-                                className="w-full mt-2 py-3 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 disabled:bg-gray-300"
-                            >
-                                発信
-                            </button>
+
+                    <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                        {/* Contact List Section */}
+                        <div>
+                            <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">連絡先</h3>
+                            <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                                {contacts.map(user => (
+                                    <div key={user.id} className="flex items-center justify-between p-3 border-b last:border-0 hover:bg-gray-50 transition">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center text-lg">
+                                                {user.playerIcon || '👤'}
+                                            </div>
+                                            <div className="font-medium text-gray-800">{user.name}</div>
+                                        </div>
+                                        <button
+                                            onClick={() => initiateCall(user.id)}
+                                            className="w-10 h-10 bg-green-100 text-green-600 rounded-full flex items-center justify-center hover:bg-green-200 transition"
+                                        >
+                                            📞
+                                        </button>
+                                    </div>
+                                ))}
+                                {contacts.length === 0 && (
+                                    <div className="p-4 text-center text-gray-400 text-sm">ユーザーがいません</div>
+                                )}
+                            </div>
                         </div>
-                        <div className="space-y-2">
-                            {callHistory?.map((call) => (
-                                <div key={call.id} className="p-3 bg-white rounded-lg shadow">
-                                    <div className="flex items-center justify-between">
+
+                        {/* History Section */}
+                        <div>
+                            <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">履歴</h3>
+                            <div className="space-y-2">
+                                {callHistory?.map((call) => (
+                                    <div key={call.id} className="p-3 bg-white rounded-lg shadow-sm border border-gray-100 flex items-center justify-between">
                                         <div>
-                                            <div className="font-semibold">
+                                            <div className="font-semibold text-gray-800">
                                                 {call.caller.id === getMyId() ? call.receiver.name : call.caller.name}
                                             </div>
-                                            <div className="text-sm text-gray-600">
-                                                {call.status === 'ENDED' && call.duration ? `${call.duration}秒` : call.status}
+                                            <div className="text-xs text-gray-500 mt-0.5">
+                                                {call.status === 'ENDED'
+                                                    ? `${call.duration}秒通話`
+                                                    : (call.status === 'MISSED' ? '不在着信' : call.status)}
+                                                <span className="mx-1">•</span>
+                                                {new Date(call.startedAt).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })}
                                             </div>
                                         </div>
-                                        <div className="text-2xl">
-                                            {call.callerId === getMyId() ? '📲' : '📞'}
+                                        <div className={`text-xl ${call.callerId === getMyId() ? 'text-blue-400' : (call.status === 'MISSED' ? 'text-red-400' : 'text-green-400')}`}>
+                                            {call.callerId === getMyId() ? '↗️' : (call.status === 'MISSED' ? '↙️' : '↙️')}
                                         </div>
                                     </div>
-                                </div>
-                            ))}
+                                ))}
+                                {!callHistory?.length && (
+                                    <div className="text-center text-gray-400 text-sm py-4">履歴はありません</div>
+                                )}
+                            </div>
                         </div>
                     </div>
                 </div>
