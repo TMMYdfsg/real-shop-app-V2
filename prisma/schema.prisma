@@ -125,6 +125,10 @@ model User {
   transactions         Transaction[]
   requests             Request[]
   
+  // Parcel (土地) Relations
+  ownedParcel          Parcel?       @relation("ParcelOwner")
+  createdParcels       Parcel[]      @relation("ParcelCreatedBy")
+  
   createdAt            DateTime @default(now())
   updatedAt            DateTime @updatedAt
 }
@@ -334,4 +338,38 @@ model CatalogItem {
   
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
+}
+
+// ==========================================
+// Land/Parcel System
+// ==========================================
+
+model Parcel {
+  id                String       @id @default(uuid())
+  addressNormalized String       // 正規化された住所
+  lat               Float        // 緯度
+  lng               Float        // 経度
+  price             Int          // 価格
+  status            ParcelStatus @default(DRAFT)
+  
+  // 作成者（管理者 or 不動産屋）
+  createdByUserId   String?
+  createdBy         User?        @relation("ParcelCreatedBy", fields: [createdByUserId], references: [id])
+  
+  // 所有者
+  ownerUserId       String?      @unique
+  owner             User?        @relation("ParcelOwner", fields: [ownerUserId], references: [id])
+  
+  soldAt            DateTime?
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+  
+  @@map("parcels")
+}
+
+enum ParcelStatus {
+  DRAFT      // 下書き
+  PUBLISHED  // 公開中（購入可能）
+  SOLD       // 売約済み
+  HIDDEN     // 非表示
 }
