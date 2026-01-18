@@ -36,6 +36,15 @@ export default function CommunicationNotifier() {
         enabled: !pathname?.includes('/login'), // ログイン画面では無効
     });
 
+    // デスクトップ通知の許可をリクエスト
+    useEffect(() => {
+        if (typeof window !== 'undefined' && 'Notification' in window) {
+            if (Notification.permission === 'default') {
+                Notification.requestPermission();
+            }
+        }
+    }, []);
+
     useEffect(() => {
         if (notif?.latestMessage && !isCommunicationPage) {
             // 新しいメッセージIDならトースト表示
@@ -48,9 +57,35 @@ export default function CommunicationNotifier() {
 
                 // 通知音（控えめに）
                 playNotificationSound();
+
+                // デスクトップ通知
+                showDesktopNotification(
+                    `New Message from ${notif.latestMessage.sender.name}`,
+                    notif.latestMessage.content
+                );
             }
         }
     }, [notif?.latestMessage, isCommunicationPage]);
+
+    const showDesktopNotification = (title: string, body: string) => {
+        if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
+            try {
+                const n = new Notification(title, {
+                    body: body,
+                    icon: '/icons/icon-192x192.png', // PWAアイコンがあれば
+                    silent: true
+                });
+
+                n.onclick = () => {
+                    window.focus();
+                    n.close();
+                    router.push('/smartphone?app=messenger');
+                };
+            } catch (e) {
+                console.error('Desktop notification failed:', e);
+            }
+        }
+    };
 
     const playNotificationSound = () => {
         try {
