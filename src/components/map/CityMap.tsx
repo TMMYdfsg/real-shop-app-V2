@@ -83,15 +83,14 @@ const CityMap: React.FC<CityMapProps> = ({
                     const newMap = new Map(mapRef.current, {
                         center: { lat: initialLat, lng: initialLng },
                         zoom: zoom,
-                        mapId: mapId, // Explicitly set MapId
                         disableDefaultUI: false,
                         mapTypeControl: false,
                         streetViewControl: false,
                         fullscreenControl: false,
-                        backgroundColor: '#f0f0f0', // Visible background color
+                        backgroundColor: '#ff0000', // DEBUG: Red background to see if container is visible
                     });
                     setMap(newMap);
-                    addLog('Map Initialized Successfully');
+                    addLog('Map Initialized (Raster Mode)');
                 } else {
                     addLog('ERROR: Map Ref is null');
                 }
@@ -467,7 +466,11 @@ const CityMap: React.FC<CityMapProps> = ({
     return (
         <div className="fixed inset-0 w-full h-full bg-slate-100 z-0 overflow-hidden">
             {/* Map Container */}
-            <div ref={mapRef} className="absolute inset-0 w-full h-full z-[1] bg-gray-200" />
+            <div
+                ref={mapRef}
+                className="absolute inset-0 w-full h-full z-[1]"
+                style={{ background: 'red' }} // DEBUG: If you see red, the div is there but map is not loading.
+            />
 
             {/* Loading Indicator */}
             {isLoading && (

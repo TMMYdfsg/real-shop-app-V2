@@ -122,6 +122,9 @@ model User {
   auditLogs            Json?
   jobHistory           Json?
   
+  // Crypto
+  cryptoHoldings       Json?    // { cryptoId: quantity }
+
   transactions         Transaction[]
   requests             Request[]
   
@@ -147,6 +150,21 @@ model Stock {
   volatility    Float
   isForbidden   Boolean
   priceHistory  Json?    // number[]
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Crypto {
+  id            String   @id @default(uuid())
+  name          String
+  symbol        String
+  price         Float
+  previousPrice Float
+  volatility    Float
+  priceHistory  Json?    // number[]
+  creatorId     String
+  description   String?
+  
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 }
