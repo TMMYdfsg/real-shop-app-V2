@@ -1,14 +1,18 @@
 'use client';
 
-import React, { useState, use } from 'react';
+import React, { useState, use, useEffect } from 'react';
 import { Modal } from '@/components/ui/Modal';
 import { motion } from 'framer-motion';
 import { JobBoardApp } from '@/components/smartphone/apps/JobBoardApp';
 import { LifeStatusApp } from '@/components/smartphone/apps/LifeStatusApp';
 import { AuditLogApp } from '@/components/smartphone/apps/AuditLogApp';
 import { BankApp } from '@/components/smartphone/apps/BankApp';
-import { useRouter } from 'next/navigation';
+// Import Communication Apps
+import MessengerApp from '@/components/smartphone/MessengerApp';
+import PhoneApp from '@/components/smartphone/PhoneApp';
+import { useRouter, useSearchParams } from 'next/navigation';
 
+// App Icons
 // App Icons
 const APPS = [
     { id: 'job_board', name: '求人', icon: '💼', color: 'bg-blue-500', description: '求人情報を確認' },
@@ -17,18 +21,30 @@ const APPS = [
     { id: 'audit', name: '行動記録', icon: '📜', color: 'bg-gray-600', description: '監査ログ確認' },
     { id: 'map', name: '地図', icon: '🗺️', color: 'bg-yellow-500', description: '街マップを開く' },
     { id: 'shopping', name: '通販', icon: '🛒', color: 'bg-orange-500', description: '準備中' },
-    { id: 'message', name: '連絡', icon: '📞', color: 'bg-green-400', description: '準備中' },
+    { id: 'message', name: 'メッセージ', icon: '💬', color: 'bg-green-400', description: 'メッセージの送受信' },
+    { id: 'phone', name: '電話', icon: '📞', color: 'bg-green-500', description: '通話・履歴' },
 ];
 
 export default function SmartphonePage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = use(params);
     const router = useRouter();
+    const searchParams = useSearchParams();
     const [activeApp, setActiveApp] = useState<string | null>(null);
+
+    // Handle URL params for direct app opening
+    useEffect(() => {
+        const appParam = searchParams.get('app');
+        if (appParam) {
+            if (appParam === 'messenger' || appParam === 'message') setActiveApp('message');
+            else if (appParam === 'phone') setActiveApp('phone');
+            else setActiveApp(appParam);
+        }
+    }, [searchParams]);
 
     const handleAppClick = (appId: string) => {
         if (appId === 'map') {
             router.push(`/player/${id}/map`);
-        } else if (appId === 'shopping' || appId === 'message') {
+        } else if (appId === 'shopping') {
             alert('この機能は準備中です');
         } else {
             setActiveApp(appId);
@@ -86,6 +102,16 @@ export default function SmartphonePage({ params }: { params: Promise<{ id: strin
             </Modal>
             <Modal isOpen={activeApp === 'bank'} onClose={() => setActiveApp(null)} title="Real Bank & Trust">
                 <BankApp onBack={() => setActiveApp(null)} />
+            </Modal>
+            <Modal isOpen={activeApp === 'message'} onClose={() => setActiveApp(null)} title="メッセージ">
+                <div className="h-[500px]">
+                    <MessengerApp />
+                </div>
+            </Modal>
+            <Modal isOpen={activeApp === 'phone'} onClose={() => setActiveApp(null)} title="電話">
+                <div className="h-[500px]">
+                    <PhoneApp />
+                </div>
             </Modal>
         </div>
     );

@@ -38,7 +38,7 @@ const MapContent: React.FC<{
                 mapTypeControl: false,
                 streetViewControl: false,
                 fullscreenControl: false,
-                mapId: 'DEMO_MAP_ID', // Advanced Markers require a mapId
+                // mapId removed to support standard markers without specific Map ID configuration
             });
             setMap(newMap);
             onMapLoad(newMap);
@@ -136,12 +136,9 @@ const CityMap: React.FC<CityMapProps> = ({
     // 施設マーカーの描画
     useEffect(() => {
         if (!map || !gameState?.places) return;
-        const markers: any[] = [];
+        const markers: google.maps.Marker[] = [];
 
-        const renderMarkers = async () => {
-            // Use google.maps.importLibrary inside Wrapper content
-            const { AdvancedMarkerElement } = await google.maps.importLibrary('marker') as google.maps.MarkerLibrary;
-
+        const renderMarkers = () => {
             gameState.places.forEach(place => {
                 const isConstruction = place.status === 'construction';
                 let iconText = '🏢';
@@ -155,21 +152,26 @@ const CityMap: React.FC<CityMapProps> = ({
                     else if (place.type === 'factory') iconText = '🏭';
                 }
 
-                const container = document.createElement('div');
-                container.innerHTML = `<div style="font-size: 30px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3))">${iconText}</div>`;
-
-                const marker = new AdvancedMarkerElement({
+                const marker = new google.maps.Marker({
                     position: { lat: place.location.lat, lng: place.location.lng },
                     map: map,
-                    content: container,
-                    title: place.name
+                    label: {
+                        text: iconText,
+                        fontSize: '30px',
+                    },
+                    title: place.name,
+                    // 透明なアイコンを使用してラベルのみを表示するテクニック
+                    icon: {
+                        path: google.maps.SymbolPath.CIRCLE,
+                        scale: 0,
+                    }
                 });
                 markers.push(marker);
             });
         };
 
         renderMarkers();
-        return () => markers.forEach(m => m.map = null);
+        return () => markers.forEach(m => m.setMap(null));
     }, [map, gameState?.places]);
 
     // --- Commute Logic ---
@@ -200,27 +202,30 @@ const CityMap: React.FC<CityMapProps> = ({
         else if (mode === 'bicycle') travelMode = google.maps.TravelMode.BICYCLING;
         else if (mode === 'train') travelMode = google.maps.TravelMode.TRANSIT;
 
-        ds.route({ origin: start, destination: end, travelMode: travelMode }, async (result, status) => {
-            if (status === 'OK' && result) {
+        ds.route({ origin: start, destination: end, travelMode: travelMode }, (result, status) => {
+            if (status === 'OK' && result && result.routes[0].overview_path) {
                 const path = result.routes[0].overview_path;
                 const polyline = new google.maps.Polyline({
                     path: path, geodesic: true, strokeColor: '#4f46e5', strokeOpacity: 0.8, strokeWeight: 6, map: map
                 });
                 commutePolylineRef.current = polyline;
 
-                const { AdvancedMarkerElement } = await google.maps.importLibrary('marker') as google.maps.MarkerLibrary;
-                let icon = mode === 'car' ? '🚗' : mode === 'bicycle' ? '🚲' : mode === 'train' ? '🚃' : '🚶';
+                let iconText = mode === 'car' ? '🚗' : mode === 'bicycle' ? '🚲' : mode === 'train' ? '🚃' : '🚶';
 
-                const container = document.createElement('div');
-                container.innerHTML = `<div style="font-size: 35px; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.5))">${icon}</div>`;
-
-                const marker = new AdvancedMarkerElement({
+                const marker = new google.maps.Marker({
                     position: path[0],
                     map: map,
-                    content: container,
-                    zIndex: 2000
+                    label: {
+                        text: iconText,
+                        fontSize: '35px'
+                    },
+                    zIndex: 2000,
+                    icon: {
+                        path: google.maps.SymbolPath.CIRCLE,
+                        scale: 0
+                    }
                 });
-                commuteMarkerRef.current = marker as any;
+                commuteMarkerRef.current = marker;
 
                 let step = 0;
                 const totalSteps = path.length;
@@ -228,7 +233,7 @@ const CityMap: React.FC<CityMapProps> = ({
                 const interval = setInterval(() => {
                     step += rawSpeed;
                     if (step >= totalSteps - 1) {
-                        marker.position = path[totalSteps - 1];
+                        marker.setPosition(path[totalSteps - 1]);
                         setCommuteProgress(100);
                         clearInterval(interval);
                         setTimeout(() => {
@@ -236,7 +241,7 @@ const CityMap: React.FC<CityMapProps> = ({
                             alert('職場に到着しました！お疲れ様です。');
                         }, 1000);
                     } else {
-                        marker.position = path[step];
+                        marker.setPosition(path[step]);
                         setCommuteProgress((step / totalSteps) * 100);
                         map.panTo(path[step]);
                     }
