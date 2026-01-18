@@ -19,6 +19,8 @@
     "@types/node": "^20.19.30",
     "@types/react": "^19.2.8",
     "@types/react-dom": "^19.2.3",
+    "agora-access-token": "^2.0.4",
+    "agora-rtc-sdk-ng": "^4.24.2",
     "dotenv": "^17.2.3",
     "framer-motion": "^12.26.2",
     "html5-qrcode": "^2.3.8",

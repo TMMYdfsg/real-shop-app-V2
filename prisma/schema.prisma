@@ -129,6 +129,12 @@ model User {
   ownedParcel          Parcel?       @relation("ParcelOwner")
   createdParcels       Parcel[]      @relation("ParcelCreatedBy")
   
+  // Communication Relations
+  sentMessages         Message[]     @relation("SentMessages")
+  receivedMessages     Message[]     @relation("ReceivedMessages")
+  callsMade            VoiceCall[]   @relation("CallsMade")
+  callsReceived        VoiceCall[]   @relation("CallsReceived")
+  
   createdAt            DateTime @default(now())
   updatedAt            DateTime @updatedAt
 }
@@ -372,4 +378,47 @@ enum ParcelStatus {
   PUBLISHED  // 公開中（購入可能）
   SOLD       // 売約済み
   HIDDEN     // 非表示
+}
+
+// ==========================================
+// Communication System
+// ==========================================
+
+model Message {
+  id          String   @id @default(uuid())
+  senderId    String
+  sender      User     @relation("SentMessages", fields: [senderId], references: [id])
+  receiverId  String
+  receiver    User     @relation("ReceivedMessages", fields: [receiverId], references: [id])
+  content     String
+  isRead      Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  
+  @@index([receiverId, isRead])
+  @@index([senderId])
+  @@map("messages")
+}
+
+model VoiceCall {
+  id          String     @id @default(uuid())
+  callerId    String
+  caller      User       @relation("CallsMade", fields: [callerId], references: [id])
+  receiverId  String
+  receiver    User       @relation("CallsReceived", fields: [receiverId], references: [id])
+  status      CallStatus @default(PENDING)
+  startedAt   DateTime   @default(now())
+  endedAt     DateTime?
+  duration    Int?       // seconds
+  
+  @@index([callerId])
+  @@index([receiverId])
+  @@map("voice_calls")
+}
+
+enum CallStatus {
+  PENDING     // 呼び出し中
+  ACTIVE      // 通話中
+  ENDED       // 終了
+  MISSED      // 不在着信
+  DECLINED    // 拒否
 }
