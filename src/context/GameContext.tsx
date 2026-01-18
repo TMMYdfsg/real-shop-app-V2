@@ -85,17 +85,23 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         const savedId = localStorage.getItem('real-shop-user-id');
         if (savedId) {
             setCurrentUserId(savedId);
+            // Ensure cookie matches localStorage
+            document.cookie = `playerId=${savedId}; path=/; max-age=2592000; SameSite=Lax`;
         }
     }, []);
 
     const login = (userId: string) => {
         setCurrentUserId(userId);
         localStorage.setItem('real-shop-user-id', userId);
+        // Set cookie for API access
+        document.cookie = `playerId=${userId}; path=/; max-age=2592000; SameSite=Lax`;
     };
 
     const logout = () => {
         setCurrentUserId(null);
         localStorage.removeItem('real-shop-user-id');
+        // Remove cookie
+        document.cookie = `playerId=; path=/; max-age=0`;
     };
 
     const refresh = () => {
