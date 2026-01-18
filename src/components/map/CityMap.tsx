@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
-import { Loader } from '@googlemaps/js-api-loader';
+import { setOptions, importLibrary } from '@googlemaps/js-api-loader';
 import { Land, PlaceType } from '@/types';
 import { generateLands } from '@/lib/cityData';
 import { Button } from '@/components/ui/Button';
@@ -54,19 +54,20 @@ const CityMap: React.FC<CityMapProps> = ({
             addLog('API Key Present');
 
             try {
-                const loader = new Loader({
+                addLog('Setting options...');
+                setOptions({
                     apiKey: apiKey,
                     version: "weekly",
                     libraries: ["places", "marker", "routes", "geometry"]
                 });
 
-                addLog('Loading Maps API...');
-                await loader.importLibrary('maps');
-                addLog('Maps API Loaded');
+                addLog('Loading Maps Library...');
+                const { Map } = await importLibrary("maps") as google.maps.MapsLibrary;
+                addLog('Maps Library Loaded');
 
                 if (mapRef.current) {
                     addLog('Initializing Map Instance...');
-                    const newMap = new google.maps.Map(mapRef.current, {
+                    const newMap = new Map(mapRef.current, {
                         center: { lat: initialLat, lng: initialLng },
                         zoom: zoom,
                         disableDefaultUI: false,
