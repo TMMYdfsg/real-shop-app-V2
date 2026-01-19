@@ -247,8 +247,32 @@ export async function POST(request: NextRequest) {
         }
 
         if (type === 'crypto_manage') {
-            // For edit/delete - implement if needed
-            // details could contain action: 'delete' | 'update'
+            const { action, cryptoId, data } = JSON.parse(details);
+
+            if (action === 'delete') {
+                const { prisma } = await import('@/lib/db');
+                await prisma.crypto.delete({ where: { id: cryptoId } });
+                return NextResponse.json({ success: true, message: '削除しました' });
+            }
+
+            if (action === 'update') {
+                await updateGameState((state) => {
+                    const c = state.cryptos.find(x => x.id === cryptoId);
+                    if (c && data) {
+                        if (data.name) c.name = data.name;
+                        if (data.symbol) c.symbol = data.symbol;
+                        if (data.price) {
+                            c.previousPrice = c.price;
+                            c.price = Number(data.price);
+                        }
+                        if (data.volatility) c.volatility = Number(data.volatility);
+                        if (data.description) c.description = data.description;
+                    }
+                    return state;
+                });
+                return NextResponse.json({ success: true, message: '更新しました' });
+            }
+
             return NextResponse.json({ success: true });
         }
 

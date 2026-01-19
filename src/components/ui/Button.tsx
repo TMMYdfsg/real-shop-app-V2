@@ -2,7 +2,7 @@ import React from 'react';
 import { motion, HTMLMotionProps } from 'framer-motion';
 
 interface ButtonProps extends HTMLMotionProps<"button"> {
-    variant?: 'primary' | 'secondary' | 'danger' | 'ghost' | 'success' | 'outline';
+    variant?: 'primary' | 'secondary' | 'danger' | 'ghost' | 'success' | 'outline' | 'warning';
     size?: 'sm' | 'md' | 'lg';
     fullWidth?: boolean;
     isLoading?: boolean;
@@ -53,6 +53,10 @@ export const Button: React.FC<ButtonProps> = ({
         },
         success: {
             background: 'var(--success-color)',
+            color: 'white',
+        },
+        warning: {
+            background: '#f59e0b',
             color: 'white',
         },
         ghost: {

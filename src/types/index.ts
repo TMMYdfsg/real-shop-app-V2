@@ -21,6 +21,8 @@ export interface Crypto {
     priceHistory?: number[]; // チャート用履歴
     creatorId: string;
     description?: string;
+    createdAt?: number;
+    updatedAt?: number;
 }
 
 export interface Product {

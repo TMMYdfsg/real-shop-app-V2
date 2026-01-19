@@ -10,7 +10,7 @@ export const CryptoApp: React.FC = () => {
     const [mode, setMode] = useState<'buy' | 'sell'>('buy');
     const [loading, setLoading] = useState(false);
 
-    const cryptos = gameState.cryptos || [];
+    const cryptos = gameState?.cryptos || [];
 
     const handleTransaction = async () => {
         if (!selectedCrypto || !amount || isNaN(Number(amount))) return;
@@ -77,8 +77,8 @@ export const CryptoApp: React.FC = () => {
                         <button
                             onClick={() => setMode('buy')}
                             className={`flex-1 py-2 rounded-lg font-bold transition-colors ${mode === 'buy'
-                                    ? 'bg-green-600 text-white'
-                                    : 'bg-slate-700 text-gray-400'
+                                ? 'bg-green-600 text-white'
+                                : 'bg-slate-700 text-gray-400'
                                 }`}
                         >
                             購入
@@ -86,8 +86,8 @@ export const CryptoApp: React.FC = () => {
                         <button
                             onClick={() => setMode('sell')}
                             className={`flex-1 py-2 rounded-lg font-bold transition-colors ${mode === 'sell'
-                                    ? 'bg-red-600 text-white'
-                                    : 'bg-slate-700 text-gray-400'
+                                ? 'bg-red-600 text-white'
+                                : 'bg-slate-700 text-gray-400'
                                 }`}
                         >
                             売却
@@ -121,8 +121,8 @@ export const CryptoApp: React.FC = () => {
                             onClick={handleTransaction}
                             disabled={loading || !amount}
                             className={`w-full py-3 rounded-lg font-bold shadow-lg ${mode === 'buy'
-                                    ? 'bg-green-500 hover:bg-green-400'
-                                    : 'bg-red-500 hover:bg-red-400'
+                                ? 'bg-green-500 hover:bg-green-400'
+                                : 'bg-red-500 hover:bg-red-400'
                                 } disabled:opacity-50 disabled:cursor-not-allowed text-white`}
                         >
                             {loading ? '処理中...' : mode === 'buy' ? '購入確定' : '売却確定'}

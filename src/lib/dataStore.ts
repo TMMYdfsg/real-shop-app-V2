@@ -228,8 +228,7 @@ export async function getGameState(): Promise<GameState> {
             lands,
             places,
             npcs,
-            events,
-            events,
+            events, // Clean single declaration
             news,
             cryptos
         ] = await Promise.all([
@@ -239,7 +238,6 @@ export async function getGameState(): Promise<GameState> {
             prisma.product.findMany(),
             prisma.land.findMany(),
             prisma.place.findMany(),
-            prisma.nPC.findMany(),
             prisma.nPC.findMany(),
             prisma.gameEvent.findMany(),
             prisma.news.findMany({ orderBy: { createdAt: 'desc' }, take: 50 }),
@@ -266,7 +264,6 @@ export async function getGameState(): Promise<GameState> {
             ownedLands: (u.ownedLands as any) || [],
             ownedPlaces: (u.ownedPlaces as any) || [],
             ownedVehicles: (u.ownedVehicles as any) || [],
-            ownedVehicles: (u.ownedVehicles as any) || [],
             qualifications: (u.qualifications as any) || [],
             cryptoHoldings: (u.cryptoHoldings as any) || {},
         })) as unknown as User[];
@@ -288,7 +285,12 @@ export async function getGameState(): Promise<GameState> {
         return {
             users: mappedUsers,
             stocks: stocks as unknown as Stock[],
-            cryptos: cryptos.map((c: any) => ({ ...c, priceHistory: (c.priceHistory as any) || [] })) as unknown as Crypto[],
+            cryptos: cryptos.map((c: any) => ({
+                ...c,
+                priceHistory: (c.priceHistory as any) || [],
+                createdAt: Number(c.createdAt || 0),
+                updatedAt: Number(c.updatedAt || 0)
+            })) as unknown as Crypto[],
             requests: requests.map((r: any) => ({ ...r, timestamp: Number(r.timestamp) })) as unknown as Request[],
             products: products.map((p: any) => ({ ...p, createdAt: Number(p.createdAt), soldAt: p.soldAt ? Number(p.soldAt) : undefined })) as unknown as Product[],
             lands: lands as unknown as Land[],
@@ -436,7 +438,6 @@ export async function updateGameState(updater: (state: GameState) => GameState |
                     pointExchangeItems: user.pointExchangeItems as any,
                     ownedLands: user.ownedLands as any,
                     ownedPlaces: user.ownedPlaces as any,
-                    ownedPlaces: user.ownedPlaces as any,
                     ownedVehicles: user.ownedVehicles as any,
                     cryptoHoldings: user.cryptoHoldings as any,
                     qualifications: user.qualifications as any,
@@ -541,6 +542,35 @@ export async function updateGameState(updater: (state: GameState) => GameState |
                     stats: place.stats as any
                 }
             });
+        }
+
+        // 6. Update Cryptos
+        if (newState.cryptos) {
+            for (const c of newState.cryptos) {
+                await prisma.crypto.upsert({
+                    where: { id: c.id },
+                    update: {
+                        price: c.price,
+                        previousPrice: c.previousPrice,
+                        volatility: c.volatility,
+                        priceHistory: c.priceHistory as any,
+                        updatedAt: new Date()
+                    },
+                    create: {
+                        id: c.id,
+                        name: c.name,
+                        symbol: c.symbol,
+                        price: c.price,
+                        previousPrice: c.previousPrice,
+                        volatility: c.volatility,
+                        description: c.description,
+                        creatorId: c.creatorId,
+                        priceHistory: c.priceHistory as any,
+                        createdAt: new Date(Number(c.createdAt) || Date.now()),
+                        updatedAt: new Date()
+                    }
+                });
+            }
         }
 
     } catch (err) {

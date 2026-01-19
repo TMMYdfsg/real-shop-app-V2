@@ -12,6 +12,7 @@ interface GameContextType {
     login: (userId: string) => void;
     logout: () => void;
     refresh: () => void; // データ再取得
+    sendRequest: (type: string, amount: number, details?: any) => Promise<void>;
 }
 
 const GameContext = createContext<GameContextType | undefined>(undefined);
@@ -110,6 +111,32 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
 
     const currentUser = gameState?.users.find(u => u.id === currentUserId);
 
+    const sendRequest = async (type: string, amount: number, details: any = {}) => {
+        try {
+            if (!currentUser) return;
+            const res = await fetch('/api/action', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    type,
+                    requesterId: currentUser.id,
+                    amount,
+                    details
+                })
+            });
+            const data = await res.json();
+            if (data.success) {
+                mutate(); // Refresh state
+            } else {
+                console.error('Action failed:', data.message);
+                throw new Error(data.message);
+            }
+        } catch (error) {
+            console.error('Request error:', error);
+            throw error;
+        }
+    };
+
     return (
         <GameContext.Provider value={{
             gameState,
@@ -118,7 +145,8 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
             currentUser,
             login,
             logout,
-            refresh
+            refresh,
+            sendRequest
         }}>
             {children}
         </GameContext.Provider>

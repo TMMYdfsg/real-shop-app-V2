@@ -5,37 +5,91 @@ import { Button } from '@/components/ui/Button';
 
 export const CryptoManager: React.FC = () => {
     const { gameState, sendRequest } = useGame();
+    // Form States
     const [name, setName] = useState('');
     const [symbol, setSymbol] = useState('');
     const [price, setPrice] = useState('');
     const [volatility, setVolatility] = useState('0.1');
     const [description, setDescription] = useState('');
+
+    // Edit Mode State
+    const [editId, setEditId] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
 
-    const cryptos = gameState.cryptos || [];
+    const cryptos = gameState?.cryptos || [];
 
-    const handleCreate = async () => {
+    const resetForm = () => {
+        setName('');
+        setSymbol('');
+        setPrice('');
+        setVolatility('0.1');
+        setDescription('');
+        setEditId(null);
+    };
+
+    const handleEdit = (c: any) => {
+        setEditId(c.id);
+        setName(c.name);
+        setSymbol(c.symbol);
+        setPrice(String(c.price));
+        setVolatility(String(c.volatility));
+        setDescription(c.description || '');
+        // Scroll to top
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    const handleDelete = async (id: string) => {
+        if (!confirm('本当に削除しますか？\nこの操作は取り消せません。')) return;
+        setLoading(true);
+        try {
+            await sendRequest('crypto_manage', 0, JSON.stringify({
+                action: 'delete',
+                cryptoId: id
+            }));
+            alert('削除しました');
+        } catch (error) {
+            console.error(error);
+            alert('削除エラー');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleSubmit = async () => {
         if (!name || !symbol || !price) return;
 
         setLoading(true);
         try {
-            await sendRequest('crypto_create', 0, JSON.stringify({
-                name,
-                symbol,
-                price: Number(price),
-                volatility: Number(volatility),
-                description
-            }));
-
-            // Reset form
-            setName('');
-            setSymbol('');
-            setPrice('');
-            setDescription('');
-            alert('作成しました');
+            if (editId) {
+                // Update
+                await sendRequest('crypto_manage', 0, JSON.stringify({
+                    action: 'update',
+                    cryptoId: editId,
+                    data: {
+                        name,
+                        symbol,
+                        price: Number(price),
+                        volatility: Number(volatility),
+                        description
+                    }
+                }));
+                alert('更新しました');
+                resetForm();
+            } else {
+                // Create
+                await sendRequest('crypto_create', 0, JSON.stringify({
+                    name,
+                    symbol,
+                    price: Number(price),
+                    volatility: Number(volatility),
+                    description
+                }));
+                alert('作成しました');
+                resetForm();
+            }
         } catch (error) {
             console.error(error);
-            alert('作成エラー');
+            alert('エラーが発生しました');
         } finally {
             setLoading(false);
         }
@@ -44,9 +98,17 @@ export const CryptoManager: React.FC = () => {
     return (
         <Card title="仮想通貨管理" padding="md">
             <div className="space-y-6">
-                {/* Create Form */}
-                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                    <h3 className="font-bold mb-3">新規通貨発行</h3>
+                {/* Form */}
+                <div className={`p-4 rounded-lg border ${editId ? 'bg-orange-50 border-orange-200' : 'bg-gray-50 border-gray-200'}`}>
+                    <div className="flex justify-between items-center mb-3">
+                        <h3 className="font-bold">{editId ? '通貨情報を編集' : '新規通貨発行'}</h3>
+                        {editId && (
+                            <Button size="sm" variant="ghost" onClick={resetForm}>
+                                キャンセル
+                            </Button>
+                        )}
+                    </div>
+
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label className="block text-sm font-bold mb-1">通貨名</label>
@@ -67,7 +129,7 @@ export const CryptoManager: React.FC = () => {
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-bold mb-1">初期価格</label>
+                            <label className="block text-sm font-bold mb-1">価格</label>
                             <input
                                 type="number"
                                 className="w-full border p-2 rounded"
@@ -98,12 +160,12 @@ export const CryptoManager: React.FC = () => {
                     </div>
                     <div className="mt-4 text-right">
                         <Button
-                            onClick={handleCreate}
+                            onClick={handleSubmit}
                             disabled={loading || !name || !symbol || !price}
                             size="md"
-                            variant="primary"
+                            variant={editId ? 'warning' : 'primary'}
                         >
-                            {loading ? '作成中...' : '発行する'}
+                            {loading ? '処理中...' : (editId ? '更新する' : '発行する')}
                         </Button>
                     </div>
                 </div>
@@ -120,10 +182,11 @@ export const CryptoManager: React.FC = () => {
                                     <div>
                                         <div className="font-bold text-lg">{c.name} <span className="text-sm font-normal text-gray-500">({c.symbol})</span></div>
                                         <div className="text-sm text-gray-600">価格: {c.price.toLocaleString()} | 変動: {c.volatility}</div>
+                                        <div className="text-xs text-gray-400 mt-1">{c.description}</div>
                                     </div>
-                                    <div className="text-right">
-                                        {/* Edit/Delete buttons placeholders */}
-                                        <span className="text-xs text-slate-400">ID: {c.id}</span>
+                                    <div className="flex items-center gap-2">
+                                        <Button size="sm" variant="secondary" onClick={() => handleEdit(c)}>編集</Button>
+                                        <Button size="sm" variant="danger" onClick={() => handleDelete(c.id)}>削除</Button>
                                     </div>
                                 </div>
                             ))}
