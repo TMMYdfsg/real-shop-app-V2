@@ -220,6 +220,18 @@ export default function PhoneApp() {
             const client = await getAgoraClient();
             setAgoraClient(client);
 
+            // リモートユーザーの音声を受信するためのイベントリスナー
+            client.on('user-published', async (user: any, mediaType: 'audio' | 'video') => {
+                await client.subscribe(user, mediaType);
+                if (mediaType === 'audio') {
+                    user.audioTrack?.play();
+                }
+            });
+
+            client.on('user-unpublished', (user: any) => {
+                // 自動的に再生は止まるが、必要ならUI更新など
+            });
+
             await client.join(
                 process.env.NEXT_PUBLIC_AGORA_APP_ID || 'dummy-app-id',
                 generateChannelName(channelId),
@@ -237,6 +249,7 @@ export default function PhoneApp() {
             console.log('[Phone] Joined voice channel:', channelId);
         } catch (error) {
             console.error('[Phone] Failed to join voice channel:', error);
+            alert(`通話接続エラー: ${(error as any).message}`);
         }
     };
 

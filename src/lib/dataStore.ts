@@ -403,6 +403,8 @@ export async function updateGameState(updater: (state: GameState) => GameState |
                 where: { id: user.id },
                 update: {
                     playerIcon: user.playerIcon,
+                    name: user.name,
+                    shopName: user.shopName,
                     balance: user.balance,
                     deposit: user.deposit,
                     debt: user.debt,
