@@ -536,6 +536,8 @@ export interface Land {
     isForSale: boolean;
     placeId?: string; // 建設されているPlace ID
     polygon?: Array<{ lat: number; lng: number }>; // マップ描画用のポリゴン座標
+    size: number; // 広さ (m2)
+    zoning: string; // 用途地域 (commercial, residential, industrial, etc.)
 }
 
 export type PlaceType = 'restaurant' | 'retail' | 'office' | 'factory' | 'service';
