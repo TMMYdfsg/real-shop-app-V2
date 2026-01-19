@@ -31,6 +31,8 @@ export default function PhoneApp() {
     const [agoraClient, setAgoraClient] = useState<any>(null);
     const [microphoneTrack, setMicrophoneTrack] = useState<any>(null);
     const [isAutoAnswering, setIsAutoAnswering] = useState(false);
+    const [hasMicPermission, setHasMicPermission] = useState(false);
+    const [showPermissionPrompt, setShowPermissionPrompt] = useState(false);
 
     const { gameState, currentUser } = useGame();
 
@@ -40,6 +42,33 @@ export default function PhoneApp() {
         { interval: 5000, enabled: !!currentUser }
     );
 
+    // マイク権限チェック
+    useEffect(() => {
+        const checkPermission = async () => {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                stream.getTracks().forEach(t => t.stop()); // すぐに止める
+                setHasMicPermission(true);
+            } catch (e) {
+                console.log('Mic permission needed');
+                setHasMicPermission(false);
+                setShowPermissionPrompt(true);
+            }
+        };
+        checkPermission();
+    }, []);
+
+    const requestPermission = async () => {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            stream.getTracks().forEach(t => t.stop());
+            setHasMicPermission(true);
+            setShowPermissionPrompt(false);
+        } catch (e) {
+            alert('マイクの使用が許可されていません。ブラウザの設定を確認してください。');
+        }
+    };
+
     // URLパラメータからの自動応答処理
     useEffect(() => {
         const action = searchParams.get('action');
@@ -47,6 +76,12 @@ export default function PhoneApp() {
 
         if (action === 'answer' && callId && !isAutoAnswering && !activeCall) {
             setIsAutoAnswering(true);
+            // マイク権限がない場合はここで止まるかもしれないが、ユーザーインタラクションが必要
+            if (!hasMicPermission) {
+                setShowPermissionPrompt(true);
+                return;
+            }
+            // ... (rest of auto answer logic)
             // 本来はAPIで対象のcallを取得すべきだが、簡易的に履歴/着信から探すか、APIコールする
             // ここでは直接応答APIを叩く
             const autoAnswer = async () => {
@@ -236,7 +271,30 @@ export default function PhoneApp() {
     const contacts = gameState?.users.filter(u => u.id !== currentUser?.id) || [];
 
     return (
-        <div className="h-full bg-gradient-to-b from-gray-50 to-gray-100 flex flex-col">
+        <div className="h-full bg-gradient-to-b from-gray-50 to-gray-100 flex flex-col relative">
+            {/* マイク権限プロンプト */}
+            {showPermissionPrompt && !hasMicPermission && (
+                <div className="absolute inset-0 z-[60] bg-black bg-opacity-90 flex flex-col items-center justify-center p-6 text-center text-white">
+                    <div className="text-6xl mb-4">🎙️</div>
+                    <h2 className="text-2xl font-bold mb-2">マイクの許可が必要です</h2>
+                    <p className="text-gray-300 mb-6">
+                        通話機能を使用するには、マイクへのアクセスを許可してください。
+                    </p>
+                    <button
+                        onClick={requestPermission}
+                        className="bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-8 rounded-full text-lg transition-all transform hover:scale-105"
+                    >
+                        マイクの使用を許可する
+                    </button>
+                    <button
+                        onClick={() => setShowPermissionPrompt(false)}
+                        className="mt-4 text-sm text-gray-400 underline"
+                    >
+                        閉じる（通話機能は使えません）
+                    </button>
+                </div>
+            )}
+
             {/* ... Incoming/Active Call UI (unchanged) ... */}
             {incomingCall && (
                 <div className="absolute inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">

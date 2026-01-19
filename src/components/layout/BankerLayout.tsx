@@ -16,6 +16,7 @@ export const BankerLayout: React.FC<{ children: React.ReactNode }> = ({ children
         { label: '申請承認', path: '/banker/requests', icon: '📝' },
         { label: '職業管理', path: '/banker/users', icon: '👥' },
         { label: '株式市場', path: '/banker/market', icon: '📈' },
+        { label: '不動産管理', path: '/banker/realestate', icon: '🏠' },
         { label: '大規模イベント', path: '/banker/eventcontrol', icon: '🎭' },
         { label: 'NPC派遣/管理', path: '/banker/events', icon: '🤖' },
         { label: 'ルーレット', path: '/banker/roulette', icon: '⚙️' },

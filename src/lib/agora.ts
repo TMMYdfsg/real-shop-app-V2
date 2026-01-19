@@ -7,6 +7,11 @@ export const AGORA_CONFIG = {
     isDevelopment: !process.env.NEXT_PUBLIC_AGORA_APP_ID,
 };
 
+// Debug log to check configuration
+if (typeof window !== 'undefined') {
+    console.log('[Agora] App ID found:', !!AGORA_CONFIG.appId ? 'YES (Masked)' : 'NO');
+}
+
 /**
  * Agora使用可能かチェック
  */

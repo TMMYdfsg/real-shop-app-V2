@@ -402,6 +402,7 @@ export async function updateGameState(updater: (state: GameState) => GameState |
             await prisma.user.upsert({
                 where: { id: user.id },
                 update: {
+                    playerIcon: user.playerIcon,
                     balance: user.balance,
                     deposit: user.deposit,
                     debt: user.debt,
@@ -453,6 +454,7 @@ export async function updateGameState(updater: (state: GameState) => GameState |
                 },
                 create: {
                     id: user.id,
+                    playerIcon: user.playerIcon,
                     name: user.name,
                     role: user.role,
                     balance: user.balance, // 必須フィールド
@@ -460,7 +462,7 @@ export async function updateGameState(updater: (state: GameState) => GameState |
                     debt: user.debt || 0,
                     popularity: user.popularity || 0,
                     happiness: user.happiness || 50,
-                    rating: user.rating || 3,
+                    rating: user.rating || 0,
                     job: user.job || 'unemployed',
                     employmentStatus: user.employmentStatus || 'unemployed',
                     // JSON フィールドのデフォルト値
