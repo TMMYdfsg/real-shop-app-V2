@@ -42,7 +42,9 @@ export const generateLands = (): Land[] => {
                 address: `東京都千代田区丸の内 ${r + 1}-${c + 1}`,
                 isForSale: true,
                 placeId: undefined,
-                polygon: polygon
+                polygon: polygon,
+                size: 10000,
+                zoning: 'commercial'
             });
         }
     }

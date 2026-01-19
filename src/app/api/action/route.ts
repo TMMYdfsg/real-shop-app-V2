@@ -160,7 +160,9 @@ export async function POST(request: NextRequest) {
                         location,
                         address,
                         isForSale: false,
-                        polygon
+                        polygon,
+                        size: 100, // Default 100m2
+                        zoning: 'residential' // Default zoning
                     };
 
                     if (!state.lands) state.lands = [];
