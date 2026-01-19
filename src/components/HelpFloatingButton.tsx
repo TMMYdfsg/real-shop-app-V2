@@ -19,7 +19,7 @@ export default function HelpFloatingButton() {
     return (
         <button
             onClick={() => router.push('/help')}
-            className="fixed bottom-6 right-6 w-14 h-14 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-full shadow-lg flex items-center justify-center hover:scale-110 transition-transform z-50 group"
+            className="fixed bottom-6 right-6 w-14 h-14 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-full shadow-lg flex items-center justify-center hover:scale-110 transition-transform z-[100] group"
             aria-label="ヘルプ"
         >
             <span className="text-3xl font-bold">?</span>

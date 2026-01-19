@@ -4,7 +4,7 @@ import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 
 export const CryptoManager: React.FC = () => {
-    const { gameState, sendRequest } = useGame();
+    const { gameState, sendRequest, refresh } = useGame();
     // Form States
     const [name, setName] = useState('');
     const [symbol, setSymbol] = useState('');
@@ -47,6 +47,7 @@ export const CryptoManager: React.FC = () => {
                 cryptoId: id
             }));
             alert('削除しました');
+            refresh(); // データを再取得
         } catch (error) {
             console.error(error);
             alert('削除エラー');
@@ -75,6 +76,7 @@ export const CryptoManager: React.FC = () => {
                 }));
                 alert('更新しました');
                 resetForm();
+                refresh(); // データを再取得
             } else {
                 // Create
                 await sendRequest('crypto_create', 0, JSON.stringify({
@@ -86,6 +88,7 @@ export const CryptoManager: React.FC = () => {
                 }));
                 alert('作成しました');
                 resetForm();
+                refresh(); // データを再取得
             }
         } catch (error) {
             console.error(error);

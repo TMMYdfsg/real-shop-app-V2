@@ -34,6 +34,14 @@ export default function PhoneApp() {
     const [hasMicPermission, setHasMicPermission] = useState(false);
     const [showPermissionPrompt, setShowPermissionPrompt] = useState(false);
 
+    // 診断・デバッグ用状態
+    const [connectionState, setConnectionState] = useState<'DISCONNECTED' | 'CONNECTING' | 'CONNECTED' | 'RECONNECTING' | 'DISCONNECTING'>('DISCONNECTED');
+    const [isPublished, setIsPublished] = useState(false);
+    const [subscribedUsers, setSubscribedUsers] = useState<string[]>([]);
+    const [lastError, setLastError] = useState<string | null>(null);
+    const [showDiagnostics, setShowDiagnostics] = useState(false);
+    const [autoplayBlocked, setAutoplayBlocked] = useState(false);
+
     const { gameState, currentUser } = useGame();
 
     // 通話履歴をリアルタイム取得（ログイン時のみ）
@@ -215,21 +223,109 @@ export default function PhoneApp() {
         }
     };
 
+    const renewToken = async (channelId: string) => {
+        if (!agoraClient || !currentUser) {
+            throw new Error('Agora client or user not available');
+        }
+
+        try {
+            console.log('[Agora] Fetching new token from server...');
+            const response = await fetch('/api/agora/token', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    channelName: generateChannelName(channelId),
+                    uid: 0 // UIDは自動割り当て
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error(`Token fetch failed: ${response.statusText}`);
+            }
+
+            const data = await response.json();
+            const newToken = data.token;
+
+            // Agoraクライアントにトークン更新を通知
+            await agoraClient.renewToken(newToken);
+            console.log('[Agora] Token renewed successfully');
+            setLastError('Token更新成功 ✅');
+
+            // 成功メッセージを3秒後にクリア
+            setTimeout(() => {
+                setLastError(null);
+            }, 3000);
+        } catch (error) {
+            console.error('[Agora] Token renewal error:', error);
+            throw error;
+        }
+    };
+
     const joinVoiceChannel = async (channelId: string, token: string) => {
         try {
+            setConnectionState('CONNECTING');
             const client = await getAgoraClient() as any;
             setAgoraClient(client);
 
-            // リモートユーザーの音声を受信するためのイベントリスナー
-            client.on('user-published', async (user: any, mediaType: 'audio' | 'video') => {
-                await client.subscribe(user, mediaType);
-                if (mediaType === 'audio') {
-                    user.audioTrack?.play();
+            // 接続状態変更イベント
+            client.on('connection-state-change', (curState: string, prevState: string, reason?: string) => {
+                console.log(`[Agora] Connection: ${prevState} -> ${curState}`, reason);
+                setConnectionState(curState as any);
+                if (reason) {
+                    setLastError(`接続変更: ${reason}`);
                 }
             });
 
-            client.on('user-unpublished', (user: any) => {
-                // 自動的に再生は止まるが、必要ならUI更新など
+            // エラーイベント
+            client.on('error', (err: any) => {
+                console.error('[Agora] Error:', err);
+                setLastError(`Error ${err.code}: ${err.message}`);
+                // Token期限切れ検出
+                if (err.code === 109 || err.code === 110) {
+                    alert('トークンが無効です。再接続してください。');
+                }
+            });
+
+            // Token期限切れ警告（30秒前）
+            client.on('token-privilege-will-expire', async () => {
+                console.warn('[Agora] Token will expire soon! Renewing...');
+                setLastError('Token更新中...');
+                try {
+                    await renewToken(channelId);
+                } catch (error) {
+                    console.error('[Agora] Token renewal failed:', error);
+                    setLastError(`Token更新失敗: ${(error as any).message}`);
+                    alert('トークン更新に失敗しました。通話を再開してください。');
+                }
+            });
+
+            // リモートユーザーの音声を受信
+            client.on('user-published', async (user: any, mediaType: 'audio' | 'video') => {
+                try {
+                    await client.subscribe(user, mediaType);
+                    console.log(`[Agora] Subscribed to user ${user.uid}:`, mediaType);
+
+                    if (mediaType === 'audio' && user.audioTrack) {
+                        // Autoplay対策: play()の失敗をキャッチ
+                        try {
+                            await user.audioTrack.play();
+                            setSubscribedUsers(prev => [...new Set([...prev, user.uid])]);
+                            console.log(`[Agora] Playing audio from user ${user.uid}`);
+                        } catch (playError: any) {
+                            console.warn('[Agora] Autoplay blocked:', playError);
+                            setAutoplayBlocked(true);
+                            setLastError('音声自動再生がブロックされました。クリックして再開してください。');
+                        }
+                    }
+                } catch (error) {
+                    console.error('[Agora] Subscribe error:', error);
+                    setLastError(`Subscribe失敗: ${(error as any).message}`);
+                }
+            });
+
+            client.on('user-unpublished', (user: any, mediaType: 'audio' | 'video') => {
+                console.log(`[Agora] User ${user.uid} unpublished`, mediaType);
+                setSubscribedUsers(prev => prev.filter(id => id !== user.uid));
             });
 
             await client.join(
@@ -239,16 +335,21 @@ export default function PhoneApp() {
                 null
             );
 
+            setConnectionState('CONNECTED');
+            console.log('[Agora] Joined channel:', channelId);
+
             const track = await createMicrophoneTrack();
             setMicrophoneTrack(track);
 
             if (track && client.publish) {
                 await client.publish([track as any]);
+                setIsPublished(true);
+                console.log('[Agora] Published microphone track');
             }
-
-            console.log('[Phone] Joined voice channel:', channelId);
         } catch (error) {
-            console.error('[Phone] Failed to join voice channel:', error);
+            console.error('[Agora] Join error:', error);
+            setConnectionState('DISCONNECTED');
+            setLastError(`接続失敗: ${(error as any).message}`);
             alert(`通話接続エラー: ${(error as any).message}`);
         }
     };
@@ -280,11 +381,93 @@ export default function PhoneApp() {
         console.log('[Phone] 📞 Incoming call!');
     };
 
+    // Autoplay再開関数
+    const resumeAutoplay = async () => {
+        if (!agoraClient) return;
+        try {
+            // 全てのremote userの音声を再生
+            const remoteUsers = agoraClient.remoteUsers || [];
+            for (const user of remoteUsers) {
+                if (user.audioTrack) {
+                    await user.audioTrack.play();
+                    console.log(`[Agora] Resumed audio for user ${user.uid}`);
+                }
+            }
+            setAutoplayBlocked(false);
+            setLastError(null);
+        } catch (error) {
+            console.error('[Agora] Resume autoplay failed:', error);
+        }
+    };
+
     // Filter users for the contact list (exclude self)
     const contacts = gameState?.users.filter(u => u.id !== currentUser?.id) || [];
 
     return (
         <div className="h-full bg-gradient-to-b from-gray-50 to-gray-100 flex flex-col relative">
+            {/* Autoplayブロック警告 */}
+            {autoplayBlocked && activeCall && (
+                <div className="absolute top-4 left-4 right-4 z-[65] bg-yellow-500 text-white p-4 rounded-xl shadow-2xl">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                            <span className="text-2xl">⚠️</span>
+                            <div>
+                                <div className="font-bold">音声が自動再生されません</div>
+                                <div className="text-sm text-yellow-100">クリックして音声を再開してください</div>
+                            </div>
+                        </div>
+                        <button
+                            onClick={resumeAutoplay}
+                            className="bg-white text-yellow-600 px-4 py-2 rounded-lg font-bold hover:bg-yellow-50 transition"
+                        >
+                            再生
+                        </button>
+                    </div>
+                </div>
+            )}
+
+            {/* 診断パネルトグル */}
+            {activeCall && (
+                <button
+                    onClick={() => setShowDiagnostics(!showDiagnostics)}
+                    className="absolute top-4 right-4 z-[64] bg-gray-800 text-white px-3 py-1 rounded-full text-xs font-bold hover:bg-gray-700 transition"
+                >
+                    {showDiagnostics ? '診断非表示' : '🔧 診断'}
+                </button>
+            )}
+
+            {/* 診断パネル */}
+            {showDiagnostics && activeCall && (
+                <div className="absolute top-16 right-4 z-[63] bg-gray-900 text-white p-4 rounded-xl shadow-2xl text-xs w-72 max-h-96 overflow-y-auto">
+                    <div className="font-bold text-sm mb-3 border-b border-gray-700 pb-2">📡 接続診断</div>
+                    <div className="space-y-2">
+                        <div className="flex justify-between">
+                            <span className="text-gray-400">接続状態:</span>
+                            <span className={`font-bold ${connectionState === 'CONNECTED' ? 'text-green-400' :
+                                connectionState === 'CONNECTING' ? 'text-yellow-400' :
+                                    'text-red-400'
+                                }`}>{connectionState}</span>
+                        </div>
+                        <div className="flex justify-between">
+                            <span className="text-gray-400">Publish:</span>
+                            <span className={isPublished ? 'text-green-400' : 'text-red-400'}>
+                                {isPublished ? '✅ OK' : '❌ NO'}
+                            </span>
+                        </div>
+                        <div className="flex justify-between">
+                            <span className="text-gray-400">Subscribe:</span>
+                            <span className="text-blue-400">{subscribedUsers.length} users</span>
+                        </div>
+                        {lastError && (
+                            <div className="mt-3 p-2 bg-red-900 bg-opacity-50 rounded border border-red-700">
+                                <div className="text-red-300 font-bold mb-1">⚠️ 最後のエラー:</div>
+                                <div className="text-red-200 text-[10px] break-words">{lastError}</div>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
+
             {/* マイク権限プロンプト */}
             {showPermissionPrompt && !hasMicPermission && (
                 <div className="absolute inset-0 z-[60] bg-black bg-opacity-90 flex flex-col items-center justify-center p-6 text-center text-white">

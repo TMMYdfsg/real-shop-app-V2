@@ -58,14 +58,7 @@ export interface InventoryItem {
     name?: string; // Optional override
 }
 
-export interface ShopItem {
-    id: string;
-    name: string;
-    cost: number; // 仕入れ値
-    price: number; // 売値
-    stock: number;
-    description?: string;
-}
+
 
 export interface Property {
     id: string;
@@ -76,6 +69,64 @@ export interface Property {
     ownerId?: string; // 所有者ID (nullなら銀行所有/売り出し中)
     description?: string;
 }
+
+// ==========================================
+// Catalog & My Room System
+// ==========================================
+
+// 仕入れカタログアイテム（家具・家電・ペット・食材）
+export interface CatalogItem {
+    id: string;
+    name: string;
+    category: 'furniture' | 'appliance' | 'pet' | 'ingredient' | 'other';
+    price: number;
+    wholesalePrice?: number; // 卸値（指定がない場合はpriceと同じ）
+    description?: string;
+    emoji?: string;
+    imageUrl?: string;
+    rarity?: 'common' | 'rare' | 'epic' | 'legendary';
+    stock?: number; // カタログ在庫
+}
+
+// ユーザーが所有する家具・ペット
+export interface OwnedItem {
+    id: string;
+    catalogItemId: string;
+    purchasedAt: number;
+    isPlaced?: boolean; // マイルームに配置済みか
+}
+
+// ==========================================
+// Review System
+// ==========================================
+
+// レビュー
+export interface Review {
+    id: string;
+    shopOwnerId: string; // レビュー対象のショップオーナー
+    reviewerId: string; // レビューを書いた人
+    reviewerName?: string; // キャッシュ用
+    rating: 1 | 2 | 3 | 4 | 5; // 星評価
+    comment: string;
+    purchaseId: string; // 購入ID（レシート識別用）
+    timestamp: number;
+}
+
+// 購入レシート
+export interface Receipt {
+    id: string;
+    shopOwnerId: string;
+    shopOwnerName?: string; // キャッシュ用
+    customerId: string;
+    items: { itemId: string; name: string; price: number; quantity: number }[];
+    total: number;
+    timestamp: number;
+    hasReview?: boolean; // レビュー済みフラグ
+}
+
+// ==========================================
+// Existing Types Continue
+// ==========================================
 
 export interface Transaction {
     id: string;
@@ -161,8 +212,14 @@ export interface User {
     shopWebsite?: ShopWebsite; // マイショップホームページ NEW
     pointExchangeItems?: PointExchangeItem[]; // ポイント交換所アイテム NEW
 
+    // Catalog & My Room System
+    myRoomItems?: OwnedItem[]; // 所有アイテム（家具・ペット）
+    receipts?: Receipt[]; // 購入レシート履歴
+    reviews?: Review[]; // 書いたレビュー
+    receivedReviews?: Review[]; // 受け取ったレビュー（ショップオーナーとして）
+
     // Virtual Currency
-    cryptoHoldings?: { [cryptoId: string]: number }; // 仮想通貨保有数 { cryptoId: amount }
+    cryptoHoldings?: { [cryptoId: string]: number }; // 仮想通貨保有数
 
     // City Simulator (Phase 1)
     ownedLands: string[]; // Land IDs
@@ -324,16 +381,7 @@ export interface GameEventData {
     revision: number;
 }
 
-// CatalogItem - 仕入れ先カタログアイテム
-export interface CatalogItem {
-    id: string;
-    name: string;
-    category: 'furniture' | 'pet' | 'ingredient' | 'appliance' | 'other';
-    emoji: string;
-    wholesalePrice: number; // 卸値（プレイヤーが支払う金額）
-    stock: number; // カタログ在庫
-    description?: string;
-}
+
 
 // ShopWebsite - マイショップホームページ
 export interface ShopWebsite {
@@ -414,6 +462,7 @@ export interface MiniGameConfig {
 // ShopItem (マイショップ商品)
 export interface ShopItem {
     id: string;
+    sellerId: string;      // 販売者ID
     name: string;
     cost: number;          // 仕入れ値
     price: number;         // 販売価格
@@ -422,8 +471,12 @@ export interface ShopItem {
     description?: string;  // 説明
     category?: 'furniture' | 'pet' | 'ingredient' | 'appliance' | 'other';  // カテゴリー
     emoji?: string;        // 絵文字アイコン
+    imageUrl?: string;     // 画像URL NEW
     discount?: number;     // 割引率（%） NEW
     isSale?: boolean;      // セール中フラグ NEW
+    isSold: boolean;       // 売り切れフラグ
+    createdAt: number;     // 作成日時
+    condition?: 'new' | 'like-new' | 'good' | 'fair' | 'poor'; // 商品の状態
 }
 
 // Recipe & Cooking System

@@ -392,6 +392,55 @@ export default function ShopPage() {
                                 <Button variant="primary" onClick={() => setIsRestockModalOpen(true)}>📦 仕入れカタログ</Button>
                             </div>
                         </div>
+
+                        {/* Popularity & Reviews Preview */}
+                        <Card padding="sm" className="mb-6 bg-gradient-to-r from-yellow-50 to-orange-50 border-orange-100">
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-4">
+                                    <div className="text-center">
+                                        <div className="text-xs text-orange-600 font-bold">人気度</div>
+                                        <div className="text-2xl font-black text-orange-500">
+                                            🔥 {currentUser.popularity || 0}
+                                        </div>
+                                    </div>
+                                    <div className="h-8 w-px bg-orange-200"></div>
+                                    <div className="text-center">
+                                        <div className="text-xs text-orange-600 font-bold">評価</div>
+                                        <div className="text-xl font-bold flex items-center gap-1">
+                                            ⭐ {(() => {
+                                                const reviews = currentUser.receivedReviews || [];
+                                                if (reviews.length === 0) return '-';
+                                                return (reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length).toFixed(1);
+                                            })()}
+                                            <span className="text-xs text-gray-500 font-normal">({(currentUser.receivedReviews || []).length})</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="text-right text-xs text-orange-700">
+                                    <p>良いレビューを集めると</p>
+                                    <p>人気度が上がり集客アップ！</p>
+                                </div>
+                            </div>
+
+                            {/* Latest Reviews */}
+                            {(currentUser.receivedReviews?.length || 0) > 0 && (
+                                <div className="mt-3 pt-3 border-t border-orange-200">
+                                    <h4 className="font-bold text-sm mb-2 text-orange-800">最新のレビュー</h4>
+                                    <div className="space-y-2">
+                                        {(currentUser.receivedReviews || []).slice(-3).reverse().map(review => (
+                                            <div key={review.id} className="bg-white/80 p-2 rounded text-sm">
+                                                <div className="flex justify-between">
+                                                    <span className="font-bold">{'⭐'.repeat(review.rating)}</span>
+                                                    <span className="text-gray-500 text-xs">{new Date(review.timestamp).toLocaleDateString()}</span>
+                                                </div>
+                                                <div className="text-gray-700 mt-1">{review.comment}</div>
+                                                <div className="text-right text-xs text-gray-400">- {review.reviewerName || 'お客様'}</div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                        </Card>
                         {/* ... Existing Management Content ... */}
 
                         {/* Coupons Section */}

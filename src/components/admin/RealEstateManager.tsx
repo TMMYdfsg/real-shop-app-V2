@@ -6,7 +6,7 @@ import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 
 export function RealEstateManager() {
-    const { gameState } = useGame();
+    const { gameState, refresh } = useGame();
     const [activeTab, setActiveTab] = useState<'properties' | 'lands'>('properties');
 
     // Forms
@@ -49,6 +49,7 @@ export function RealEstateManager() {
             });
             alert('物件を追加しました');
             setPropForm({ name: '', type: 'apartment', price: 10000, income: 500, description: '' });
+            refresh(); // データを再取得
         } catch (e) {
             console.error(e);
             alert('エラーが発生しました');
@@ -62,6 +63,7 @@ export function RealEstateManager() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ action: 'delete_property', propertyId: id }),
         });
+        refresh(); // データを再取得
     };
 
     const handleAddLand = async () => {
@@ -86,6 +88,7 @@ export function RealEstateManager() {
             });
             alert('土地を追加しました');
             setLandForm({ id: '', address: '', price: 100000, size: 100, zoning: 'residential' });
+            refresh(); // データを再取得
         } catch (e) {
             console.error(e);
             alert('エラーが発生しました');

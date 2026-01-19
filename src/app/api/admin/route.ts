@@ -955,6 +955,33 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ success: true });
         }
 
+        // -----------------------------------------------------
+        // カタログアイテム管理
+        // -----------------------------------------------------
+        if (action === 'add_catalog_item') {
+            const { item } = body;
+            await updateGameState((state) => {
+                if (!state.catalogInventory) state.catalogInventory = [];
+                state.catalogInventory.push({
+                    ...item,
+                    id: crypto.randomUUID()
+                });
+                return state;
+            });
+            return NextResponse.json({ success: true });
+        }
+
+        if (action === 'delete_catalog_item') {
+            const { itemId } = body;
+            await updateGameState((state) => {
+                if (state.catalogInventory) {
+                    state.catalogInventory = state.catalogInventory.filter(i => i.id !== itemId);
+                }
+                return state;
+            });
+            return NextResponse.json({ success: true });
+        }
+
         return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
     } catch (error) {
         console.error(error);

@@ -75,6 +75,7 @@ export default function BankerProductsPage() {
             name: newItem.name,
             category: selectedCategory,
             emoji: newItem.emoji || CATEGORY_EMOJIS[selectedCategory],
+            price: newItem.wholesalePrice, // Required by CatalogItem
             wholesalePrice: newItem.wholesalePrice,
             stock: newItem.stock,
             description: newItem.description
@@ -199,8 +200,8 @@ export default function BankerProductsPage() {
                                                             value={item.stock}
                                                             onChange={(e) => handleChange(index, 'stock', Number(e.target.value))}
                                                             className={`w-full px-2 py-1 border rounded text-sm font-semibold
-                                                                ${item.stock === 0 ? 'border-red-500 text-red-600 bg-red-50' :
-                                                                    item.stock < 5 ? 'border-yellow-500 text-yellow-600 bg-yellow-50' :
+                                                                ${(item.stock || 0) === 0 ? 'border-red-500 text-red-600 bg-red-50' :
+                                                                    (item.stock || 0) < 5 ? 'border-yellow-500 text-yellow-600 bg-yellow-50' :
                                                                         'border-green-500 text-green-600 bg-green-50'}
                                                             `}
                                                         />
@@ -237,8 +238,8 @@ export default function BankerProductsPage() {
                                         key={category}
                                         onClick={() => setSelectedCategory(category)}
                                         className={`p-3 rounded-lg border-2 transition-all ${selectedCategory === category
-                                                ? 'border-indigo-500 bg-indigo-50'
-                                                : 'border-gray-200 hover:border-gray-300'
+                                            ? 'border-indigo-500 bg-indigo-50'
+                                            : 'border-gray-200 hover:border-gray-300'
                                             }`}
                                     >
                                         <div className="text-2xl mb-1">{CATEGORY_EMOJIS[category]}</div>

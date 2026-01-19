@@ -624,6 +624,24 @@ export async function POST(request: NextRequest) {
                         card.points += points;
                     }
 
+                    // --- Receipt Generation ---
+                    if (!buyer.receipts) buyer.receipts = [];
+                    buyer.receipts.push({
+                        id: crypto.randomUUID(),
+                        shopOwnerId: seller.id,
+                        shopOwnerName: seller.shopName || seller.name,
+                        customerId: buyer.id,
+                        items: [{
+                            itemId: item.id,
+                            name: item.name,
+                            price: item.price,
+                            quantity: 1
+                        }],
+                        total: item.price,
+                        timestamp: Date.now(),
+                        hasReview: false
+                    });
+
                     // --- Phase 8: Record Idempotency ---
                     if (idempotencyKey) state.processedIdempotencyKeys.push(idempotencyKey);
 
@@ -1596,12 +1614,15 @@ export async function POST(request: NextRequest) {
                 } else {
                     user.shopMenu.push({
                         id: itemId,
+                        sellerId: user.id,
                         name: catalogItem.name,
                         emoji: catalogItem.emoji,
                         cost,
                         price,
                         stock,
-                        category: catalogType as any
+                        category: catalogType as any,
+                        isSold: false,
+                        createdAt: Date.now()
                     });
                 }
 
@@ -1639,13 +1660,16 @@ export async function POST(request: NextRequest) {
                     // 限定家具などは原価0で追加
                     user.shopMenu.push({
                         id: itemId,
+                        sellerId: user.id,
                         name: itemData.name,
                         emoji: itemData.emoji,
                         cost: 0,
                         price: itemData.price || 1000,
                         stock: 1,
                         category: 'furniture',
-                        isSale: false
+                        isSale: false,
+                        isSold: false,
+                        createdAt: Date.now()
                     });
                 } else if (itemType === 'gacha_ticket') {
                     // チケット機能はまだないので、とりあえずgachaCollectionに追加するか、
@@ -1653,13 +1677,16 @@ export async function POST(request: NextRequest) {
                     if (!user.shopMenu) user.shopMenu = [];
                     user.shopMenu.push({
                         id: itemId,
+                        sellerId: user.id,
                         name: itemData.name,
                         emoji: itemData.emoji,
                         cost: 0,
                         price: 0, // 売れない？
                         stock: 1,
                         category: 'other',
-                        description: '持っているといいことがあるかも？'
+                        description: '持っているといいことがあるかも？',
+                        isSold: false,
+                        createdAt: Date.now()
                     });
                 }
 
@@ -2172,6 +2199,136 @@ export async function POST(request: NextRequest) {
                 return newState;
             });
             return NextResponse.json({ success: true, message: '新しいターンが始まりました' });
+        }
+
+        // -----------------------------------------------------
+        // カタログアイテム購入 (buy_catalog_item)
+        // -----------------------------------------------------
+        if (type === 'buy_catalog_item') {
+            const catalogItemId = details;
+
+            await updateGameState((state) => {
+                const user = state.users.find(u => u.id === requesterId);
+                const catalogItem = state.catalogInventory?.find(c => c.id === catalogItemId);
+
+                if (!user || !catalogItem) return state;
+
+                const cost = catalogItem.wholesalePrice || catalogItem.price;
+                if (user.balance < cost) {
+                    throw new Error('残高不足');
+                }
+
+                // Deduct balance
+                user.balance -= cost;
+
+                // Add to myRoomItems
+                if (!user.myRoomItems) user.myRoomItems = [];
+                user.myRoomItems.push({
+                    id: crypto.randomUUID(),
+                    catalogItemId: catalogItem.id,
+                    purchasedAt: Date.now(),
+                    isPlaced: false
+                });
+
+                // Add to shopMenu (Auto-sell)
+                if (!user.shopMenu) user.shopMenu = [];
+                user.shopMenu.push({
+                    id: crypto.randomUUID(),
+                    sellerId: user.id,
+                    name: catalogItem.name,
+                    price: catalogItem.price, // 定価で自動出品
+                    cost: catalogItem.wholesalePrice || catalogItem.price,
+                    stock: 1, // Initial stock
+                    description: catalogItem.description,
+                    emoji: catalogItem.emoji,
+                    imageUrl: catalogItem.imageUrl,
+                    category: catalogItem.category,
+                    isSold: false,
+                    createdAt: Date.now(),
+                    condition: 'new'
+                });
+
+                // Decrease catalog stock if applicable
+                if (catalogItem.stock !== undefined && catalogItem.stock > 0) {
+                    catalogItem.stock--;
+                }
+
+                return state;
+            });
+
+            return NextResponse.json({ success: true, message: 'アイテムを購入しました' });
+        }
+
+        // -----------------------------------------------------
+        // マイルームアイテム配置 (place_item_in_room)
+        // -----------------------------------------------------
+        if (type === 'place_item_in_room') {
+            const ownedItemId = details;
+
+            await updateGameState((state) => {
+                const user = state.users.find(u => u.id === requesterId);
+                if (!user || !user.myRoomItems) return state;
+
+                const item = user.myRoomItems.find(i => i.id === ownedItemId);
+                if (item) {
+                    item.isPlaced = true;
+                }
+
+                return state;
+            });
+
+            return NextResponse.json({ success: true, message: 'アイテムを配置しました' });
+        }
+
+        // -----------------------------------------------------
+        // レビュー投稿 (submit_review)
+        // -----------------------------------------------------
+        if (type === 'submit_review') {
+            const { purchaseId, rating, comment } = JSON.parse(details || '{}');
+
+            await updateGameState((state) => {
+                const reviewer = state.users.find(u => u.id === requesterId);
+                if (!reviewer) return state;
+
+                // Find receipt
+                const receipt = reviewer.receipts?.find(r => r.id === purchaseId);
+                if (!receipt || receipt.hasReview) return state;
+
+                const shopOwner = state.users.find(u => u.id === receipt.shopOwnerId);
+                if (!shopOwner) return state;
+
+                // Create review
+                const review = {
+                    id: crypto.randomUUID(),
+                    shopOwnerId: receipt.shopOwnerId,
+                    reviewerId: requesterId,
+                    reviewerName: reviewer.name,
+                    rating: Number(rating) as 1 | 2 | 3 | 4 | 5,
+                    comment,
+                    purchaseId,
+                    timestamp: Date.now()
+                };
+
+                // Add to reviewer's reviews
+                if (!reviewer.reviews) reviewer.reviews = [];
+                reviewer.reviews.push(review);
+
+                // Add to shop owner's received reviews
+                if (!shopOwner.receivedReviews) shopOwner.receivedReviews = [];
+                shopOwner.receivedReviews.push(review);
+
+                // Mark receipt as reviewed
+                receipt.hasReview = true;
+
+                // Update shop owner's popularity based on average rating
+                const avgRating = shopOwner.receivedReviews.reduce((sum, r) => sum + r.rating, 0) / shopOwner.receivedReviews.length;
+                const basePopularity = shopOwner.popularity || 0;
+                shopOwner.popularity = Math.max(0, Math.floor(basePopularity + (avgRating - 3) * 10));
+
+                return state;
+            });
+
+            return NextResponse.json({ success: true, message: 'レビューを投稿しました' });
         }
 
         // 既存の汎用リクエスト保存処理 (他のアクション用)
