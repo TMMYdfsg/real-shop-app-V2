@@ -29,16 +29,16 @@ export default function MessengerApp() {
     const [sending, setSending] = useState(false);
     const [isSelectingUser, setIsSelectingUser] = useState(false);
 
-    // 会話リストをリアルタイム取得
+    // 会話リストをリアルタイム取得（ログイン時のみ）
     const { data: conversations, refetch: refetchConversations } = useRealtime<Message[]>(
         '/api/messages',
-        { interval: 3000 }
+        { interval: 3000, enabled: !!currentUser }
     );
 
     // 選択されたユーザーとのメッセージをリアルタイム取得
     const { data: messages, refetch: refetchMessages } = useRealtime<Message[]>(
         selectedUserId ? `/api/messages?userId=${selectedUserId}` : '',
-        { interval: 2000, enabled: !!selectedUserId }
+        { interval: 2000, enabled: !!currentUser && !!selectedUserId }
     );
 
     const sendMessage = async () => {

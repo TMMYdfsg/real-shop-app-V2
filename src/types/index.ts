@@ -279,6 +279,7 @@ export interface RouletteResult {
 
 export interface GameState {
     users: User[];
+    gameId?: string; // Session ID for client reset detection
     stocks: Stock[];
     cryptos: Crypto[]; // 仮想通貨リスト
     requests: Request[];

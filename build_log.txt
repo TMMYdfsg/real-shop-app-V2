@@ -3,7 +3,7 @@
 > next build
 
    笆ｲ Next.js 15.1.0
-   - Environments: .env.local
+   - Environments: .env.local, .env
 
    Creating an optimized production build ...
  笨・Compiled successfully
@@ -11,13 +11,13 @@
    Checking validity of types ...
 Failed to compile.
 
-./src/app/api/admin/route.ts:767:27
-Type error: Property 'items' does not exist on type 'User'.
+./src/app/api/admin/route.ts:802:23
+Type error: Property 'gameId' does not exist on type 'GameState'.
 
-  765 |                         u.job = 'unemployed';
-  766 |                         u.jobType = 'normal';
-> 767 |                         u.items = [];
-      |                           ^
-  768 |                         u.stocks = {};
-  769 |                         u.forbiddenStocks = {};
-  770 |                         u.isForbiddenUnlocked = false;
+  800 |                 state.turn = 1;
+  801 |                 state.isDay = true;
+> 802 |                 state.gameId = crypto.randomUUID(); // Force refresh context
+      |                       ^
+  803 |
+  804 |                 return state;
+  805 |             });

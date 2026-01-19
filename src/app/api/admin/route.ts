@@ -799,26 +799,38 @@ export async function POST(req: NextRequest) {
                 // 3. Reset Game Cycle
                 state.turn = 1;
                 state.isDay = true;
-                state.marketStatus = 'open';
-                state.requests = [];
-                state.news = [{ id: crypto.randomUUID(), message: 'ゲームがリセットされました', timestamp: Date.now() }];
-                state.activeNPCs = [];
-                state.timeRemaining = state.settings.turnDuration;
-                state.lastTick = Date.now();
-
-                // 4. Reset Properties
-                state.properties = [
-                    { id: 'p1', name: '駅前の一等地 (土地)', type: 'land', price: 10000, income: -500, description: '購入すると土地代がかかるが、店舗の売上が大幅UP' },
-                    { id: 'p2', name: '郊外の空き地 (土地)', type: 'land', price: 2000, income: -100, description: '安い土地。少しだけ売上に貢献' },
-                    { id: 'p3', name: 'アパート「ひまわり」', type: 'apartment', price: 5000, income: 300, description: '安定した家賃収入が得られる' },
-                    { id: 'p4', name: '貸し店舗「商店街」', type: 'shop', price: 8000, income: 500, description: 'テナント料が入る' },
-                    { id: 'p5', name: '高級マンション「ヒルズ」', type: 'mansion', price: 50000, income: 3000, description: '圧倒的な家賃収入。選ばれし者の証' },
-                ];
+                state.gameId = crypto.randomUUID(); // Force refresh context
 
                 return state;
             });
-            return NextResponse.json({ success: true, message: 'Game initialized' });
+            return NextResponse.json({ success: true });
         }
+
+        // -----------------------------------------------------
+        // 完全リセット (Full Reset - Back to Setup)
+        // -----------------------------------------------------
+        if (action === 'full_reset') {
+            await updateGameState((state) => {
+                state.users = []; // Clear all users to trigger setup screen
+                state.gameId = crypto.randomUUID();
+                state.turn = 1;
+                state.isDay = true;
+                // Reset other lists
+                state.stocks = [];
+                state.requests = [];
+                state.products = [];
+                state.lands = [];
+                state.activeNPCs = [];
+                state.activeEvents = [];
+                state.news = [];
+                state.cryptos = [];
+                state.cryptos = [];
+
+                return state;
+            });
+            return NextResponse.json({ success: true });
+        }
+
 
         // -----------------------------------------------------
         // 神モード (God Mode)

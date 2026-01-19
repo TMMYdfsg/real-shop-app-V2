@@ -25,6 +25,24 @@ export default function BankerDashboard() {
         });
     };
 
+    const handleFullReset = async () => {
+        if (!confirm('【警告】すべてのデータを消去して初期セットアップ画面に戻りますか？\nこの操作は取り消せません。')) return;
+        if (!confirm('本当にリセットしますか？')) return;
+
+        try {
+            await fetch('/api/admin', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'full_reset' }),
+            });
+            // Force reload to clear context and redirect to setup
+            window.location.href = '/';
+        } catch (error) {
+            console.error('Reset failed:', error);
+            alert('リセットに失敗しました');
+        }
+    };
+
     const handleRequest = async (requestId: string, action: 'approve' | 'reject') => {
         await fetch('/api/admin', {
             method: 'POST',
@@ -93,6 +111,14 @@ export default function BankerDashboard() {
                         <Card title="参加プレイヤー" padding="md">
                             <div style={{ fontSize: '2rem', fontWeight: 'bold' }}>{gameState.users.filter(u => u.role === 'player').length}人</div>
                             <div className="text-sm text-gray-500 mt-2">現在のアクティブユーザー</div>
+                            <Button
+                                size="sm"
+                                variant="danger"
+                                className="mt-4 w-full"
+                                onClick={handleFullReset}
+                            >
+                                🗑️ 完全リセット (最初へ戻る)
+                            </Button>
                         </Card>
                     </div>
 

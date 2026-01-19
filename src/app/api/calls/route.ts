@@ -108,8 +108,8 @@ export async function POST(req: NextRequest) {
             },
         });
 
-        // Agoraトークン生成（簡易版：本番環境では別APIに分離推奨）
-        const token = generateDummyToken(call.id);
+        // Agoraトークン生成
+        const token = generateRtcToken(call.id, 0); // uid=0 for simplicity or use numeric uid if possible
 
         return NextResponse.json({
             call,
@@ -125,9 +125,32 @@ export async function POST(req: NextRequest) {
     }
 }
 
-// 簡易トークン生成（開発用）
-// 本番環境ではagora-access-tokenを使用してサーバーサイドで生成
-function generateDummyToken(channelId: string): string {
-    // 実際のAgoraトークンは別APIで生成
-    return `dummy_token_${channelId}_${Date.now()}`;
+/**
+ * Agora RTC Token Generator
+ */
+import { RtcTokenBuilder, RtcRole } from 'agora-token';
+
+function generateRtcToken(channelName: string, uid: number): string {
+    const appId = process.env.NEXT_PUBLIC_AGORA_APP_ID;
+    const appCertificate = process.env.AGORA_APP_CERTIFICATE;
+
+    if (!appId || !appCertificate) {
+        console.warn('[Agora] Missing App ID or Certificate. Using dummy token.');
+        return 'dummy-token';
+    }
+
+    const role = RtcRole.PUBLISHER;
+    const expirationTimeInSeconds = 3600;
+    const currentTimestamp = Math.floor(Date.now() / 1000);
+    const privilegeExpiredTs = currentTimestamp + expirationTimeInSeconds;
+
+    return RtcTokenBuilder.buildTokenWithUid(
+        appId,
+        appCertificate,
+        channelName,
+        uid,
+        role,
+        expirationTimeInSeconds,
+        expirationTimeInSeconds
+    );
 }

@@ -32,10 +32,12 @@ export default function PhoneApp() {
     const [microphoneTrack, setMicrophoneTrack] = useState<any>(null);
     const [isAutoAnswering, setIsAutoAnswering] = useState(false);
 
-    // 通話履歴をリアルタイム取得
+    const { gameState, currentUser } = useGame();
+
+    // 通話履歴をリアルタイム取得（ログイン時のみ）
     const { data: callHistory } = useRealtime<VoiceCall[]>(
         '/api/calls',
-        { interval: 5000 }
+        { interval: 5000, enabled: !!currentUser }
     );
 
     // URLパラメータからの自動応答処理
@@ -65,23 +67,36 @@ export default function PhoneApp() {
     // 着信をチェック（pollingで簡易実装）
     useEffect(() => {
         const checkIncoming = async () => {
-            const res = await fetch('/api/calls');
-            const calls: VoiceCall[] = await res.json();
-            const pending = calls.find(c => c.status === 'PENDING' && c.receiverId === getMyId());
-
-            // 自動応答の処理（通知から遷移してきた場合）
-            const action = searchParams.get('action');
-            const callId = searchParams.get('callId');
-
-            if (pending && (!incomingCall || pending.id !== incomingCall.id)) {
-                if (action === 'answer' && callId === pending.id) {
-                    // 自動応答
-                    answerCall(pending);
-                    // URLパラメータをクリアするとより良い
-                } else {
-                    setIncomingCall(pending);
-                    playRingtone();
+            try {
+                const res = await fetch('/api/calls');
+                if (!res.ok) {
+                    // 401 or other errors - user not logged in or API error
+                    return;
                 }
+                const calls: VoiceCall[] = await res.json();
+                if (!Array.isArray(calls)) {
+                    // Unexpected response format
+                    return;
+                }
+                const pending = calls.find(c => c.status === 'PENDING' && c.receiverId === getMyId());
+
+                // 自動応答の処理（通知から遷移してきた場合）
+                const action = searchParams.get('action');
+                const callId = searchParams.get('callId');
+
+                if (pending && (!incomingCall || pending.id !== incomingCall.id)) {
+                    if (action === 'answer' && callId === pending.id) {
+                        // 自動応答
+                        answerCall(pending);
+                        // URLパラメータをクリアするとより良い
+                    } else {
+                        setIncomingCall(pending);
+                        playRingtone();
+                    }
+                }
+            } catch (error) {
+                // Network error or JSON parse error - silently ignore
+                console.debug('[PhoneApp] checkIncoming error:', error);
             }
         };
 
@@ -115,15 +130,17 @@ export default function PhoneApp() {
     const answerCall = async (call: VoiceCall) => {
         try {
             // ステータスをACTIVEに更新
-            await fetch(`/api/calls/${call.id}`, {
+            const res = await fetch(`/api/calls/${call.id}`, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ status: 'ACTIVE' }),
             });
+            const data = await res.json();
+            const token = data.token; // APIからトークンを取得
 
             setIncomingCall(null);
             setActiveCall(call);
-            await joinVoiceChannel(call.id, 'dummy-token');
+            await joinVoiceChannel(call.id, token || 'dummy-token');
         } catch (error) {
             console.error('Failed to answer call:', error);
         }
@@ -214,11 +231,6 @@ export default function PhoneApp() {
         // 着信音を再生（将来実装）
         console.log('[Phone] 📞 Incoming call!');
     };
-
-    const { gameState, currentUser } = useGame();
-    // ... existing state ...
-
-    // ... existing hooks ...
 
     // Filter users for the contact list (exclude self)
     const contacts = gameState?.users.filter(u => u.id !== currentUser?.id) || [];
