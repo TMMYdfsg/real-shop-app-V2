@@ -56,6 +56,11 @@ export class DummyAgoraClient {
     on(event: string, callback: Function) {
         console.log('[Dummy Agora] Listening to event:', event);
     }
+
+    async subscribe(user: any, mediaType: 'audio' | 'video') {
+        console.log('[Dummy Agora] Subscribing to user:', user, 'mediaType:', mediaType);
+        return Promise.resolve();
+    }
 }
 
 /**

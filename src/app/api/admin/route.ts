@@ -832,6 +832,67 @@ export async function POST(req: NextRequest) {
         }
 
 
+
+        // -----------------------------------------------------
+        // 不動産管理 (Real Estate Management)
+        // -----------------------------------------------------
+        if (action === 'add_property') {
+            const { property } = body;
+            await updateGameState((state) => {
+                if (!state.properties) state.properties = [];
+                state.properties.push({
+                    ...property,
+                    id: crypto.randomUUID(),
+                    ownerId: null // Default to bank owned
+                });
+                return state;
+            });
+            return NextResponse.json({ success: true });
+        }
+
+        if (action === 'delete_property') {
+            const { propertyId } = body;
+            await updateGameState((state) => {
+                if (state.properties) {
+                    state.properties = state.properties.filter(p => p.id !== propertyId);
+                }
+                return state;
+            });
+            return NextResponse.json({ success: true });
+        }
+
+        if (action === 'add_land') {
+            const { land } = body;
+            await updateGameState((state) => {
+                const newLand = {
+                    ...land,
+                    id: land.id || `land_${crypto.randomUUID()}`, // Use provided Grid ID or random
+                    ownerId: null,
+                    isForSale: true,
+                    placeId: undefined,
+                    polygon: land.polygon || [] // Should be generated if missing, but minimal for now
+                };
+                if (!state.lands) state.lands = [];
+                state.lands.push(newLand);
+                return state;
+            });
+            return NextResponse.json({ success: true });
+        }
+
+        if (action === 'update_land') {
+            const { landId, price, isForSale, zoning } = body;
+            await updateGameState((state) => {
+                const land = state.lands.find(l => l.id === landId);
+                if (land) {
+                    if (price !== undefined) land.price = Number(price);
+                    if (isForSale !== undefined) land.isForSale = isForSale;
+                    if (zoning !== undefined) land.zoning = zoning;
+                }
+                return state;
+            });
+            return NextResponse.json({ success: true });
+        }
+
         // -----------------------------------------------------
         // 神モード (God Mode)
         // -----------------------------------------------------

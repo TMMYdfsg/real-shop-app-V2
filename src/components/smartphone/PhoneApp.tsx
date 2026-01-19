@@ -217,7 +217,7 @@ export default function PhoneApp() {
 
     const joinVoiceChannel = async (channelId: string, token: string) => {
         try {
-            const client = await getAgoraClient();
+            const client = await getAgoraClient() as any;
             setAgoraClient(client);
 
             // リモートユーザーの音声を受信するためのイベントリスナー
