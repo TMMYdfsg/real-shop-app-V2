@@ -66,7 +66,7 @@ export const MiniGameContainer: React.FC<MiniGameContainerProps> = ({ config, on
 
     const renderGameContent = () => {
         // 1. Job Specific Overrides
-        const jobId = config.jobId as JobType | undefined;
+        const jobId = config.jobId as JobTypeData | undefined;
 
         if (jobId === 'bakery' || jobId === 'cake_shop' || jobId === 'pastry_shop' || jobId === 'wagashi_shop') {
             return <BakerGame difficulty={config.difficulty} onScoreUpdate={handleScoreUpdate} />;
