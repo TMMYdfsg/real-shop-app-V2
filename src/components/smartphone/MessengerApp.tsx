@@ -24,7 +24,7 @@ interface Message {
     };
 }
 
-export default function MessengerApp() {
+export default function MessengerApp({ onClose }: { onClose: () => void }) {
     const { gameState, currentUser } = useGame();
     const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
     const [newMessage, setNewMessage] = useState('');
@@ -110,7 +110,10 @@ export default function MessengerApp() {
             {/* 会話リスト / ユーザー選択 */}
             <div className="w-1/3 bg-white border-r border-gray-200 overflow-y-auto flex flex-col">
                 <div className="p-4 bg-blue-600 text-white font-bold flex justify-between items-center sticky top-0 z-10">
-                    <span>💬 メッセージ</span>
+                    <div className="flex items-center gap-2">
+                        <button onClick={onClose} className="hover:bg-white/20 p-1 rounded-full text-lg" title="戻る">⬅️</button>
+                        <span>💬 メッセージ</span>
+                    </div>
                     <button
                         onClick={() => setIsSelectingUser(!isSelectingUser)}
                         className="text-white hover:text-blue-100 text-xl font-bold px-2 rounded hover:bg-white/10"

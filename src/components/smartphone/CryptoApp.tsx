@@ -3,7 +3,7 @@ import { useGame } from '@/context/GameContext';
 import { Crypto } from '@/types';
 import { StockChart } from '@/components/stock/StockChart';
 
-export const CryptoApp: React.FC = () => {
+export const CryptoApp: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     const { gameState, currentUser, sendRequest } = useGame();
     const [selectedCrypto, setSelectedCrypto] = useState<Crypto | null>(null);
     const [amount, setAmount] = useState<string>('');
@@ -135,9 +135,12 @@ export const CryptoApp: React.FC = () => {
 
     return (
         <div className="h-full bg-slate-900 text-white p-4 overflow-y-auto">
-            <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-                <span className="text-2xl">🚀</span> Crypto Trade
-            </h2>
+            <div className="flex items-center gap-4 mb-4">
+                <button onClick={onClose} className="text-gray-400 hover:text-white transition-colors p-1" title="戻る">⬅️</button>
+                <h2 className="text-xl font-bold flex items-center gap-2">
+                    <span className="text-2xl">🚀</span> Crypto Trade
+                </h2>
+            </div>
 
             <div className="space-y-3">
                 {cryptos.length === 0 ? (
