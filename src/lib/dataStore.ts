@@ -334,7 +334,8 @@ export async function getGameState(): Promise<GameState> {
                 interestRate: settings.interestRate,
                 salaryAutoSafeRate: settings.salaryAutoSafeRate,
                 turnDuration: settings.turnDuration,
-                moneyMultiplier: (settings as any).moneyMultiplier || 1.0
+                moneyMultiplier: (settings as any).moneyMultiplier || 1.0,
+                isGameStarted: (settings as any).isGameStarted ?? false
             },
             economy: {
                 status: settings.economyStatus as any,
