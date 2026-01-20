@@ -21,7 +21,8 @@ const BankerLayout: React.FC<{ children: React.ReactNode; initialData?: any }> =
     }, [initialData, mutate]);
 
     const navItems = [
-        { label: 'ホーム (Dashboard)', path: '/banker', icon: '🏠' },
+        { label: 'ホーム (Dashboard)', path: '/banker', icon: '📊' },
+        { label: '私のプレイヤー画面へ', path: `/player/${currentUser?.id}`, icon: '📱' },
         { label: '申請承認', path: '/banker/requests', icon: '📝' },
         { label: '職業管理', path: '/banker/users', icon: '👥' },
         { label: '株式市場', path: '/banker/market', icon: '📈' },
@@ -44,9 +45,14 @@ const BankerLayout: React.FC<{ children: React.ReactNode; initialData?: any }> =
             {/* Main Content */}
             <main style={{ padding: '4rem 1rem 2rem 1rem', overflowY: 'auto' }}>
                 {currentUser && (
-                    <div style={{ maxWidth: '1200px', margin: '0 auto 1rem auto', display: 'flex', justifyContent: 'flex-end' }}>
-                        <Button size="sm" variant="secondary" onClick={() => router.push(`/player/${currentUser.id}`)}>
-                            👛 私の財布(プレイヤー画面)を見る
+                    <div style={{ maxWidth: '1200px', margin: '0 auto 1.5rem auto', display: 'flex', justifyContent: 'flex-end' }}>
+                        <Button
+                            size="lg"
+                            variant="primary"
+                            onClick={() => router.push(`/player/${currentUser.id}`)}
+                            style={{ boxShadow: '0 4px 12px rgba(99, 102, 241, 0.4)', borderRadius: '12px' }}
+                        >
+                            📱 プレイヤー画面 (自分のスマホ) を開く
                         </Button>
                     </div>
                 )}

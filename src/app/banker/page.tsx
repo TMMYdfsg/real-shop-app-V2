@@ -125,15 +125,25 @@ export default function BankerDashboard() {
 
                         {/* Players Card */}
                         <Card title="参加プレイヤー" padding="md">
-                            <div style={{ fontSize: '2rem', fontWeight: 'bold' }}>{gameState.users.filter(u => u.role === 'player').length}人</div>
-                            <div className="text-sm text-gray-500 mt-2">現在のアクティブユーザー</div>
+                            <div className="text-3xl font-bold mb-1">{gameState.users.filter(u => u.role === 'player').length}人</div>
+                            <div className="text-sm text-gray-500 mb-4">現在のアクティブプレイヤー</div>
+
+                            <Button
+                                size="lg"
+                                variant="primary"
+                                className="w-full mb-3 shadow-lg"
+                                onClick={() => router.push(`/player/${gameState.users.find(u => u.role === 'banker')?.id}`)}
+                            >
+                                📱 プレイヤー画面を開く
+                            </Button>
+
                             <Button
                                 size="sm"
-                                variant="danger"
-                                className="mt-4 w-full"
+                                variant="ghost"
+                                className="w-full text-xs text-red-500 hover:text-red-700 opacity-50"
                                 onClick={handleFullReset}
                             >
-                                🗑️ 完全リセット (最初へ戻る)
+                                🗑️ システム初期化
                             </Button>
                         </Card>
                     </div>

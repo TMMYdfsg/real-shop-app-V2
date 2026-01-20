@@ -11,6 +11,7 @@ export default function Home() {
   const { gameState, login, isLoading } = useGame();
   const router = useRouter();
   const [setupStep, setSetupStep] = useState(0); // 0: Check, 1: Setup Form
+  const [isSetupBusy, setIsSetupBusy] = useState(false);
   const [playerCount, setPlayerCount] = useState(4);
   const [names, setNames] = useState<string[]>(['', '', '', '']);
   const [ids, setIds] = useState<string[]>(['', '', '', '']); // Custom IDs
@@ -45,39 +46,49 @@ export default function Home() {
   };
 
   const handleSetupSubmit = async () => {
-    // 1. Initialize Game Settings first
+    if (isSetupBusy) return;
+    if (names.some(name => !name.trim())) {
+      alert("全員の名前を入力してね");
+      return;
+    }
+
+    setIsSetupBusy(true);
+
     try {
-      await fetch('/api/setup/settings', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
+      // 1. Prepare Full Data
+      const users = names.map((name, index) => ({
+        name: name.trim(),
+        role: index === 0 ? 'banker' : 'player',
+        id: ids[index]?.trim() || undefined,
+      }));
+
+      const setupData = {
+        settings: {
           moneyMultiplier: Number(moneyMultiplier),
           startingMoney: Number(startingMoney)
-        })
-      });
-    } catch (e) {
-      console.error("Failed to save settings", e);
-      alert("設定の保存に失敗しましたが、続行します。");
-    }
+        },
+        users: users
+      };
 
-    // 2. Register users sequentially
-    const usersToCreate = names.map((name, index) => ({
-      name: name || `Player ${index + 1}`,
-      role: index === 0 ? 'banker' : 'player',
-      job: 'unemployed',
-      id: ids[index] || undefined, // Pass custom ID if set
-      initialBalance: index === 0 ? undefined : Number(startingMoney) // Pass starting money for players
-    }));
-
-    for (const user of usersToCreate) {
-      await fetch('/api/setup/user', {
+      // 2. Perform Full Setup in one call
+      const res = await fetch('/api/setup/full', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(user),
+        body: JSON.stringify(setupData),
       });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || `Setup failed`);
+      }
+
+      // Success!
+      window.location.reload();
+    } catch (e: any) {
+      console.error("Failed to perform setup", e);
+      alert(`セットアップに失敗しました: ${e.message}`);
+      setIsSetupBusy(false);
     }
-    // Refresh page or wait for polling
-    window.location.reload();
   };
 
   if (isLoading) {
@@ -192,8 +203,8 @@ export default function Home() {
             )}
           </div>
 
-          <Button onClick={handleSetupSubmit} fullWidth>
-            ゲームスタート！
+          <Button onClick={handleSetupSubmit} fullWidth disabled={isSetupBusy}>
+            {isSetupBusy ? '作成中...' : 'ゲームスタート！'}
           </Button>
         </Card>
       </main>
