@@ -3,6 +3,7 @@ import { updateGameState } from '@/lib/dataStore';
 import { GameState, User, Transaction } from '@/types';
 import crypto from 'crypto';
 import { generateLands, PREFECTURES } from '@/lib/cityData';
+import { eventManager } from '@/lib/eventManager';
 
 export const dynamic = 'force-dynamic';
 
