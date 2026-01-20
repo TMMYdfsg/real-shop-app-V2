@@ -285,42 +285,47 @@ export const LifeStatusApp: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                     <h3 className="font-bold text-sm text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-2">
                         <span>🐾</span> ペット
                     </h3>
-                    {currentUser.myRoomItems?.filter(i => i.category === 'pet').length > 0 ? (
-                        <div className="space-y-2">
-                            <div className="grid grid-cols-2 gap-2">
-                                {currentUser.myRoomItems.filter(i => i.category === 'pet').map(item => (
-                                    <div key={item.id} className="bg-white p-2 rounded-lg border border-orange-100 flex items-center gap-2">
-                                        <span className="text-2xl">{item.emoji ?? '🐶'}</span>
-                                        <span className="text-sm font-bold">{item.name}</span>
+                    {(() => {
+                        const pets = currentUser.myRoomItems?.filter(i => i.category === 'pet') || [];
+                        if (pets.length > 0) {
+                            return (
+                                <div className="space-y-2">
+                                    <div className="grid grid-cols-2 gap-2">
+                                        {pets.map(item => (
+                                            <div key={item.id} className="bg-white p-2 rounded-lg border border-orange-100 flex items-center gap-2">
+                                                <span className="text-2xl">{item.emoji ?? '🐶'}</span>
+                                                <span className="text-sm font-bold">{item.name}</span>
+                                            </div>
+                                        ))}
                                     </div>
-                                ))}
+                                    <button
+                                        onClick={async () => {
+                                            await fetch('/api/action', {
+                                                method: 'POST',
+                                                headers: { 'Content-Type': 'application/json' },
+                                                body: JSON.stringify({
+                                                    type: 'interact_pet',
+                                                    requesterId: currentUser.id,
+                                                    details: { petItemIds: pets.map(p => p.id) }
+                                                })
+                                            });
+                                            alert('ペットたちと遊びました！癒やされました〜');
+                                        }}
+                                        className="w-full py-2 bg-orange-500 text-white rounded-xl font-bold hover:bg-orange-600 transition shadow-sm"
+                                    >
+                                        🧶 遊ぶ
+                                    </button>
+                                </div>
+                            );
+                        }
+                        return null;
+                    })() || (
+                            <div className="text-center py-6 text-gray-400 bg-gray-50 rounded-xl border border-dashed border-gray-300">
+                                <span className="text-3xl">🐕</span>
+                                <p className="text-sm mt-2">ペットはいません</p>
+                                <p className="text-xs">カタログで家族を迎えましょう</p>
                             </div>
-                            <button
-                                onClick={async () => {
-                                    const pets = currentUser.myRoomItems.filter(i => i.category === 'pet');
-                                    await fetch('/api/action', {
-                                        method: 'POST',
-                                        headers: { 'Content-Type': 'application/json' },
-                                        body: JSON.stringify({
-                                            type: 'interact_pet',
-                                            requesterId: currentUser.id,
-                                            details: { petItemIds: pets.map(p => p.id) }
-                                        })
-                                    });
-                                    alert('ペットたちと遊びました！癒やされました〜');
-                                }}
-                                className="w-full py-2 bg-orange-500 text-white rounded-xl font-bold hover:bg-orange-600 transition shadow-sm"
-                            >
-                                🧶 遊ぶ
-                            </button>
-                        </div>
-                    ) : (
-                        <div className="text-center py-6 text-gray-400 bg-gray-50 rounded-xl border border-dashed border-gray-300">
-                            <span className="text-3xl">🐕</span>
-                            <p className="text-sm mt-2">ペットはいません</p>
-                            <p className="text-xs">カタログで家族を迎えましょう</p>
-                        </div>
-                    )}
+                        )}
                 </section>
             </div>
         </div>
