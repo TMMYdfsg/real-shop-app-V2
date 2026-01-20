@@ -92,6 +92,29 @@ export default function BankerDashboard() {
             {activeTab === 'overview' && (
                 <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1rem' }}>
+                        {/* Game Start Control */}
+                        {gameState.settings.isGameStarted === false && (
+                            <Card title="⚠️ ゲーム開始待ち" padding="md" style={{ borderLeft: '4px solid #f59e0b', gridColumn: '1 / -1' }}>
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <h3 className="text-xl font-bold mb-1">ゲームを開始しますか？</h3>
+                                        <p className="text-gray-600">現在、プレイヤー画面はロックされています。</p>
+                                    </div>
+                                    <Button size="lg" variant="primary" className="px-8 shadow-xl animate-pulse" onClick={async () => {
+                                        if (confirm('ゲームを開始し、プレイヤーのロックを解除しますか？')) {
+                                            await fetch('/api/admin', {
+                                                method: 'POST',
+                                                headers: { 'Content-Type': 'application/json' },
+                                                body: JSON.stringify({ action: 'start_game' })
+                                            });
+                                        }
+                                    }}>
+                                        🚀 ゲームスタート
+                                    </Button>
+                                </div>
+                            </Card>
+                        )}
+
                         {/* Turn Card */}
                         <Card title="現在のターン" padding="md">
                             <div style={{ fontSize: '2rem', fontWeight: 'bold' }}>Turn {gameState.turn}</div>

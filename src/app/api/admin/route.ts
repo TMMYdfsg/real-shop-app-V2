@@ -184,6 +184,20 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ success: true });
         }
 
+        if (action === 'start_game') {
+            await updateGameState((state) => {
+                state.settings.isGameStarted = true;
+                state.news.unshift({
+                    id: crypto.randomUUID(),
+                    message: '🎮 ゲームが開始されました！',
+                    timestamp: Date.now()
+                });
+                return state;
+            });
+            eventManager.broadcast({ type: 'STATE_SYNC', payload: { type: 'game_started' }, timestamp: Date.now(), revision: 0 });
+            return NextResponse.json({ success: true });
+        }
+
         // -----------------------------------------------------
         // ターン進行 (Next Turn)
         // -----------------------------------------------------

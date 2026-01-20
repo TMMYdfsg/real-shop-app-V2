@@ -28,9 +28,11 @@ export async function POST(request: Request) {
                 lastTick: BigInt(Date.now()),
                 timeRemaining: 60,
                 season: 'spring',
+                isGameStarted: false,
             },
             update: {
                 moneyMultiplier: setupSettings?.moneyMultiplier || 1.0,
+                isGameStarted: false,
             }
         });
 

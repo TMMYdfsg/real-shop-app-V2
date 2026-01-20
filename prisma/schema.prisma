@@ -25,6 +25,7 @@ model GameSettings {
   turn                Int     @default(1)
   isDay               Boolean @default(true)
   isTimerRunning      Boolean @default(true)
+  isGameStarted       Boolean @default(false)
   lastTick            BigInt
   timeRemaining       Int
   marketStatus        String  @default("open")

@@ -399,6 +399,7 @@ export async function updateGameState(updater: (state: GameState) => GameState |
                 salaryAutoSafeRate: newState.settings.salaryAutoSafeRate,
                 isDay: newState.isDay,
                 isTimerRunning: newState.isTimerRunning,
+                isGameStarted: newState.settings.isGameStarted ?? false,
                 lastTick: BigInt(newState.lastTick),
                 timeRemaining: newState.timeRemaining,
                 marketStatus: newState.marketStatus,

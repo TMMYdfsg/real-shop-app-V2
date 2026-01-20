@@ -25,6 +25,24 @@ export default function PlayerHome({ params }: { params: Promise<{ id: string }>
 
     if (!gameState || !currentUser) return <div className="p-8 text-center">Loading world data...</div>;
 
+    // Game Start Lock
+    if (gameState.settings.isGameStarted === false) {
+        return (
+            <div className="fixed inset-0 bg-slate-900 z-50 flex items-center justify-center text-white p-8">
+                <div className="text-center max-w-md">
+                    <div className="text-6xl mb-6">🛑</div>
+                    <h1 className="text-3xl font-bold mb-4">準備中</h1>
+                    <p className="text-lg text-slate-300 leading-relaxed mb-8">
+                        ゲームが初期化されました。<br />
+                        管理者がゲームを開始するまで<br />
+                        しばらくお待ちください。
+                    </p>
+                    <div className="animate-pulse text-sm text-slate-500">Waiting for admin...</div>
+                </div>
+            </div>
+        );
+    }
+
     const handleBankAction = async (type: string, details: any) => {
         try {
             const res = await fetch('/api/action', {

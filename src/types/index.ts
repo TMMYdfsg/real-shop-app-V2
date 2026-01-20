@@ -375,6 +375,7 @@ export interface GameSettings {
     salaryAutoSafeRate: number; // 稼ぎの何%を自動貯金するか (デフォルト50%)
     turnDuration: number; // 1ターンの時間(ミリ秒)
     moneyMultiplier: number; // グローバル収入倍率
+    isGameStarted?: boolean; // ゲーム開始フラグ
 }
 
 export interface NewsItem {
