@@ -4,12 +4,13 @@ import { useGame } from '@/context/GameContext';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 
-export default function CatalogPage({ params }: { params: { id: string } }) {
+export default function CatalogPage() {
     const { gameState, sendRequest, currentUser } = useGame();
     const [selectedCategory, setSelectedCategory] = useState<'all' | 'furniture' | 'appliance' | 'pet' | 'ingredient'>('all');
     const router = useRouter();
+    const params = useParams<{ id: string }>();
 
     if (!currentUser || currentUser.id !== params.id) {
         router.push(`/player/${params.id}`);
@@ -56,8 +57,8 @@ export default function CatalogPage({ params }: { params: { id: string } }) {
                             key={cat}
                             onClick={() => setSelectedCategory(cat as any)}
                             className={`px-4 py-2 rounded-lg font-bold whitespace-nowrap transition ${selectedCategory === cat
-                                    ? 'bg-indigo-600 text-white shadow-lg'
-                                    : 'bg-white text-gray-700 hover:bg-gray-100'
+                                ? 'bg-indigo-600 text-white shadow-lg'
+                                : 'bg-white text-gray-700 hover:bg-gray-100'
                                 }`}
                         >
                             {cat === 'all' ? '全て' : cat}

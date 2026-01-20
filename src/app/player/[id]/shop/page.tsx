@@ -13,6 +13,7 @@ import { FURNITURE_CATALOG, PET_CATALOG, INGREDIENTS } from '@/lib/gameData';
 type CatalogTab = 'furniture' | 'pet' | 'ingredient';
 
 import CityMap from '@/components/map/CityMap'; // Import CityMap
+import { ShopSetupWizard } from '@/components/shop/ShopSetupWizard';
 
 // ... imports
 
@@ -102,11 +103,14 @@ export default function ShopPage() {
         const currentMenu = currentUser.shopMenu || [];
         const item: ShopItem = {
             id: Math.random().toString(36).substr(2, 9),
+            sellerId: currentUser.id, // Added sellerId
             name: newItem.name,
             cost: cost,
             price: price,
             stock: 0,
-            description: newItem.description
+            description: newItem.description,
+            isSold: false, // Added isSold
+            createdAt: Date.now() // Added createdAt
         };
 
         const updatedMenu = [...currentMenu, item];
@@ -333,6 +337,36 @@ export default function ShopPage() {
     }, [currentUser?.shopName]);
 
     if (!currentUser) return <div>Loading...</div>;
+
+    // --- Business Flow Checks ---
+    const hasLand = (currentUser.ownedLands && currentUser.ownedLands.length > 0) || (currentUser.ownedPlaces && currentUser.ownedPlaces.length > 0);
+    const hasWebsite = !!currentUser.shopWebsite;
+
+    if (!hasLand) {
+        return (
+            <div className="min-h-screen p-6 flex items-center justify-center">
+                <Card className="max-w-md w-full text-center" padding="lg">
+                    <div className="text-6xl mb-4 animate-float">🏞️</div>
+                    <h2 className="text-2xl font-bold mb-2">まずは土地を探そう</h2>
+                    <p className="text-gray-600 mb-6 font-medium">お店を開くには、まず拠点となる土地が必要です。<br />不動産屋で良い物件を見つけましょう。</p>
+                    <Button
+                        size="lg"
+                        fullWidth
+                        onClick={() => router.push(`/player/${currentUser.id}/realestate`)}
+                        variant="primary"
+                        className="shadow-lg shadow-indigo-500/30"
+                    >
+                        不動産へ行く
+                    </Button>
+                </Card>
+            </div>
+        );
+    }
+
+    if (!hasWebsite) {
+        return <ShopSetupWizard onComplete={() => window.location.reload()} />;
+    }
+    // ---------------------------
 
     const shopMenu = currentUser.shopMenu || [];
     const coupons = currentUser.coupons || [];
@@ -573,7 +607,7 @@ export default function ShopPage() {
                 {/* PROPERTY TAB */}
                 {activeTab === 'property' && (
                     <div className="animate-fade-in h-[600px] border border-gray-200 rounded-lg overflow-hidden relative">
-                        <CityMap />
+                        <CityMap context="shop" />
                     </div>
                 )}
             </motion.div>

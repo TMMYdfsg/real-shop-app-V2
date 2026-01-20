@@ -1,6 +1,6 @@
 import { prisma } from '@/lib/db';
 import { GameState, User, Stock, Crypto, Request, Product, Transaction, Place, Land, NPC, GameEvent, Property, NewsItem, RouletteResult, CatalogItem } from '@/types';
-import { generateLands, BASE_LAT, BASE_LNG, GRID_SIZE_LAT, GRID_SIZE_LNG, GRID_ROWS, GRID_COLS } from '@/lib/cityData';
+import { generateLands, BASE_LAT, BASE_LNG } from '@/lib/cityData';
 
 // Re-export INITIAL_STATE for reference, though logic uses DB defaults
 const INITIAL_STATE_VALUES: GameState = {
@@ -27,7 +27,8 @@ const INITIAL_STATE_VALUES: GameState = {
         insuranceRate: 100,
         interestRate: 0.05,
         salaryAutoSafeRate: 0.5,
-        turnDuration: 5 * 60 * 1000
+        turnDuration: 5 * 60 * 1000,
+        moneyMultiplier: 1.0
     },
     news: [],
     roulette: { // Note: Currently not in DB schema explicitly as object, might need to store in GameSettings or separate
@@ -96,10 +97,10 @@ const INITIAL_STATE_VALUES: GameState = {
             name: 'カーディーラー・丸の内',
             type: 'retail',
             location: { // In DB: flattened to lat, lng, address, landId
-                lat: BASE_LAT + (5 - GRID_ROWS / 2) * GRID_SIZE_LAT,
-                lng: BASE_LNG + (5 - GRID_COLS / 2) * GRID_SIZE_LNG,
+                lat: BASE_LAT,
+                lng: BASE_LNG,
                 address: '東京都千代田区丸の内 6-6',
-                landId: '5-5'
+                landId: 'tokyo'
             },
             status: 'active',
             level: 3,
@@ -177,6 +178,8 @@ async function initializeDatabase() {
             interestRate: 0.05,
             salaryAutoSafeRate: 0.5,
             turnDuration: 5 * 60 * 1000,
+            // @ts-ignore
+            moneyMultiplier: 1.0,
             lastTick: BigInt(Date.now()),
             timeRemaining: 5 * 60 * 1000,
             envSeason: 'spring',
@@ -293,7 +296,24 @@ export async function getGameState(): Promise<GameState> {
             })) as unknown as Crypto[],
             requests: requests.map((r: any) => ({ ...r, timestamp: Number(r.timestamp) })) as unknown as Request[],
             products: products.map((p: any) => ({ ...p, createdAt: Number(p.createdAt), soldAt: p.soldAt ? Number(p.soldAt) : undefined })) as unknown as Product[],
-            lands: lands as unknown as Land[],
+            lands: lands.map((l: any) => ({
+                id: l.id,
+                ownerId: l.ownerId,
+                price: l.price,
+                location: { lat: l.lat, lng: l.lng },
+                address: l.address,
+                isForSale: l.isForSale ?? true, // Default true if missing
+                size: l.size,
+                zoning: l.zoning,
+                status: l.status,
+                polygon: l.polygon as any,
+
+                // New Fields
+                maintenanceFee: l.maintenanceFee,
+                requiresApproval: l.requiresApproval,
+                allowConstruction: l.allowConstruction,
+                allowCompany: l.allowCompany
+            })) as unknown as Land[],
             places: mappedPlaces,
             activeNPCs: npcs.map((n: any) => ({ ...n, entryTime: Number(n.entryTime), leaveTime: Number(n.leaveTime) })) as unknown as NPC[],
             activeEvents: events.map((e: any) => ({ ...e, startTime: Number(e.startTime) })) as unknown as GameEvent[],
@@ -313,7 +333,8 @@ export async function getGameState(): Promise<GameState> {
                 insuranceRate: settings.insuranceRate,
                 interestRate: settings.interestRate,
                 salaryAutoSafeRate: settings.salaryAutoSafeRate,
-                turnDuration: settings.turnDuration
+                turnDuration: settings.turnDuration,
+                moneyMultiplier: (settings as any).moneyMultiplier || 1.0
             },
             economy: {
                 status: settings.economyStatus as any,
@@ -370,6 +391,13 @@ export async function updateGameState(updater: (state: GameState) => GameState |
             where: { id: 'singleton' },
             data: {
                 turn: newState.turn,
+                turnDuration: newState.settings.turnDuration,
+                // @ts-ignore
+                moneyMultiplier: newState.settings.moneyMultiplier,
+                taxRate: newState.settings.taxRate,
+                insuranceRate: newState.settings.insuranceRate,
+                interestRate: newState.settings.interestRate,
+                salaryAutoSafeRate: newState.settings.salaryAutoSafeRate,
                 isDay: newState.isDay,
                 isTimerRunning: newState.isTimerRunning,
                 lastTick: BigInt(newState.lastTick),
@@ -572,6 +600,44 @@ export async function updateGameState(updater: (state: GameState) => GameState |
                         priceHistory: c.priceHistory as any,
                         createdAt: new Date(Number(c.createdAt) || Date.now()),
                         updatedAt: new Date()
+                    }
+                });
+            }
+        }
+
+        // 7. Update Lands
+        if (newState.lands) {
+            for (const land of newState.lands) {
+                await (prisma.land as any).upsert({
+                    where: { id: land.id },
+                    update: {
+                        ownerId: land.ownerId,
+                        price: land.price,
+                        isForSale: land.isForSale,
+                        status: land.status || 'active',
+                        maintenanceFee: land.maintenanceFee || 0,
+                        requiresApproval: land.requiresApproval || false,
+                        allowConstruction: land.allowConstruction ?? true,
+                        allowCompany: land.allowCompany ?? true,
+                        polygon: land.polygon as any
+                    },
+                    create: {
+                        id: land.id,
+                        lat: land.location.lat,
+                        lng: land.location.lng,
+                        address: land.address,
+                        price: land.price,
+                        ownerId: land.ownerId,
+                        type: 'land',
+                        size: land.size,
+                        zoning: land.zoning,
+                        status: land.status || 'active',
+                        isForSale: land.isForSale,
+                        maintenanceFee: land.maintenanceFee || 0,
+                        requiresApproval: land.requiresApproval || false,
+                        allowConstruction: land.allowConstruction ?? true,
+                        allowCompany: land.allowCompany ?? true,
+                        polygon: land.polygon as any
                     }
                 });
             }

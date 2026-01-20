@@ -37,7 +37,12 @@ export const Sidebar: React.FC<SidebarProps> = ({ title, items, role, player, ch
                     <Button
                         variant="ghost"
                         onClick={() => setIsOpen(!isOpen)}
-                        style={{ background: 'rgba(255,255,255,0.8)', backdropFilter: 'blur(4px)', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}
+                        style={{
+                            background: 'var(--glass-bg)',
+                            backdropFilter: 'blur(8px)',
+                            border: '1px solid var(--glass-border)',
+                            boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                        }}
                     >
                         <motion.span
                             key={isOpen ? 'close' : 'open'}
@@ -62,7 +67,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ title, items, role, player, ch
                             onClick={() => setIsOpen(false)}
                             style={{
                                 position: 'fixed', inset: 0,
-                                background: 'rgba(0,0,0,0.5)',
+                                background: 'rgba(0,0,0,0.3)',
                                 zIndex: 998,
                                 backdropFilter: 'blur(2px)'
                             }}
@@ -74,11 +79,14 @@ export const Sidebar: React.FC<SidebarProps> = ({ title, items, role, player, ch
                             animate={{ x: 0 }}
                             exit={{ x: '-100%' }}
                             transition={TRANSITIONS.spring}
+                            className="glass-panel"
                             style={{
                                 position: 'fixed', top: 0, left: 0, bottom: 0,
                                 width: '280px',
-                                background: role === 'banker' ? 'var(--bg-primary)' : 'rgba(255, 255, 255, 0.95)',
-                                boxShadow: '4px 0 15px rgba(0,0,0,0.1)',
+                                background: role === 'banker' ? 'var(--bg-primary)' : 'var(--glass-bg)',
+                                borderRadius: '0', // Reset radius for drawer
+                                borderRight: '1px solid var(--glass-border)',
+                                borderTop: 'none', borderBottom: 'none', borderLeft: 'none',
                                 zIndex: 999,
                                 padding: '4rem 1rem 1rem 1rem',
                                 display: 'flex', flexDirection: 'column',

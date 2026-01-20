@@ -56,6 +56,7 @@ export interface InventoryItem {
     itemId: string; // Master template ID (e.g., 'ing_rice')
     quantity: number;
     name?: string; // Optional override
+    isIllegal?: boolean;
 }
 
 
@@ -130,7 +131,7 @@ export interface Receipt {
 
 export interface Transaction {
     id: string;
-    type: 'payment' | 'transfer' | 'income' | 'tax' | 'deposit' | 'withdraw' | 'repay';
+    type: 'payment' | 'transfer' | 'income' | 'tax' | 'deposit' | 'withdraw' | 'repay' | 'buy_stock' | 'sell_stock';
     amount: number;
     senderId?: string;
     receiverId?: string;
@@ -221,6 +222,10 @@ export interface User {
     // Virtual Currency
     cryptoHoldings?: { [cryptoId: string]: number }; // 仮想通貨保有数
 
+    // Time Machine Feature
+    timeEra?: 'present' | 'past' | 'future';
+
+
     // City Simulator (Phase 1)
     ownedLands: string[]; // Land IDs
     ownedPlaces: string[]; // Place IDs
@@ -269,6 +274,38 @@ export interface User {
     // Audit & Security (Phase 6)
     auditLogs?: AuditLog[];
     suspicionScore?: number; // 0-100 (100で監査イベント確定)
+    nerve?: number; // 0-100 (犯罪行動用スタミナ, Torn City参考)
+
+    // Quest System (New)
+    quests?: QuestProgress[];
+    completedQuestIds?: string[];
+}
+
+export interface Quest {
+    id: string;
+    title: string;
+    description: string;
+    type: 'main' | 'daily' | 'achievement';
+    requirements: {
+        type: 'job' | 'debt' | 'balance' | 'item' | 'location';
+        value: any;
+        comparison?: 'eq' | 'gte' | 'lte'; // defaults to eq or gte depends on type
+    };
+    rewards: {
+        money?: number;
+        item?: string;
+        xp?: number;
+        popularity?: number;
+    };
+    isRepeatable?: boolean;
+}
+
+export interface QuestProgress {
+    questId: string;
+    status: 'active' | 'completed' | 'failed';
+    progress: number; // 0-100
+    startedAt: number;
+    completedAt?: number;
 }
 
 // Phase 3: Qualifications
@@ -320,10 +357,12 @@ export interface GameSettings {
     interestRate: number;
     salaryAutoSafeRate: number; // 稼ぎの何%を自動貯金するか (デフォルト50%)
     turnDuration: number; // 1ターンの時間(ミリ秒)
+    moneyMultiplier: number; // グローバル収入倍率
 }
 
 export interface NewsItem {
     id: string;
+    type?: string;
     message: string;
     timestamp: number;
 }
@@ -332,6 +371,32 @@ export interface RouletteResult {
     text: string;
     timestamp: number;
     targetUserId?: string;
+}
+
+// Social Media & Video Types
+export interface SNSPost {
+    id: string;
+    authorId: string;
+    authorName: string;
+    content: string;
+    likes: number;
+    likedBy: string[];
+    timestamp: number;
+    replyToId?: string; // For replies
+}
+
+export interface VideoContent {
+    id: string;
+    uploaderId: string;
+    uploaderName: string;
+    title: string;
+    description: string; // Added
+    tags: string[];      // Added
+    url: string;         // Added (path to video file)
+    thumbnailColor: string;
+    views: number;
+    likes: number;
+    timestamp: number;
 }
 
 export interface GameState {
@@ -359,6 +424,10 @@ export interface GameState {
     activeEvents: GameEvent[];
     properties: Property[];
     catalogInventory?: CatalogItem[]; // 仕入れ先カタログ（管理者が管理）
+
+    // Social Media & Video Data
+    snsPosts?: SNSPost[];
+    videos?: VideoContent[];
 
     // City Simulator Data
     lands: Land[];
@@ -581,7 +650,7 @@ export interface Location {
 }
 
 export interface Land {
-    id: string; // gridId (例: "135-35-10")
+    id: string; // gridId (例: "135-35-10") or countryId
     ownerId: string | null; // nullなら公有地/販売中
     price: number; // 地価
     location: Location;
@@ -591,15 +660,40 @@ export interface Land {
     polygon?: Array<{ lat: number; lng: number }>; // マップ描画用のポリゴン座標
     size: number; // 広さ (m2)
     zoning: string; // 用途地域 (commercial, residential, industrial, etc.)
+    status?: string; // 状態 (active, sold, etc.)
+
+    // 不動産管理パラメータ
+    maintenanceFee?: number;    // 維持費
+    requiresApproval?: boolean; // 購入承認必要フラグ
+    allowConstruction?: boolean;// 建設許可フラグ
+    allowCompany?: boolean;     // 法人設立許可フラグ
+    regionId?: string;          // 地域ID (region_asia, etc.)
+    place?: Place;
 }
 
-export type PlaceType = 'restaurant' | 'retail' | 'office' | 'factory' | 'service';
+export type PlaceType = 'restaurant' | 'retail' | 'office' | 'factory' | 'service' | 'residential' | 'public';
+
+export type BuildingCategory = 'house' | 'company' | 'shop';
+
+export type CompanyType =
+    | 'large_enterprise' | 'sme' | 'start_up' | 'venture' | 'mega_venture'
+    | 'growth_company' | 'listed_company' | 'unlisted_company' | 'public_company' | 'private_company'
+    | 'domestic_company' | 'foreign_company' | 'parent_company' | 'subsidiary' | 'affiliate' | 'group_company'
+    | 'established_company' | 'emerging_company' | 'mature_company'
+    | 'white_company' | 'black_company'
+    | 'sole_proprietorship' | 'corporation' | 'small_business' | 'global_enterprise';
+
+
 
 export interface Place {
     id: string; // SKU/UUID
     ownerId: string; // 所有者ID
     name: string;
-    type: PlaceType;
+    type: PlaceType; // Legacy or specific
+
+    // New Building Properties
+    buildingCategory?: BuildingCategory;
+    companyType?: CompanyType;
 
     // 地理情報
     location: {
@@ -643,11 +737,12 @@ export interface Loan {
     name: string; // "住宅ローン", "事業拡大資金" etc.
     amount: number; // 元金
     remainingAmount: number; // 残高
+    dueDate?: number; // 返済期限 (timestamp)
     interestRate: number; // 金利 (%)
     isFixedRate: boolean; // 固定金利かどうか
     monthlyPayment: number; // 毎ターン返済額
     nextPaymentTurn: number;
-    status: 'active' | 'paid_off' | 'defaulted';
+    status: 'active' | 'paid_off' | 'defaulted' | 'pending';
     borrowedAt: number;
 }
 

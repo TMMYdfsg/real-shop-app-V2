@@ -21,6 +21,7 @@ model GameSettings {
   interestRate        Float
   salaryAutoSafeRate  Float
   turnDuration        Int
+  moneyMultiplier     Float   @default(1.0)
   turn                Int     @default(1)
   isDay               Boolean @default(true)
   isTimerRunning      Boolean @default(true)
@@ -224,19 +225,27 @@ model Product {
 }
 
 model Land {
-  id          String   @id
-  lat         Float
-  lng         Float
-  address     String
-  price       Float
-  ownerId     String?
-  type        String
-  size        Float
-  zoning      String
-  status      String
+  id                String   @id
+  lat               Float
+  lng               Float
+  address           String
+  price             Float
+  ownerId           String?
+  type              String?
+  size              Float
+  zoning            String
+  status            String   @default("active")
+  isForSale         Boolean  @default(true)
   
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  maintenanceFee    Float    @default(0)
+  requiresApproval  Boolean  @default(false)
+  allowConstruction Boolean  @default(true)
+  allowCompany      Boolean  @default(true)
+  
+  polygon           Json?
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
   
   @@index([ownerId])
 }

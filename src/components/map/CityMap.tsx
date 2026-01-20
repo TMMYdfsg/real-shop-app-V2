@@ -1,378 +1,415 @@
 'use client';
 
-import React, { useEffect, useRef, useState } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, Polygon, useMap, useMapEvents } from 'react-leaflet';
-import 'leaflet/dist/leaflet.css';
-import L from 'leaflet';
-import { Land, PlaceType } from '@/types';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import { GoogleMap, useJsApiLoader, InfoWindow, Marker, MarkerClusterer } from '@react-google-maps/api';
+import { Land } from '@/types';
 import { generateLands } from '@/lib/cityData';
 import { Button } from '@/components/ui/Button';
 import { LandPurchaseModal } from '@/components/map/LandPurchaseModal';
 import { PlaceConstructionModal } from '@/components/map/PlaceConstructionModal';
+import { JapanPrefectureModal } from '@/components/map/JapanPrefectureModal';
+import { RegionModal } from '@/components/map/RegionModal';
 import { useGame } from '@/context/GameContext';
 import { useRouter } from 'next/navigation';
-
-// Leaflet Icon Fix associated with Webpack/Next.js
-// Referencing the Zenn article suggestion for simplicity
-L.Icon.Default.imagePath = 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/';
 
 interface CityMapProps {
     initialLat?: number;
     initialLng?: number;
     zoom?: number;
     onLandSelect?: (land: Land) => void;
+    context?: 'global' | 'shop'; // 追加: コンテキストによって表示を切り替える
 }
 
-type CommuteMode = 'walk' | 'bicycle' | 'car' | 'train';
-
-// Initial View Controller
-const MapController = ({ center, zoom }: { center: [number, number], zoom: number }) => {
-    const map = useMap();
-    useEffect(() => {
-        map.setView(center, zoom);
-    }, [center, zoom, map]);
-    return null;
-};
+// Google Maps用のスタイル（落ち着いた色調）
+const mapStyles = [
+    { featureType: 'poi', elementType: 'labels', stylers: [{ visibility: 'off' }] },
+    { featureType: 'transit', elementType: 'labels.icon', stylers: [{ visibility: 'off' }] },
+];
 
 export default function CityMap({
-    initialLat = 35.681236,
-    initialLng = 139.767125,
-    zoom = 15,
-    onLandSelect
+    initialLat = 20.0,  // 世界全体が見やすい位置（アジア中心）
+    initialLng = 130.0,
+    zoom: initialZoom = 3,           // 世界地図レベル
+    onLandSelect,
+    context = 'global'
 }: CityMapProps) {
     const router = useRouter();
     const { currentUser, gameState, refresh } = useGame();
-    const [lands, setLands] = useState<Land[]>([]);
     const [selectedLandId, setSelectedLandId] = useState<string | null>(null);
+    const [infoWindowPosition, setInfoWindowPosition] = useState<google.maps.LatLngLiteral | null>(null);
     const [isPurchaseModalOpen, setIsPurchaseModalOpen] = useState(false);
     const [isConstructionModalOpen, setIsConstructionModalOpen] = useState(false);
+    const [isJapanModalOpen, setIsJapanModalOpen] = useState(false);
+    const [isRegionModalOpen, setIsRegionModalOpen] = useState(false);
+    const [currentZoom, setCurrentZoom] = useState(initialZoom);
 
-    // UI State
-    const [isMapOnly, setIsMapOnly] = useState(true);
-    const [searchAddress, setSearchAddress] = useState('');
+    // マップロード状態
+    const { isLoaded } = useJsApiLoader({
+        id: 'google-map-script',
+        googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || ''
+    });
 
-    // Load Lands
-    useEffect(() => {
-        const baseLands = gameState?.lands && gameState.lands.length > 0
-            ? [...gameState.lands]
-            : generateLands();
+    const [map, setMap] = React.useState<google.maps.Map | null>(null);
 
-        if (currentUser && currentUser.ownedLands) {
-            baseLands.forEach(l => {
-                if (currentUser.ownedLands.includes(l.id)) {
-                    l.ownerId = currentUser.id;
-                    l.isForSale = false;
+    const onLoad = React.useCallback(function callback(map: google.maps.Map) {
+        setMap(map);
+    }, []);
+
+    const onUnmount = React.useCallback(function callback(map: google.maps.Map) {
+        setMap(null);
+    }, []);
+
+    // 土地データの初期化（メモ化して計算負荷軽減）
+    const lands = useMemo(() => {
+        // cityDataから全土地データを取得
+        const initialLands = generateLands();
+
+        // サーバーから最新の状態を取得してマージ
+        if (gameState?.lands) {
+            return initialLands.map(land => {
+                const serverLand = gameState.lands.find(sl => sl.id === land.id);
+                if (serverLand) {
+                    return { ...land, ...serverLand };
                 }
+                return land;
             });
         }
-        setLands(baseLands);
-    }, [currentUser, gameState?.lands]);
+        return initialLands;
+    }, [gameState?.lands]);
+
+    // Auto-Geocoding Logic (Self-Healing)
+    useEffect(() => {
+        if (!isLoaded || !lands.length) return;
+
+        // lat, lng が 0 (未設定) の土地を抽出
+        const pendingLands = lands.filter(l => l.location.lat === 0 && l.location.lng === 0);
+
+        if (pendingLands.length > 0) {
+            console.log(`Auto-Geocoding started for ${pendingLands.length} lands...`);
+            const geocoder = new google.maps.Geocoder();
+            let isCancelled = false;
+
+            const processGeocoding = async () => {
+                for (const land of pendingLands) {
+                    if (isCancelled) break;
+                    try {
+                        await new Promise(r => setTimeout(r, 1500)); // Rate limit 緩めに
+                        const result = await geocoder.geocode({ address: land.address });
+                        if (result.results && result.results.length > 0) {
+                            const loc = result.results[0].geometry.location;
+                            const lat = loc.lat();
+                            const lng = loc.lng();
+
+                            await fetch('/api/action', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    type: 'city_update_land_coord',
+                                    requesterId: currentUser?.id || 'system',
+                                    details: JSON.stringify({ landId: land.id, lat, lng })
+                                })
+                            });
+                        }
+                    } catch (e) { console.error(e); }
+                }
+            };
+            processGeocoding();
+            return () => { isCancelled = true; };
+        }
+    }, [isLoaded, lands.length]);
 
     const handleLandClick = (land: Land) => {
         setSelectedLandId(land.id);
-        if (onLandSelect) onLandSelect(land);
+        // setInfoWindowPosition(land.location); // 不要：selectedLandから直接計算
+        if (onLandSelect) {
+            onLandSelect(land);
+        }
     };
 
     const handlePurchase = async (land: Land) => {
-        if (!currentUser) return;
+        setIsPurchaseModalOpen(false);
         try {
             const res = await fetch('/api/action', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     type: 'city_buy_land',
-                    requesterId: currentUser.id,
-                    details: land.id,
-                    amount: land.price
+                    requesterId: currentUser?.id,
+                    amount: land.price,
+                    details: land.id
                 })
             });
             const data = await res.json();
             if (data.success) {
-                alert('土地を購入しました！');
-                setIsPurchaseModalOpen(false);
-                setSelectedLandId(null);
-                refresh();
+                alert(data.message);
+                refresh(); // ゲーム状態更新
             } else {
                 alert(`購入失敗: ${data.message}`);
             }
         } catch (error) {
             console.error('Purchase error:', error);
+            alert('購入エラーが発生しました');
         }
     };
 
-    const handleBuild = async (name: string, type: PlaceType) => {
-        if (!currentUser || !selectedLandId) return;
-        try {
-            const res = await fetch('/api/action', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    type: 'city_build_place',
-                    requesterId: currentUser.id,
-                    details: JSON.stringify({ landId: selectedLandId, name, type })
-                })
-            });
-            const data = await res.json();
-            if (data.success) {
-                alert('施設の建設を開始しました！');
-                setIsConstructionModalOpen(false);
-                setSelectedLandId(null);
-                refresh();
-            } else {
-                alert(`建設失敗: ${data.message}`);
-            }
-        } catch (error) {
-            console.error('Build error:', error);
-        }
+    const selectedLand = useMemo(() =>
+        lands.find(l => l.id === selectedLandId),
+        [lands, selectedLandId]
+    );
+
+    const containerStyle: React.CSSProperties = {
+        width: '100%',
+        height: '100vh'
     };
 
-    const buyVehicle = async (type: 'car' | 'bicycle', price: number) => {
-        if (!currentUser) return;
-        if (currentUser.balance < price) {
-            alert('所持金が足りません！');
-            return;
-        }
-        try {
-            const res = await fetch('/api/action', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    type: 'buy_vehicle',
-                    requesterId: currentUser.id,
-                    details: type === 'car' ? 'car_sedan' : 'bicycle_road',
-                    amount: price
-                })
-            });
-            const data = await res.json();
-            if (data.success) {
-                alert(`${type === 'car' ? 'セダン' : 'ロードバイク'}を購入しました！`);
-                refresh();
-            } else {
-                alert(`購入失敗: ${data.message}`);
-            }
-        } catch (error) {
-            console.error('Vehicle purchase error:', error);
-        }
-    };
-
-    const selectedLand = lands.find(l => l.id === selectedLandId);
-
-    // Helpers for rendering icons
-    const getPlaceIcon = (place: any) => {
-        const isConstruction = place.status === 'construction';
-        let iconText = '🏢';
-        if (place.id === 'place_dealer') iconText = '🚗';
-        else if (place.id === 'place_homecenter') iconText = '🚲';
-        else if (isConstruction) iconText = '🚧';
-        else {
-            if (place.type === 'restaurant') iconText = '🍽️';
-            else if (place.type === 'retail') iconText = '🏪';
-            else if (place.type === 'service') iconText = '💇';
-            else if (place.type === 'factory') iconText = '🏭';
-        }
-        // Leaflet DivIcon to render emoji as marker
-        return L.divIcon({
-            html: `<div style="font-size: 30px; line-height: 1;">${iconText}</div>`,
-            className: '',
-            iconSize: [30, 30],
-            iconAnchor: [15, 30]
-        });
-    };
+    if (!isLoaded) return <div>Loading Map...</div>;
 
     return (
-        <div className="fixed inset-0 w-full h-full bg-slate-100 z-0 overflow-hidden">
-            <MapContainer
-                center={[initialLat, initialLng]}
-                zoom={zoom}
-                style={{ height: '100%', width: '100%' }}
-                zoomControl={false}
+        <div style={{ position: 'fixed', inset: 0, width: '100%', height: '100vh', zIndex: 0 }}>
+            <GoogleMap
+                mapContainerStyle={containerStyle}
+                center={{ lat: initialLat, lng: initialLng }}
+                zoom={initialZoom}
+                options={{
+                    styles: mapStyles,
+                    disableDefaultUI: false,
+                    zoomControl: true,
+                    streetViewControl: false,
+                    mapTypeControl: false,
+                    fullscreenControl: false,
+                    minZoom: 2,
+                    maxZoom: 18,
+                }}
+                onLoad={onLoad}
+                onUnmount={onUnmount}
+                onZoomChanged={() => {
+                    if (map) {
+                        setCurrentZoom(map.getZoom() || initialZoom);
+                    }
+                }}
             >
-                <TileLayer
-                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                />
-
-                {/* Ensure map updates when props change */}
-                <MapController center={[initialLat, initialLng]} zoom={zoom} />
-
-                {/* Render Lands (Polygons) */}
-                {lands.map(land => {
-                    const isSpecial = land.id === '5-5' || land.id === '5-15';
-                    const isOwned = land.ownerId === currentUser?.id;
-
-                    if (!isSpecial && !isOwned && !land.polygon) return null;
-                    if (!land.polygon) return null;
-
-                    const fillColor = land.id === '5-5' ? '#3b82f6' : land.id === '5-15' ? '#10b981' : '#10b981';
-                    const positions: [number, number][] = land.polygon.map(p => [p.lat, p.lng]);
-
-                    return (
-                        <Polygon
-                            key={land.id}
-                            positions={positions}
-                            pathOptions={{
-                                color: isSpecial ? '#2563eb' : '#059669',
-                                fillColor: fillColor,
-                                fillOpacity: 0.5,
-                                weight: 2
-                            }}
-                            eventHandlers={{
-                                click: () => handleLandClick(land)
-                            }}
-                        />
-                    );
-                })}
-
-                {/* Render Places (Markers) */}
-                {gameState?.places?.map(place => (
-                    <Marker
-                        key={place.id}
-                        position={[place.location.lat, place.location.lng]}
-                        icon={getPlaceIcon(place)}
-                    >
-                        <Popup>{place.name}</Popup>
-                    </Marker>
-                ))}
-
-            </MapContainer>
-
-            {/* Right Sidebar UI Stack */}
-            {!isMapOnly && (
-                <div className="absolute top-4 right-4 z-[1002] flex flex-col items-end gap-3 pointer-events-none">
-                    {/* 1. Map Only Toggle */}
-                    <div className="pointer-events-auto flex flex-col items-center">
-                        <Button
-                            variant="secondary"
-                            className="rounded-full shadow-lg font-black w-12 h-12 flex items-center justify-center text-xl bg-white border-2 border-gray-100"
-                            onClick={() => setIsMapOnly(true)}
-                            title="マップのみ表示"
-                        >
-                            🗺️
-                        </Button>
-                        <span className="text-[10px] font-bold text-gray-500 bg-white/80 px-1.5 py-0.5 rounded-full shadow-sm -mt-2 z-10">マップのみ</span>
-                    </div>
-
-                    {/* 2. Address Search (Placeholder for now as no Google API) */}
-                    <div className="pointer-events-auto w-64 bg-white shadow-xl rounded-xl p-1.5 border border-gray-100 flex flex-col gap-2">
-                        <input
-                            type="text"
-                            value={searchAddress}
-                            onChange={(e) => setSearchAddress(e.target.value)}
-                            placeholder="住所検索 (未実装)"
-                            className="w-full bg-gray-50 px-3 py-2 rounded-lg outline-none text-xs font-bold text-gray-800"
-                            disabled
-                        />
-                        <Button
-                            variant="primary"
-                            size="sm"
-                            className="w-full rounded-lg font-black text-xs h-8"
-                            disabled
-                        >
-                            OpenStreetMapで検索
-                        </Button>
-                    </div>
-
-                    {/* 3. Commute Button (Simplified) */}
-                    <div className="pointer-events-auto">
-                        <Button variant="primary" size="lg" className="shadow-xl rounded-full px-6 flex items-center gap-2 font-bold" onClick={() => alert('通勤機能は調整中です')}>
-                            🏢 仕事場へ行く
-                        </Button>
-                    </div>
-
-                    {/* 4. Back Button & Status */}
-                    <div className="pointer-events-auto bg-white/95 backdrop-blur shadow-2xl rounded-2xl p-4 border border-gray-100 w-48">
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            className="w-full justify-start text-xs font-bold text-gray-500 hover:text-gray-800 mb-3"
-                            onClick={() => router.back()}
-                        >
-                            ← 戻る
-                        </Button>
-
-                        <div className="space-y-3">
-                            <div>
-                                <div className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">所持金</div>
-                                <div className="font-black text-lg text-indigo-600 tracking-tight text-right">
-                                    {currentUser?.balance?.toLocaleString()}<span className="text-xs text-gray-500 ml-0.5">円</span>
-                                </div>
-                            </div>
-                            <div className="w-full h-px bg-gray-100" />
-                            <div>
-                                <div className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">所有物件</div>
-                                <div className="font-black text-lg text-gray-700 tracking-tight text-right">
-                                    {currentUser?.ownedLands?.length || 0}<span className="text-xs text-gray-500 ml-0.5">区画</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {/* Map Only Restore Button */}
-            {isMapOnly && (
-                <div className="absolute top-4 right-2 z-[1002]">
-                    <Button
-                        variant="primary"
-                        className="rounded-xl shadow-2xl font-black px-5 py-3 flex items-center gap-2 text-sm border-2 border-white/50 bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600"
-                        onClick={() => setIsMapOnly(false)}
-                        title="UIを表示"
-                    >
-                        👁️ View
-                    </Button>
-                </div>
-            )}
-
-            {/* Selection Overlay */}
-            {selectedLand && !isMapOnly && (
-                <div className="absolute bottom-6 left-6 right-6 md:left-auto md:right-6 md:w-80 bg-white p-4 rounded-xl shadow-2xl border border-gray-200 z-[1001]">
-                    <div className="flex justify-between items-start mb-2">
-                        <h3 className="font-extrabold text-xl flex items-center gap-2">
-                            {selectedLand.id === '5-5' ? '🚗 ディーラー' : selectedLand.id === '5-15' ? '🚲 ホームセンター' : '📍 土地情報'}
-                        </h3>
-                        <button onClick={() => setSelectedLandId(null)} className="p-1 hover:bg-gray-100 rounded-full transition-colors">✕</button>
-                    </div>
-
-                    {selectedLand.id === '5-5' ? (
-                        <div className="space-y-4">
-                            <div className="aspect-video bg-gradient-to-br from-gray-100 to-gray-200 rounded-2xl flex items-center justify-center text-6xl shadow-inner font-black text-white/50 relative overflow-hidden">🚗</div>
-                            <p className="text-sm text-gray-500 leading-relaxed font-medium">丸の内正規ディーラー：最高の一台をご提案します。自家用車でワンランク上の通勤を。</p>
-                            <Button fullWidth variant={currentUser?.ownedVehicles?.some(id => id.startsWith('car')) ? 'outline' : 'primary'} size="lg" className="rounded-xl h-12 font-bold" onClick={() => buyVehicle('car', 3000000)}>
-                                {currentUser?.ownedVehicles?.some(id => id.startsWith('car')) ? '✅ 所有済み' : '契約書にサインする (300万円)'}
-                            </Button>
-                        </div>
-                    ) : selectedLand.id === '5-15' ? (
-                        <div className="space-y-4">
-                            <div className="aspect-video bg-gradient-to-br from-green-50 to-emerald-100 rounded-2xl flex items-center justify-center text-6xl shadow-inner font-black text-white/50">🚲</div>
-                            <p className="text-sm text-gray-500 leading-relaxed font-medium">丸の内ホームセンター：電動アシスト自転車。坂道もラクラク、健康的な通勤スタイルを。</p>
-                            <Button fullWidth variant={currentUser?.ownedVehicles?.some(id => id.startsWith('bicycle')) ? 'outline' : 'success'} size="lg" className="rounded-xl h-12 font-bold" onClick={() => buyVehicle('bicycle', 150000)}>
-                                {currentUser?.ownedVehicles?.some(id => id.startsWith('bicycle')) ? '✅ 所有済み' : '今すぐ購入する (15万円)'}
-                            </Button>
-                        </div>
-                    ) : (
+                <MarkerClusterer>
+                    {(clusterer) => (
                         <>
-                            <div className="space-y-3 mb-6">
-                                <div className="text-xs font-bold text-gray-400 uppercase tracking-widest pl-1">Address</div>
-                                <div className="text-sm font-semibold text-gray-700 bg-gray-50 p-3 rounded-xl border border-gray-100">{selectedLand.address}</div>
-                                <div className="flex justify-between items-center bg-indigo-600 p-4 rounded-2xl shadow-lg">
-                                    <span className="font-bold text-white/80">価格</span>
-                                    <span className="font-black text-2xl text-white tracking-tighter">{selectedLand.price.toLocaleString()}<span className="text-sm ml-1">円</span></span>
-                                </div>
-                            </div>
-                            <div className="flex flex-col gap-2">
-                                {selectedLand.isForSale && !selectedLand.ownerId ? (
-                                    <Button fullWidth variant="primary" size="lg" className="rounded-xl font-bold h-12" onClick={() => setIsPurchaseModalOpen(true)}>土地を購入する</Button>
-                                ) : selectedLand.ownerId === currentUser?.id ? (
-                                    <Button fullWidth variant="success" size="lg" className="rounded-xl font-bold h-12" onClick={() => setIsConstructionModalOpen(true)}>🏢 施設を建設する</Button>
-                                ) : <Button fullWidth variant="secondary" size="lg" className="rounded-xl font-bold h-12" disabled>取引不可</Button>}
-                            </div>
+                            {lands.map((land) => {
+                                // 座標未定の場合は表示しない
+                                if (land.location.lat === 0 && land.location.lng === 0) return null;
+
+                                // 表示フィルタ
+                                const isRegion = land.id.startsWith('region_');
+                                const isOwnedByAny = !!land.ownerId;
+                                const isOwnedByMe = land.ownerId === currentUser?.id;
+
+                                // 【追加】グローバル表示時は、所有されていない国・地域は非表示
+                                if (context === 'global' && (isRegion || land.id.startsWith('country_')) && !isOwnedByAny) {
+                                    return null;
+                                }
+
+                                // 低ズーム時は、地域マーカーか自分の所有地のみ表示
+                                if (currentZoom <= 4 && !isRegion && !isOwnedByMe) {
+                                    return null;
+                                }
+
+                                // 都道府県マーカーは通常非表示（日本マーカーからアクセス）
+                                // ただし所有している場合は表示
+                                const isPrefecture = !land.id.startsWith('country_') && !land.id.startsWith('region_');
+                                if (isPrefecture && !isOwnedByMe) return null;
+
+                                // ピンの色分け
+                                let iconUrl = "http://maps.google.com/mapfiles/ms/icons/blue-dot.png"; // Default
+
+                                if (isRegion) {
+                                    iconUrl = "http://maps.google.com/mapfiles/ms/icons/orange-dot.png"; // Region
+                                } else {
+                                    // Place情報があればそれに基づき色変更
+                                    const place = gameState?.places?.find(p => p.id === land.placeId);
+
+                                    if (place) {
+                                        if (place.buildingCategory === 'house') {
+                                            iconUrl = "http://maps.google.com/mapfiles/ms/icons/red-dot.png";
+                                        } else if (place.buildingCategory === 'company') {
+                                            iconUrl = "http://maps.google.com/mapfiles/ms/icons/green-dot.png";
+                                        } else if (place.buildingCategory === 'shop') {
+                                            iconUrl = "http://maps.google.com/mapfiles/ms/icons/yellow-dot.png";
+                                        }
+                                    } else if (land.ownerId) {
+                                        if (land.ownerId === currentUser?.id) {
+                                            iconUrl = "http://maps.google.com/mapfiles/ms/icons/purple-dot.png";
+                                        } else {
+                                            iconUrl = "http://maps.google.com/mapfiles/ms/icons/pink-dot.png";
+                                        }
+                                    }
+                                }
+
+                                return (
+                                    <Marker
+                                        key={land.id}
+                                        position={land.location}
+                                        onClick={() => {
+                                            if (isRegion) {
+                                                setSelectedLandId(land.id);
+                                                setIsRegionModalOpen(true);
+                                            } else {
+                                                handleLandClick(land);
+                                            }
+                                        }}
+                                        icon={iconUrl}
+                                        clusterer={clusterer}
+                                        label={isRegion ? { text: land.address, color: '#333', fontWeight: 'bold' } : undefined}
+                                    />
+                                );
+                            })}
                         </>
                     )}
-                </div>
-            )}
+                </MarkerClusterer>
 
-            <LandPurchaseModal land={selectedLand || null} isOpen={isPurchaseModalOpen} onClose={() => setIsPurchaseModalOpen(false)} onPurchase={handlePurchase} currentBalance={currentUser?.balance || 0} />
-            <PlaceConstructionModal land={selectedLand || null} isOpen={isConstructionModalOpen} onClose={() => setIsConstructionModalOpen(false)} onBuild={handleBuild} />
+
+                {/* InfoWindow for selected land */}
+                {selectedLand && (
+                    <InfoWindow
+                        key={selectedLand.id} // 強制再描画
+                        position={selectedLand.location}
+                        onCloseClick={() => {
+                            setSelectedLandId(null);
+                        }}
+                    >
+                        <div className="p-2 min-w-[200px]">
+                            <h3 className="font-bold text-sm mb-1">{selectedLand.address}</h3>
+                            <p className="text-xs text-gray-600 mb-2">
+                                価格: ¥{selectedLand.price.toLocaleString()}
+                            </p>
+                            <p className="text-xs text-gray-500 mb-2">
+                                {selectedLand.ownerId === currentUser?.id
+                                    ? '✅ あなたの土地'
+                                    : selectedLand.ownerId
+                                        ? `🔒 所有済み`
+                                        : selectedLand.isForSale
+                                            ? '🏷️ 購入可能'
+                                            : '🚫 非売品'}
+                            </p>
+
+                            {/* 建物情報の表示 */}
+                            {(() => {
+                                const place = gameState?.places?.find(p => p.id === selectedLand.placeId);
+                                if (place) {
+                                    return (
+                                        <div className="mb-2 p-2 bg-gray-100 rounded text-xs">
+                                            <div className="font-bold">{place.name}</div>
+                                            <div>Type: {place.buildingCategory || 'Unknown'}</div>
+                                            {place.level && <div>Level: {place.level}</div>}
+                                        </div>
+                                    );
+                                }
+                                return null;
+                            })()}
+
+                            {selectedLand.isForSale && !selectedLand.ownerId && currentUser && (
+                                <Button
+                                    size="sm"
+                                    onClick={() => {
+                                        if (selectedLand.id === 'country_日本') {
+                                            setIsJapanModalOpen(true);
+                                        } else {
+                                            setIsPurchaseModalOpen(true);
+                                        }
+                                    }}
+                                    className="w-full text-xs"
+                                >
+                                    購入する
+                                </Button>
+                            )}
+                            {selectedLand.ownerId === currentUser?.id && !selectedLand.placeId && (
+                                <Button
+                                    size="sm"
+                                    variant="secondary"
+                                    onClick={() => setIsConstructionModalOpen(true)}
+                                    className="w-full text-xs"
+                                >
+                                    建設する
+                                </Button>
+                            )}
+
+                        </div>
+                    </InfoWindow>
+                )}
+            </GoogleMap>
+
+            {/* モーダル */}
+            <LandPurchaseModal
+                isOpen={isPurchaseModalOpen}
+                onClose={() => setIsPurchaseModalOpen(false)}
+                land={selectedLand || null}
+                onPurchase={(land) => handlePurchase(land)}
+                currentBalance={currentUser?.balance || 0}
+            />
+
+            <PlaceConstructionModal
+                isOpen={isConstructionModalOpen}
+                onClose={() => setIsConstructionModalOpen(false)}
+                land={selectedLand || null}
+                onBuild={async (name, type, companyType) => {
+                    // 建設処理
+                    if (!selectedLand) return;
+
+                    try {
+                        const res = await fetch('/api/action', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                type: 'city_build_place',
+                                requesterId: currentUser?.id,
+                                details: JSON.stringify({
+                                    landId: selectedLand.id,
+                                    buildingType: type,
+                                    buildingName: name,
+                                    companyType: companyType
+                                })
+                            })
+                        });
+                        const data = await res.json();
+                        if (data.success) {
+                            alert(data.message);
+                            refresh();
+                            setIsConstructionModalOpen(false);
+                        } else {
+                            alert(`建設失敗: ${data.message}`);
+                        }
+                    } catch (e) {
+                        console.error(e);
+                        alert('建設エラー');
+                    }
+                }}
+            />
+
+            <JapanPrefectureModal
+                isOpen={isJapanModalOpen}
+                onClose={() => setIsJapanModalOpen(false)}
+                prefectures={lands.filter(l => !l.id.startsWith('country_') && !l.id.startsWith('region_'))}
+                currentBalance={currentUser?.balance || 0}
+                onSelect={(prefecture) => {
+                    setIsJapanModalOpen(false);
+                    handlePurchase(prefecture);
+                }}
+            />
+
+
+            <RegionModal
+                isOpen={isRegionModalOpen}
+                onClose={() => setIsRegionModalOpen(false)}
+                regionName={selectedLand?.address || ''}
+                countries={lands.filter(l => l.regionId === selectedLandId && l.id.startsWith('country_'))}
+                currentBalance={currentUser?.balance || 0}
+                onSelect={(country) => {
+                    setIsRegionModalOpen(false);
+                    if (country.id === 'country_日本') {
+                        setIsJapanModalOpen(true);
+                    } else {
+                        handleLandClick(country);
+                        setIsPurchaseModalOpen(true);
+                    }
+                }}
+            />
+
         </div>
     );
 }

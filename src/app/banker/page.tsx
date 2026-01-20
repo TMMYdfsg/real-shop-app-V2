@@ -4,6 +4,7 @@ import React from 'react';
 import { useGame } from '@/context/GameContext';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
+import { useRouter } from 'next/navigation';
 
 import { CryptoManager } from '@/components/admin/CryptoManager';
 import { RealEstateManager } from '@/components/admin/RealEstateManager';
@@ -11,6 +12,7 @@ import { CatalogManagerAdmin } from '@/components/admin/CatalogManagerAdmin';
 
 export default function BankerDashboard() {
     const { gameState } = useGame();
+    const router = useRouter();
     const [activeTab, setActiveTab] = React.useState<'overview' | 'crypto' | 'real_estate' | 'catalog'>('overview');
     const [showRequests, setShowRequests] = React.useState(false);
 
@@ -72,7 +74,7 @@ export default function BankerDashboard() {
                         🚀 仮想通貨管理
                     </button>
                     <button
-                        onClick={() => setActiveTab('real_estate')}
+                        onClick={() => router.push('/banker/realestate')}
                         className={`px-4 py-2 rounded-md text-sm font-bold transition-all ${activeTab === 'real_estate' ? 'bg-white shadow text-indigo-600' : 'text-gray-500 hover:text-gray-700'}`}
                     >
                         🏠 不動産管理
@@ -193,12 +195,6 @@ export default function BankerDashboard() {
                 </div>
             )}
 
-            {/* Real Estate Manager Tab */}
-            {activeTab === 'real_estate' && (
-                <div className="animate-in fade-in slide-in-from-right-4 duration-300">
-                    <RealEstateManager />
-                </div>
-            )}
 
             {/* Catalog Manager Tab */}
             {activeTab === 'catalog' && (

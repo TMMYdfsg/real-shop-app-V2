@@ -2,6 +2,7 @@
 
 import { useRef, useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
+import { useSWRConfig } from 'swr';
 import { useGame } from '@/context/GameContext';
 import { useRouter } from 'next/navigation';
 import { Sidebar } from './Sidebar';
@@ -11,9 +12,21 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 import { EventAnnouncement, ActiveEventBar } from '@/components/effects/EventAnnouncement';
 
-export const PlayerLayout: React.FC<{ children: React.ReactNode; id: string }> = ({ children, id }) => {
+import { TimeThemeWrapper } from './TimeThemeWrapper';
+import { useToast } from '@/components/ui/ToastProvider';
+
+export const PlayerLayout: React.FC<{ children: React.ReactNode; id: string; initialData?: any }> = ({ children, id, initialData }) => {
     const pathname = usePathname();
-    const { currentUser, gameState, login } = useGame();
+    const { currentUser, gameState, login, refresh } = useGame();
+    const { addToast } = useToast();
+    const { mutate } = useSWRConfig();
+
+    // SSRで取得したデータがあれば即座にキャッシュに反映
+    useEffect(() => {
+        if (initialData) {
+            mutate('/api/game', initialData, false);
+        }
+    }, [initialData, mutate]);
 
     // Extract user ID from props and auto-login
     useEffect(() => {
@@ -105,9 +118,9 @@ export const PlayerLayout: React.FC<{ children: React.ReactNode; id: string }> =
 
         const data = await res.json();
         if (data.success) {
-            alert(data.message || '解放されました！');
+            addToast(data.message || '解放されました！', 'success');
         } else {
-            alert(data.message || 'コードが無効です');
+            addToast(data.message || 'コードが無効です', 'error');
         }
     };
 
@@ -123,6 +136,8 @@ export const PlayerLayout: React.FC<{ children: React.ReactNode; id: string }> =
         { label: 'スマホ', path: `${basePath}/smartphone`, icon: '📱' },
         { label: 'マイショップ', path: `${basePath}/shop`, icon: '🛍️' },
         { label: '不動産', path: `${basePath}/realestate`, icon: '🏠' },
+        { label: '通勤', path: `${basePath}/commute`, icon: '🚃' },
+        { label: '資格・試験', path: `${basePath}/qualifications`, icon: '🎓' },
         { label: 'ポイント', path: `${basePath}/points`, icon: '💳' },
         { label: '株', path: `${basePath}/stock`, icon: '📈' },
         { label: '貯金', path: `${basePath}/bank`, icon: '🏦' },
@@ -162,7 +177,25 @@ export const PlayerLayout: React.FC<{ children: React.ReactNode; id: string }> =
                             amount: 0
                         })
                     });
-                    alert('世界が変わった気がする...');
+                    addToast('世界が変わった気がする...', 'special');
+                }
+            } else if (val === 'タイムマシン') {
+                if (confirm('次元の狭間へ移動しますか？')) {
+                    // Use window.location as router might be scoped differently or for hard redirect
+                    // But router.push is better for SPA. 
+                    // However, we need 'router' from useRouter() to be available here. 
+                    // PlayerLayout usually doesn't have useRouter unless imported.
+                    // It IS imported up top. But let's check scope.
+                    // Yes, const router = useRouter() is likely not in PlayerLayout? 
+                    // Wait, PlayerLayout is a component, checking imports.
+                    // Ah, row 6: import { useRouter } from 'next/navigation';
+                    // And row 16 context usage.. Missing `router`.
+                    // We need to add `const router = useRouter();` to PlayerLayout if not present.
+                    // Wait, let's checking full file content I viewed earlier...
+                    // Line 6 imports useRouter. But I don't see `const router = useRouter()` in the component body in the previous view output (lines 1-280).
+                    // Oh, line 6 is import. 
+                    // Let's add it.
+                    window.location.href = `/player/${currentUser.id}/timemachine`;
                 }
             }
             e.currentTarget.value = '';
@@ -173,107 +206,136 @@ export const PlayerLayout: React.FC<{ children: React.ReactNode; id: string }> =
     const isForbiddenPage = pathname?.includes('/forbidden');
 
     return (
-        <div style={{ minHeight: '100vh', paddingBottom: '80px', background: isForbiddenPage ? '#111' : '#e0f2fe' }}>
-            {/* Animated Notifications */}
-            <AnimatePresence>
-                {activeBills.length > 0 && (
-                    <motion.div
-                        initial={{ opacity: 0, y: -50 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -50 }}
-                        transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-                        style={{ position: 'fixed', top: '70px', left: '1rem', right: '1rem', zIndex: 100, background: '#ef4444', color: 'white', padding: '1rem', borderRadius: '8px', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }}
-                    >
-                        <motion.div animate={{ scale: [1, 1.02, 1] }} transition={{ repeat: Infinity, duration: 1 }}>
-                            <div style={{ fontWeight: 'bold' }}>⚠️ 請求が届いています</div>
-                            <div style={{ fontSize: '0.9rem' }}>{activeBills.length}件の支払いが求められています。銀行員が承認すると引き落とされます。</div>
-                        </motion.div>
-                    </motion.div>
-                )}
-            </AnimatePresence>
-
-            {/* Night Blocking Overlay */}
-            <AnimatePresence>
-                {gameState && !gameState.isDay && (
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        style={{
-                            position: 'fixed', inset: 0, zIndex: 9999,
-                            background: 'rgba(15, 23, 42, 0.95)',
-                            display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-                            color: 'white', textAlign: 'center'
-                        }}
-                    >
-                        <audio autoPlay loop src="/sounds/sleep.mp3" />
+        <TimeThemeWrapper>
+            <div style={{ minHeight: '100vh', paddingBottom: '80px', background: isForbiddenPage ? '#111' : undefined }}>
+                {/* Animated Notifications */}
+                <AnimatePresence>
+                    {activeBills.length > 0 && (
                         <motion.div
-                            animate={{ rotate: [0, 10, -10, 0] }}
-                            transition={{ repeat: Infinity, duration: 4 }}
-                            style={{ fontSize: '4rem', marginBottom: '1rem' }}
+                            initial={{ opacity: 0, y: -50 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -50 }}
+                            transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+                            style={{ position: 'fixed', top: '70px', left: '1rem', right: '1rem', zIndex: 100, background: '#ef4444', color: 'white', padding: '1rem', borderRadius: '8px', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }}
                         >
-                            🌙
+                            <motion.div animate={{ scale: [1, 1.02, 1] }} transition={{ repeat: Infinity, duration: 1 }}>
+                                <div style={{ fontWeight: 'bold' }}>⚠️ 請求が届いています</div>
+                                <div style={{ fontSize: '0.9rem' }}>{activeBills.length}件の支払いが求められています。銀行員が承認すると引き落とされます。</div>
+                            </motion.div>
                         </motion.div>
-                        <h2 style={{ fontSize: '2rem', fontWeight: 'bold', marginBottom: '1rem' }}>夜は必ず寝ましょう</h2>
-                        <p style={{ fontSize: '1.2rem', opacity: 0.8 }}>次の朝までお待ちください...</p>
-                        <div style={{ marginTop: '2rem', fontFamily: 'monospace', fontSize: '1.5rem' }}>
-                            あと {formatTime(displayTime)}
-                        </div>
-                    </motion.div>
-                )}
-            </AnimatePresence>
-
-            {/* Header */}
-            <header style={{
-                position: 'sticky',
-                top: 0,
-                zIndex: 50,
-                background: gameState?.isDay ? 'rgba(255,255,255,0.8)' : 'rgba(0,0,0,0.8)',
-                backdropFilter: 'blur(10px)',
-                borderBottom: '1px solid var(--glass-border)',
-                padding: '0.75rem 1rem',
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                color: gameState?.isDay ? '#000' : '#fff',
-                transition: 'all 0.5s'
-            }}>
-                <div>
-                    <div style={{ fontSize: '0.8rem', opacity: 0.8 }}>Turn {gameState?.turn}</div>
-                    <div style={{ fontWeight: 'bold' }}>{currentUser.name}</div>
-                </div>
-                <div style={{ textAlign: 'right' }}>
-                    <div style={{ fontSize: '0.8rem' }}>
-                        <span style={{ marginRight: '0.5rem', color: '#fbbf24' }}>
-                            {'★'.repeat(currentUser.rating || 0)}{'☆'.repeat(5 - (currentUser.rating || 0))}
-                        </span>
-                        {gameState?.isDay ? '☀️ 昼' : '🌙 夜'} {formatTime(displayTime)}
-                    </div>
-                    <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                        <span style={{ fontSize: '0.9rem', opacity: 0.8 }}>所持金:</span>
-                        <motion.span
-                            key={currentUser.balance}
-                            initial={{ scale: 1.2, color: '#3b82f6' }}
-                            animate={{ scale: 1, color: 'var(--accent-color)' }}
-                            style={{ fontSize: '1.2rem', fontWeight: 'bold' }}
-                        >
-                            {(currentUser.balance || 0).toLocaleString()}
-                        </motion.span>
-                    </div>
-                </div>
-            </header>
-
-            {/* Main Content with Page Transition */}
-            <main style={{ padding: '1rem', maxWidth: '800px', margin: '0 auto' }}>
-                <Sidebar title={currentUser.name} items={navItems} role="player" player={currentUser}>
-                    {!currentUser.isForbiddenUnlocked && (
-                        <SecretCodeInput onUnlock={handleSecretUnlock} />
                     )}
-                </Sidebar>
-                <PageTransition>
-                    {children}
-                </PageTransition>
-            </main>
-        </div>
+                </AnimatePresence>
+
+                {/* Night Blocking Overlay */}
+                <AnimatePresence>
+                    {gameState && !gameState.isDay && (
+                        <>
+                            {/* Allow Home and Smartphone, Block others */}
+                            {!(pathname === basePath || pathname?.includes('/smartphone')) ? (
+                                <motion.div
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    exit={{ opacity: 0 }}
+                                    style={{
+                                        position: 'fixed', inset: 0, zIndex: 9999,
+                                        background: 'rgba(15, 23, 42, 0.95)',
+                                        display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                                        color: 'white', textAlign: 'center'
+                                    }}
+                                >
+                                    <audio autoPlay loop src="/sounds/sleep.mp3" />
+                                    <motion.div
+                                        animate={{ rotate: [0, 10, -10, 0] }}
+                                        transition={{ repeat: Infinity, duration: 4 }}
+                                        style={{ fontSize: '4rem', marginBottom: '1rem' }}
+                                    >
+                                        🌙
+                                    </motion.div>
+                                    <h2 style={{ fontSize: '2rem', fontWeight: 'bold', marginBottom: '1rem' }}>夜は必ず寝ましょう</h2>
+                                    <p style={{ fontSize: '1.2rem', opacity: 0.8 }}>次の朝までお待ちください...</p>
+                                    <div style={{ marginTop: '2rem', fontFamily: 'monospace', fontSize: '1.5rem' }}>
+                                        あと {formatTime(displayTime)}
+                                    </div>
+                                    <div className="mt-8">
+                                        <button
+                                            onClick={() => {
+                                                // 救済策: 自宅に戻る
+                                                const router = require('next/navigation').useRouter(); // Dynamic import to avoid top-level missing hook if any
+                                                window.location.href = basePath;
+                                            }}
+                                            className="px-6 py-2 bg-indigo-600 rounded-full font-bold hover:bg-indigo-700 transition"
+                                        >
+                                            🏠 自宅に戻る
+                                        </button>
+                                    </div>
+                                </motion.div>
+                            ) : (
+                                /* Non-intrusive Night Mode Indicator for Allowed Pages */
+                                <motion.div
+                                    initial={{ opacity: 0, y: -20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    className="fixed top-20 right-4 z-40 bg-slate-900/90 text-indigo-200 px-4 py-2 rounded-full border border-indigo-500/30 shadow-lg backdrop-blur-md flex items-center gap-2"
+                                >
+                                    <span className="text-xl">🌙</span>
+                                    <span className="font-bold text-sm">夜間モード中 (機能制限あり)</span>
+                                </motion.div>
+                            )}
+                        </>
+                    )}
+                </AnimatePresence>
+
+                {/* Header */}
+                <header style={{
+                    position: 'sticky',
+                    top: 0,
+                    zIndex: 50,
+                    background: gameState?.isDay ? 'rgba(255,255,255,0.8)' : 'rgba(0,0,0,0.8)',
+                    backdropFilter: 'blur(10px)',
+                    borderBottom: '1px solid var(--glass-border)',
+                    padding: '0.75rem 1rem',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    color: gameState?.isDay ? '#000' : '#fff',
+                    transition: 'all 0.5s'
+                }}>
+                    <div>
+                        <div style={{ fontSize: '0.8rem', opacity: 0.8 }}>Turn {gameState?.turn}</div>
+                        <div style={{ fontWeight: 'bold' }}>{currentUser.name}</div>
+                    </div>
+                    <div style={{ textAlign: 'right' }}>
+                        <div style={{ fontSize: '0.8rem' }}>
+                            <span style={{ marginRight: '0.5rem', color: '#fbbf24' }}>
+                                {'★'.repeat(currentUser.rating || 0)}{'☆'.repeat(5 - (currentUser.rating || 0))}
+                            </span>
+                            {gameState?.isDay ? '☀️ 昼' : '🌙 夜'} {formatTime(displayTime)}
+                        </div>
+                        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                            <span style={{ fontSize: '0.9rem', opacity: 0.8 }}>所持金:</span>
+                            <motion.span
+                                key={currentUser.balance}
+                                initial={{ scale: 1.2, color: '#3b82f6' }}
+                                animate={{ scale: 1, color: 'var(--accent-color)' }}
+                                style={{ fontSize: '1.2rem', fontWeight: 'bold' }}
+                            >
+                                {(currentUser.balance || 0).toLocaleString()}
+                            </motion.span>
+                        </div>
+                    </div>
+                </header>
+
+                {/* Main Content with Page Transition */}
+                <main style={{ padding: '1rem', maxWidth: '800px', margin: '0 auto' }}>
+                    <Sidebar title={currentUser.name} items={navItems} role="player" player={currentUser}>
+                        {!currentUser.isForbiddenUnlocked && (
+                            <SecretCodeInput onUnlock={handleSecretUnlock} />
+                        )}
+                    </Sidebar>
+                    <PageTransition>
+                        {children}
+                    </PageTransition>
+                </main>
+            </div>
+        </TimeThemeWrapper>
     );
 };

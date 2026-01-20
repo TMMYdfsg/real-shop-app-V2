@@ -3,11 +3,12 @@
 import { useGame } from '@/context/GameContext';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 
-export default function MyRoomPage({ params }: { params: { id: string } }) {
+export default function MyRoomPage() {
     const { gameState, sendRequest, currentUser } = useGame();
     const router = useRouter();
+    const params = useParams<{ id: string }>();
 
     if (!currentUser || currentUser.id !== params.id) {
         router.push(`/player/${params.id}`);

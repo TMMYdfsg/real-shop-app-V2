@@ -141,6 +141,119 @@ export default function GodModePage() {
                     </div>
                 </Card>
 
+                {/* Global Money Multiplier */}
+                <Card padding="lg" className="mb-6 bg-gradient-to-r from-amber-50 to-yellow-50 border-2 border-amber-300">
+                    <h3 className="font-bold text-xl mb-4 flex items-center gap-2">
+                        <span className="text-2xl">💰</span>
+                        グローバル収入倍率
+                        <span className="text-sm font-normal text-gray-600">
+                            （全プレイヤーの収入に適用）
+                        </span>
+                    </h3>
+
+                    <div className="bg-white/80 rounded-xl p-4 mb-4">
+                        <div className="flex items-center justify-between mb-4">
+                            <span className="text-gray-600">現在の倍率</span>
+                            <span className="text-3xl font-black text-amber-600">
+                                {(gameState.settings?.moneyMultiplier || 1).toLocaleString()}x
+                            </span>
+                        </div>
+
+                        {/* Input with Range */}
+                        <div className="space-y-4">
+                            <div className="flex gap-2">
+                                <input
+                                    type="number"
+                                    min="1"
+                                    max="10000000"
+                                    value={gameState.settings?.moneyMultiplier || 1}
+                                    onChange={async (e) => {
+                                        const value = Math.max(1, Math.min(10000000, parseInt(e.target.value) || 1));
+                                        await fetch('/api/admin', {
+                                            method: 'POST',
+                                            headers: { 'Content-Type': 'application/json' },
+                                            body: JSON.stringify({
+                                                type: 'update_settings',
+                                                updates: { moneyMultiplier: value }
+                                            })
+                                        });
+                                    }}
+                                    className="flex-1 p-3 border-2 border-amber-300 rounded-lg text-xl font-bold text-center"
+                                />
+                                <Button
+                                    variant="primary"
+                                    className="bg-amber-500 hover:bg-amber-600"
+                                    onClick={async () => {
+                                        const input = document.querySelector('input[max="10000000"]') as HTMLInputElement;
+                                        const value = parseInt(input?.value) || 1;
+                                        await fetch('/api/admin', {
+                                            method: 'POST',
+                                            headers: { 'Content-Type': 'application/json' },
+                                            body: JSON.stringify({
+                                                type: 'update_settings',
+                                                updates: { moneyMultiplier: value }
+                                            })
+                                        });
+                                        alert(`収入倍率を ${value.toLocaleString()}x に設定しました`);
+                                    }}
+                                >
+                                    適用
+                                </Button>
+                            </div>
+
+                            {/* Preset Buttons */}
+                            <div className="grid grid-cols-4 gap-2">
+                                {[1, 10, 100, 1000].map(mult => (
+                                    <Button
+                                        key={mult}
+                                        variant={gameState.settings?.moneyMultiplier === mult ? 'primary' : 'outline'}
+                                        className={gameState.settings?.moneyMultiplier === mult ? 'bg-amber-500' : ''}
+                                        onClick={async () => {
+                                            await fetch('/api/admin', {
+                                                method: 'POST',
+                                                headers: { 'Content-Type': 'application/json' },
+                                                body: JSON.stringify({
+                                                    type: 'update_settings',
+                                                    updates: { moneyMultiplier: mult }
+                                                })
+                                            });
+                                            alert(`収入倍率を ${mult}x に設定しました`);
+                                        }}
+                                    >
+                                        {mult}x
+                                    </Button>
+                                ))}
+                            </div>
+                            <div className="grid grid-cols-4 gap-2">
+                                {[10000, 100000, 1000000, 10000000].map(mult => (
+                                    <Button
+                                        key={mult}
+                                        variant={gameState.settings?.moneyMultiplier === mult ? 'primary' : 'outline'}
+                                        className={`text-xs ${gameState.settings?.moneyMultiplier === mult ? 'bg-amber-500' : ''}`}
+                                        onClick={async () => {
+                                            await fetch('/api/admin', {
+                                                method: 'POST',
+                                                headers: { 'Content-Type': 'application/json' },
+                                                body: JSON.stringify({
+                                                    type: 'update_settings',
+                                                    updates: { moneyMultiplier: mult }
+                                                })
+                                            });
+                                            alert(`収入倍率を ${mult.toLocaleString()}x に設定しました`);
+                                        }}
+                                    >
+                                        {mult >= 1000000 ? `${mult / 1000000}M` : `${mult / 1000}K`}x
+                                    </Button>
+                                ))}
+                            </div>
+                        </div>
+
+                        <p className="text-xs text-gray-500 mt-3">
+                            ※ この倍率は給与、ショップ売上、NPC購入などすべての収入に適用されます
+                        </p>
+                    </div>
+                </Card>
+
                 {/* User Selection */}
                 <Card padding="lg" className="mb-6">
                     <h3 className="font-bold text-xl mb-4">1. ユーザーを選択</h3>

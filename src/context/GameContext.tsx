@@ -19,13 +19,24 @@ const GameContext = createContext<GameContextType | undefined>(undefined);
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
-export function GameProvider({ children }: { children: React.ReactNode }) {
+export function GameProvider({ children, initialData }: { children: React.ReactNode, initialData?: GameState }) {
     const { data: gameState, error, mutate } = useSWR<GameState>('/api/game', fetcher, {
-        refreshInterval: 0, // SSE導入によりポーリング停止 (0は無効化)
+        refreshInterval: 0, // SSE導入によりポーリング停止
         revalidateOnFocus: true,
+        fallbackData: initialData, // SSRで取得したデータを初期値にする
     });
 
-    const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+    // クッキーからログインIDを即座に復旧（Hydration Flash防止）
+    const [currentUserId, setCurrentUserId] = useState<string | null>(() => {
+        if (typeof document !== 'undefined') {
+            const cookieValue = document.cookie
+                .split('; ')
+                .find(row => row.startsWith('playerId='))
+                ?.split('=')[1];
+            return cookieValue || null;
+        }
+        return null;
+    });
 
     // --- Phase 8: Real-time Sync (SSE) ---
     useEffect(() => {

@@ -59,13 +59,121 @@ export function processGameTick(state: GameState): { newState: GameState, hasCha
                 // 朝になった時の処理 (Night -> Day)
                 newState.turn += 1; // 日付が進む
 
-                // ユーザーごとの処理
+                // -----------------------------------------------------
+                // Quest System Logic
+                // -----------------------------------------------------
+                const QUEST_DATABASE: any[] = [
+                    {
+                        id: 'quest_first_job',
+                        title: 'はじめての仕事',
+                        description: '職安で仕事を見つけて就職しよう！',
+                        type: 'main',
+                        requirements: { type: 'job', value: 'unemployed', comparison: 'neq' }, // job !== unemployed
+                        rewards: { money: 1000, xp: 50, popularity: 5 }
+                    },
+                    {
+                        id: 'quest_debt_free',
+                        title: '借金完済',
+                        description: '借金を0にして自由を手に入れよう！',
+                        type: 'main',
+                        requirements: { type: 'debt', value: 0, comparison: 'lte' }, // debt <= 0
+                        rewards: { money: 5000, xp: 100, popularity: 20 }
+                    }
+                ];
+
+                // Check & Update Quests for each user
                 newState.users = newState.users.map(user => {
                     let u = { ...user };
+                    if (u.role !== 'player') return u;
+
+                    // 1. Initialize Quests if missing
+                    if (!u.quests) u.quests = [];
+                    if (!u.completedQuestIds) u.completedQuestIds = [];
+
+                    QUEST_DATABASE.forEach(qData => {
+                        const isCompleted = u.completedQuestIds?.includes(qData.id);
+                        const isActive = u.quests?.some(q => q.questId === qData.id);
+
+                        if (!isCompleted && !isActive) {
+                            u.quests!.push({
+                                questId: qData.id,
+                                status: 'active',
+                                progress: 0,
+                                startedAt: Date.now()
+                            });
+                            // New Quest Notification (Optional, maybe too spammy on login)
+                        }
+                    });
+
+                    // 2. Check Progress
+                    u.quests = u.quests!.map(progress => {
+                        if (progress.status !== 'active') return progress;
+
+                        const qData = QUEST_DATABASE.find(q => q.id === progress.questId);
+                        if (!qData) return progress;
+
+                        let isMet = false;
+                        const req = qData.requirements;
+
+                        if (req.type === 'job') {
+                            if (req.comparison === 'neq') isMet = u.job !== req.value;
+                            else isMet = u.job === req.value;
+                        } else if (req.type === 'debt') {
+                            // Special case: Only complete if they had debt before? Or simply if debt is 0.
+                            // For "Debt Free", implies reaching 0. Simple check: debt <= 0.
+                            if (req.comparison === 'lte') isMet = u.debt <= req.value;
+                        }
+
+                        if (isMet) {
+                            progress.status = 'completed';
+                            progress.completedAt = Date.now();
+                            progress.progress = 100;
+                            u.completedQuestIds!.push(qData.id);
+
+                            // Give Rewards
+                            if (qData.rewards.money) {
+                                u.balance += qData.rewards.money;
+                                // Log reward
+                                if (!u.transactions) u.transactions = [];
+                                u.transactions.push({
+                                    id: crypto.randomUUID(),
+                                    type: 'income',
+                                    amount: qData.rewards.money,
+                                    description: `クエスト報酬: ${qData.title}`,
+                                    timestamp: Date.now()
+                                });
+                            }
+                            if (qData.rewards.popularity) {
+                                u.popularity = (u.popularity || 0) + qData.rewards.popularity;
+                            }
+
+                            // Notification Trigger (via News or Toast State?)
+                            // Since this runs on server/logic side, we use newState.news or a dedicated event queue
+                            // For now, push to news, client can watch news for "Quest Completed" or use a separate event system
+                            newState.news.unshift({
+                                id: crypto.randomUUID(),
+                                type: 'achievement', // Special new type for news
+                                message: `🏆 クエスト達成！「${qData.title}」`,
+                                timestamp: Date.now()
+                            });
+                        }
+                        return progress;
+                    });
+
+                    return u;
+                });
+
+                // ユーザーごとの処理 (Original Logic Continues)
+                newState.users = newState.users.map(user => {
+                    let u = { ...user };
+                    // ... (rest of the logic)
 
                     // 1. 給与支給 (銀行員は税金免除、プレイヤーは税金あり)
+                    // グローバル収入倍率を取得
+                    const moneyMultiplier = state.settings?.moneyMultiplier || 1;
+
                     if (u.role === 'banker') {
-                        u.balance += 1000; // 銀行員給与
+                        u.balance += 1000 * moneyMultiplier; // 銀行員給与 × 倍率
                     } else {
                         // プレイヤーの給与計算（職業ベース）
                         // 注意: サーバーサイド実行を想定しているが、ここはクライアントでも動く可能性がある共通ロジック
@@ -78,7 +186,7 @@ export function processGameTick(state: GameState): { newState: GameState, hasCha
                             idol: { salary: 1200 }
                         };
                         const jobDef = JOB_DEFINITIONS[u.jobType || 'normal'] || JOB_DEFINITIONS.normal;
-                        let salary = jobDef.salary;
+                        let salary = jobDef.salary * moneyMultiplier; // 給与 × 倍率
 
                         // 人気度ボーナス (Rating * 5%)
                         const ratingBonus = Math.floor(salary * (u.rating || 0) * 0.05);
@@ -103,6 +211,19 @@ export function processGameTick(state: GameState): { newState: GameState, hasCha
                         const extraCustomers = Math.floor((u.rating || 0) / 2);
                         let customers = baseCustomers + extraCustomers;
 
+                        // 天候による客足への影響
+                        const weather = state.environment?.weather || 'sunny';
+                        const weatherMultipliers: Record<string, number> = {
+                            sunny: 1.2,     // 晴れ: 客足+20%
+                            rain: 0.8,      // 雨: 客足-20%
+                            heavy_rain: 0.6, // 大雨: 客足-40%
+                            storm: 0.3,     // 嵐: 客足-70%
+                            snow: 0.7,      // 雪: 客足-30%
+                            heatwave: 0.9,  // 猛暑: 客足-10%
+                        };
+                        const weatherMult = weatherMultipliers[weather] ?? 1.0;
+                        customers = Math.floor(customers * weatherMult);
+
                         if (customers > 0) {
                             let sales = customers * 100;
 
@@ -113,6 +234,9 @@ export function processGameTick(state: GameState): { newState: GameState, hasCha
                             if (boomEvent) sales = Math.floor(sales * boomEvent.effectValue);
                             if (recessionEvent) sales = Math.floor(sales * recessionEvent.effectValue);
 
+                            // Apply God Mode Money Multiplier
+                            sales = Math.floor(sales * moneyMultiplier);
+
                             u.balance += sales;
 
                             // 履歴追加 (通知トリガー用)
@@ -122,7 +246,7 @@ export function processGameTick(state: GameState): { newState: GameState, hasCha
                                 type: 'income',
                                 amount: sales,
                                 senderId: 'customer_sim', // システムによる一般客
-                                description: `売上: 一般客 (${customers}名)`,
+                                description: `売上: 一般客 (${customers}名) ${weather !== 'sunny' ? `[${weather}]` : ''}`,
                                 timestamp: Date.now()
                             });
                         }
@@ -218,7 +342,9 @@ export function processGameTick(state: GameState): { newState: GameState, hasCha
                             // Buy
                             const min = template?.minPayment ?? 100;
                             const max = template?.maxPayment ?? 1000;
-                            const sales = Math.floor(min + Math.random() * (max - min));
+                            // Apply God Mode Money Multiplier
+                            const multiplier = newState.settings?.moneyMultiplier || 1;
+                            const sales = Math.floor((min + Math.random() * (max - min)) * multiplier);
                             targetUser.balance += sales;
 
                             // 履歴追加
@@ -228,13 +354,13 @@ export function processGameTick(state: GameState): { newState: GameState, hasCha
                                 type: 'income',
                                 amount: sales,
                                 senderId: npc.id,
-                                description: `売上: ${npc.name}`,
+                                description: `売上: ${npc.name}${multiplier > 1 ? ` [${multiplier}x]` : ''}`,
                                 timestamp: now
                             });
 
                             newState.news.unshift({
                                 id: crypto.randomUUID(),
-                                message: `💰 ${targetUser.name}のお店で${npc.name}が ${sales}枚 のお買い上げ！`,
+                                message: `💰 ${targetUser.name}のお店で${npc.name}が ${sales.toLocaleString()}枚 のお買い上げ！`,
                                 timestamp: now
                             });
                         }
@@ -288,6 +414,44 @@ export function processGameTick(state: GameState): { newState: GameState, hasCha
                     timestamp: now
                 });
                 hasChanged = true;
+            }
+
+            // -----------------------------------------------------
+            // Risk System: Police Raid (Night Only)
+            // -----------------------------------------------------
+            if (!newState.isDay) {
+                newState.users = newState.users.map(u => {
+                    const hasForbiddenStocks = u.forbiddenStocks && Object.values(u.forbiddenStocks).some(val => val > 0);
+                    const hasIllegalItems = u.inventory && u.inventory.some(i => i.isIllegal);
+
+                    if (hasForbiddenStocks || hasIllegalItems) {
+                        // 0.5% chance per second per user if holding illegal goods
+                        if (Math.random() < 0.005) {
+                            const fine = Math.floor(u.balance * 0.5);
+                            u.balance -= fine;
+
+                            // Log
+                            u.transactions = u.transactions || [];
+                            u.transactions.push({
+                                id: crypto.randomUUID(),
+                                type: 'tax', // or custom type
+                                amount: fine,
+                                senderId: 'police',
+                                description: '警察の手入れ（罰金）',
+                                timestamp: Date.now()
+                            });
+
+                            newState.news.unshift({
+                                id: crypto.randomUUID(),
+                                type: 'arrest',
+                                message: `🚓 【緊急】警察が ${u.name} の元へ突入！違法取引の疑いで罰金 ${fine.toLocaleString()}枚`,
+                                timestamp: Date.now()
+                            });
+                            hasChanged = true;
+                        }
+                    }
+                    return u;
+                });
             }
         }
 

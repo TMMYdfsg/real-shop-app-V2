@@ -18,6 +18,7 @@ export function useRealtime<T>(
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [isAuthenticated, setIsAuthenticated] = useState(true);
+    const [isConnected, setIsConnected] = useState(false);
     const hasLoggedAuthError = useRef(false);
 
     const fetchData = useCallback(async () => {
@@ -35,6 +36,7 @@ export function useRealtime<T>(
             if (res.status === 401) {
                 // 認証エラー: 静かに処理（一度だけログ）
                 setIsAuthenticated(false);
+                setIsConnected(true); // Server is reachable, just auth error
                 if (requiresAuth && !hasLoggedAuthError.current) {
                     console.debug(`[useRealtime] Auth required for ${url} - waiting for login`);
                     hasLoggedAuthError.current = true;
@@ -49,10 +51,12 @@ export function useRealtime<T>(
             const json = await res.json();
             setData(json);
             setIsAuthenticated(true);
+            setIsConnected(true);
             hasLoggedAuthError.current = false; // 成功したらリセット
         } catch (err: any) {
             console.error(`[useRealtime] Error fetching ${url}:`, err);
             setError(err.message);
+            setIsConnected(false);
         } finally {
             setLoading(false);
         }
@@ -75,5 +79,5 @@ export function useRealtime<T>(
         fetchData();
     }, [fetchData]);
 
-    return { data, loading, error, isAuthenticated, refetch };
+    return { data, loading, error, isAuthenticated, isConnected, refetch };
 }

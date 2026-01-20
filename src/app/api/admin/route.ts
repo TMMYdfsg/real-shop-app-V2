@@ -2,6 +2,7 @@ import { NextResponse, NextRequest } from 'next/server';
 import { updateGameState } from '@/lib/dataStore';
 import { GameState, User, Transaction } from '@/types';
 import crypto from 'crypto';
+import { generateLands, PREFECTURES } from '@/lib/cityData';
 
 export const dynamic = 'force-dynamic';
 
@@ -893,6 +894,38 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ success: true });
         }
 
+        if (action === 'delete_land') {
+            const { landId } = body;
+            await updateGameState((state) => {
+                if (state.lands) {
+                    state.lands = state.lands.filter(l => l.id !== landId);
+                }
+                return state;
+            });
+            return NextResponse.json({ success: true });
+        }
+
+        if (action === 'reset_japan_lands') {
+            const allInitialLands = generateLands();
+            const initialJapanLands = allInitialLands.filter(l =>
+                l.id === 'country_日本' ||
+                PREFECTURES.some(p => p.id === l.id)
+            );
+
+            await updateGameState((state) => {
+                const japanLandsIds = new Set(initialJapanLands.map(l => l.id));
+
+                // 日本関連の土地（都道府県と country_日本）を除外
+                state.lands = (state.lands || []).filter(l => !japanLandsIds.has(l.id));
+
+                // デフォルトの状態（所有者なし等）で再度追加
+                state.lands.push(...initialJapanLands);
+
+                return state;
+            });
+            return NextResponse.json({ success: true });
+        }
+
         // -----------------------------------------------------
         // 神モード (God Mode)
         // -----------------------------------------------------
@@ -949,6 +982,39 @@ export async function POST(req: NextRequest) {
                     }
                 });
                 state.news.push({ id: crypto.randomUUID(), message: '⚡️ 神の裁定により全ユーザーがリセットされました', timestamp: Date.now() });
+                return state;
+            });
+
+            return NextResponse.json({ success: true });
+        }
+
+        // -----------------------------------------------------
+        // 設定更新 (Update Settings) - God Mode Money Multiplier
+        // -----------------------------------------------------
+        if (type === 'update_settings') {
+            const { updates } = body;
+
+            await updateGameState((state) => {
+                if (!state.settings) {
+                    state.settings = {} as any;
+                }
+
+                // Money Multiplier (1 - 10,000,000)
+                if (updates.moneyMultiplier !== undefined) {
+                    const mult = Math.max(1, Math.min(10000000, parseInt(updates.moneyMultiplier) || 1));
+                    state.settings.moneyMultiplier = mult;
+                    state.news.push({
+                        id: crypto.randomUUID(),
+                        message: `⚡️ 神モード: 収入倍率が ${mult.toLocaleString()}x に変更されました`,
+                        timestamp: Date.now()
+                    });
+                }
+
+                // Other settings can be added here
+                if (updates.taxRate !== undefined) state.settings.taxRate = updates.taxRate;
+                if (updates.interestRate !== undefined) state.settings.interestRate = updates.interestRate;
+                if (updates.turnDuration !== undefined) state.settings.turnDuration = updates.turnDuration;
+
                 return state;
             });
 

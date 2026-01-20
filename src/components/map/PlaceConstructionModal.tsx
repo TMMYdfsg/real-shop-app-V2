@@ -1,108 +1,129 @@
 import React, { useState } from 'react';
-import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
-import { Land, PlaceType } from '@/types';
+import { Modal } from '@/components/ui/Modal';
+import { Land, BuildingCategory, CompanyType } from '@/types';
 
 interface PlaceConstructionModalProps {
-    land: Land | null;
     isOpen: boolean;
     onClose: () => void;
-    onBuild: (name: string, type: PlaceType) => void;
+    land: Land | null;
+    onBuild: (name: string, type: BuildingCategory, companyType?: CompanyType) => void;
 }
 
-const PLACE_TYPES: { type: PlaceType; label: string; icon: string; description: string; cost: number }[] = [
-    { type: 'restaurant', label: '飲食店', icon: '🍽️', description: 'レストランやカフェ。安定した需要が見込める。', cost: 5000000 },
-    { type: 'retail', label: '小売店', icon: '🏪', description: '雑貨屋やコンビニ。立地が重要。', cost: 4000000 },
-    { type: 'office', label: 'オフィス', icon: '🏢', description: 'IT企業や事務所。高い収益性。', cost: 8000000 },
-    { type: 'service', label: 'サービス', icon: '💇', description: '美容室やマッサージ店。リピーターが鍵。', cost: 3000000 },
-    { type: 'factory', label: '工場', icon: '🏭', description: '製品を生産する。騒音に注意。', cost: 10000000 },
+const COMPANY_TYPES: { value: CompanyType, label: string }[] = [
+    { value: 'start_up', label: 'スタートアップ' },
+    { value: 'venture', label: 'ベンチャー' },
+    { value: 'sme', label: '中小企業' },
+    { value: 'large_enterprise', label: '大企業' },
+    { value: 'mega_venture', label: 'メガベンチャー' },
+    { value: 'listed_company', label: '上場企業' },
+    { value: 'unlisted_company', label: '非上場企業' },
+    { value: 'public_company', label: '公開企業' },
+    { value: 'private_company', label: '非公開企業' },
+    { value: 'global_enterprise', label: 'グローバル企業' },
+    { value: 'sole_proprietorship', label: '個人事業主' },
+    { value: 'corporation', label: '法人' },
 ];
 
-export const PlaceConstructionModal: React.FC<PlaceConstructionModalProps> = ({
-    land,
-    isOpen,
-    onClose,
-    onBuild
-}) => {
-    const [placeName, setPlaceName] = useState('');
-    const [selectedType, setSelectedType] = useState<PlaceType>('retail');
+export const PlaceConstructionModal: React.FC<PlaceConstructionModalProps> = ({ isOpen, onClose, land, onBuild }) => {
+    const [name, setName] = useState('');
+    const [type, setType] = useState<BuildingCategory>('house');
+    const [companyType, setCompanyType] = useState<CompanyType>('start_up');
 
     if (!land) return null;
 
     const handleSubmit = () => {
-        if (!placeName.trim()) {
-            alert('施設名を入力してください');
-            return;
-        }
-        onBuild(placeName, selectedType);
-        setPlaceName('');
-        setSelectedType('retail');
+        if (!name && type !== 'house') return alert('名前を入力してください');
+        onBuild(name || 'マイホーム', type, type === 'company' ? companyType : undefined);
     };
 
-    const selectedTypeInfo = PLACE_TYPES.find(t => t.type === selectedType);
+    const getCost = () => {
+        if (type === 'house') return 5000000;
+        if (type === 'shop') return 10000000;
+        if (type === 'company') return 20000000;
+        return 0;
+    };
 
     return (
-        <Modal isOpen={isOpen} onClose={onClose} title="新規施設の建設">
-            <div className="space-y-4">
-                <div className="bg-blue-50 p-4 rounded-lg text-sm text-blue-800">
-                    <span className="font-bold">建設予定地:</span> {land.address}
+        <Modal isOpen={isOpen} onClose={onClose} title="建設プラン">
+            <div className="space-y-6">
+                <div>
+                    <label className="block text-sm font-bold mb-3 text-gray-700">建物の種類</label>
+                    <div className="grid grid-cols-3 gap-3">
+                        <button
+                            onClick={() => setType('house')}
+                            className={`flex flex-col items-center justify-center p-4 border-2 rounded-xl transition-all ${type === 'house'
+                                    ? 'border-red-500 bg-red-50 ring-2 ring-red-200'
+                                    : 'border-gray-100 bg-gray-50 hover:border-gray-300'
+                                }`}
+                        >
+                            <span className="text-3xl mb-1">🏠</span>
+                            <span className="text-xs font-bold">家</span>
+                        </button>
+                        <button
+                            onClick={() => setType('shop')}
+                            className={`flex flex-col items-center justify-center p-4 border-2 rounded-xl transition-all ${type === 'shop'
+                                    ? 'border-yellow-500 bg-yellow-50 ring-2 ring-yellow-200'
+                                    : 'border-gray-100 bg-gray-50 hover:border-gray-300'
+                                }`}
+                        >
+                            <span className="text-3xl mb-1">🏪</span>
+                            <span className="text-xs font-bold">店舗</span>
+                        </button>
+                        <button
+                            onClick={() => setType('company')}
+                            className={`flex flex-col items-center justify-center p-4 border-2 rounded-xl transition-all ${type === 'company'
+                                    ? 'border-green-500 bg-green-50 ring-2 ring-green-200'
+                                    : 'border-gray-100 bg-gray-50 hover:border-gray-300'
+                                }`}
+                        >
+                            <span className="text-3xl mb-1">🏢</span>
+                            <span className="text-xs font-bold">会社</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div className="p-3 bg-indigo-50 border border-indigo-100 rounded-lg">
+                    <div className="flex justify-between items-center text-sm">
+                        <span className="text-indigo-700 font-medium">建設費用</span>
+                        <span className="text-indigo-900 font-bold">¥{getCost().toLocaleString()}</span>
+                    </div>
                 </div>
 
                 <div>
-                    <label className="block text-sm font-bold text-gray-700 mb-1">施設名</label>
+                    <label className="block text-sm font-bold mb-2 text-gray-700">
+                        {type === 'house' ? '家の名前 (任意)' : type === 'shop' ? '店舗名' : '会社名'}
+                    </label>
                     <input
                         type="text"
-                        value={placeName}
-                        onChange={(e) => setPlaceName(e.target.value)}
-                        placeholder="例: マイショップ東京本店"
-                        className="w-full p-2 border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none"
+                        value={name}
+                        onChange={e => setName(e.target.value)}
+                        className="w-full p-3 border-2 border-gray-100 rounded-xl focus:border-indigo-500 focus:outline-none transition-colors bg-gray-50"
+                        placeholder={type === 'house' ? 'マイホーム' : type === 'shop' ? 'コンビニ幸運' : '株式会社...'}
                     />
                 </div>
 
-                <div>
-                    <label className="block text-sm font-bold text-gray-700 mb-2">業種を選択</label>
-                    <div className="grid grid-cols-1 gap-2 max-h-60 overflow-y-auto">
-                        {PLACE_TYPES.map((type) => (
-                            <div
-                                key={type.type}
-                                onClick={() => setSelectedType(type.type)}
-                                className={`p-3 rounded-lg border-2 cursor-pointer transition-all ${selectedType === type.type
-                                        ? 'border-indigo-600 bg-indigo-50'
-                                        : 'border-gray-200 hover:border-indigo-300'
-                                    }`}
-                            >
-                                <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-3">
-                                        <div className="text-2xl">{type.icon}</div>
-                                        <div>
-                                            <div className="font-bold text-gray-900">{type.label}</div>
-                                            <div className="text-xs text-gray-500">{type.description}</div>
-                                        </div>
-                                    </div>
-                                    <div className="text-sm font-bold text-gray-600">
-                                        {type.cost.toLocaleString()}円
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-
-                {selectedTypeInfo && (
-                    <div className="flex justify-between items-center pt-2 border-t mt-4">
-                        <span className="text-gray-600 font-bold">建設費用（概算）:</span>
-                        <span className="text-xl font-bold text-red-600">
-                            {selectedTypeInfo.cost.toLocaleString()}円
-                        </span>
+                {type === 'company' && (
+                    <div className="animate-in fade-in slide-in-from-top-2">
+                        <label className="block text-sm font-bold mb-2 text-gray-700">会社形態</label>
+                        <select
+                            value={companyType}
+                            onChange={e => setCompanyType(e.target.value as CompanyType)}
+                            className="w-full p-3 border-2 border-gray-100 rounded-xl bg-gray-50 focus:border-indigo-500 focus:outline-none transition-colors"
+                        >
+                            {COMPANY_TYPES.map(ct => (
+                                <option key={ct.value} value={ct.value}>{ct.label}</option>
+                            ))}
+                        </select>
                     </div>
                 )}
 
-                <div className="flex gap-3 pt-2">
-                    <Button variant="secondary" onClick={onClose} fullWidth>
+                <div className="flex gap-4 pt-4 border-t border-gray-100">
+                    <Button variant="secondary" onClick={onClose} className="flex-1" size="lg">
                         キャンセル
                     </Button>
-                    <Button variant="primary" onClick={handleSubmit} fullWidth>
-                        建設開始
+                    <Button onClick={handleSubmit} className="flex-1" size="lg">
+                        建設する
                     </Button>
                 </div>
             </div>

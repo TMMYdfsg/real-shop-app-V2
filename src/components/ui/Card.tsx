@@ -7,9 +7,10 @@ interface CardProps {
     title?: string;
     padding?: 'none' | 'sm' | 'md' | 'lg';
     id?: string;
+    onClick?: () => void;
 }
 
-export const Card: React.FC<CardProps> = ({ children, className = '', style, title, padding = 'md', id }) => {
+export const Card: React.FC<CardProps> = ({ children, className = '', style, title, padding = 'md', id, onClick }) => {
     const paddingMap = {
         none: 0,
         sm: '0.5rem',
@@ -20,6 +21,8 @@ export const Card: React.FC<CardProps> = ({ children, className = '', style, tit
     return (
         <div
             id={id}
+            onClick={onClick}
+
             className={`glass-panel ${className}`}
             style={{
                 padding: paddingMap[padding],

@@ -2,6 +2,7 @@ import { NextResponse, NextRequest } from 'next/server';
 import { updateGameState } from '@/lib/dataStore';
 import { Request as GameRequest } from '@/types';
 import crypto from 'crypto';
+import { z } from 'zod'; // Zod Import
 
 import { JOB_GAME_CONFIGS, JobType } from '@/lib/jobData';
 import { GACHA_ITEMS } from '@/lib/gameData';
@@ -11,10 +12,39 @@ import { getGameState } from '@/lib/dataStore';
 
 export const dynamic = 'force-dynamic';
 
+// Validation Schema
+const ActionSchema = z.object({
+    type: z.string(),
+    requesterId: z.string(),
+    amount: z.number().optional(),
+    details: z.any().optional(), // Flexible for now, can be tightened later
+    idempotencyKey: z.string().optional()
+});
+
 export async function POST(request: NextRequest) {
+    const safeParseDetails = (d: any) => {
+        if (!d) return {};
+        if (typeof d === 'string') {
+            try {
+                return JSON.parse(d);
+            } catch (e) {
+                console.error('Failed to parse details string:', d);
+                return {};
+            }
+        }
+        return d;
+    };
+
     try {
         const body = await request.json();
-        const { type, requesterId, amount, details, idempotencyKey } = body;
+
+        // Validate Validation
+        const result = ActionSchema.safeParse(body);
+        if (!result.success) {
+            return NextResponse.json({ error: 'Invalid request data', details: result.error.format() }, { status: 400 });
+        }
+
+        const { type, requesterId, amount, details, idempotencyKey } = result.data;
 
         if (!type || !requesterId) {
             return NextResponse.json({ error: 'Missing fields' }, { status: 400 });
@@ -32,7 +62,7 @@ export async function POST(request: NextRequest) {
 
         const newRequest: GameRequest = {
             id: crypto.randomUUID(),
-            type,
+            type: type as GameRequest['type'],
             requesterId,
             amount: Number(amount) || 0,
             details,
@@ -97,16 +127,41 @@ export async function POST(request: NextRequest) {
 
         if (type === 'city_buy_land') {
             const landId = details;
+
             // 土地購入処理
+            let purchaseSuccess = false;
+            let purchasedLandAddress = '';
+            let updatedLand: any = null;
+
             await updateGameState((state) => {
                 const user = state.users.find(u => u.id === requesterId);
-                const land = state.lands.find(l => l.id === landId);
+                if (!user) return state;
+
+                // DBにlandsがない場合は初期化
+                if (!state.lands || state.lands.length === 0) {
+                    const { generateLands } = require('@/lib/cityData');
+                    state.lands = generateLands();
+                }
+
+                let land = state.lands.find(l => l.id === landId);
+
+                // まだリストにない場合はcityDataから取得して追加
+                if (!land) {
+                    const { generateLands } = require('@/lib/cityData');
+                    const allLands = generateLands();
+                    const target = allLands.find((l: any) => l.id === landId);
+                    if (target) {
+                        state.lands.push(target);
+                        land = target;
+                    }
+                }
 
                 if (user && land) {
                     // バリデーション
-                    if (land.ownerId) return state; // 既に誰かが所有
-                    if (!land.isForSale) return state; // 非売品
-                    if (user.balance < land.price) return state; // 資金不足 (クライアントでもチェックするが念のため)
+                    if (land.ownerId && land.ownerId !== 'public' && land.ownerId !== '') {
+                        return state; // 既に誰かが所有
+                    }
+                    if (user.balance < land.price) return state; // 資金不足
 
                     // 支払い
                     user.balance -= land.price;
@@ -114,10 +169,13 @@ export async function POST(request: NextRequest) {
                     // 所有権移転
                     land.ownerId = user.id;
                     land.isForSale = false;
+                    land.status = 'owned';
 
                     // ユーザーの所有地リストに追加
                     if (!user.ownedLands) user.ownedLands = [];
-                    user.ownedLands.push(land.id);
+                    if (!user.ownedLands.includes(land.id)) {
+                        user.ownedLands.push(land.id);
+                    }
 
                     // 履歴追加
                     if (!user.transactions) user.transactions = [];
@@ -130,22 +188,156 @@ export async function POST(request: NextRequest) {
                         timestamp: Date.now()
                     });
 
+                    purchaseSuccess = true;
+                    purchasedLandAddress = land.address;
+                    updatedLand = land;
+
                     // --- Phase 8: Record Idempotency ---
                     if (idempotencyKey) state.processedIdempotencyKeys.push(idempotencyKey);
                 }
                 return state;
             });
-            eventManager.broadcast({
-                type: 'STATE_SYNC',
-                payload: { type: 'land_purchased', landId },
-                timestamp: Date.now(),
-                revision: 0 // Will be set or not used directly if we just refresh
+
+            if (purchaseSuccess && updatedLand) {
+                eventManager.broadcast({
+                    type: 'STATE_SYNC',
+                    payload: { type: 'land_update', land: updatedLand },
+                    timestamp: Date.now(),
+                    revision: 0
+                });
+                return NextResponse.json({ success: true, message: `${purchasedLandAddress}を購入しました！` });
+            } else {
+                return NextResponse.json({ success: false, message: '購入できませんでした' });
+            }
+        }
+
+        if (type === 'city_build_place') {
+            const { landId, buildingType, buildingName, companyType } = safeParseDetails(details);
+            let checkSuccess = false;
+
+            await updateGameState((state) => {
+                const user = state.users.find(u => u.id === requesterId);
+                const land = state.lands.find(l => l.id === landId);
+
+                if (user && land && land.ownerId === user.id) {
+                    // 建設コスト計算 (簡易)
+                    // House: 500万, Shop: 1000万, Company: 2000万
+                    let cost = 5000000;
+                    if (buildingType === 'shop') cost = 10000000;
+                    if (buildingType === 'company') cost = 20000000;
+
+                    if (user.balance < cost) return state;
+
+                    // 支払い
+                    user.balance -= cost;
+
+                    // Place作成
+                    const placeId = `plc_${crypto.randomUUID()}`;
+                    const newPlace: any = { // Use 'any' or correct Place type matching updated index.ts
+                        id: placeId,
+                        ownerId: user.id,
+                        name: buildingName || 'New Building',
+                        type: buildingType === 'house' ? 'residential' : (buildingType === 'shop' ? 'retail' : 'office'),
+                        buildingCategory: buildingType,
+                        companyType: companyType,
+                        location: { ...land.location, address: land.address, landId: land.id },
+                        status: 'active',
+                        level: 1,
+                        employees: [],
+                        stats: { capital: 0, sales: 0, expenses: 0, profit: 0, reputation: 0, customerCount: 0 },
+                        licenses: [],
+                        insurances: []
+                    };
+
+                    if (!state.places) state.places = [];
+                    state.places.push(newPlace);
+
+                    // 土地情報更新
+                    land.placeId = placeId;
+
+                    // 履歴
+                    if (!user.transactions) user.transactions = [];
+                    user.transactions.push({
+                        id: crypto.randomUUID(),
+                        type: 'payment',
+                        amount: cost,
+                        senderId: user.id,
+                        description: `建設費用 (${buildingName})`,
+                        timestamp: Date.now()
+                    });
+
+                    checkSuccess = true;
+
+                    if (idempotencyKey) state.processedIdempotencyKeys.push(idempotencyKey);
+                }
+                return state;
             });
-            return NextResponse.json({ success: true, message: '土地を購入しました' });
+
+            if (checkSuccess) {
+                eventManager.broadcast({
+                    type: 'STATE_SYNC',
+                    payload: { type: 'places_update' }, // Simplified event
+                    timestamp: Date.now(),
+                    revision: 0
+                });
+                return NextResponse.json({ success: true, message: '建設完了！' });
+            } else {
+                return NextResponse.json({ success: false, message: '建設に失敗しました（資金不足または所有権なし）' });
+            }
+        }
+
+        if (type === 'city_update_land_coord') {
+            const { landId, lat, lng } = safeParseDetails(details);
+            await updateGameState((state) => {
+                // landsが未初期化の場合は初期化
+                if (!state.lands || state.lands.length === 0) {
+                    const { generateLands } = require('@/lib/cityData');
+                    state.lands = generateLands();
+                }
+
+                let land = state.lands.find(l => l.id === landId);
+
+                // まだリストにない場合は追加（cityDataから復元）
+                if (!land) {
+                    const { generateLands } = require('@/lib/cityData');
+                    const allLands = generateLands();
+                    const target = allLands.find((l: any) => l.id === landId);
+                    if (target) {
+                        state.lands.push(target);
+                        land = target;
+                    }
+                }
+
+                if (land) {
+                    land.location = { lat, lng };
+                    // DB同期用
+                    (land as any).lat = lat;
+                    (land as any).lng = lng;
+                }
+                return state;
+            });
+            return NextResponse.json({ success: true });
+        }
+
+        if (type === 'admin_update_land') {
+            const updates = safeParseDetails(details);
+            await updateGameState((state) => {
+                const land = state.lands.find(l => l.id === updates.landId);
+                if (land) {
+                    if (updates.price !== undefined) land.price = updates.price;
+                    if (updates.maintenanceFee !== undefined) land.maintenanceFee = updates.maintenanceFee;
+                    if (updates.requiresApproval !== undefined) land.requiresApproval = updates.requiresApproval;
+                    if (updates.allowConstruction !== undefined) land.allowConstruction = updates.allowConstruction;
+                    if (updates.allowCompany !== undefined) land.allowCompany = updates.allowCompany;
+                    if (updates.isForSale !== undefined) land.isForSale = updates.isForSale;
+                }
+                return state;
+            });
+            return NextResponse.json({ success: true });
         }
 
         if (type === 'city_buy_address') {
-            const { address, location, polygon, price } = JSON.parse(details);
+            const { address, location, polygon, price } = safeParseDetails(details);
             await updateGameState((state) => {
                 const user = state.users.find(u => u.id === requesterId);
                 if (user) {
@@ -222,7 +414,7 @@ export async function POST(request: NextRequest) {
 
         // --- Virtual Currency Actions ---
         if (type === 'crypto_create') {
-            const { name, symbol, price, volatility, description } = JSON.parse(details);
+            const { name, symbol, price, volatility, description } = safeParseDetails(details);
             await updateGameState((state) => {
                 const user = state.users.find(u => u.id === requesterId);
                 if (user && user.role === 'banker') {
@@ -249,7 +441,7 @@ export async function POST(request: NextRequest) {
         }
 
         if (type === 'crypto_manage') {
-            const { action, cryptoId, data } = JSON.parse(details);
+            const { action, cryptoId, data } = safeParseDetails(details);
 
             if (action === 'delete') {
                 const { prisma } = await import('@/lib/db');
@@ -279,7 +471,7 @@ export async function POST(request: NextRequest) {
         }
 
         if (type === 'crypto_buy') {
-            const { cryptoId, amount: buyAmount } = details ? JSON.parse(details) : { cryptoId: '', amount: 0 }; // buyAmount is quantity? Or currency?
+            const { cryptoId, amount: buyAmount } = details ? safeParseDetails(details) : { cryptoId: '', amount: 0 }; // buyAmount is quantity? Or currency?
             // "amount" in top level is usually currency amount for generic checking, but here let's clarify.
             // Let's assume 'amount' passed in body is the COST (total price).
             // details has the quantity.
@@ -323,7 +515,7 @@ export async function POST(request: NextRequest) {
         }
 
         if (type === 'crypto_sell') {
-            const { cryptoId, amount: sellCost } = details ? JSON.parse(details) : { cryptoId: '', amount: 0 };
+            const { cryptoId, amount: sellCost } = details ? safeParseDetails(details) : { cryptoId: '', amount: 0 };
             // amount is the money to receive.
 
             await updateGameState((state) => {
@@ -434,16 +626,14 @@ export async function POST(request: NextRequest) {
         if (type === 'update_profile') {
             await updateGameState((state) => {
                 const user = state.users.find(u => u.id === requesterId);
-                if (user) {
-                    if (details) {
-                        const { name, shopName, cardType, isInsured, propertyLevel, playerIcon } = JSON.parse(details);
-                        if (name !== undefined) user.name = name;
-                        if (shopName !== undefined) user.shopName = shopName;
-                        if (cardType !== undefined) user.cardType = cardType;
-                        if (isInsured !== undefined) user.isInsured = isInsured;
-                        if (propertyLevel !== undefined) user.propertyLevel = propertyLevel;
-                        if (playerIcon !== undefined) user.playerIcon = playerIcon;
-                    }
+                if (user && details) {
+                    const { name, shopName, cardType, isInsured, propertyLevel, playerIcon } = safeParseDetails(details);
+                    if (name !== undefined) user.name = name;
+                    if (shopName !== undefined) user.shopName = shopName;
+                    if (cardType !== undefined) user.cardType = cardType;
+                    if (isInsured !== undefined) user.isInsured = isInsured;
+                    if (propertyLevel !== undefined) user.propertyLevel = propertyLevel;
+                    if (playerIcon !== undefined) user.playerIcon = playerIcon;
                 }
                 return state;
             });
@@ -454,7 +644,7 @@ export async function POST(request: NextRequest) {
             await updateGameState((state) => {
                 const user = state.users.find(u => u.id === requesterId);
                 if (user && details) {
-                    const websiteData = JSON.parse(details);
+                    const websiteData = safeParseDetails(details);
                     user.shopWebsite = {
                         ...websiteData,
                         ownerId: user.id
@@ -469,7 +659,7 @@ export async function POST(request: NextRequest) {
             await updateGameState((state) => {
                 const user = state.users.find(u => u.id === requesterId);
                 if (user && details) {
-                    const items = JSON.parse(details);
+                    const items = safeParseDetails(details);
                     user.pointExchangeItems = items;
                 }
                 return state;
@@ -482,7 +672,7 @@ export async function POST(request: NextRequest) {
                 const buyer = state.users.find(u => u.id === requesterId);
                 if (!buyer || !details) return state;
 
-                const { itemId, ownerId } = JSON.parse(details);
+                const { itemId, ownerId } = safeParseDetails(details);
                 const owner = state.users.find(u => u.id === ownerId);
 
                 if (!owner || !owner.pointExchangeItems) return state;
@@ -525,7 +715,7 @@ export async function POST(request: NextRequest) {
                 const user = state.users.find(u => u.id === requesterId); // Buyer
                 if (!user) return state;
 
-                const { productId, sellerId } = details ? JSON.parse(details) : { productId: '', sellerId: '' };
+                const { productId, sellerId } = details ? safeParseDetails(details) : { productId: '', sellerId: '' };
                 const product = state.products.find(p => p.id === productId);
                 const seller = state.users.find(u => u.id === sellerId);
 
@@ -575,7 +765,7 @@ export async function POST(request: NextRequest) {
                 const buyer = state.users.find(u => u.id === requesterId);
                 if (!buyer) return state;
 
-                const { itemId, sellerId } = details ? JSON.parse(details) : {};
+                const { itemId, sellerId } = details ? safeParseDetails(details) : {};
                 const seller = state.users.find(u => u.id === sellerId);
 
                 if (!seller || !seller.shopMenu) return state;
@@ -667,7 +857,7 @@ export async function POST(request: NextRequest) {
                 // Also general sync
                 eventManager.broadcast({
                     type: 'INVENTORY_UPDATED',
-                    payload: { sellerId: JSON.parse(details).sellerId },
+                    payload: { sellerId: safeParseDetails(details).sellerId },
                     timestamp: Date.now(),
                     revision: 0
                 });
@@ -761,7 +951,7 @@ export async function POST(request: NextRequest) {
         }
 
         if (type === 'timer_update') {
-            const params = details ? JSON.parse(details) : { days: 0, hours: 0, minutes: 5, seconds: 0 };
+            const params = details ? safeParseDetails(details) : { days: 0, hours: 0, minutes: 5, seconds: 0 };
             const days = Number(params.days) || 0;
             const hours = Number(params.hours) || 0;
             const minutes = Number(params.minutes) || 0;
@@ -920,10 +1110,10 @@ export async function POST(request: NextRequest) {
         }
 
         if (type === 'complete_job') {
-            updateGameState((state) => {
+            await updateGameState((state) => {
                 const user = state.users.find(u => u.id === requesterId);
                 if (user) {
-                    const score = details ? JSON.parse(details).score : 0;
+                    const score = details ? safeParseDetails(details).score : 0;
                     const jobType = user.job || 'unemployed';
                     const baseSalary = 100; // Define base or import
                     // Simplified reward logic
@@ -952,7 +1142,7 @@ export async function POST(request: NextRequest) {
 
             let resultData: any = {};
 
-            updateGameState((state) => {
+            await updateGameState((state) => {
                 const user = state.users.find(u => u.id === requesterId);
                 if (!user) return state;
 
@@ -1019,9 +1209,9 @@ export async function POST(request: NextRequest) {
         // -----------------------------------------------------
         if (type === 'gamble_blackjack') {
             const bet = Number(amount);
-            const gameData = JSON.parse(details);
+            const gameData = safeParseDetails(details);
 
-            updateGameState((state) => {
+            await updateGameState((state) => {
                 const user = state.users.find(u => u.id === requesterId);
                 if (!user) return state;
 
@@ -1051,9 +1241,9 @@ export async function POST(request: NextRequest) {
         // -----------------------------------------------------
         if (type === 'gamble_slot') {
             const bet = Number(amount);
-            const gameData = JSON.parse(details);
+            const gameData = safeParseDetails(details);
 
-            updateGameState((state) => {
+            await updateGameState((state) => {
                 const user = state.users.find(u => u.id === requesterId);
                 if (!user) return state;
 
@@ -1085,9 +1275,9 @@ export async function POST(request: NextRequest) {
         // -----------------------------------------------------
         if (type === 'gamble_horse') {
             const bet = Number(amount);
-            const gameData = JSON.parse(details);
+            const gameData = safeParseDetails(details);
 
-            updateGameState((state) => {
+            await updateGameState((state) => {
                 const user = state.users.find(u => u.id === requesterId);
                 if (!user) return state;
 
@@ -1119,7 +1309,7 @@ export async function POST(request: NextRequest) {
         // -----------------------------------------------------
         if (type === 'buy_property') {
             const propertyId = details;
-            updateGameState((state) => {
+            await updateGameState((state) => {
                 const user = state.users.find(u => u.id === requesterId);
                 const property = state.properties?.find(p => p.id === propertyId);
 
@@ -1162,7 +1352,7 @@ export async function POST(request: NextRequest) {
                 return NextResponse.json({ error: '車両が見つかりません' }, { status: 404 });
             }
 
-            updateGameState((state) => {
+            await updateGameState((state) => {
                 const user = state.users.find(u => u.id === requesterId);
                 if (user) {
                     // 購入チェック
@@ -1224,7 +1414,7 @@ export async function POST(request: NextRequest) {
         if (type === 'get_license') {
             const LICENSE_COST = 300000; // 教習所費用
 
-            updateGameState((state) => {
+            await updateGameState((state) => {
                 const user = state.users.find(u => u.id === requesterId);
                 if (user) {
                     if (user.hasLicense) return state;
@@ -1252,9 +1442,9 @@ export async function POST(request: NextRequest) {
         // 通勤設定 (config_commute)
         // -----------------------------------------------------
         if (type === 'config_commute') {
-            const { method, homeId, workId, distance, region } = JSON.parse(details);
+            const { method, homeId, workId, distance, region } = safeParseDetails(details);
 
-            updateGameState((state) => {
+            await updateGameState((state) => {
                 const user = state.users.find(u => u.id === requesterId);
                 if (user) {
                     if (method) user.commuteMethod = method;
@@ -1275,7 +1465,7 @@ export async function POST(request: NextRequest) {
             const { COMMUTE_EVENTS, VEHICLE_CATALOG } = await import('@/lib/gameData');
 
             // クライアントからミニゲームのスコアなどの詳細を受け取る
-            const { minigameScore } = details ? JSON.parse(details) : { minigameScore: undefined };
+            const { minigameScore } = details ? safeParseDetails(details) : { minigameScore: undefined };
 
             let result = {
                 success: true,
@@ -1287,7 +1477,7 @@ export async function POST(request: NextRequest) {
                 minigameBonus: 0
             };
 
-            updateGameState((state) => {
+            await updateGameState((state) => {
                 const user = state.users.find(u => u.id === requesterId);
                 if (!user) return state;
 
@@ -1413,8 +1603,8 @@ export async function POST(request: NextRequest) {
 
         if (type === 'update_shop_menu') {
             // details = JSON string of ShopItem[]
-            const items = JSON.parse(details);
-            updateGameState((state) => {
+            const items = safeParseDetails(details);
+            await updateGameState((state) => {
                 const user = state.users.find(u => u.id === requesterId);
                 if (user) {
                     user.shopMenu = items;
@@ -1429,9 +1619,9 @@ export async function POST(request: NextRequest) {
             const { GACHA_ITEMS } = await import('@/lib/gameData');
             let resultItems: any[] = [];
 
-            updateGameState((state) => {
+            await updateGameState((state) => {
                 const user = state.users.find(u => u.id === requesterId);
-                const { count } = details ? JSON.parse(details) : { count: 1 };
+                const { count } = details ? safeParseDetails(details) : { count: 1 };
                 const cost = count * 300; // 1回300円 hardcoded for now
 
                 if (user && user.balance >= cost) {
@@ -1481,8 +1671,8 @@ export async function POST(request: NextRequest) {
         }
 
         if (type === 'restock_item') {
-            const { itemId, quantity } = JSON.parse(details);
-            updateGameState((state) => {
+            const { itemId, quantity } = safeParseDetails(details);
+            await updateGameState((state) => {
                 const user = state.users.find(u => u.id === requesterId);
                 if (user && user.shopMenu) {
                     const item = user.shopMenu.find(i => i.id === itemId);
@@ -1526,16 +1716,16 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ success: false, message: 'コードが無効です' }, { status: 400 });
         }
 
-        updateGameState((state) => {
+        await updateGameState((state) => {
             state.requests.push(newRequest);
             return state;
         });
 
         // クーポン作成
         if (type === 'create_coupon') {
-            const { code, discountPercent, minPurchase, maxUses, expiresAt } = JSON.parse(details);
+            const { code, discountPercent, minPurchase, maxUses, expiresAt } = safeParseDetails(details);
 
-            updateGameState((state) => {
+            await updateGameState((state) => {
                 const user = state.users.find(u => u.id === requesterId);
                 if (!user) return state;
 
@@ -1563,13 +1753,173 @@ export async function POST(request: NextRequest) {
 
 
 
-        // カタログから仕入れ
+        // -----------------------------------------------------
+        // 銀行 (Bank) - 融資・返済・差し押さえ
+        // -----------------------------------------------------
+        if (type === 'request_loan') {
+            const { amount, duration } = safeParseDetails(details);
+            const loanAmount = Number(amount);
+
+            await updateGameState((state) => {
+                const user = state.users.find(u => u.id === requesterId);
+                if (user) {
+                    // Credit Score Check (Simple mock)
+                    const score = user.creditScore || 650;
+                    const maxLoan = score * 10000; // e.g. 650 -> 6,500,000
+
+                    if (user.loans && user.loans.some((l: any) => l.status === 'active' || l.status === 'overdue')) {
+                        // Already has active loan (Simplify: 1 loan at a time for now)
+                        // Or check total
+                    }
+
+                    if (loanAmount > maxLoan) {
+                        // Should reject or error, but let's just allow request and let admin decide?
+                        // Or auto-reject. Let's auto-reject for simplicity.
+                        // Actually, let's create a pending loan request.
+                    }
+
+                    if (!user.loans) user.loans = [];
+                    user.loans.push({
+                        id: crypto.randomUUID(),
+                        name: '融資申請',
+                        amount: loanAmount,
+                        remainingAmount: loanAmount,
+                        interestRate: 0.05, // 5% fixed
+                        dueDate: Date.now() + (duration * 24 * 60 * 60 * 1000), // days to ms
+                        isFixedRate: true,
+                        monthlyPayment: 0,
+                        nextPaymentTurn: 0,
+                        status: 'pending',
+                        borrowedAt: Date.now()
+                    });
+                }
+                return state;
+            });
+            return NextResponse.json({ success: true, message: '融資申請を行いました。バンカーの承認をお待ちください。' });
+        }
+
+        if (type === 'repay_loan') {
+            const { loanId, amount } = safeParseDetails(details);
+            const repayAmount = Number(amount);
+
+            await updateGameState((state) => {
+                const user = state.users.find(u => u.id === requesterId);
+                if (user && user.loans) {
+                    const loan = user.loans.find((l: any) => l.id === loanId);
+                    if (loan && loan.status === 'active') {
+                        if (user.balance >= repayAmount) {
+                            user.balance -= repayAmount;
+                            loan.amount -= repayAmount; // Reduce principal (simplified)
+
+                            if (loan.amount <= 0) {
+                                loan.amount = 0;
+                                loan.status = 'paid_off';
+                                // Boost Credit Score
+                                user.creditScore = Math.min(850, (user.creditScore || 650) + 10);
+                            }
+
+                            if (!user.transactions) user.transactions = [];
+                            user.transactions.push({
+                                id: crypto.randomUUID(), type: 'payment', amount: repayAmount,
+                                senderId: user.id, description: `ローン返済`, timestamp: Date.now()
+                            });
+                        }
+                    }
+                }
+                return state;
+            });
+            return NextResponse.json({ success: true, message: '返済を受け付けました' });
+        }
+
+        if (type === 'admin_seize_asset') {
+            const { targetUserId, amount, reason } = safeParseDetails(details);
+            const seizeAmount = Number(amount);
+
+            await updateGameState((state) => {
+                // Ensure requester is banker (client side check usually, but good to check role here if we had session)
+                const target = state.users.find(u => u.id === targetUserId);
+                if (target) {
+                    // Seize from deposit first, then balance
+                    let remaining = seizeAmount;
+
+                    if (target.deposit > 0) {
+                        const take = Math.min(target.deposit, remaining);
+                        target.deposit -= take;
+                        remaining -= take;
+                    }
+
+                    if (remaining > 0 && target.balance > 0) {
+                        const take = Math.min(target.balance, remaining);
+                        target.balance -= take;
+                        remaining -= take;
+                    }
+
+                    // Log seizure
+                    if (!target.transactions) target.transactions = [];
+                    target.transactions.push({
+                        id: crypto.randomUUID(), type: 'payment', amount: seizeAmount - remaining,
+                        senderId: target.id, description: `【強制徴収】${reason}`, timestamp: Date.now()
+                    });
+
+                    // Penalty to credit score
+                    target.creditScore = Math.max(300, (target.creditScore || 650) - 50);
+                }
+                return state;
+            });
+            return NextResponse.json({ success: true, message: '資産を差し押さえました' });
+        }
+
+        // -----------------------------------------------------
+        // 資格試験合格 (pass_exam) (NEW)
+        // -----------------------------------------------------
+        if (type === 'pass_exam') {
+            const { qualificationId } = safeParseDetails(details);
+            const { QUALIFICATIONS } = require('@/lib/gameData');
+
+            await updateGameState((state) => {
+                const user = state.users.find(u => u.id === requesterId);
+                const qual = QUALIFICATIONS.find((q: any) => q.id === qualificationId);
+
+                if (user && qual) {
+                    if (!user.qualifications) user.qualifications = [];
+                    if (!user.qualifications.includes(qualificationId)) {
+                        user.qualifications.push(qualificationId);
+
+                        // Deduct fee if not already handled by client side logic check
+                        // (Assuming client does check, but server enforces cost if we wanted strict logic)
+                        // Here we just mark passed for simplicity as mock exam client handles flow
+
+                        // Transaction for passed exam
+                        if (!user.transactions) user.transactions = [];
+                        user.transactions.push({
+                            id: crypto.randomUUID(),
+                            type: 'payment',
+                            amount: 0, // Fee paid before? Or here? Let's assume paid here for safety
+                            senderId: user.id,
+                            description: `資格取得: ${qual.name}`,
+                            timestamp: Date.now()
+                        });
+
+                        // If we want to charge here:
+                        if (user.balance >= qual.examFee) {
+                            user.balance -= qual.examFee;
+                            user.transactions[user.transactions.length - 1].amount = qual.examFee;
+                            user.transactions[user.transactions.length - 1].description = `受験料: ${qual.name} (合格)`;
+                        }
+                    }
+                }
+                return state;
+            });
+
+            return NextResponse.json({ success: true, message: '試験に合格しました！資格を取得しました。' });
+        }
+
         // カタログから仕入れ
         if (type === 'restock_from_catalog') {
-            const { catalogType, itemId, cost, price, stock } = JSON.parse(details);
+            const { catalogType, itemId, cost, price, stock } = safeParseDetails(details);
             let earnedPoints = 0;
 
-            updateGameState((state) => {
+            await updateGameState((state) => {
                 const user = state.users.find(u => u.id === requesterId);
                 if (!user) return state;
 
@@ -1640,9 +1990,9 @@ export async function POST(request: NextRequest) {
 
         // ポイント交換
         if (type === 'exchange_points') {
-            const { itemId, pointsCost, itemType, itemData } = JSON.parse(details);
+            const { itemId, pointsCost, itemType, itemData } = safeParseDetails(details);
 
-            updateGameState((state) => {
+            await updateGameState((state) => {
                 const user = state.users.find(u => u.id === requesterId);
                 if (!user) return state;
 
@@ -1704,12 +2054,12 @@ export async function POST(request: NextRequest) {
 
         // まとめ買い
         if (type === 'bulk_purchase_shop_items') {
-            const { sellerId, cartItems, couponCode } = JSON.parse(details);
+            const { sellerId, cartItems, couponCode } = safeParseDetails(details);
 
             let totalCost = 0;
             let discount = 0;
 
-            updateGameState((state) => {
+            await updateGameState((state) => {
                 const buyer = state.users.find(u => u.id === requesterId);
                 const seller = state.users.find(u => u.id === sellerId);
                 if (!buyer || !seller) return state;
@@ -1786,14 +2136,53 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ success: true, total: totalCost, discount });
         }
 
+        // ==========================================
+        // Shop Website Actions (NEW)
+        // ==========================================
+
+        if (type === 'create_website') {
+            const { templateId, shopName, description, colors } = safeParseDetails(details);
+
+            await updateGameState((state) => {
+                const user = state.users.find(u => u.id === requesterId);
+                if (!user) return state;
+
+                // Create Website
+                user.shopWebsite = {
+                    id: crypto.randomUUID(),
+                    ownerId: user.id,
+                    templateId,
+                    customization: {
+                        primaryColor: colors.primary,
+                        secondaryColor: colors.secondary,
+                        shopDescription: description,
+                        welcomeMessage: `Welcome to ${shopName}!`,
+                        showProducts: true,
+                        showCoupons: true,
+                        layout: 'grid'
+                    },
+                    isPublished: true,
+                    createdAt: Date.now(),
+                    updatedAt: Date.now()
+                };
+
+                // Update Shop Name
+                user.shopName = shopName;
+
+                return state;
+            });
+
+            return NextResponse.json({ success: true, message: 'ホームページを作成しました！' });
+        }
+
         if (type === 'city_build_place') {
-            const { landId, name, type: placeType } = JSON.parse(details || '{}');
+            const { landId, name, type: placeType } = safeParseDetails(details);
 
             if (!landId || !name || !placeType) {
                 return NextResponse.json({ error: 'Missing build details' }, { status: 400 });
             }
 
-            updateGameState((state) => {
+            await updateGameState((state) => {
                 const user = state.users.find(u => u.id === requesterId);
                 const land = state.lands.find(l => l.id === landId);
 
@@ -1879,10 +2268,10 @@ export async function POST(request: NextRequest) {
         // 融資申し込み (bank_loan_apply)
         // -----------------------------------------------------
         if (type === 'bank_loan_apply') {
-            const { amount, purpose, months } = JSON.parse(details);
+            const { amount, purpose, months } = safeParseDetails(details);
             const loanAmount = Number(amount);
 
-            updateGameState((state) => {
+            await updateGameState((state) => {
                 const user = state.users.find(u => u.id === requesterId);
                 const { calculateCreditScore } = require('@/lib/simulation'); // Dynamic import to avoid circular dependency if any
 
@@ -1966,8 +2355,8 @@ export async function POST(request: NextRequest) {
         // 任意返済 (bank_repay)
         // -----------------------------------------------------
         if (type === 'bank_repay') {
-            const { loanId, repaymentAmount } = JSON.parse(details);
-            updateGameState((state) => {
+            const { loanId, repaymentAmount } = safeParseDetails(details);
+            await updateGameState((state) => {
                 const user = state.users.find(u => u.id === requesterId);
                 if (user && user.loans) {
                     const loan = user.loans.find(l => l.id === loanId);
@@ -2010,10 +2399,10 @@ export async function POST(request: NextRequest) {
         // 銀行振込 (bank_transfer)
         // -----------------------------------------------------
         if (type === 'bank_transfer') {
-            const { targetId, transferAmount } = JSON.parse(details);
+            const { targetId, transferAmount } = safeParseDetails(details);
             const val = Number(transferAmount);
 
-            updateGameState((state) => {
+            await updateGameState((state) => {
                 const sender = state.users.find(u => u.id === requesterId);
                 const receiver = state.users.find(u => u.id === targetId);
 
@@ -2037,7 +2426,7 @@ export async function POST(request: NextRequest) {
         // 保険加入 (insurance_buy)
         // -----------------------------------------------------
         if (type === 'insurance_buy') {
-            const { insuranceType } = JSON.parse(details);
+            const { insuranceType } = safeParseDetails(details);
             // hardcoded definitions for now
             const INSURANCE_PLANS = {
                 'fire': { name: '火災保険', premium: 5000, coverage: 10000000 },
@@ -2087,10 +2476,10 @@ export async function POST(request: NextRequest) {
         // 店舗別ポイント交換アイテム設定 (update_point_exchange_items)
         // -----------------------------------------------------
         if (type === 'update_point_exchange_items') {
-            const { items } = JSON.parse(details);
+            const { items } = safeParseDetails(details);
             // items: PointExchangeItem[]
 
-            updateGameState((state) => {
+            await updateGameState((state) => {
                 const user = state.users.find(u => u.id === requesterId);
                 if (user) {
                     user.pointExchangeItems = items;
@@ -2104,9 +2493,9 @@ export async function POST(request: NextRequest) {
         // 店舗別ポイント交換実行 (exchange_shop_item)
         // -----------------------------------------------------
         if (type === 'exchange_shop_item') {
-            const { shopOwnerId, itemId } = JSON.parse(details);
+            const { shopOwnerId, itemId } = safeParseDetails(details);
 
-            updateGameState((state) => {
+            await updateGameState((state) => {
                 const user = state.users.find(u => u.id === requesterId);
                 const shopOwner = state.users.find(u => u.id === shopOwnerId);
 
@@ -2179,12 +2568,84 @@ export async function POST(request: NextRequest) {
         }
 
         // -----------------------------------------------------
+        // SNS (post_sns, like_sns)
+        // -----------------------------------------------------
+        if (type === 'post_sns') {
+            const { content } = safeParseDetails(details);
+            await updateGameState((state) => {
+                const user = state.users.find(u => u.id === requesterId);
+                if (user) {
+                    if (!state.snsPosts) state.snsPosts = [];
+                    state.snsPosts.unshift({
+                        id: crypto.randomUUID(),
+                        authorId: user.id,
+                        authorName: user.name,
+                        content: content.slice(0, 280), // Limit length
+                        likes: 0,
+                        likedBy: [],
+                        timestamp: Date.now()
+                    });
+                }
+                return state;
+            });
+            return NextResponse.json({ success: true, message: '投稿しました' });
+        }
+
+        if (type === 'like_sns') {
+            const { postId } = safeParseDetails(details);
+            await updateGameState((state) => {
+                const post = state.snsPosts?.find(p => p.id === postId);
+                if (post) {
+                    if (post.likedBy.includes(requesterId)) {
+                        // Unlike
+                        post.likedBy = post.likedBy.filter(id => id !== requesterId);
+                        post.likes--;
+                    } else {
+                        // Like
+                        post.likedBy.push(requesterId);
+                        post.likes++;
+                    }
+                }
+                return state;
+            });
+            return NextResponse.json({ success: true });
+        }
+
+        // -----------------------------------------------------
+        // Video App (upload_video, watch_video)
+        // -----------------------------------------------------
+        if (type === 'upload_video') {
+            const { title, description, tags, url, color } = safeParseDetails(details);
+            await updateGameState((state) => {
+                const user = state.users.find(u => u.id === requesterId);
+                if (user) {
+                    if (!state.videos) state.videos = [];
+                    state.videos.unshift({
+                        id: crypto.randomUUID(),
+                        uploaderId: user.id,
+                        uploaderName: user.name,
+                        title: title.slice(0, 50),
+                        description: description || '',
+                        tags: tags || [],
+                        url: url || '', // Store the file path
+                        thumbnailColor: color || '#ff0000',
+                        views: 0,
+                        likes: 0,
+                        timestamp: Date.now()
+                    });
+                }
+                return state;
+            });
+            return NextResponse.json({ success: true, message: '動画をアップロードしました' });
+        }
+
+        // -----------------------------------------------------
         // ターン経過処理 (next_turn)
         // -----------------------------------------------------
         if (type === 'next_turn') {
             const { simulateTurn } = require('@/lib/simulation');
 
-            updateGameState((state) => {
+            await updateGameState((state) => {
                 // 1. Increment Turn
                 state.turn += 1;
 
@@ -2284,7 +2745,7 @@ export async function POST(request: NextRequest) {
         // レビュー投稿 (submit_review)
         // -----------------------------------------------------
         if (type === 'submit_review') {
-            const { purchaseId, rating, comment } = JSON.parse(details || '{}');
+            const { purchaseId, rating, comment } = safeParseDetails(details);
 
             await updateGameState((state) => {
                 const reviewer = state.users.find(u => u.id === requesterId);
@@ -2331,11 +2792,140 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ success: true, message: 'レビューを投稿しました' });
         }
 
+        // -----------------------------------------------------
+        // forbidden_market / stock_trade
+        // -----------------------------------------------------
+
+        if (type === 'buy_stock') {
+            const stockId = details;
+            const quantity = Number(amount);
+
+            await updateGameState((state) => {
+                const user = state.users.find(u => u.id === requesterId);
+                const stock = state.stocks.find(s => s.id === stockId);
+
+                if (user && stock) {
+                    const cost = stock.price * quantity;
+                    if (user.balance >= cost) {
+                        user.balance -= cost;
+
+                        // Add to appropriate portfolio
+                        if (stock.isForbidden) {
+                            if (!user.forbiddenStocks) user.forbiddenStocks = {};
+                            user.forbiddenStocks[stockId] = (user.forbiddenStocks[stockId] || 0) + quantity;
+                        } else {
+                            if (!user.stocks) user.stocks = {};
+                            user.stocks[stockId] = (user.stocks[stockId] || 0) + quantity;
+                        }
+
+                        // Transaction
+                        if (!user.transactions) user.transactions = [];
+                        user.transactions.push({
+                            id: crypto.randomUUID(),
+                            type: 'buy_stock',
+                            amount: cost,
+                            senderId: user.id,
+                            description: `株購入: ${stock.name} x${quantity}`,
+                            timestamp: Date.now()
+                        });
+                    }
+                }
+                return state;
+            });
+            return NextResponse.json({ success: true, message: '株を購入しました' });
+        }
+
+        if (type === 'sell_stock') {
+            const stockId = details;
+            const quantity = Number(amount);
+
+            await updateGameState((state) => {
+                const user = state.users.find(u => u.id === requesterId);
+                const stock = state.stocks.find(s => s.id === stockId);
+
+                if (user && stock) {
+                    // Check ownership
+                    let currentOwned = 0;
+                    if (stock.isForbidden) {
+                        currentOwned = user.forbiddenStocks?.[stockId] || 0;
+                    } else {
+                        currentOwned = user.stocks?.[stockId] || 0;
+                    }
+
+                    if (currentOwned >= quantity) {
+                        // Remove from portfolio
+                        if (stock.isForbidden) {
+                            user.forbiddenStocks![stockId] -= quantity;
+                        } else {
+                            user.stocks![stockId] -= quantity;
+                        }
+
+                        const gain = stock.price * quantity;
+                        user.balance += gain;
+
+                        // Transaction
+                        if (!user.transactions) user.transactions = [];
+                        user.transactions.push({
+                            id: crypto.randomUUID(),
+                            type: 'sell_stock',
+                            amount: gain,
+                            senderId: user.id,
+                            description: `株売却: ${stock.name} x${quantity}`,
+                            timestamp: Date.now()
+                        });
+                    }
+                }
+                return state;
+            });
+            return NextResponse.json({ success: true, message: '株を売却しました' });
+        }
+
+        if (type === 'buy_forbidden_item') {
+            const { itemId } = safeParseDetails(details);
+
+            await updateGameState((state) => {
+                const user = state.users.find(u => u.id === requesterId);
+                if (!user) return state;
+
+                // Simple check for now, ideally fetch item price from backend config
+                const price = Number(amount);
+
+                if (user.balance >= price) {
+                    user.balance -= price;
+
+                    if (!user.inventory) user.inventory = [];
+                    // Check if already has unique items? Or stack them?
+                    // Let's stack or add new instance.
+                    user.inventory.push({
+                        id: crypto.randomUUID(),
+                        itemId: itemId,
+                        quantity: 1,
+                        name: itemId === 'fake_id' ? '偽造ID' : (itemId === 'hacking_tool' ? 'ハッキングツール' : 'ウイルスUSB'),
+                    });
+
+                    // Log (Secret?)
+                    if (!user.transactions) user.transactions = []; // Avoid details in legit history?
+                    // Or use a cryptic name
+                    user.transactions.push({
+                        id: crypto.randomUUID(),
+                        type: 'payment',
+                        amount: price,
+                        senderId: user.id,
+                        description: 'SYSTEM_PAYMENT_ERR_404',
+                        timestamp: Date.now()
+                    });
+                }
+                return state;
+            });
+            return NextResponse.json({ success: true, message: '取引完了' });
+        }
+
         // 既存の汎用リクエスト保存処理 (他のアクション用)
 
         return NextResponse.json({ success: true, request: newRequest });
     } catch (error) {
-        return NextResponse.json({ error: 'Failed to submit action' }, { status: 500 });
+        console.error('Action error:', error);
+        return NextResponse.json({ success: false, message: 'Internal Server Error', details: String(error) }, { status: 500 });
     }
 }
 

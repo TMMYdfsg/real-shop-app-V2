@@ -4,14 +4,15 @@ import { useGame } from '@/context/GameContext';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 
-export default function ReceiptsPage({ params }: { params: { id: string } }) {
+export default function ReceiptsPage() {
     const { gameState, sendRequest, currentUser } = useGame();
     const [reviewModal, setReviewModal] = useState<{ purchaseId: string; shopName: string } | null>(null);
     const [rating, setRating] = useState(5);
     const [comment, setComment] = useState('');
     const router = useRouter();
+    const params = useParams<{ id: string }>();
 
     if (!currentUser || currentUser.id !== params.id) {
         router.push(`/player/${params.id}`);
