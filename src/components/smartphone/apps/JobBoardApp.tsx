@@ -15,7 +15,7 @@ const applyForJob = async (jobId: string, type: 'full' | 'part') => {
 };
 
 export const JobBoardApp: React.FC<{ onBack: () => void }> = ({ onBack }) => {
-    const { currentUser, refresh } = useGame();
+    const { currentUser, refresh, gameState } = useGame();
     const [activeTab, setActiveTab] = useState<'jobs' | 'part-time'>('jobs');
     const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
 
