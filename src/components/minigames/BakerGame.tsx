@@ -1,94 +1,92 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/Button';
 
-interface MiniGameProps {
-    onComplete: (score: number, reward: number) => void;
-    onExit: () => void;
+interface BakerGameProps {
+    difficulty: number; // 1-5, though Baker is simple
+    onScoreUpdate: (score: number) => void;
 }
 
-export const BakerGame: React.FC<MiniGameProps> = ({ onComplete, onExit }) => {
-    const [step, setStep] = useState(0); // 0: Start, 1: Playing, 2: Result
+export const BakerGame: React.FC<BakerGameProps> = ({ difficulty, onScoreUpdate }) => {
     const [recipe, setRecipe] = useState<string[]>([]);
     const [input, setInput] = useState<string[]>([]);
-    const [message, setMessage] = useState('');
+    const [message, setMessage] = useState('レシピ通りに作ろう！');
+    const [feedbackColor, setFeedbackColor] = useState('transparent');
 
-    const ingredients = ['小麦粉', '水', 'イースト', '砂糖', '塩', 'バター'];
+    const ingredients = ['小麦粉', '水', 'イースト', '砂糖', '塩', 'バター', '卵', '牛乳'];
+    // Difficulty adjusts ingredients pool? Or recipe length?
+    // Let's use simple logic:
+    const activeIngredients = ingredients.slice(0, 5 + Math.floor(difficulty / 2)); // 5 to 7 ingredients
 
-    const startGame = () => {
-        // Generate random recipe of 3-5 items
-        const len = 3 + Math.floor(Math.random() * 3);
+    const generateRecipe = () => {
+        const len = 3 + Math.floor(Math.random() * (difficulty > 3 ? 4 : 2)); // 3-4 or 3-6 items
         const newRecipe = [];
         for (let i = 0; i < len; i++) {
-            newRecipe.push(ingredients[Math.floor(Math.random() * ingredients.length)]);
+            newRecipe.push(activeIngredients[Math.floor(Math.random() * activeIngredients.length)]);
         }
         setRecipe(newRecipe);
         setInput([]);
-        setStep(1);
-        setMessage('レシピ通りに材料を入れてね！');
+        setFeedbackColor('transparent');
     };
+
+    useEffect(() => {
+        generateRecipe();
+    }, []);
 
     const handleIngredient = (ing: string) => {
         if (input.length < recipe.length) {
             const newInput = [...input, ing];
             setInput(newInput);
 
-            // Check full input
+            // Check correctness interactively if wrong immediately?
+            // "Recipe memory" style? No, shown recipe.
+            // Just check at end or strict check every step?
+            // Simple check at end of length.
             if (newInput.length === recipe.length) {
-                // Validation
                 const isCorrect = newInput.every((val, idx) => val === recipe[idx]);
                 if (isCorrect) {
-                    onComplete(100, 50); // Score, Reward
-                    setMessage('大成功！おいしいパンが焼けたよ！ (+50枚)');
+                    onScoreUpdate(100 + (difficulty * 20)); // Score
+                    setMessage('おいしいパンが焼けた！');
+                    setFeedbackColor('#dcfce7'); // Success Green
                 } else {
-                    onComplete(50, 10);
-                    setMessage('ちょっと焦げちゃった... (+10枚)');
+                    // onScoreUpdate(10); // Low score for fail? Or 0?
+                    // Maybe negative or small positive for effort
+                    onScoreUpdate(10);
+                    setMessage('失敗しちゃった...');
+                    setFeedbackColor('#fee2e2'); // Error Red
                 }
-                setStep(2);
+                // Delay next recipe
+                setTimeout(() => {
+                    generateRecipe();
+                    setMessage('次はこれを作ろう！');
+                }, 800);
             }
         }
     };
 
-    if (step === 0) {
-        return (
-            <div style={{ textAlign: 'center' }}>
-                <h3>パン屋さんのお仕事</h3>
-                <p>注文通りのパンを焼こう！</p>
-                <Button onClick={startGame} style={{ marginTop: '1rem' }}>仕事開始</Button>
-            </div>
-        );
-    }
-
-    if (step === 2) {
-        return (
-            <div style={{ textAlign: 'center' }}>
-                <h3>{message}</h3>
-                <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', marginTop: '1rem' }}>
-                    <Button onClick={startGame}>もう一度焼く</Button>
-                    <Button variant="secondary" onClick={onExit}>仕事を終える</Button>
+    return (
+        <div style={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '1rem', background: feedbackColor, transition: 'background 0.3s' }}>
+            <div style={{ marginBottom: '1.5rem', textAlign: 'center' }}>
+                <h3 style={{ fontSize: '1.2rem', marginBottom: '0.5rem', color: '#555' }}>{message}</h3>
+                <div style={{ padding: '1rem', background: 'white', borderRadius: '8px', border: '2px solid #ddd', minWidth: '300px', fontSize: '1.2rem', fontWeight: 'bold', color: '#333' }}>
+                    {recipe.join(' + ')}
                 </div>
             </div>
-        );
-    }
 
-    return (
-        <div>
-            <div style={{ marginBottom: '1rem', padding: '1rem', background: 'var(--glass-bg)', borderRadius: '8px' }}>
-                <strong>レシピ: </strong>
-                {recipe.join(' → ')}
+            <div style={{ marginBottom: '2rem', minHeight: '3rem', fontSize: '1.2rem', color: '#3b82f6' }}>
+                {input.length > 0 ? input.join(' + ') : '(材料を選んでください)'}
             </div>
 
-            <div style={{ marginBottom: '1rem', minHeight: '2rem' }}>
-                <strong>投入: </strong>
-                {input.join(' → ')}
-            </div>
-
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.5rem' }}>
-                {ingredients.map(ing => (
-                    <Button key={ing} variant="secondary" onClick={() => handleIngredient(ing)}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.8rem' }}>
+                {activeIngredients.map(ing => (
+                    <Button key={ing} variant="secondary" onClick={() => handleIngredient(ing)} style={{ fontSize: '1rem', padding: '1rem' }}>
                         {ing}
                     </Button>
                 ))}
             </div>
+            <div style={{ marginTop: '1rem' }}>
+                <Button variant="ghost" size="sm" onClick={() => { setInput([]); }}>リセット</Button>
+            </div>
         </div>
     );
 };
+

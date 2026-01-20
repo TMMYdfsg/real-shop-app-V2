@@ -135,9 +135,9 @@ export async function POST(req: NextRequest) {
         }
 
         const body = await req.json();
-        const { receiverId, content } = body;
+        const { receiverId, content, imageUrl, type } = body;
 
-        if (!receiverId || !content) {
+        if (!receiverId || (!content && !imageUrl)) {
             return NextResponse.json(
                 { error: '必須フィールドが不足しています' },
                 { status: 400 }
@@ -148,7 +148,9 @@ export async function POST(req: NextRequest) {
             data: {
                 senderId: playerId,
                 receiverId,
-                content,
+                content: content || 'Image sent',
+                imageUrl,
+                type: type || 'text',
             },
             include: {
                 sender: {

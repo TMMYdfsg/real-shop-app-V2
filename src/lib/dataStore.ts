@@ -542,7 +542,7 @@ export async function updateGameState(updater: (state: GameState) => GameState |
                     type: req.type,
                     requesterId: req.requesterId,
                     amount: req.amount,
-                    details: req.details,
+                    details: typeof req.details === 'object' ? JSON.stringify(req.details) : String(req.details || ''),
                     status: req.status,
                     timestamp: BigInt(req.timestamp),
                     idempotencyKey: req.idempotencyKey

@@ -15,6 +15,11 @@ export default function Home() {
   const [names, setNames] = useState<string[]>(['', '', '', '']);
   const [ids, setIds] = useState<string[]>(['', '', '', '']); // Custom IDs
 
+  // Advanced Settings State
+  const [showAdvanced, setShowAdvanced] = useState(false);
+  const [startingMoney, setStartingMoney] = useState(2000);
+  const [moneyMultiplier, setMoneyMultiplier] = useState(1.0);
+
   useEffect(() => {
     if (!isLoading && gameState) {
       if (gameState.users.length === 0) {
@@ -28,6 +33,9 @@ export default function Home() {
   const handleLogin = (userId: string, role: Role, userName: string) => {
     if (!confirm(`${userName}さんで間違いありませんか？`)) return;
 
+    // クッキーにIDを保存 (GameContextの初期化で使用)
+    document.cookie = `playerId=${userId}; path=/; max-age=31536000; SameSite=Lax`;
+
     login(userId);
     if (role === 'banker') {
       router.push('/banker');
@@ -37,12 +45,28 @@ export default function Home() {
   };
 
   const handleSetupSubmit = async () => {
-    // Register users sequentially
+    // 1. Initialize Game Settings first
+    try {
+      await fetch('/api/setup/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          moneyMultiplier: Number(moneyMultiplier),
+          startingMoney: Number(startingMoney)
+        })
+      });
+    } catch (e) {
+      console.error("Failed to save settings", e);
+      alert("設定の保存に失敗しましたが、続行します。");
+    }
+
+    // 2. Register users sequentially
     const usersToCreate = names.map((name, index) => ({
       name: name || `Player ${index + 1}`,
       role: index === 0 ? 'banker' : 'player',
       job: 'unemployed',
-      id: ids[index] || undefined // Pass custom ID if set
+      id: ids[index] || undefined, // Pass custom ID if set
+      initialBalance: index === 0 ? undefined : Number(startingMoney) // Pass starting money for players
     }));
 
     for (const user of usersToCreate) {
@@ -131,6 +155,41 @@ export default function Home() {
                 </div>
               </div>
             ))}
+          </div>
+
+          {/* Admin Settings Accordion */}
+          <div className="mb-6 border rounded-lg overflow-hidden">
+            <button
+              onClick={() => setShowAdvanced(!showAdvanced)}
+              className="w-full p-2 bg-gray-50 text-left text-sm font-bold flex justify-between items-center hover:bg-gray-100"
+            >
+              <span>⚙️ 詳細設定 (管理者用)</span>
+              <span>{showAdvanced ? '▼' : '▶'}</span>
+            </button>
+            {showAdvanced && (
+              <div className="p-4 bg-gray-50 space-y-4 animate-in slide-in-from-top-2">
+                <div className="flex flex-col gap-1 text-left">
+                  <label className="text-xs font-bold text-gray-600">開始時の所持金 (プレイヤー)</label>
+                  <input
+                    type="number"
+                    value={startingMoney}
+                    onChange={(e) => setStartingMoney(Number(e.target.value))}
+                    className="p-2 border rounded"
+                  />
+                </div>
+                <div className="flex flex-col gap-1 text-left">
+                  <label className="text-xs font-bold text-gray-600">グローバル収入倍率 (給料等)</label>
+                  <input
+                    type="number"
+                    step="0.1"
+                    value={moneyMultiplier}
+                    onChange={(e) => setMoneyMultiplier(Number(e.target.value))}
+                    className="p-2 border rounded"
+                  />
+                  <p className="text-xs text-gray-400">※1.0 = 通常, 2.0 = 2倍</p>
+                </div>
+              </div>
+            )}
           </div>
 
           <Button onClick={handleSetupSubmit} fullWidth>

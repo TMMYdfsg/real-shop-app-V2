@@ -1,5 +1,6 @@
 import { NextResponse, NextRequest } from 'next/server';
 import { updateGameState } from '@/lib/dataStore';
+import { v4 as uuidv4 } from 'uuid';
 import { Request as GameRequest } from '@/types';
 import crypto from 'crypto';
 import { z } from 'zod'; // Zod Import
@@ -61,7 +62,7 @@ export async function POST(request: NextRequest) {
         let eventToBroadcast: any = null;
 
         const newRequest: GameRequest = {
-            id: crypto.randomUUID(),
+            id: uuidv4(),
             type: type as GameRequest['type'],
             requesterId,
             amount: Number(amount) || 0,
@@ -180,7 +181,7 @@ export async function POST(request: NextRequest) {
                     // 履歴追加
                     if (!user.transactions) user.transactions = [];
                     user.transactions.push({
-                        id: crypto.randomUUID(),
+                        id: uuidv4(),
                         type: 'payment',
                         amount: land.price,
                         senderId: user.id,
@@ -232,7 +233,7 @@ export async function POST(request: NextRequest) {
                     user.balance -= cost;
 
                     // Place作成
-                    const placeId = `plc_${crypto.randomUUID()}`;
+                    const placeId = `plc_${uuidv4()}`;
                     const newPlace: any = { // Use 'any' or correct Place type matching updated index.ts
                         id: placeId,
                         ownerId: user.id,
@@ -258,7 +259,7 @@ export async function POST(request: NextRequest) {
                     // 履歴
                     if (!user.transactions) user.transactions = [];
                     user.transactions.push({
-                        id: crypto.randomUUID(),
+                        id: uuidv4(),
                         type: 'payment',
                         amount: cost,
                         senderId: user.id,
@@ -344,7 +345,7 @@ export async function POST(request: NextRequest) {
                     if (user.balance < price) return state;
 
                     user.balance -= price;
-                    const landId = `addr_${crypto.randomUUID()}`;
+                    const landId = `addr_${uuidv4()}`;
                     const newLand = {
                         id: landId,
                         ownerId: user.id,
@@ -365,7 +366,7 @@ export async function POST(request: NextRequest) {
 
                     if (!user.transactions) user.transactions = [];
                     user.transactions.push({
-                        id: crypto.randomUUID(),
+                        id: uuidv4(),
                         type: 'payment',
                         amount: price,
                         senderId: user.id,
@@ -419,7 +420,7 @@ export async function POST(request: NextRequest) {
                 const user = state.users.find(u => u.id === requesterId);
                 if (user && user.role === 'banker') {
                     const newCrypto = {
-                        id: `cry_${crypto.randomUUID()}`,
+                        id: `cry_${uuidv4()}`,
                         name,
                         symbol,
                         price: Number(price),
@@ -500,7 +501,7 @@ export async function POST(request: NextRequest) {
 
                         if (!user.transactions) user.transactions = [];
                         user.transactions.push({
-                            id: crypto.randomUUID(),
+                            id: uuidv4(),
                             type: 'payment',
                             amount: cost,
                             senderId: user.id,
@@ -532,7 +533,7 @@ export async function POST(request: NextRequest) {
 
                         if (!user.transactions) user.transactions = [];
                         user.transactions.push({
-                            id: crypto.randomUUID(),
+                            id: uuidv4(),
                             type: 'income',
                             amount: receiveAmount,
                             senderId: user.id,
@@ -560,7 +561,7 @@ export async function POST(request: NextRequest) {
                         // 履歴追加
                         if (!user.transactions) user.transactions = [];
                         user.transactions.push({
-                            id: crypto.randomUUID(),
+                            id: uuidv4(),
                             type: 'tax',
                             amount: payAmount,
                             senderId: user.id,
@@ -594,7 +595,7 @@ export async function POST(request: NextRequest) {
                         // 履歴
                         if (!user.transactions) user.transactions = [];
                         user.transactions.push({
-                            id: crypto.randomUUID(), type: 'deposit', amount: val, senderId: user.id, description: '預け入れ', timestamp: Date.now()
+                            id: uuidv4(), type: 'deposit', amount: val, senderId: user.id, description: '預け入れ', timestamp: Date.now()
                         });
                     }
                 }
@@ -614,7 +615,7 @@ export async function POST(request: NextRequest) {
                         // 履歴
                         if (!user.transactions) user.transactions = [];
                         user.transactions.push({
-                            id: crypto.randomUUID(), type: 'withdraw', amount: val, senderId: user.id, description: '引き出し', timestamp: Date.now()
+                            id: uuidv4(), type: 'withdraw', amount: val, senderId: user.id, description: '引き出し', timestamp: Date.now()
                         });
                     }
                 }
@@ -627,13 +628,16 @@ export async function POST(request: NextRequest) {
             await updateGameState((state) => {
                 const user = state.users.find(u => u.id === requesterId);
                 if (user && details) {
-                    const { name, shopName, cardType, isInsured, propertyLevel, playerIcon } = safeParseDetails(details);
+                    const { name, shopName, cardType, isInsured, propertyLevel, playerIcon, settings } = safeParseDetails(details);
                     if (name !== undefined) user.name = name;
                     if (shopName !== undefined) user.shopName = shopName;
                     if (cardType !== undefined) user.cardType = cardType;
                     if (isInsured !== undefined) user.isInsured = isInsured;
                     if (propertyLevel !== undefined) user.propertyLevel = propertyLevel;
                     if (playerIcon !== undefined) user.playerIcon = playerIcon;
+                    if (settings !== undefined) {
+                        user.settings = { ...user.settings, ...settings };
+                    }
                 }
                 return state;
             });
@@ -645,6 +649,7 @@ export async function POST(request: NextRequest) {
                 const user = state.users.find(u => u.id === requesterId);
                 if (user && details) {
                     const websiteData = safeParseDetails(details);
+                    if (websiteData.shopName) user.shopName = websiteData.shopName;
                     user.shopWebsite = {
                         ...websiteData,
                         ownerId: user.id
@@ -733,12 +738,12 @@ export async function POST(request: NextRequest) {
                         // Transaction History
                         if (!user.transactions) user.transactions = [];
                         user.transactions.push({
-                            id: crypto.randomUUID(), type: 'payment', amount: product.price, senderId: user.id, receiverId: seller.id, description: `購入: ${product.name}`, timestamp: Date.now()
+                            id: uuidv4(), type: 'payment', amount: product.price, senderId: user.id, receiverId: seller.id, description: `購入: ${product.name}`, timestamp: Date.now()
                         });
 
                         if (!seller.transactions) seller.transactions = [];
                         seller.transactions.push({
-                            id: crypto.randomUUID(), type: 'income', amount: product.price, senderId: user.id, receiverId: seller.id, description: `売上: ${product.name}`, timestamp: Date.now()
+                            id: uuidv4(), type: 'income', amount: product.price, senderId: user.id, receiverId: seller.id, description: `売上: ${product.name}`, timestamp: Date.now()
                         });
 
                         // Points (100 -> 1pt)
@@ -783,7 +788,7 @@ export async function POST(request: NextRequest) {
                     // 取引履歴
                     if (!buyer.transactions) buyer.transactions = [];
                     buyer.transactions.push({
-                        id: crypto.randomUUID(),
+                        id: uuidv4(),
                         type: 'payment',
                         amount: item.price,
                         senderId: buyer.id,
@@ -794,7 +799,7 @@ export async function POST(request: NextRequest) {
 
                     if (!seller.transactions) seller.transactions = [];
                     seller.transactions.push({
-                        id: crypto.randomUUID(),
+                        id: uuidv4(),
                         type: 'income',
                         amount: item.price,
                         senderId: buyer.id,
@@ -817,7 +822,7 @@ export async function POST(request: NextRequest) {
                     // --- Receipt Generation ---
                     if (!buyer.receipts) buyer.receipts = [];
                     buyer.receipts.push({
-                        id: crypto.randomUUID(),
+                        id: uuidv4(),
                         shopOwnerId: seller.id,
                         shopOwnerName: seller.shopName || seller.name,
                         customerId: buyer.id,
@@ -910,18 +915,18 @@ export async function POST(request: NextRequest) {
                     if (exchangeType === 'cash') {
                         u.balance += 500;
                         u.transactions.push({
-                            id: crypto.randomUUID(), type: 'income', amount: 500, description: 'ポイント交換（現金）', timestamp: Date.now()
+                            id: uuidv4(), type: 'income', amount: 500, description: 'ポイント交換（現金）', timestamp: Date.now()
                         });
                     } else if (exchangeType === 'debt_relief') {
                         // 借金APIと整合性を取るため、ここではloanを減らすと仮定
                         u.debt = Math.max(0, u.debt - 2000);
                         u.transactions.push({
-                            id: crypto.randomUUID(), type: 'repay', amount: 2000, description: 'ポイント交換（借金免除）', timestamp: Date.now()
+                            id: uuidv4(), type: 'repay', amount: 2000, description: 'ポイント交換（借金免除）', timestamp: Date.now()
                         });
                     }
 
                     s.news.unshift({
-                        id: crypto.randomUUID(),
+                        id: uuidv4(),
                         message: `🎁 ${u.name}がポイントを交換しました！`,
                         timestamp: Date.now()
                     });
@@ -1005,14 +1010,14 @@ export async function POST(request: NextRequest) {
                         u.balance += 300;
                         u.arrestCount = (u.arrestCount || 0) + 1;
                         u.transactions.push({
-                            id: crypto.randomUUID(),
+                            id: uuidv4(),
                             type: 'income',
                             amount: 300,
                             description: `${target.name}を逮捕`,
                             timestamp: Date.now()
                         });
                         s.news.unshift({
-                            id: crypto.randomUUID(),
+                            id: uuidv4(),
                             message: `🚔 ${u.name}が${target.name}を逮捕！`,
                             timestamp: Date.now()
                         }); // Assuming news array expects object. If it expects strings, will fix.
@@ -1040,14 +1045,14 @@ export async function POST(request: NextRequest) {
                             u.balance += actual;
                             u.stolenAmount = (u.stolenAmount || 0) + actual;
                             u.transactions.push({
-                                id: crypto.randomUUID(),
+                                id: uuidv4(),
                                 type: 'income',
                                 amount: actual,
                                 description: '盗み成功',
                                 timestamp: Date.now()
                             });
                             s.news.unshift({
-                                id: crypto.randomUUID(),
+                                id: uuidv4(),
                                 message: `💰 誰かが${actual}枚を盗んだようです...`,
                                 timestamp: Date.now()
                             });
@@ -1061,14 +1066,14 @@ export async function POST(request: NextRequest) {
                         if (u) {
                             u.balance -= 500;
                             u.transactions.push({
-                                id: crypto.randomUUID(),
+                                id: uuidv4(),
                                 type: 'payment',
                                 amount: 500,
                                 description: '盗み失敗（罰金）',
                                 timestamp: Date.now()
                             });
                             s.news.unshift({
-                                id: crypto.randomUUID(),
+                                id: uuidv4(),
                                 message: `🚨 ${u.name}が盗みに失敗！罰金500枚`,
                                 timestamp: Date.now()
                             });
@@ -1091,14 +1096,14 @@ export async function POST(request: NextRequest) {
                         u.rating = (u.rating || 0) + 1;
                         u.fanCount = (u.fanCount || 0) + Math.floor(Math.random() * 10) + 1;
                         u.transactions.push({
-                            id: crypto.randomUUID(),
+                            id: uuidv4(),
                             type: 'income',
                             amount: earning,
                             description: 'ライブ投げ銭',
                             timestamp: Date.now()
                         });
                         s.news.unshift({
-                            id: crypto.randomUUID(),
+                            id: uuidv4(),
                             message: `🎤 ${u.name}がライブ開催！${earning}枚獲得`,
                             timestamp: Date.now()
                         });
@@ -1121,7 +1126,7 @@ export async function POST(request: NextRequest) {
 
                     user.balance += reward;
                     user.transactions.push({
-                        id: crypto.randomUUID(),
+                        id: uuidv4(),
                         type: 'income',
                         amount: reward,
                         description: `仕事報酬 (${jobType})`,
@@ -1174,7 +1179,7 @@ export async function POST(request: NextRequest) {
 
                 if (!user.transactions) user.transactions = [];
                 user.transactions.push({
-                    id: crypto.randomUUID(),
+                    id: uuidv4(),
                     type: isWin ? 'income' : 'payment',
                     amount: isWin ? payout - bet : bet, // Net change logged? Or gross?
                     // Let's log the net outcome description, usually payment of bet is already implicit if we deducted.
@@ -1223,7 +1228,7 @@ export async function POST(request: NextRequest) {
 
                 if (!user.transactions) user.transactions = [];
                 user.transactions.push({
-                    id: crypto.randomUUID(),
+                    id: uuidv4(),
                     type: gameData.winAmount > 0 ? 'income' : 'payment',
                     amount: gameData.winAmount > 0 ? gameData.winAmount - bet : bet,
                     description: `ブラックジャック: ${gameData.outcome}`,
@@ -1257,7 +1262,7 @@ export async function POST(request: NextRequest) {
 
                 if (!user.transactions) user.transactions = [];
                 user.transactions.push({
-                    id: crypto.randomUUID(),
+                    id: uuidv4(),
                     type: gameData.payout > 0 ? 'income' : 'payment',
                     amount: gameData.payout > 0 ? gameData.payout - bet : bet,
                     description: `スロット: ${gameData.message}`,
@@ -1291,7 +1296,7 @@ export async function POST(request: NextRequest) {
 
                 if (!user.transactions) user.transactions = [];
                 user.transactions.push({
-                    id: crypto.randomUUID(),
+                    id: uuidv4(),
                     type: gameData.payout > 0 ? 'income' : 'payment',
                     amount: gameData.payout > 0 ? gameData.payout - bet : bet,
                     description: `競馬: ${gameData.payout > 0 ? '的中!' : '外れ'} (馬${gameData.selectedHorse}→${gameData.winner})`,
@@ -1325,7 +1330,7 @@ export async function POST(request: NextRequest) {
 
                         // History
                         user.transactions.push({
-                            id: crypto.randomUUID(), type: 'payment', amount: property.price, senderId: user.id, description: `不動産購入: ${property.name}`, timestamp: Date.now()
+                            id: uuidv4(), type: 'payment', amount: property.price, senderId: user.id, description: `不動産購入: ${property.name}`, timestamp: Date.now()
                         });
                     }
                 }
@@ -1383,7 +1388,7 @@ export async function POST(request: NextRequest) {
                     // 履歴
                     if (!user.transactions) user.transactions = [];
                     user.transactions.push({
-                        id: crypto.randomUUID(),
+                        id: uuidv4(),
                         type: 'payment',
                         amount: targetVehicle.price,
                         senderId: user.id,
@@ -1425,7 +1430,7 @@ export async function POST(request: NextRequest) {
 
                     if (!user.transactions) user.transactions = [];
                     user.transactions.push({
-                        id: crypto.randomUUID(),
+                        id: uuidv4(),
                         type: 'payment',
                         amount: LICENSE_COST,
                         senderId: user.id,
@@ -1456,6 +1461,225 @@ export async function POST(request: NextRequest) {
                 return state;
             });
             return NextResponse.json({ success: true });
+        }
+
+
+        // -----------------------------------------------------
+        // 資格試験合格 (pass_exam)
+        // -----------------------------------------------------
+        if (type === 'pass_exam') {
+            const { qualificationId } = safeParseDetails(details);
+            const { QUALIFICATIONS_DATA } = await import('@/lib/qualificationData');
+
+            await updateGameState((state) => {
+                const user = state.users.find(u => u.id === requesterId);
+                const qual = QUALIFICATIONS_DATA.find(q => q.id === qualificationId);
+
+                if (user && qual) {
+                    // Check if already owned
+                    if (user.qualifications?.includes(qualificationId)) return state;
+
+                    // Fee deduction
+                    const fee = qual.feeYen || 0;
+                    if (user.balance < fee) return state;
+
+                    user.balance -= fee;
+
+                    // Add qualification
+                    if (!user.qualifications) user.qualifications = [];
+                    user.qualifications.push(qualificationId);
+
+                    // Add Payment Record
+                    if (fee > 0) {
+                        if (!user.transactions) user.transactions = [];
+                        user.transactions.push({
+                            id: uuidv4(),
+                            type: 'payment',
+                            amount: fee,
+                            senderId: user.id,
+                            description: `資格受験料 (${qual.name})`,
+                            timestamp: Date.now()
+                        });
+                    }
+
+                    // News
+                    state.news.unshift({
+                        id: uuidv4(),
+                        message: `🎓 ${user.name}が「${qual.name}」を取得しました！`,
+                        timestamp: Date.now()
+                    });
+                }
+                return state;
+            });
+            return NextResponse.json({ success: true, message: '資格を取得しました！' });
+        }
+
+        // -----------------------------------------------------
+        // パートナー探し (find_partner)
+        // -----------------------------------------------------
+        if (type === 'find_partner') {
+            const candidates = Array.from({ length: 3 }).map(() => {
+                const isFemale = Math.random() > 0.5;
+                const age = Math.floor(Math.random() * 10) + 20; // 20-30
+                const salary = Math.floor(Math.random() * 300) * 1000 + 200000;
+                return {
+                    id: uuidv4(),
+                    name: isFemale ? `Female Candidate ${Math.floor(Math.random() * 100)}` : `Male Candidate ${Math.floor(Math.random() * 100)}`,
+                    gender: isFemale ? 'female' : 'male',
+                    age: age,
+                    job: 'Company Employee',
+                    salary: salary,
+                    tags: ['Kind', 'Serious', 'Active'].sort(() => 0.5 - Math.random()).slice(0, 2),
+                    affection: 0
+                };
+            });
+            return NextResponse.json({ success: true, candidates });
+        }
+
+        // -----------------------------------------------------
+        // 結婚 (marry_partner)
+        // -----------------------------------------------------
+        if (type === 'marry_partner') {
+            const { candidateId } = safeParseDetails(details);
+
+            let success = false;
+            let errorMsg = '';
+
+            await updateGameState((state) => {
+                const user = state.users.find(u => u.id === requesterId);
+                if (!user) return state;
+
+                if (user.balance < 50000) {
+                    errorMsg = '資金が足りません';
+                    return state;
+                }
+
+                if (!user.family) user.family = [];
+                // Mock spouse creation (in reality, we'd retrieve the candidate)
+                const spouse = {
+                    id: candidateId || uuidv4(),
+                    relation: 'spouse' as 'spouse',
+                    name: 'Partner', // Simplified
+                    age: 25,
+                    gender: 'female' as 'female' | 'male' | 'other',
+                    affection: 50,
+                    occupation: 'Partner'
+                };
+                user.family.push(spouse);
+
+                user.balance -= 50000;
+                if (!user.transactions) user.transactions = [];
+                user.transactions.push({
+                    id: uuidv4(),
+                    type: 'payment',
+                    amount: 50000,
+                    description: '結婚費用',
+                    timestamp: Date.now(),
+                    senderId: user.id
+                });
+
+                success = true;
+                return state;
+            });
+
+            if (!success) {
+                return NextResponse.json({ success: false, error: errorMsg || 'Unknown error' }, { status: 400 });
+            }
+
+            return NextResponse.json({ success: true });
+        }
+
+        // -----------------------------------------------------
+        // 家具配置保存 (update_furniture_layout)
+        // -----------------------------------------------------
+        if (type === 'update_furniture_layout') {
+            const { items } = details;
+
+            await updateGameState((state) => {
+                const user = state.users.find(u => u.id === requesterId);
+                if (user) {
+                    user.myRoomItems = items;
+                }
+                return state;
+            });
+
+            return NextResponse.json({ success: true });
+        }
+
+        // -----------------------------------------------------
+        // 採取 (gather_resource)
+        // -----------------------------------------------------
+        if (type === 'gather_resource') {
+            let gatheredItem: any = null;
+            let message = '何も見つかりませんでした...';
+
+            await updateGameState((state) => {
+                const user = state.users.find(u => u.id === requesterId);
+                if (user) {
+                    const rand = Math.random();
+                    if (rand < 0.7) { // 70% chance
+                        // Mock drop items
+                        const DROPS = [
+                            { id: 'ing_apple', name: '🍎 リンゴ', price: 100 },
+                            { id: 'ing_herb', name: '🌿 ハーブ', price: 50 },
+                            { id: 'ing_mushroom', name: '🍄 キノコ', price: 80 },
+                            { id: 'col_stone', name: '🪨 きれいな石', price: 10 },
+                            { id: 'col_bug', name: '🐞 てんとう虫', price: 20 },
+                        ];
+                        gatheredItem = DROPS[Math.floor(Math.random() * DROPS.length)];
+
+                        if (!user.inventory) user.inventory = [];
+
+                        // Push new InventoryItem
+                        user.inventory.push({
+                            id: crypto.randomUUID(),
+                            itemId: gatheredItem.id,
+                            quantity: 1,
+                            name: gatheredItem.name
+                        });
+
+                        message = `${gatheredItem.name} を発見しました！`;
+
+                        // Cost
+                        user.lifeStats = user.lifeStats || { health: 100, hunger: 0, stress: 0, fatigue: 0, hygiene: 100 };
+                        user.lifeStats.fatigue = Math.min(100, user.lifeStats.fatigue + 5);
+                    } else {
+                        user.lifeStats = user.lifeStats || { health: 100, hunger: 0, stress: 0, fatigue: 0, hygiene: 100 };
+                        user.lifeStats.fatigue = Math.min(100, user.lifeStats.fatigue + 2);
+                    }
+                }
+                return state;
+            });
+
+            return NextResponse.json({ success: !!gatheredItem, message, item: gatheredItem });
+        }
+
+        // -----------------------------------------------------
+        // ペットと遊ぶ (interact_pet)
+        // -----------------------------------------------------
+        if (type === 'interact_pet') {
+            const { petItemIds } = details;
+            let message = '';
+
+            await updateGameState((state) => {
+                const user = state.users.find(u => u.id === requesterId);
+                if (user && user.myRoomItems) {
+                    const pets = user.myRoomItems.filter(i => petItemIds.includes(i.id));
+                    if (pets.length > 0) {
+                        const happinessGain = pets.length * 5;
+                        const stressReduction = pets.length * 10;
+
+                        user.happiness = Math.min(100, (user.happiness || 50) + happinessGain);
+                        if (user.lifeStats) {
+                            user.lifeStats.stress = Math.max(0, user.lifeStats.stress - stressReduction);
+                        }
+                        message = `ペットたちと遊んで癒やされました (+${happinessGain} 幸福度)`;
+                    }
+                }
+                return state;
+            });
+
+            return NextResponse.json({ success: true, message });
         }
 
         // -----------------------------------------------------
@@ -2141,7 +2365,11 @@ export async function POST(request: NextRequest) {
         // ==========================================
 
         if (type === 'create_website') {
-            const { templateId, shopName, description, colors } = safeParseDetails(details);
+            const parsed = safeParseDetails(details);
+            const templateId = parsed.templateId || 'simple';
+            const shopName = parsed.shopName || '';
+            const description = parsed.description || '';
+            const colors = parsed.colors || { primary: '#3b82f6', secondary: '#10b981' };
 
             await updateGameState((state) => {
                 const user = state.users.find(u => u.id === requesterId);
@@ -2153,8 +2381,8 @@ export async function POST(request: NextRequest) {
                     ownerId: user.id,
                     templateId,
                     customization: {
-                        primaryColor: colors.primary,
-                        secondaryColor: colors.secondary,
+                        primaryColor: colors.primary || '#3b82f6',
+                        secondaryColor: colors.secondary || '#10b981',
                         shopDescription: description,
                         welcomeMessage: `Welcome to ${shopName}!`,
                         showProducts: true,
@@ -2580,7 +2808,7 @@ export async function POST(request: NextRequest) {
                         id: crypto.randomUUID(),
                         authorId: user.id,
                         authorName: user.name,
-                        content: content.slice(0, 280), // Limit length
+                        content: (content || '').slice(0, 280), // Limit length
                         likes: 0,
                         likedBy: [],
                         timestamp: Date.now()
@@ -2624,7 +2852,7 @@ export async function POST(request: NextRequest) {
                         id: crypto.randomUUID(),
                         uploaderId: user.id,
                         uploaderName: user.name,
-                        title: title.slice(0, 50),
+                        title: (title || '').slice(0, 50),
                         description: description || '',
                         tags: tags || [],
                         url: url || '', // Store the file path
@@ -2918,6 +3146,49 @@ export async function POST(request: NextRequest) {
                 return state;
             });
             return NextResponse.json({ success: true, message: '取引完了' });
+        }
+
+        if (type === 'complete_job') {
+            const { score, job } = safeParseDetails(details);
+            let reward = 0;
+            let message = '';
+
+            await updateGameState((state) => {
+                const user = state.users.find(u => u.id === requesterId);
+                const jobConfig = JOB_GAME_CONFIGS[job as JobType];
+
+                if (user && jobConfig) {
+                    // Global Multiplier
+                    const moneyMultiplier = state.settings?.moneyMultiplier || 1;
+
+                    // Base Reward Calculation
+                    // Formula: Score * Job Multiplier * Global Multiplier
+                    const baseReward = Math.floor(Number(score) * (jobConfig.rewardMultiplier || 1));
+                    reward = Math.floor(baseReward * moneyMultiplier);
+
+                    if (reward > 0) {
+                        user.balance += reward;
+
+                        // Transaction History
+                        if (!user.transactions) user.transactions = [];
+                        user.transactions.push({
+                            id: crypto.randomUUID(),
+                            type: 'income',
+                            amount: reward,
+                            senderId: 'JOB',
+                            description: `仕事報酬: ${jobConfig.name} (Score: ${score})`,
+                            timestamp: Date.now()
+                        });
+
+                        message = `報酬 ${reward.toLocaleString()}枚 を獲得しました！`;
+                    } else {
+                        message = '報酬なし... もっと頑張ろう！';
+                    }
+                }
+                return state;
+            });
+
+            return NextResponse.json({ success: true, message });
         }
 
         // 既存の汎用リクエスト保存処理 (他のアクション用)

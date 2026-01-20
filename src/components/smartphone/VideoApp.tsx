@@ -2,10 +2,12 @@ import React, { useState, useRef } from 'react';
 import { useGame } from '@/context/GameContext';
 import { useRealtime } from '@/hooks/useRealtime';
 import { VideoContent } from '@/types';
+import { useToast } from '@/components/ui/ToastProvider';
 
 export default function VideoApp({ onClose }: { onClose: () => void }) {
     const { currentUser, sendRequest } = useGame();
-    const { data: videos } = useRealtime<VideoContent[]>('/api/video/list', { interval: 5000 });
+    const { data: videos, refetch } = useRealtime<VideoContent[]>('/api/video/list', { interval: 5000 });
+    const { addToast } = useToast();
 
     // UI State
     const [view, setView] = useState<'list' | 'upload' | 'watch'>('list');
@@ -19,9 +21,41 @@ export default function VideoApp({ onClose }: { onClose: () => void }) {
     const [file, setFile] = useState<File | null>(null);
     const [isUploading, setIsUploading] = useState(false);
 
+    // Helper: Check video duration
+    const checkVideoDuration = (file: File): Promise<boolean> => {
+        return new Promise((resolve) => {
+            const video = document.createElement('video');
+            video.preload = 'metadata';
+            video.onloadedmetadata = () => {
+                window.URL.revokeObjectURL(video.src);
+                const duration = video.duration;
+                // Limit: 10 minutes (600 seconds)
+                if (duration > 600) {
+                    addToast('動画は10分以内でないと投稿できません', 'error');
+                    resolve(false);
+                } else {
+                    resolve(true);
+                }
+            };
+            video.onerror = () => {
+                addToast('動画ファイルの読み込みに失敗しました', 'error');
+                resolve(false);
+            };
+            video.src = URL.createObjectURL(file);
+        });
+    };
+
     const handleUpload = async () => {
         if (!title.trim() || !currentUser) return;
+
+        // Check duration if file exists
+        if (file) {
+            const isValidDuration = await checkVideoDuration(file);
+            if (!isValidDuration) return;
+        }
+
         setIsUploading(true);
+        setUploadProgress(0);
 
         try {
             let fileUrl = '';
@@ -42,13 +76,13 @@ export default function VideoApp({ onClose }: { onClose: () => void }) {
             }
 
             // 2. Register Metadata
-            await sendRequest('upload_video', 0, JSON.stringify({
+            await sendRequest('upload_video', 0, {
                 title,
                 description,
                 tags: tagsInput.split(',').map(t => t.trim()).filter(Boolean),
                 url: fileUrl,
                 color
-            }));
+            });
 
             // Reset
             setView('list');
@@ -56,9 +90,14 @@ export default function VideoApp({ onClose }: { onClose: () => void }) {
             setDescription('');
             setTagsInput('');
             setFile(null);
+
+            // Refresh list immediately
+            setTimeout(() => refetch(), 500); // Small delay to ensure DB write
+
+            addToast('動画を投稿しました！', 'success');
         } catch (e) {
             console.error(e);
-            alert('アップロードに失敗しました');
+            addToast('アップロードに失敗しました', 'error');
         } finally {
             setIsUploading(false);
         }
@@ -145,6 +184,18 @@ export default function VideoApp({ onClose }: { onClose: () => void }) {
                             ))}
                         </div>
                     </div>
+
+                    {isUploading && (
+                        <div className="mb-4">
+                            <div className="flex justify-between text-xs text-gray-500 mb-1">
+                                <span>アップロード中...</span>
+                                <span>{uploadProgress}%</span>
+                            </div>
+                            <div className="w-full bg-gray-200 rounded-full h-2.5">
+                                <div className="bg-red-600 h-2.5 rounded-full transition-all duration-300" style={{ width: `${uploadProgress}%` }}></div>
+                            </div>
+                        </div>
+                    )}
 
                     <div className="flex gap-4 mt-4 pb-8">
                         <button onClick={() => setView('list')} className="flex-1 py-3 text-gray-500 font-bold">キャンセル</button>

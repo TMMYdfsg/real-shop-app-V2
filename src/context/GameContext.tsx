@@ -120,7 +120,7 @@ export function GameProvider({ children, initialData }: { children: React.ReactN
         mutate();
     };
 
-    const currentUser = gameState?.users.find(u => u.id === currentUserId);
+    const currentUser = gameState?.users?.find(u => u.id === currentUserId);
 
     const sendRequest = async (type: string, amount: number, details: any = {}) => {
         try {

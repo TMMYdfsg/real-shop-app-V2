@@ -16,7 +16,24 @@ export async function POST(request: Request) {
         }
 
         // balanceの計算（NaNチェック付き）
-        const initialBalance = role === 'banker' ? 1000000 : 100;
+        // リクエストから initialBalance が渡された場合はそれを使用 (初期設定画面からの値)
+        const requestedBalance = body.initialBalance !== undefined ? Number(body.initialBalance) : undefined;
+
+        let initialBalance = role === 'banker' ? 1000000 : 100;
+        if (requestedBalance !== undefined && !isNaN(requestedBalance)) {
+            initialBalance = requestedBalance;
+            // Banker usually gets infinite or very high, but if specific amount is requested (e.g. for players), use it.
+            // If this is a banker, maybe keep the high amount? 
+            // Logic: If role is banker, maybe ignore 'Starting Money' setting intended for players?
+            // Usually setup screen sends specific amount for players.
+            if (role === 'banker') {
+                initialBalance = 1000000; // Force banker to have high funds regardless
+            }
+        } else {
+            // Fallback default
+            initialBalance = role === 'banker' ? 1000000 : 2000; // Default to 2000 if not specified
+        }
+
         if (isNaN(initialBalance) || !isFinite(initialBalance)) {
             return NextResponse.json({ error: 'Invalid balance calculation' }, { status: 500 });
         }

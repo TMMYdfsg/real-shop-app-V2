@@ -8,6 +8,7 @@ export const APPS = [
     { id: 'bank', name: '銀行', icon: '🏦', color: 'bg-green-600', description: '口座管理' },
     { id: 'job_board', name: '求人', icon: '💼', color: 'bg-blue-500', description: '求人情報を確認' },
     { id: 'status', name: '生活', icon: '❤️', color: 'bg-pink-500', description: 'ライフステータス' },
+    { id: 'family', name: 'Family', icon: '🏠', color: 'bg-pink-400', description: '家族・パートナー' },
     { id: 'audit', name: '行動記録', icon: '📜', color: 'bg-gray-600', description: '監査ログ確認' },
     { id: 'crypto', name: '仮想通貨', icon: '🚀', color: 'bg-indigo-600', description: '取引・チャート' },
     { id: 'quests', name: 'クエスト', icon: '⚔️', color: 'bg-violet-600', description: '目標・実績' },
@@ -15,6 +16,7 @@ export const APPS = [
     { id: 'shopping', name: '通販', icon: '🛒', color: 'bg-amber-600', description: '準備中' },
     { id: 'camera', name: 'カメラ', icon: '📸', color: 'bg-gray-700', description: 'カメラ' },
     { id: 'settings', name: '設定', icon: '⚙️', color: 'bg-gray-500', description: '設定' },
+    { id: 'politics', name: '政治', icon: '🗳️', color: 'bg-blue-700', description: '投票・提案' },
 ];
 
 export const DOCK_APPS = ['phone', 'sns', 'message', 'video'];

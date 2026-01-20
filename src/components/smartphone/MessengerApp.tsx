@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import { useRealtime } from '@/hooks/useRealtime';
 import { useGame } from '@/context/GameContext';
 import { PlayerIcon } from '@/components/ui/PlayerIcon';
@@ -8,6 +8,8 @@ interface Message {
     senderId: string;
     receiverId: string;
     content: string;
+    imageUrl?: string;
+    type?: 'text' | 'image';
     isRead: boolean;
     createdAt: string;
     sender: {
@@ -29,6 +31,9 @@ export default function MessengerApp() {
     const [sending, setSending] = useState(false);
     const [isSelectingUser, setIsSelectingUser] = useState(false);
 
+    // File Upload Ref
+    const fileInputRef = useRef<HTMLInputElement>(null);
+
     // 会話リストをリアルタイム取得（ログイン時のみ）
     const { data: conversations, refetch: refetchConversations } = useRealtime<Message[]>(
         '/api/messages',
@@ -41,8 +46,9 @@ export default function MessengerApp() {
         { interval: 2000, enabled: !!currentUser && !!selectedUserId }
     );
 
-    const sendMessage = async () => {
-        if (!selectedUserId || !newMessage.trim()) return;
+    const sendMessage = async (imageUrl?: string) => {
+        if (!selectedUserId) return;
+        if (!imageUrl && !newMessage.trim()) return;
 
         setSending(true);
         try {
@@ -51,7 +57,9 @@ export default function MessengerApp() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     receiverId: selectedUserId,
-                    content: newMessage,
+                    content: imageUrl ? 'Sent an image' : newMessage,
+                    imageUrl: imageUrl,
+                    type: imageUrl ? 'image' : 'text'
                 }),
             });
 
@@ -66,6 +74,18 @@ export default function MessengerApp() {
         } finally {
             setSending(false);
         }
+    };
+
+    const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onloadend = () => {
+            const base64 = reader.result as string;
+            sendMessage(base64);
+        };
+        reader.readAsDataURL(file);
     };
 
     const getOtherUser = (msg: Message) => {
@@ -131,7 +151,7 @@ export default function MessengerApp() {
                                         <div className="flex-1 min-w-0">
                                             <div className="font-semibold truncate">{other.name}</div>
                                             <div className="text-sm text-gray-600 truncate">
-                                                {conv.content}
+                                                {conv.type === 'image' ? '📷 画像を送信しました' : conv.content}
                                             </div>
                                         </div>
                                         {!conv.isRead && conv.receiverId === conv.receiver.id && (
@@ -175,7 +195,14 @@ export default function MessengerApp() {
                                                 : 'bg-white border border-gray-200 rounded-tl-none'
                                                 }`}
                                         >
-                                            <div className="break-words">{msg.content}</div>
+                                            {msg.imageUrl ? (
+                                                <div className="max-w-[200px]">
+                                                    <img src={msg.imageUrl} alt="sent image" className="rounded-lg mb-1 w-full h-auto" />
+                                                </div>
+                                            ) : (
+                                                <div className="break-words">{msg.content}</div>
+                                            )}
+
                                             <div
                                                 className={`text-[10px] mt-1 text-right ${isMe ? 'text-blue-100' : 'text-gray-400'
                                                     }`}
@@ -196,7 +223,23 @@ export default function MessengerApp() {
                             )}
                         </div>
                         <div className="p-4 bg-white border-t border-gray-200">
-                            <div className="flex gap-2">
+                            <div className="flex gap-2 items-center">
+                                {/* Image Upload Button */}
+                                <input
+                                    type="file"
+                                    ref={fileInputRef}
+                                    className="hidden"
+                                    accept="image/*"
+                                    onChange={handleImageSelect}
+                                />
+                                <button
+                                    onClick={() => fileInputRef.current?.click()}
+                                    className="p-2 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-full transition"
+                                    disabled={sending}
+                                >
+                                    📷
+                                </button>
+
                                 <input
                                     type="text"
                                     value={newMessage}
@@ -207,7 +250,7 @@ export default function MessengerApp() {
                                     disabled={sending}
                                 />
                                 <button
-                                    onClick={sendMessage}
+                                    onClick={() => sendMessage()}
                                     disabled={sending || !newMessage.trim()}
                                     className="px-6 py-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed font-bold transition shadow-sm"
                                 >

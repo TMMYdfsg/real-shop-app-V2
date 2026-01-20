@@ -53,6 +53,49 @@ export default function HelpPage() {
                 {/* マニュアルセクション */}
                 <div className="space-y-4">
 
+                    {/* 0. アップデート情報 (Release Notes) */}
+                    <HelpSection
+                        id="release"
+                        title="🚀 アップデート情報 (Release Notes)"
+                        icon="🆕"
+                        isOpen={openSection === 'release'}
+                        onToggle={() => toggleSection('release')}
+                    >
+                        <div className="space-y-6">
+                            <div className="border-l-4 border-blue-500 pl-4">
+                                <h4 className="font-bold text-lg flex items-center gap-2">
+                                    Ver 2.1.0 <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">Latest</span>
+                                </h4>
+                                <p className="text-gray-500 text-sm mb-2">2026/01/20 リリース</p>
+                                <ul className="list-disc pl-5 space-y-2 text-sm">
+                                    <li>
+                                        <strong>資格試験システムの実装:</strong><br />
+                                        180種類以上の資格試験が追加されました！合格するとプロフィールに表示され、就職や昇進に有利になります。<br />
+                                        試験画面もより使いやすく、ポップアップ形式に刷新されました。
+                                    </li>
+                                    <li>
+                                        <strong>店舗管理機能の改善:</strong><br />
+                                        ホームページ作成ウィザード完了後、スムーズに店舗管理画面へ移動できるよう修正しました。
+                                    </li>
+                                    <li>
+                                        <strong>システム安定性の向上:</strong><br />
+                                        サーバーエラー (500 Error) の原因となっていたID生成処理を修正し、動作が安定しました。
+                                    </li>
+                                </ul>
+                            </div>
+
+                            <div className="border-l-4 border-gray-300 pl-4 opacity-75">
+                                <h4 className="font-bold text-lg">Ver 2.0.0 (Global Update)</h4>
+                                <ul className="list-disc pl-5 space-y-1 text-sm">
+                                    <li>Google Maps連携によるリアルな土地購入システムの導入</li>
+                                    <li>スマートフォンOS (v2.0) のUI刷新</li>
+                                    <li>リアルタイム通信機能（通話・メッセージ）の強化</li>
+                                    <li>経済バランスの調整</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </HelpSection>
+
                     {/* 1. ゲームの概要 */}
                     <HelpSection
                         id="concept"
@@ -74,6 +117,7 @@ export default function HelpPage() {
                             </p>
                             <ul className="list-disc pl-5 space-y-1">
                                 <li><strong>資産家になる:</strong> お金を稼ぎ、長者番付1位を目指す</li>
+                                <li><strong>資格マスター:</strong> 全180種類の資格試験合格を目指す (New!)</li>
                                 <li><strong>ビジネス王:</strong> 巨大な店舗や会社を経営する</li>
                                 <li><strong>コンプリート:</strong> すべてのコレクションや実績を解除する</li>
                             </ul>
@@ -111,9 +155,9 @@ export default function HelpPage() {
                             <div className="flex gap-4 items-start">
                                 <div className="bg-blue-100 text-blue-800 w-8 h-8 rounded-full flex items-center justify-center font-bold flex-shrink-0">3</div>
                                 <div>
-                                    <h4 className="font-bold">プロフを充実させる</h4>
+                                    <h4 className="font-bold">プロフ・資格を充実させる</h4>
                                     <p className="text-sm text-gray-600">
-                                        自分のアイコンを設定したり、職業を選んでステータスを上げましょう。
+                                        「資格・試験センター」で資格を取得すると、より報酬の高い仕事に就けるようになります。
                                     </p>
                                 </div>
                             </div>
@@ -180,11 +224,10 @@ export default function HelpPage() {
                                     <li><strong>自宅 (House):</strong> 住居。家具を置いてカスタマイズできます。</li>
                                 </ul>
                             </div>
-
-                            <h3 className="text-lg font-bold border-b pb-1">フリマ・出品</h3>
+                            <h3 className="text-lg font-bold border-b pb-1">ホームページ作成</h3>
                             <p className="text-sm">
-                                手に入れたアイテムや、拾ったもの（虫・化石など）をマイショップで販売できます。
-                                価格は自由に設定できます。
+                                お店のホームページを作成すると、集客力がアップします。
+                                デザインテンプレートを選んで、自分だけのお店をアピールしましょう。
                             </p>
                         </div>
                     </HelpSection>
@@ -237,6 +280,11 @@ export default function HelpPage() {
                         onToggle={() => toggleSection('life')}
                     >
                         <div className="space-y-3">
+                            <h3 className="font-bold">🎓 資格試験 (New!)</h3>
+                            <p className="text-sm">
+                                資格・試験センターで様々な資格に挑戦できます。
+                                合格には受験料が必要ですが、取得すればキャリアアップのチャンス！
+                            </p>
                             <h3 className="font-bold">🪲 採集システム</h3>
                             <p className="text-sm">
                                 マップ上には様々な生き物（昆虫・魚）や化石が出現します。
@@ -246,11 +294,6 @@ export default function HelpPage() {
                             <p className="text-sm">
                                 家具屋でインテリアを購入し、自宅や店舗に配置できます。
                                 レアな家具を集めて自慢のお部屋を作りましょう。
-                            </p>
-                            <h3 className="font-bold">🐶 ペット</h3>
-                            <p className="text-sm">
-                                犬や猫などのペットを飼うことができます。
-                                餌をあげたり遊んだりして仲良くなりましょう。
                             </p>
                         </div>
                     </HelpSection>
@@ -305,13 +348,24 @@ export default function HelpPage() {
                                 </thead>
                                 <tbody className="divide-y">
                                     <tr><td className="p-2">基本</td><td className="p-2">ユーザー認証・プロフ</td><td className="p-2 text-center text-green-600 font-bold">✅</td></tr>
+                                    <tr><td className="p-2">基本</td><td className="p-2">ユーザー認証・プロフ</td><td className="p-2 text-center text-green-600 font-bold">✅</td></tr>
+                                    <tr><td className="p-2">教育</td><td className="p-2">資格試験・クイズ</td><td className="p-2 text-center text-green-600 font-bold">✅</td></tr>
                                     <tr><td className="p-2">経済</td><td className="p-2">銀行・送金・ローン</td><td className="p-2 text-center text-green-600 font-bold">✅</td></tr>
                                     <tr><td className="p-2">経済</td><td className="p-2">株式投資</td><td className="p-2 text-center text-green-600 font-bold">✅</td></tr>
                                     <tr><td className="p-2">不動産</td><td className="p-2">土地購入 (Map連携)</td><td className="p-2 text-center text-green-600 font-bold">✅</td></tr>
                                     <tr><td className="p-2">通信</td><td className="p-2">電話 (ボイスチャット)</td><td className="p-2 text-center text-green-600 font-bold">✅</td></tr>
-                                    <tr><td className="p-2">通信</td><td className="p-2">メッセージ機能</td><td className="p-2 text-center text-green-600 font-bold">✅</td></tr>
-                                    <tr className="bg-yellow-50"><td className="p-2">経営</td><td className="p-2">詳細な店舗運営</td><td className="p-2 text-center text-yellow-600 font-bold">🚧 開発中</td></tr>
-                                    <tr className="bg-gray-50"><td className="p-2">生活</td><td className="p-2">家具・採集・ペット</td><td className="p-2 text-center text-gray-400 font-bold">📅 予定</td></tr>
+                                    <tr><td className="p-2">通信</td><td className="p-2">メッセージ (テキスト)</td><td className="p-2 text-center text-green-600 font-bold">✅</td></tr>
+                                    <tr><td className="p-2">通信</td><td className="p-2">メッセージ (画像送信)</td><td className="p-2 text-center text-gray-400 font-bold">📅 予定</td></tr>
+
+                                    {/* 経営詳細 */}
+                                    <tr className="bg-blue-50"><td className="p-2">経営</td><td className="p-2">商品入荷・価格設定</td><td className="p-2 text-center text-green-600 font-bold">✅</td></tr>
+                                    <tr className="bg-blue-50"><td className="p-2">経営</td><td className="p-2">クーポン発行</td><td className="p-2 text-center text-green-600 font-bold">✅</td></tr>
+                                    <tr className="bg-blue-50"><td className="p-2">経営</td><td className="p-2">従業員・客AI</td><td className="p-2 text-center text-yellow-600 font-bold">🚧 開発中</td></tr>
+
+                                    {/* 生活詳細 */}
+                                    <tr className="bg-pink-50"><td className="p-2">生活</td><td className="p-2">状態モニタ (健康/ストレス)</td><td className="p-2 text-center text-green-600 font-bold">✅</td></tr>
+                                    <tr className="bg-pink-50"><td className="p-2">生活</td><td className="p-2">家具配置・模様替え</td><td className="p-2 text-center text-gray-400 font-bold">📅 予定</td></tr>
+                                    <tr className="bg-pink-50"><td className="p-2">生活</td><td className="p-2">ペット飼育・採集</td><td className="p-2 text-center text-gray-400 font-bold">📅 予定</td></tr>
                                 </tbody>
                             </table>
                         </div>

@@ -311,12 +311,12 @@ export const IconSelector: React.FC<IconSelectorProps> = ({ selectedIcon = 'defa
                         />
                     </div>
 
-                    {/* ボタン */}
-                    <div className="flex gap-2 pt-4 relative z-50">
-                        <Button fullWidth onClick={handleCropConfirm}>
-                            確定 (Enter)
+                    {/* ボタン (Bottom Sticky) */}
+                    <div className="absolute bottom-4 left-4 right-4 z-50 flex gap-2">
+                        <Button fullWidth onClick={handleCropConfirm} className="shadow-lg">
+                            確定
                         </Button>
-                        <Button fullWidth variant="ghost" onClick={handleCropCancel}>
+                        <Button fullWidth variant="secondary" onClick={handleCropCancel} className="bg-white/90 backdrop-blur shadow-lg">
                             キャンセル
                         </Button>
                     </div>

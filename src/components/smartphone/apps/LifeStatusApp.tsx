@@ -62,10 +62,17 @@ const StatBadge = ({ label, value, icon, color }: { label: string; value: number
     </div>
 );
 
+import { FurniturePlacement } from '@/components/housing/FurniturePlacement';
+
 export const LifeStatusApp: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     const { currentUser } = useGame();
+    const [showFurniturePlacement, setShowFurniturePlacement] = React.useState(false);
 
     if (!currentUser) return null;
+
+    if (showFurniturePlacement) {
+        return <FurniturePlacement onClose={() => setShowFurniturePlacement(false)} />;
+    }
 
     // 基本ステータス
     const stats = currentUser.lifeStats || {
@@ -86,17 +93,25 @@ export const LifeStatusApp: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         <div className="h-full flex flex-col bg-gradient-to-b from-pink-50 to-white text-gray-900">
             {/* ヘッダー */}
             <div className="p-4 bg-gradient-to-r from-pink-500 to-rose-500 text-white">
-                <div className="flex items-center gap-3">
-                    <button
-                        onClick={onBack}
-                        className="w-8 h-8 flex items-center justify-center rounded-full bg-white/20 hover:bg-white/30 transition"
-                    >
-                        ←
-                    </button>
-                    <div>
-                        <h2 className="font-bold text-lg">ヘルスケア</h2>
-                        <p className="text-xs opacity-80">ライフステータス管理</p>
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                        <button
+                            onClick={onBack}
+                            className="w-8 h-8 flex items-center justify-center rounded-full bg-white/20 hover:bg-white/30 transition"
+                        >
+                            ←
+                        </button>
+                        <div>
+                            <h2 className="font-bold text-lg">ヘルスケア</h2>
+                            <p className="text-xs opacity-80">ライフステータス管理</p>
+                        </div>
                     </div>
+                    <button
+                        onClick={() => setShowFurniturePlacement(true)}
+                        className="text-xs bg-white/20 px-2 py-1 rounded hover:bg-white/30"
+                    >
+                        🏠 模様替え
+                    </button>
                 </div>
             </div>
 
@@ -261,6 +276,49 @@ export const LifeStatusApp: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                         <div className="text-center py-6 text-gray-400">
                             <span className="text-3xl">👤</span>
                             <p className="text-sm mt-2">家族はいません</p>
+                        </div>
+                    )}
+                </section>
+
+                {/* ペット (NEW) */}
+                <section>
+                    <h3 className="font-bold text-sm text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-2">
+                        <span>🐾</span> ペット
+                    </h3>
+                    {currentUser.myRoomItems?.filter(i => i.category === 'pet').length > 0 ? (
+                        <div className="space-y-2">
+                            <div className="grid grid-cols-2 gap-2">
+                                {currentUser.myRoomItems.filter(i => i.category === 'pet').map(item => (
+                                    <div key={item.id} className="bg-white p-2 rounded-lg border border-orange-100 flex items-center gap-2">
+                                        <span className="text-2xl">{item.emoji ?? '🐶'}</span>
+                                        <span className="text-sm font-bold">{item.name}</span>
+                                    </div>
+                                ))}
+                            </div>
+                            <button
+                                onClick={async () => {
+                                    const pets = currentUser.myRoomItems.filter(i => i.category === 'pet');
+                                    await fetch('/api/action', {
+                                        method: 'POST',
+                                        headers: { 'Content-Type': 'application/json' },
+                                        body: JSON.stringify({
+                                            type: 'interact_pet',
+                                            requesterId: currentUser.id,
+                                            details: { petItemIds: pets.map(p => p.id) }
+                                        })
+                                    });
+                                    alert('ペットたちと遊びました！癒やされました〜');
+                                }}
+                                className="w-full py-2 bg-orange-500 text-white rounded-xl font-bold hover:bg-orange-600 transition shadow-sm"
+                            >
+                                🧶 遊ぶ
+                            </button>
+                        </div>
+                    ) : (
+                        <div className="text-center py-6 text-gray-400 bg-gray-50 rounded-xl border border-dashed border-gray-300">
+                            <span className="text-3xl">🐕</span>
+                            <p className="text-sm mt-2">ペットはいません</p>
+                            <p className="text-xs">カタログで家族を迎えましょう</p>
                         </div>
                     )}
                 </section>

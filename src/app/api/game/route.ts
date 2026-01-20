@@ -24,8 +24,13 @@ export async function GET() {
                 'Cache-Control': 'no-store, max-age=0',
             },
         });
-    } catch (error) {
-        console.error('API /api/game error:', error);
-        return NextResponse.json({ error: 'Internal Server Error', details: String(error) }, { status: 500 });
+    } catch (error: any) {
+        console.error('API /api/game Critical Error:', error);
+        console.error('Stack:', error.stack);
+        return NextResponse.json({
+            error: 'Internal Server Error',
+            message: error.message || String(error),
+            stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+        }, { status: 500 });
     }
 }

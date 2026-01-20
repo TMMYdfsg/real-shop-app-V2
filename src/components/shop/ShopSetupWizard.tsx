@@ -77,8 +77,12 @@ export const ShopSetupWizard = ({ onComplete }: { onComplete?: () => void }) => 
                 }
             });
             alert('ホームページを作成しました！');
-            if (onComplete) onComplete();
-            else window.location.reload();
+            if (onComplete) {
+                onComplete();
+            } else {
+                // Force navigation/reload to ensure state is updated
+                window.location.reload();
+            }
         } catch (error) {
             console.error(error);
             alert('作成に失敗しました');

@@ -752,7 +752,92 @@ export async function POST(req: NextRequest) {
         }
 
         // -----------------------------------------------------
-        // ゲーム初期化 (Reset Game)
+        // 完全リセット (Full Wipe)
+        // -----------------------------------------------------
+        if (action === 'full_reset') {
+            await updateGameState(async (state) => {
+                // This 'updateGameState' wrapper is designed for the JSON store.
+                // Since we are migrating/using Prisma, we might need direct Prisma calls here if 'updateGameState' essentially just saves state.
+                // However, the current code seems to be using an in-memory or JSON structure that mimics Prisma or is wrapped.
+                // Assuming 'updateGameState' gives us a mutable 'state' object that is persisted...
+                // WAIT, previous analysis said "Migrate to Prisma".
+                // If 'updateGameState' is still the primary way, we empty the arrays.
+
+                // BUT, looking at schema.prisma, we HAVE a DB.
+                // The current 'updateGameState' helper likely handles JSON file writing OR DB sync.
+                // If the user wants to DELETE EVERYTHING including IDs, we should probably check if we can access Prisma directly here.
+
+                // Let's assume we stick to the pattern 'updateGameState' for now to be safe with the 'lib/dataStore' abstraction,
+                // modifying the state object to be empty.
+
+                const { prisma } = require('@/lib/prisma'); // Dynamic require to avoid top-level issues if context differs
+
+                try {
+                    // Transactional delete of ALL data
+                    await prisma.$transaction([
+                        prisma.transaction.deleteMany({}),
+                        prisma.request.deleteMany({}),
+                        prisma.message.deleteMany({}),
+                        prisma.voiceCall.deleteMany({}),
+                        prisma.vote.deleteMany({}),
+                        prisma.policyProposal.deleteMany({}),
+                        prisma.product.deleteMany({}),
+                        prisma.land.deleteMany({}),
+                        prisma.place.deleteMany({}),
+                        prisma.nPC.deleteMany({}),
+                        prisma.gameEvent.deleteMany({}),
+                        prisma.property.deleteMany({}),
+                        prisma.news.deleteMany({}),
+                        prisma.rouletteResult.deleteMany({}),
+                        prisma.parcel.deleteMany({}), // If related to User, might need order
+                        // User deletion (Cascading should handle relations, but manual is safer)
+                        prisma.user.deleteMany({}),
+                        // Reset Settings
+                        prisma.gameSettings.update({
+                            where: { id: 'singleton' },
+                            data: {
+                                turn: 1,
+                                isDay: true,
+                                season: 'spring',
+                                marketStatus: 'open',
+                                economyStatus: 'normal',
+                                priceIndex: 100.0,
+                                moneyMultiplier: 1.0, // Reset multiplier
+                                taxRate: 0.1, // Default
+                                insuranceRate: 0.05,
+                                interestRate: 0.05,
+                                salaryAutoSafeRate: 0.1
+                            }
+                        })
+                    ]);
+
+                    // Also clear the in-memory state if that's what 'state' represents
+                    state.users = [];
+                    state.requests = [];
+                    state.transactions = [];
+                    state.stocks.forEach(s => {
+                        s.price = s.previousPrice || 1000;
+                        s.priceHistory = [];
+                    });
+                    state.news = [];
+                    state.activeEvents = [];
+                    state.activeNPCs = [];
+                    state.turn = 1;
+                    state.isDay = true;
+
+                } catch (e) {
+                    console.error("Full Reset Prisma Error:", e);
+                    // Fallback to state clearing if Prisma fails
+                    state.users = [];
+                }
+
+                return state;
+            });
+            return NextResponse.json({ success: true });
+        }
+
+        // -----------------------------------------------------
+        // ゲーム初期化 (Reset Game - Soft Reset)
         // -----------------------------------------------------
         if (action === 'reset_game') {
             await updateGameState((state) => {

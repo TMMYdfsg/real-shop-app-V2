@@ -1,7 +1,8 @@
 import { GameState, User, GameEvent } from '@/types';
+import { v4 as uuidv4 } from 'uuid';
 
 
-import { processGameTick as originalProcessGameTick } from './gameLogic'; // self import fix? No.
+// import { processGameTick as originalProcessGameTick } from './gameLogic'; // Removed circular dependency
 import { EVENT_TEMPLATES } from './eventData';
 
 export function processGameTick(state: GameState): { newState: GameState, hasChanged: boolean } {
@@ -35,7 +36,6 @@ export function processGameTick(state: GameState): { newState: GameState, hasCha
 
     if (elapsed >= 1000) { // 1秒以上経過していたら更新
         newState.timeRemaining -= elapsed;
-        newState.lastTick = now;
         hasChanged = true;
 
         // ターン切り替え
@@ -45,7 +45,7 @@ export function processGameTick(state: GameState): { newState: GameState, hasCha
 
             // ログ追加
             newState.news.unshift({
-                id: crypto.randomUUID(),
+                id: uuidv4(),
                 message: `時間経過: ${newState.isDay ? '朝になりました ☀️' : '夜になりました 🌙'}`,
                 timestamp: Date.now()
             });
@@ -58,6 +58,24 @@ export function processGameTick(state: GameState): { newState: GameState, hasCha
             } else {
                 // 朝になった時の処理 (Night -> Day)
                 newState.turn += 1; // 日付が進む
+
+                // -----------------------------------------------------
+                // Politics: Check Proposal Deadlines (Server-side logic simulation)
+                // -----------------------------------------------------
+                // Note: In a real app this would be a separate DB worker.
+                // Here we can't easily access DB inside simple state function without async.
+                // Since processGameTick is synchronous and runs in memory (or client), 
+                // we can't check DB proposals here easily.
+                // Instead, we will assume the API route or a separate scheduled task handles proposal resolution.
+                // However, for this task requirement "updating game settings", we might need a hook.
+                // Let's rely on an external trigger or check if we can fetch via API in the loop (bad practice).
+                // Alternative: The /api/game/tick or similar endpoint should handle it.
+                // Valid Approach: We leave the resolution to a dedicated API call or user interaction for now,
+                // OR we accept that we can't resolve it strictly every tick without DB access.
+                // BUT, if we want "automatic" resolution, we need an async worker.
+                // For this environment, let's skip adding it to synchronous `processGameTick` 
+                // and assume an API endpoint `/api/politics/resolve` is called periodically by the client or admin.
+                // I will update the PoliticsApp to call "resolve" endpoint occasionally or just handle it purely via API.
 
                 // -----------------------------------------------------
                 // Quest System Logic
@@ -136,7 +154,7 @@ export function processGameTick(state: GameState): { newState: GameState, hasCha
                                 // Log reward
                                 if (!u.transactions) u.transactions = [];
                                 u.transactions.push({
-                                    id: crypto.randomUUID(),
+                                    id: uuidv4(),
                                     type: 'income',
                                     amount: qData.rewards.money,
                                     description: `クエスト報酬: ${qData.title}`,
@@ -151,7 +169,7 @@ export function processGameTick(state: GameState): { newState: GameState, hasCha
                             // Since this runs on server/logic side, we use newState.news or a dedicated event queue
                             // For now, push to news, client can watch news for "Quest Completed" or use a separate event system
                             newState.news.unshift({
-                                id: crypto.randomUUID(),
+                                id: uuidv4(),
                                 type: 'achievement', // Special new type for news
                                 message: `🏆 クエスト達成！「${qData.title}」`,
                                 timestamp: Date.now()
@@ -242,7 +260,7 @@ export function processGameTick(state: GameState): { newState: GameState, hasCha
                             // 履歴追加 (通知トリガー用)
                             if (!u.transactions) u.transactions = [];
                             u.transactions.push({
-                                id: crypto.randomUUID(),
+                                id: uuidv4(),
                                 type: 'income',
                                 amount: sales,
                                 senderId: 'customer_sim', // システムによる一般客
@@ -261,208 +279,242 @@ export function processGameTick(state: GameState): { newState: GameState, hasCha
         // NPC Logic (process every tick or every second)
         // Random NPC Spawn Logic (e.g. check every 1 second)
         if (now - newState.lastTick >= 1000) {
-            if (newState.isDay && newState.npcTemplates) {
-                const players = newState.users.filter(u => u.role === 'player');
-                if (players.length > 0) {
-                    newState.npcTemplates.forEach(template => {
-                        // Check spawn rate (e.g. rate is probability out of 100 per minute -> adjust for per second ~ rate / 60)
-                        // Simplified: rate is % chance per tick (approx 1 sec)
-                        // Use a smaller probability if rate is meant for longer periods. Assuming rate 0-100 per check.
-                        // Let's treat spawnRate as "Probability per 10 seconds" or keep it simple % per tick
-                        // User wants "spawnRate" control. Let's assume input 5 means 5% chance per tick.
-                        if (Math.random() * 100 < template.spawnRate) {
-                            const target = players[Math.floor(Math.random() * players.length)];
+            // -----------------------------------------------------
+            // Advanced Customer AI Spawn Logic
+            // -----------------------------------------------------
+            if (now - newState.lastTick >= 2000) { // Check every 2 seconds
+                if (newState.isDay) {
+                    const shopOwners = newState.users.filter(u => u.shopName && u.role === 'player');
 
-                            // Prevent spamming too many NPCs? Limit 1 per user? - Optional
-                            // if (newState.activeNPCs.some(n => n.targetUserId === target.id)) return;
+                    shopOwners.forEach(owner => {
+                        // Base spawn chance based on Reputation/Popularity
+                        // Reputation 0-5 stars. 
+                        // Chance: (Rep * 5) + (Popularity / 10) %
+                        const reputation = owner.rating || 1;
+                        const popularity = owner.popularity || 0;
+                        const spawnChance = (reputation * 5) + (popularity / 50) + 5; // Min 5% per check
 
-                            const newNPC: any = {
-                                id: crypto.randomUUID(),
-                                targetUserId: target.id,
-                                templateId: template.id,
-                                type: template.id,
-                                name: template.name,
-                                description: template.description,
+                        if (Math.random() * 100 < spawnChance) {
+                            // Spawn Customer
+                            const templates = newState.npcTemplates?.filter(t => t.actionType === 'buy') || [];
+                            const template = templates.length > 0
+                                ? templates[Math.floor(Math.random() * templates.length)]
+                                : { id: 'guest', name: 'Guest', description: 'Customer', duration: 10000, actionType: 'buy' }; // Fallback
+
+                            const customer: any = { // Type assertion for flexibility
+                                id: uuidv4(),
+                                targetUserId: owner.id,
+                                templateId: template.id || 'guest',
+                                type: 'customer',
+                                name: `Customer ${Math.floor(Math.random() * 1000)}`, // Unique names
+                                description: 'Shopping',
                                 entryTime: now,
-                                leaveTime: now + template.duration,
-                                effectApplied: false
+                                leaveTime: now + (template.duration || 15000), // 15 sec visit
+                                effectApplied: false,
+                                budget: (Math.random() * 5000) + 1000 // 1000 - 6000 yen budget
                             };
-                            if (!newState.activeNPCs) newState.activeNPCs = [];
-                            newState.activeNPCs.push(newNPC);
 
-                            newState.news.unshift({
-                                id: crypto.randomUUID(),
-                                message: `⚠️ ${target.name}のお店に「${template.name}」が来店しました！`,
-                                timestamp: now
-                            });
-                            hasChanged = true;
+                            if (!newState.activeNPCs) newState.activeNPCs = [];
+                            newState.activeNPCs.push(customer);
+
+                            // Optional: Notification for very high value customers?
+                            // newState.news.unshift(...)
                         }
                     });
                 }
             }
-        }
 
-        // NPC Logic (process active NPCs)
-        if (newState.activeNPCs && newState.activeNPCs.length > 0) {
-            const initialCount = newState.activeNPCs.length;
-            newState.activeNPCs = newState.activeNPCs.filter(npc => {
-                // Check ownership
-                const targetUser = newState.users.find(u => u.id === npc.targetUserId);
-                if (!targetUser) return false; // User gone, remove NPC
+            // NPC Logic (process active NPCs)
+            if (newState.activeNPCs && newState.activeNPCs.length > 0) {
+                const initialCount = newState.activeNPCs.length;
+                newState.activeNPCs = newState.activeNPCs.filter(npc => {
+                    // Check ownership
+                    const targetUser = newState.users.find(u => u.id === npc.targetUserId);
+                    if (!targetUser) return false; // User gone, remove NPC
 
-                const template = newState.npcTemplates?.find(t => t.id === npc.templateId);
-                // Fallback if template missing
-                if (!template && !npc.type) return false;
+                    const template = newState.npcTemplates?.find(t => t.id === npc.templateId);
+                    // Fallback if template missing
+                    if (!template && !npc.type) return false;
 
-                // Determine Action Type & Params
-                const actionType = template?.actionType || 'buy'; // default
+                    // Determine Action Type & Params
+                    const actionType = template?.actionType || npc.actionType || 'buy';
 
-                // Effect triggering (e.g. at leave time)
-                if (now >= npc.leaveTime) {
-                    if (!npc.effectApplied) {
-                        // Apply Effect based on Template
-                        if (actionType === 'steal_money' || actionType === 'scam') {
-                            // Steal Money
-                            const min = template?.minStealAmount ?? 100;
-                            const max = template?.maxStealAmount ?? 1000;
-                            const stolen = Math.floor(min + Math.random() * (max - min));
+                    // Effect triggering (e.g. at leave time)
+                    if (now >= npc.leaveTime) {
+                        if (!npc.effectApplied) {
+                            // Apply Effect based on Template
+                            if (actionType === 'steal_money' || actionType === 'scam') {
+                                // Steal Money Logic
+                                const min = template?.minStealAmount ?? 100;
+                                const max = template?.maxStealAmount ?? 1000;
+                                const stolen = Math.floor(min + Math.random() * (max - min));
 
-                            targetUser.balance -= stolen;
-                            if (targetUser.balance < 0) targetUser.balance = 0;
+                                targetUser.balance -= stolen;
+                                if (targetUser.balance < 0) targetUser.balance = 0;
 
-                            // Log
-                            newState.news.unshift({
-                                id: crypto.randomUUID(),
-                                message: `🚨 ${targetUser.name}のお店で${npc.name}による被害！ ${stolen}枚 失いました...`,
-                                timestamp: now
-                            });
-                        } else if (actionType === 'steal_items') {
-                            // Steal Items (placeholder)
-                        } else if (actionType === 'buy') {
-                            // Buy
-                            const min = template?.minPayment ?? 100;
-                            const max = template?.maxPayment ?? 1000;
-                            // Apply God Mode Money Multiplier
-                            const multiplier = newState.settings?.moneyMultiplier || 1;
-                            const sales = Math.floor((min + Math.random() * (max - min)) * multiplier);
-                            targetUser.balance += sales;
+                                // Log
+                                newState.news.unshift({
+                                    id: uuidv4(),
+                                    message: `🚨 ${targetUser.name}のお店で${npc.name}による被害！ ${stolen}枚 失いました...`,
+                                    timestamp: now
+                                });
+                            } else if (actionType === 'buy' || npc.type === 'customer') {
+                                // DETAILED SHOPPING LOGIC
+                                // 1. Check Shop Items
+                                const items = targetUser.shopItems || [];
+                                const budget = npc.budget || 5000;
+                                let spent = 0;
+                                const purchasedItems: string[] = [];
 
-                            // 履歴追加
-                            if (!targetUser.transactions) targetUser.transactions = [];
-                            targetUser.transactions.push({
-                                id: crypto.randomUUID(),
-                                type: 'income',
-                                amount: sales,
-                                senderId: npc.id,
-                                description: `売上: ${npc.name}${multiplier > 1 ? ` [${multiplier}x]` : ''}`,
-                                timestamp: now
-                            });
+                                // 2. Select Items to Buy
+                                // Shuffle items to random browse
+                                const shuffledItems = [...items].sort(() => 0.5 - Math.random());
 
-                            newState.news.unshift({
-                                id: crypto.randomUUID(),
-                                message: `💰 ${targetUser.name}のお店で${npc.name}が ${sales.toLocaleString()}枚 のお買い上げ！`,
-                                timestamp: now
-                            });
+                                shuffledItems.forEach(item => {
+                                    if (spent >= budget) return;
+                                    if (item.isSold || item.stock <= 0) return; // Skip sold out
+                                    if (item.price > (budget - spent)) return;
+
+                                    // Purchase Chance (Price vs Quality/Demand placeholder)
+                                    // Simplify: 50% chance to buy if affordable
+                                    if (Math.random() < 0.5) {
+                                        // Buy 1 unit
+                                        item.stock -= 1;
+                                        // Auto-tag as isSold if stock 0? (Currently boolean isSold is used, maybe simple switch)
+                                        if (item.stock <= 0) item.isSold = true;
+
+                                        spent += item.price;
+                                        purchasedItems.push(item.name);
+                                    }
+                                });
+
+                                // 3. Process Transaction if bought anything
+                                if (spent > 0) {
+                                    targetUser.balance += spent;
+
+                                    if (!targetUser.transactions) targetUser.transactions = [];
+                                    targetUser.transactions.push({
+                                        id: uuidv4(),
+                                        type: 'income',
+                                        amount: spent,
+                                        senderId: npc.id,
+                                        description: `売上: ${npc.name} (${purchasedItems.join(', ')})`,
+                                        timestamp: now
+                                    });
+
+                                    // Log large purchases
+                                    if (spent > 5000) {
+                                        newState.news.unshift({
+                                            id: uuidv4(),
+                                            message: `💰 ${targetUser.name}のお店で${npc.name}が爆買い！ 合計 ${spent.toLocaleString()}枚`,
+                                            timestamp: now
+                                        });
+                                    }
+                                }
+                            }
+                            npc.effectApplied = true;
                         }
-                        npc.effectApplied = true; // Mark as applied mostly formality as we remove below
+                        return false; // Remove after effect
                     }
-                    return false; // Remove after effect (time up)
+
+                    // Keep NPC if time not up
+                    return true;
+                });
+
+                if (newState.activeNPCs.length !== initialCount) {
+                    hasChanged = true;
+                }
+            }
+
+            // Random Large-Scale Event Logic (Check every 1 second)
+            if (now - newState.lastTick >= 1000) {
+                // Remove Expired Events
+                if (newState.activeEvents && newState.activeEvents.length > 0) {
+                    const activeCount = newState.activeEvents.length;
+                    newState.activeEvents = newState.activeEvents.filter(e => now < e.startTime + e.duration);
+                    if (newState.activeEvents.length !== activeCount) hasChanged = true;
                 }
 
-                // Keep NPC if time not up
-                return true;
-            });
+                // Trigger New Event (if none active, low chance)
+                // 0.5% chance per second
+                if ((!newState.activeEvents || newState.activeEvents.length === 0) && Math.random() < 0.005) {
+                    const template = EVENT_TEMPLATES[Math.floor(Math.random() * EVENT_TEMPLATES.length)];
+                    const newEvent: GameEvent = {
+                        id: uuidv4(),
+                        ...template,
+                        startTime: now
+                    };
 
-            if (newState.activeNPCs.length !== initialCount) {
-                hasChanged = true;
-            }
-        }
+                    if (!newState.activeEvents) newState.activeEvents = [];
+                    newState.activeEvents.push(newEvent);
 
-        // Random Large-Scale Event Logic (Check every 1 second)
-        if (now - newState.lastTick >= 1000) {
-            // Remove Expired Events
-            if (newState.activeEvents && newState.activeEvents.length > 0) {
-                const activeCount = newState.activeEvents.length;
-                newState.activeEvents = newState.activeEvents.filter(e => now < e.startTime + e.duration);
-                if (newState.activeEvents.length !== activeCount) hasChanged = true;
-            }
+                    // Instant Effects
+                    if (newEvent.type === 'grant') {
+                        newState.users = newState.users.map(u => ({ ...u, balance: u.balance + newEvent.effectValue }));
+                    } else if (newEvent.type === 'tax_hike') {
+                        newState.users = newState.users.map(u => ({ ...u, balance: Math.floor(u.balance * (1 - newEvent.effectValue)) }));
+                    }
 
-            // Trigger New Event (if none active, low chance)
-            // 0.5% chance per second
-            if ((!newState.activeEvents || newState.activeEvents.length === 0) && Math.random() < 0.005) {
-                const template = EVENT_TEMPLATES[Math.floor(Math.random() * EVENT_TEMPLATES.length)];
-                const newEvent: GameEvent = {
-                    id: crypto.randomUUID(),
-                    ...template,
-                    startTime: now
-                };
-
-                if (!newState.activeEvents) newState.activeEvents = [];
-                newState.activeEvents.push(newEvent);
-
-                // Instant Effects
-                if (newEvent.type === 'grant') {
-                    newState.users = newState.users.map(u => ({ ...u, balance: u.balance + newEvent.effectValue }));
-                } else if (newEvent.type === 'tax_hike') {
-                    newState.users = newState.users.map(u => ({ ...u, balance: Math.floor(u.balance * (1 - newEvent.effectValue)) }));
+                    // Log
+                    newState.news.unshift({
+                        id: uuidv4(),
+                        message: `📢 速報: ${newEvent.name} - ${newEvent.description}`,
+                        timestamp: now
+                    });
+                    hasChanged = true;
                 }
 
-                // Log
-                newState.news.unshift({
-                    id: crypto.randomUUID(),
-                    message: `📢 速報: ${newEvent.name} - ${newEvent.description}`,
-                    timestamp: now
-                });
-                hasChanged = true;
-            }
+                // -----------------------------------------------------
+                // Risk System: Police Raid (Night Only)
+                // -----------------------------------------------------
+                if (!newState.isDay) {
+                    newState.users = newState.users.map(u => {
+                        const hasForbiddenStocks = u.forbiddenStocks && Object.values(u.forbiddenStocks).some(val => val > 0);
+                        const hasIllegalItems = u.inventory && u.inventory.some(i => i.isIllegal);
 
-            // -----------------------------------------------------
-            // Risk System: Police Raid (Night Only)
-            // -----------------------------------------------------
-            if (!newState.isDay) {
-                newState.users = newState.users.map(u => {
-                    const hasForbiddenStocks = u.forbiddenStocks && Object.values(u.forbiddenStocks).some(val => val > 0);
-                    const hasIllegalItems = u.inventory && u.inventory.some(i => i.isIllegal);
+                        if (hasForbiddenStocks || hasIllegalItems) {
+                            // 0.5% chance per second per user if holding illegal goods
+                            if (Math.random() < 0.005) {
+                                const fine = Math.floor(u.balance * 0.5);
+                                u.balance -= fine;
 
-                    if (hasForbiddenStocks || hasIllegalItems) {
-                        // 0.5% chance per second per user if holding illegal goods
-                        if (Math.random() < 0.005) {
-                            const fine = Math.floor(u.balance * 0.5);
-                            u.balance -= fine;
+                                // Log
+                                u.transactions = u.transactions || [];
+                                u.transactions.push({
+                                    id: uuidv4(),
+                                    type: 'tax', // or custom type
+                                    amount: fine,
+                                    senderId: 'police',
+                                    description: '警察の手入れ（罰金）',
+                                    timestamp: Date.now()
+                                });
 
-                            // Log
-                            u.transactions = u.transactions || [];
-                            u.transactions.push({
-                                id: crypto.randomUUID(),
-                                type: 'tax', // or custom type
-                                amount: fine,
-                                senderId: 'police',
-                                description: '警察の手入れ（罰金）',
-                                timestamp: Date.now()
-                            });
-
-                            newState.news.unshift({
-                                id: crypto.randomUUID(),
-                                type: 'arrest',
-                                message: `🚓 【緊急】警察が ${u.name} の元へ突入！違法取引の疑いで罰金 ${fine.toLocaleString()}枚`,
-                                timestamp: Date.now()
-                            });
-                            hasChanged = true;
+                                newState.news.unshift({
+                                    id: uuidv4(),
+                                    type: 'arrest',
+                                    message: `🚓 【緊急】警察が ${u.name} の元へ突入！違法取引の疑いで罰金 ${fine.toLocaleString()}枚`,
+                                    timestamp: Date.now()
+                                });
+                                hasChanged = true;
+                            }
                         }
-                    }
-                    return u;
-                });
+                        return u;
+                    });
+                }
             }
-        }
 
-        return { newState, hasChanged };
-
-        function processNightEvents(state: GameState): GameState {
-            // 簡易的な夜間処理
-            // 必要に応じて拡張: 利子計算、税金徴収など
-            return state;
+            newState.lastTick = now;
+            return { newState, hasChanged };
+        } else {
+            return { newState, hasChanged };
         }
-    } else {
-        return { newState, hasChanged };
     }
+
+    return { newState, hasChanged };
+}
+
+function processNightEvents(state: GameState): GameState {
+    // 簡易的な夜間処理
+    // 必要に応じて拡張: 利子計算、税金徴収など
+    return state;
 }

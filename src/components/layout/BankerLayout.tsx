@@ -1,15 +1,24 @@
 'use client';
 
-import { useRef } from 'react';
+import { useRef, useEffect } from 'react';
 import { Sidebar } from './Sidebar';
 import { useGame } from '@/context/GameContext';
 import { Button } from '@/components/ui/Button';
 import { useRouter } from 'next/navigation';
 import { PageTransition } from './PageTransition';
+import { useSWRConfig } from 'swr';
 
-export const BankerLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const BankerLayout: React.FC<{ children: React.ReactNode; initialData?: any }> = ({ children, initialData }) => {
     const { currentUser } = useGame();
     const router = useRouter();
+    const { mutate } = useSWRConfig();
+
+    // Hydrate SWR cache with server-side data
+    useEffect(() => {
+        if (initialData) {
+            mutate('/api/game', initialData, false);
+        }
+    }, [initialData, mutate]);
 
     const navItems = [
         { label: 'ホーム (Dashboard)', path: '/banker', icon: '🏠' },

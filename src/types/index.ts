@@ -95,6 +95,15 @@ export interface OwnedItem {
     catalogItemId: string;
     purchasedAt: number;
     isPlaced?: boolean; // マイルームに配置済みか
+    x?: number; // Grid X
+    y?: number; // Grid Y
+    rotation?: number; // 0, 90, 180, 270
+
+    // Display / Cache properties
+    name?: string;
+    emoji?: string;
+    category?: string;
+    price?: number;
 }
 
 // ==========================================
@@ -279,6 +288,11 @@ export interface User {
     // Quest System (New)
     quests?: QuestProgress[];
     completedQuestIds?: string[];
+
+    // Settings
+    settings?: {
+        notificationSound?: string;
+    };
 }
 
 export interface Quest {
@@ -514,6 +528,10 @@ export interface NPC {
     entryTime: number; // 来店時刻
     leaveTime: number; // 退店予定時刻
     effectApplied: boolean; // 効果発動済みか
+
+    // Dynamic props
+    actionType?: 'buy' | 'steal_money' | 'steal_items' | 'scam';
+    budget?: number;
 }
 
 export interface MiniGameConfig {
@@ -875,3 +893,28 @@ export interface AuditLog {
 }
 
 
+
+// ==========================================
+// Phase 8: Real-time Communication
+// ==========================================
+
+export interface Message {
+    id: string;
+    senderId: string;
+    receiverId: string;
+    content: string;
+    imageUrl?: string;
+    type?: 'text' | 'image';
+    isRead: boolean;
+    createdAt: string;
+    sender: {
+        id: string;
+        name: string;
+        playerIcon?: string;
+    };
+    receiver: {
+        id: string;
+        name: string;
+        playerIcon?: string;
+    };
+}

@@ -16,7 +16,7 @@ const nextConfig: NextConfig = {
     return config;
   },
   // コンパイラによるコード圧縮を強制
-  swcMinify: true,
+  // swcMinify is default in Next 15
   // 画像最適化（外部画像を使う場合ドメイン指定必須）
   images: {
     domains: ['lh3.googleusercontent.com'],

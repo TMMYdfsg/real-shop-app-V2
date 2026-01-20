@@ -19,54 +19,36 @@ import { LifeStatusApp } from './apps/LifeStatusApp';
 import { AuditLogApp } from './apps/AuditLogApp';
 import { QuestApp } from './apps/QuestApp';
 import { ForbiddenApp } from './apps/ForbiddenApp';
+import { SettingsApp } from './apps/SettingsApp';
+import PoliticsApp from '@/components/apps/PoliticsApp';
 
 export const SmartphoneOS = () => {
-    const searchParams = useSearchParams();
-    const router = useRouter();
     const [currentApp, setCurrentApp] = useState<string | null>(null);
-
-    // Handle initial app from URL
-    useEffect(() => {
-        const appParam = searchParams.get('app');
-        if (appParam) {
-            if (appParam === 'message') setCurrentApp('message');
-            else setCurrentApp(appParam);
-        }
-    }, [searchParams]);
-
-    const handleOpenApp = (appId: string) => {
-        if (appId === 'map') {
-            const path = window.location.pathname;
-            const match = path.match(/\/player\/([^\/]+)/);
-            if (match) {
-                router.push(`/player/${match[1]}/map`);
-            } else {
-                alert("プレイヤーIDが見つかりません");
-            }
-        } else {
-            setCurrentApp(appId);
-        }
-    };
 
     const handleHome = () => {
         setCurrentApp(null);
     };
 
+    const handleOpenApp = (appId: string) => {
+        setCurrentApp(appId);
+    };
+
     const renderApp = () => {
         switch (currentApp) {
-            case 'phone': return <PhoneApp />;
-            case 'message': return <MessengerApp />;
+            case 'phone': return <PhoneApp onClose={handleHome} />;
+            case 'messenger': return <MessengerApp onClose={handleHome} />;
             case 'sns': return <SNSApp onClose={handleHome} />;
             case 'video': return <VideoApp onClose={handleHome} />;
             case 'news': return <NewsApp onClose={handleHome} />;
-            case 'crypto': return <CryptoApp />;
+            case 'crypto': return <CryptoApp onClose={handleHome} />;
             case 'job_board': return <JobBoardApp onBack={handleHome} />;
             case 'bank': return <BankApp onBack={handleHome} />;
-            case 'status': return <LifeStatusApp onBack={handleHome} />;
-            case 'audit': return <AuditLogApp onBack={handleHome} />;
+            case 'life_status': return <LifeStatusApp onBack={handleHome} />;
+            case 'audit_log': return <AuditLogApp onBack={handleHome} />;
             case 'quests': return <QuestApp onBack={handleHome} />;
             case 'dark_web': return <ForbiddenApp onBack={handleHome} />;
-            case 'settings': return <div className="p-8 text-black font-bold text-center mt-20">設定はまだありません</div>;
+            case 'politics': return <PoliticsApp onClose={handleHome} />;
+            case 'settings': return <SettingsApp onClose={handleHome} />;
             case 'camera': return <div className="p-8 text-black font-bold text-center mt-20">カメラは起動できません</div>;
             case 'shopping': return <div className="p-8 text-black font-bold text-center mt-20">準備中</div>;
             default: return null;

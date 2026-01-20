@@ -25,7 +25,11 @@ export default function SpecialActionPage() {
     const jobType = currentUser.jobType || 'normal';
     const jobName = currentUser.job as JobType || 'unemployed';
     const jobDef = JOB_DEFINITIONS[jobType];
-    const gameConfig = JOB_GAME_CONFIGS[jobName];
+
+    // Debug: Allow selecting any job game
+    const [debugJob, setDebugJob] = useState<JobType | ''>('');
+    const activeJob = (debugJob || jobName) as JobType;
+    const gameConfig = JOB_GAME_CONFIGS[activeJob];
 
     // Work Handlers
     const handleWorkStart = () => {
@@ -87,7 +91,29 @@ export default function SpecialActionPage() {
 
     return (
         <div style={{ paddingBottom: '2rem' }}>
-            <h2 style={{ fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '1rem' }}>仕事をする</h2>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                <h2 style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>仕事をする</h2>
+
+                {/* Debug Switch: Only for Bankers or users with 'Debug' in name */}
+                {(currentUser.role === 'banker' || currentUser.name.includes('Debug')) && (
+                    <div className="bg-gray-100 p-2 rounded text-sm">
+                        <label className="mr-2 font-bold text-gray-600">デバッグ切替:</label>
+                        <select
+                            value={debugJob}
+                            onChange={(e) => setDebugJob(e.target.value as JobType)}
+                            className="p-1 rounded border"
+                        >
+                            <option value="">本来の職業 ({jobName})</option>
+                            {Object.entries(JOB_GAME_CONFIGS).map(([key, config]) => (
+                                <option key={key} value={key}>
+                                    {config.name} ({key})
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                )}
+            </div>
+
 
             {/* Daily Work Card */}
             {gameConfig && (

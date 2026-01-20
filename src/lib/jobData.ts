@@ -1,6 +1,6 @@
 import { MiniGameConfig } from '@/types';
 
-export type JobType = 'doctor' | 'cake_shop' | 'bakery' | 'police' | 'detective' | 'programmer' | 'hacker' | 'youtuber' | 'animator' | 'musician' | 'novelist' | 'artist' | 'chef' | 'florist' | 'driver' | 'mangaka' | 'scientist' | 'investigator' | 'cracker' | 'garbage_collector' | 'bookstore' | 'wagashi_shop' | 'pastry_shop' | 'unemployed';
+export type JobType = 'doctor' | 'cake_shop' | 'bakery' | 'police' | 'detective' | 'programmer' | 'hacker' | 'youtuber' | 'animator' | 'musician' | 'novelist' | 'artist' | 'chef' | 'florist' | 'driver' | 'mangaka' | 'scientist' | 'investigator' | 'cracker' | 'garbage_collector' | 'bookstore' | 'wagashi_shop' | 'pastry_shop' | 'architect' | 'streamer' | 'pilot' | 'unemployed' | 'thief' | 'idol' | 'normal';
 
 export const JOB_GAME_CONFIGS: Record<JobType, Partial<MiniGameConfig> & { acceptanceRate?: number }> = {
     // 1. 医者
@@ -49,6 +49,15 @@ export const JOB_GAME_CONFIGS: Record<JobType, Partial<MiniGameConfig> & { accep
     wagashi_shop: { name: '和菓子作り', type: 'sequence', description: '材料を正しい順番で混ぜよう', difficulty: 2, rewardMultiplier: 1.2, duration: 25, acceptanceRate: 80 },
     // 23. 洋菓子屋
     pastry_shop: { name: 'デコレーション', type: 'puzzle', description: 'ケーキを美しく飾ろう', difficulty: 2, rewardMultiplier: 1.3, duration: 30, acceptanceRate: 70 },
-    // 24. 無職
+
+    // New Jobs
+    architect: { name: '設計図作成', type: 'puzzle', description: 'パーツを組み合わせて設計図を完成させよう', difficulty: 4, rewardMultiplier: 1.6, duration: 40, acceptanceRate: 25 },
+    streamer: { name: 'コメント返信', type: 'input', description: 'ファンからのコメントに素早く返信しよう', difficulty: 2, rewardMultiplier: 1.3, duration: 30, acceptanceRate: 60 },
+    pilot: { name: 'フライト制御', type: 'timing', description: '計器のタイミングに合わせて操縦しよう', difficulty: 5, rewardMultiplier: 2.5, duration: 20, acceptanceRate: 15 },
+
+    // Special base jobs
     unemployed: { name: '暇つぶし', type: 'choice', description: 'アルバイトか宝探しか選ぼう', difficulty: 1, rewardMultiplier: 0.5, duration: 10, acceptanceRate: 100 },
+    thief: { name: '隠密行動', type: 'search', description: '誰にも見つからずに移動しよう', difficulty: 3, rewardMultiplier: 1.2, duration: 20, acceptanceRate: 50 },
+    idol: { name: 'ファンサ', type: 'tap', description: 'ファンにハートを飛ばそう', difficulty: 2, rewardMultiplier: 1.5, duration: 15, acceptanceRate: 40 },
+    normal: { name: '事務作業', type: 'input', description: '書類を作成しよう', difficulty: 1, rewardMultiplier: 1.0, duration: 30, acceptanceRate: 90 },
 };

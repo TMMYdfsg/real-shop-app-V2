@@ -138,6 +138,12 @@ model User {
   receivedMessages     Message[]     @relation("ReceivedMessages")
   callsMade            VoiceCall[]   @relation("CallsMade")
   callsReceived        VoiceCall[]   @relation("CallsReceived")
+
+  // Politics Relations
+  proposals            PolicyProposal[]
+  votes                Vote[]
+
+
   
   createdAt            DateTime @default(now())
   updatedAt            DateTime @updatedAt
@@ -418,6 +424,8 @@ model Message {
   receiverId  String
   receiver    User     @relation("ReceivedMessages", fields: [receiverId], references: [id])
   content     String
+  imageUrl    String?  // 画像データ (Base64 or URL)
+  type        String?  // 'text' | 'image'
   isRead      Boolean  @default(false)
   createdAt   DateTime @default(now())
   
@@ -448,4 +456,40 @@ enum CallStatus {
   ENDED       // 終了
   MISSED      // 不在着信
   DECLINED    // 拒否
+}
+
+// ==========================================
+// Politics System
+// ==========================================
+
+model PolicyProposal {
+  id          String   @id @default(uuid())
+  title       String
+  description String
+  type        String
+  params      Json?
+  proposerId  String
+  proposer    User     @relation(fields: [proposerId], references: [id])
+  status      String   @default("active")
+  deadline    BigInt
+  
+  votes       Vote[]
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@index([status])
+}
+
+model Vote {
+  id          String         @id @default(uuid())
+  proposalId  String
+  proposal    PolicyProposal @relation(fields: [proposalId], references: [id])
+  userId      String
+  user        User           @relation(fields: [userId], references: [id])
+  vote        String
+  
+  createdAt   DateTime @default(now())
+  
+  @@unique([proposalId, userId])
 }
