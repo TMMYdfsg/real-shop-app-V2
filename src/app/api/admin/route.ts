@@ -171,6 +171,10 @@ export async function POST(req: NextRequest) {
                                     req.status = 'rejected';
                                 }
                             }
+                        } else if (req.type === 'vacation') {
+                            user.isOff = true;
+                            user.vacationReason = req.details || '有給休暇';
+                            addHistory(user, 'income', 0, '有給休暇承認');
                         }
                     }
                 }
@@ -214,7 +218,7 @@ export async function POST(req: NextRequest) {
 
                     // === 夜の自動処理 ===
                     state.users.forEach(user => {
-                        if (user.role === 'player') {
+                        if (user.role === 'player' && !user.isOff) {
                             // Init new fields if missing
                             if (user.health === undefined) user.health = 100;
                             if (user.isInsured === undefined) user.isInsured = false;
@@ -589,9 +593,31 @@ export async function POST(req: NextRequest) {
                                     req.status = 'rejected';
                                 }
                             }
+                        } else if (req.type === 'vacation') {
+                            user.isOff = true;
+                            user.vacationReason = req.details || '有給休暇';
+                            addHistory(user, 'income', 0, '有給休暇承認');
                         }
                     }
                 });
+                return state;
+            });
+            return NextResponse.json({ success: true });
+        }
+
+        if (action === 'toggle_vacation') {
+            const targetUserId = requestId;
+            await updateGameState((state) => {
+                const user = state.users.find(u => u.id === targetUserId);
+                if (user) {
+                    user.isOff = !user.isOff;
+                    if (user.isOff) {
+                        user.vacationReason = '管理者による設定';
+                    } else {
+                        user.vacationReason = undefined;
+                    }
+                    state.news.push(`📢 ${user.name} が ${user.isOff ? 'お休み中' : '復帰'} になりました。`);
+                }
                 return state;
             });
             return NextResponse.json({ success: true });

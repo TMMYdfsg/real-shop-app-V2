@@ -392,7 +392,6 @@ export async function updateGameState(updater: (state: GameState) => GameState |
             data: {
                 turn: newState.turn,
                 turnDuration: newState.settings.turnDuration,
-                // @ts-ignore
                 moneyMultiplier: newState.settings.moneyMultiplier,
                 taxRate: newState.settings.taxRate,
                 insuranceRate: newState.settings.insuranceRate,
@@ -425,7 +424,12 @@ export async function updateGameState(updater: (state: GameState) => GameState |
 
         // 2. Update Users (Iterate and upsert changed users - assuming modification)
         // Optimization: In Phase 1, we just update ALL users in the state. 
-        // Warning: This is slow if many users, but safe correctness-wise.
+        // Sync Deletions: Remove users from DB that are no longer in state
+        const currentUserIds = newState.users.map(u => u.id);
+        await prisma.user.deleteMany({
+            where: { id: { notIn: currentUserIds } }
+        });
+
         for (const user of newState.users) {
             await prisma.user.upsert({
                 where: { id: user.id },
@@ -481,6 +485,8 @@ export async function updateGameState(updater: (state: GameState) => GameState |
                     smartphone: user.smartphone as any,
                     commuteInfo: user.commuteInfo as any,
                     auditLogs: user.auditLogs as any,
+                    isOff: user.isOff,
+                    vacationReason: user.vacationReason,
                 },
                 create: {
                     id: user.id,
@@ -509,7 +515,9 @@ export async function updateGameState(updater: (state: GameState) => GameState |
                     ownedVehicles: (user.ownedVehicles as any) || [],
                     cryptoHoldings: (user.cryptoHoldings as any) || {},
                     qualifications: (user.qualifications as any) || [],
-                    jobHistory: (user.jobHistory as any) || null
+                    jobHistory: (user.jobHistory as any) || null,
+                    isOff: user.isOff || false,
+                    vacationReason: user.vacationReason || null
                 }
             });
         }
@@ -527,8 +535,12 @@ export async function updateGameState(updater: (state: GameState) => GameState |
             });
         }
 
-        // 4. Update Requests (Only adding new ones usually? or status change)
-        // For simplicity, we assume ID exists or create.
+        // 4. Update Requests
+        const currentRequestIds = newState.requests.map(r => r.id);
+        await prisma.request.deleteMany({
+            where: { id: { notIn: currentRequestIds } }
+        });
+
         for (const req of newState.requests) {
             // Check if exists to avoid error? upsert is safer
             await prisma.request.upsert({

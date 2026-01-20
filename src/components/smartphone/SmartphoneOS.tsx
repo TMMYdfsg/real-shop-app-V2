@@ -21,6 +21,7 @@ import { QuestApp } from './apps/QuestApp';
 import { ForbiddenApp } from './apps/ForbiddenApp';
 import { SettingsApp } from './apps/SettingsApp';
 import PoliticsApp from '@/components/apps/PoliticsApp';
+import { VacationApp } from './apps/VacationApp';
 
 export const SmartphoneOS = () => {
     const [currentApp, setCurrentApp] = useState<string | null>(null);
@@ -49,6 +50,7 @@ export const SmartphoneOS = () => {
             case 'dark_web': return <ForbiddenApp onBack={handleHome} />;
             case 'politics': return <PoliticsApp onClose={handleHome} />;
             case 'settings': return <SettingsApp onClose={handleHome} />;
+            case 'vacation': return <VacationApp onBack={handleHome} />;
             case 'camera': return <div className="p-8 text-black font-bold text-center mt-20">カメラは起動できません</div>;
             case 'shopping': return <div className="p-8 text-black font-bold text-center mt-20">準備中</div>;
             default: return null;

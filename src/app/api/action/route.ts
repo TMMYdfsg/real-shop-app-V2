@@ -10,6 +10,8 @@ import { GACHA_ITEMS } from '@/lib/gameData';
 import { logAudit, checkResalePrice } from '@/lib/audit';
 import { eventManager } from '@/lib/eventManager';
 import { getGameState } from '@/lib/dataStore';
+import { calculateSalary } from '@/lib/career';
+import { JOBS, PART_TIME_JOBS } from '@/lib/gameData';
 
 export const dynamic = 'force-dynamic';
 
@@ -1119,17 +1121,26 @@ export async function POST(request: NextRequest) {
                 const user = state.users.find(u => u.id === requesterId);
                 if (user) {
                     const score = details ? safeParseDetails(details).score : 0;
-                    const jobType = user.job || 'unemployed';
-                    const baseSalary = 100; // Define base or import
-                    // Simplified reward logic
-                    const reward = Math.floor(baseSalary * (score / 100) * (1 + (user.rating || 0) * 0.1));
+                    const jobId = user.job;
+                    const job = JOBS.find(j => j.id === jobId) || PART_TIME_JOBS.find(j => j.id === jobId);
+
+                    let reward = 0;
+                    if (job) {
+                        const multiplier = state.settings.moneyMultiplier || 1.0;
+                        const dailySalary = calculateSalary(user as any, job, multiplier);
+                        // スコアに応じて日給を変動（100点で満額、低スコアなら減額）
+                        reward = Math.floor(dailySalary * (score / 100));
+                    } else {
+                        reward = Math.floor(100 * (score / 100)); // Default fallback
+                    }
 
                     user.balance += reward;
+                    if (!user.transactions) user.transactions = [];
                     user.transactions.push({
                         id: uuidv4(),
                         type: 'income',
                         amount: reward,
-                        description: `仕事報酬 (${jobType})`,
+                        description: `仕事報酬 (${job?.name || jobId})`,
                         timestamp: Date.now()
                     });
                 }

@@ -87,6 +87,8 @@ model User {
   isHospitalized       Boolean?
   suspicionScore       Int?
   playerIcon           String?
+  isOff                Boolean  @default(false)
+  vacationReason       String?
   
   // JSON fields for complex data
   stocks               Json?    // { stockId: quantity }

@@ -163,7 +163,8 @@ export default function BankerDashboard() {
                                                 {req.type === 'loan' && '💸 借金申請'}
                                                 {req.type === 'repay' && '↩️ 返済申請'}
                                                 {req.type === 'tax' && '🧾 支払い'}
-                                                : <span style={{ fontWeight: 'bold' }}>{req.amount}枚</span>
+                                                {req.type === 'vacation' && '🛌 お休み申請'}
+                                                : <span style={{ fontWeight: 'bold' }}>{req.type === 'vacation' ? (req.details || '有給休暇') : `${req.amount}枚`}</span>
                                             </div>
                                         </div>
                                         <div style={{ display: 'flex', gap: '0.5rem' }}>
@@ -188,9 +189,36 @@ export default function BankerDashboard() {
                                     <span>借金:</span>
                                     <span style={{ color: user.debt > 0 ? 'var(--danger-color)' : 'inherit', fontWeight: user.debt > 0 ? 'bold' : 'normal' }}>{(user.debt || 0).toLocaleString()}枚</span>
                                 </div>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.8rem' }}>
                                     <span>職業:</span>
                                     <span>{user.job}</span>
+                                </div>
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '1rem', paddingTop: '0.5rem', borderTop: '1px solid #eee' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                        <span style={{ fontSize: '0.8rem', color: '#666' }}>お休みモード:</span>
+                                        {user.isOff ? (
+                                            <span style={{ fontSize: '0.75rem', padding: '2px 8px', borderRadius: '12px', background: 'var(--indigo-color)', color: 'white', fontWeight: 'bold' }}>ON</span>
+                                        ) : (
+                                            <span style={{ fontSize: '0.75rem', padding: '2px 8px', borderRadius: '12px', background: '#eee', color: '#999' }}>OFF</span>
+                                        )}
+                                    </div>
+                                    <Button
+                                        size="sm"
+                                        variant={user.isOff ? 'primary' : 'ghost'}
+                                        onClick={async () => {
+                                            if (confirm(`${user.name} を ${user.isOff ? '通常稼働' : 'お休み'} に切り替えますか？`)) {
+                                                await fetch('/api/admin', {
+                                                    method: 'POST',
+                                                    headers: { 'Content-Type': 'application/json' },
+                                                    body: JSON.stringify({ action: 'toggle_vacation', requestId: user.id })
+                                                });
+                                                window.location.reload();
+                                            }
+                                        }}
+                                        style={{ fontSize: '0.7rem' }}
+                                    >
+                                        {user.isOff ? '復帰させる' : 'お休みにする'}
+                                    </Button>
                                 </div>
                             </Card>
                         ))}

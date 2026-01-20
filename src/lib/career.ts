@@ -97,7 +97,7 @@ export function checkPromotion(user: User): { promoted: boolean; nextJobId?: str
 // 給与計算
 // ------------------------------------------------------------------
 
-export function calculateSalary(user: User, job: Occupation | PartTimeJob): number {
+export function calculateSalary(user: User, job: Occupation | PartTimeJob, multiplier: number = 1.0): number {
     let base = 'salary' in job ? (job as Occupation).salary : (job as PartTimeJob).hourlyWage * 8; // バイトは日給換算(仮)
 
     // 資格ボーナス
@@ -115,5 +115,5 @@ export function calculateSalary(user: User, job: Occupation | PartTimeJob): numb
         base += base * 0.05; // 人気者は5%アップ
     }
 
-    return Math.floor(base);
+    return Math.floor(base * multiplier);
 }

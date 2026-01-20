@@ -68,7 +68,9 @@ export async function POST(request: Request) {
                 shopItems: [],
                 ownedLands: [],
                 ownedPlaces: [],
-                shopMenu: []
+                shopMenu: [],
+                isOff: false,
+                vacationReason: ''
             };
         });
 

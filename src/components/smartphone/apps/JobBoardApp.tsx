@@ -43,7 +43,9 @@ export const JobBoardApp: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     if (selectedJob) {
         // Detail View
         const { canApply, reason } = currentUser ? canApplyJob(currentUser, selectedJob) : { canApply: false, reason: 'Login required' };
-        const salary = currentUser ? calculateSalary(currentUser, selectedJob) : 0;
+        const multiplier = gameState?.settings.moneyMultiplier || 1.0;
+        const salary = currentUser ? calculateSalary(currentUser, selectedJob, multiplier) : 0;
+        const hourlyWage = 'hourlyWage' in selectedJob ? Math.floor((selectedJob as any).hourlyWage * multiplier) : 0;
 
         // Handle different property structures
         const experienceReq = activeTab === 'jobs'
@@ -69,7 +71,7 @@ export const JobBoardApp: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
                     <div className="bg-gray-100 p-3 rounded-lg mb-4">
                         <p className="font-bold text-lg text-blue-800">
-                            {activeTab === 'jobs' ? `月給 ¥${salary.toLocaleString()}` : `時給 ¥${(selectedJob as any).hourlyWage.toLocaleString()}`}
+                            {activeTab === 'jobs' ? `月給 ¥${salary.toLocaleString()}` : `時給 ¥${hourlyWage.toLocaleString()}`}
                         </p>
                         <p className="text-xs text-gray-500 mt-1">※能力・資格により変動</p>
                     </div>
@@ -137,7 +139,7 @@ export const JobBoardApp: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                         <div>
                             <div className="font-bold text-sm">{job.name}</div>
                             <div className="text-xs text-gray-500 mt-1">
-                                {activeTab === 'jobs' ? `月給 ¥${(job as any).salary.toLocaleString()}~` : `時給 ¥${(job as any).hourlyWage.toLocaleString()}`}
+                                {activeTab === 'jobs' ? `月給 ¥${Math.floor((job as any).salary * (gameState?.settings.moneyMultiplier || 1)).toLocaleString()}~` : `時給 ¥${Math.floor((job as any).hourlyWage * (gameState?.settings.moneyMultiplier || 1)).toLocaleString()}`}
                             </div>
                         </div>
                         <div className="text-gray-400">›</div>

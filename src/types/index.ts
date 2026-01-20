@@ -42,7 +42,7 @@ export interface Product {
 
 export interface Request {
     id: string;
-    type: 'loan' | 'repay' | 'income' | 'tax' | 'bill' | 'buy_stock' | 'sell_stock' | 'change_job' | 'unlock_forbidden' | 'transfer' | 'pay_tax' | 'city_buy_land' | 'city_build_place' | 'city_buy_address' | 'buy_vehicle' | 'restock_items';
+    type: 'loan' | 'repay' | 'income' | 'tax' | 'bill' | 'buy_stock' | 'sell_stock' | 'change_job' | 'unlock_forbidden' | 'transfer' | 'pay_tax' | 'city_buy_land' | 'city_build_place' | 'city_buy_address' | 'buy_vehicle' | 'restock_items' | 'vacation';
     requesterId: string;
     amount: number;
     details?: string;
@@ -293,6 +293,9 @@ export interface User {
     settings?: {
         notificationSound?: string;
     };
+    // Vacation System
+    isOff?: boolean; // お休み中フラグ
+    vacationReason?: string; // お休みの理由
 }
 
 export interface Quest {

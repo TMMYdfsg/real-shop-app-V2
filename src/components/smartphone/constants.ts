@@ -17,6 +17,7 @@ export const APPS = [
     { id: 'camera', name: 'カメラ', icon: '📸', color: 'bg-gray-700', description: 'カメラ' },
     { id: 'settings', name: '設定', icon: '⚙️', color: 'bg-gray-500', description: '設定' },
     { id: 'politics', name: '政治', icon: '🗳️', color: 'bg-blue-700', description: '投票・提案' },
+    { id: 'vacation', name: 'お休みする', icon: '🛌', color: 'bg-indigo-400', description: '有給休暇の申請' },
 ];
 
 export const DOCK_APPS = ['phone', 'sns', 'message', 'video'];

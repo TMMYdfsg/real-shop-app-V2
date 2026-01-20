@@ -191,12 +191,9 @@ export function processGameTick(state: GameState): { newState: GameState, hasCha
                     const moneyMultiplier = state.settings?.moneyMultiplier || 1;
 
                     if (u.role === 'banker') {
-                        u.balance += 1000 * moneyMultiplier; // 銀行員給与 × 倍率
-                    } else {
-                        // プレイヤーの給与計算（職業ベース）
-                        // 注意: サーバーサイド実行を想定しているが、ここはクライアントでも動く可能性がある共通ロジック
-                        // import/require はNext.jsのクライアントコンポーネントで問題になる可能性があるため
-                        // 定義をここに持つか、純粋なデータとして扱うのが安全
+                        u.balance += 1000 * moneyMultiplier; // 銀行員給料 × 倍率
+                    } else if (!u.isOff) { // お休み中でないプレイヤーのみ給与を支払う
+                        // プレイヤーの給料計算（職業ベース）
                         const JOB_DEFINITIONS: any = {
                             normal: { salary: 500 },
                             police: { salary: 800 },
@@ -204,7 +201,7 @@ export function processGameTick(state: GameState): { newState: GameState, hasCha
                             idol: { salary: 1200 }
                         };
                         const jobDef = JOB_DEFINITIONS[u.jobType || 'normal'] || JOB_DEFINITIONS.normal;
-                        let salary = jobDef.salary * moneyMultiplier; // 給与 × 倍率
+                        let salary = jobDef.salary * moneyMultiplier; // 給料 × 倍率
 
                         // 人気度ボーナス (Rating * 5%)
                         const ratingBonus = Math.floor(salary * (u.rating || 0) * 0.05);
@@ -214,17 +211,27 @@ export function processGameTick(state: GameState): { newState: GameState, hasCha
                         const netIncome = salary - tax;
 
                         // 自動貯金
-                        const autoSave = Math.floor(netIncome * state.settings.salaryAutoSafeRate);
+                        const autoSave = Math.floor(netIncome * (state.settings.salaryAutoSafeRate || 0.1));
                         const cash = netIncome - autoSave;
 
                         u.balance += cash;
                         u.deposit += autoSave;
                         u.unpaidTax = (u.unpaidTax || 0);
+
+                        // 取引履歴
+                        if (!u.transactions) u.transactions = [];
+                        u.transactions.push({
+                            id: uuidv4(),
+                            type: 'income',
+                            amount: cash,
+                            description: `給料支給 (${u.job})`,
+                            timestamp: Date.now()
+                        });
                     }
 
 
                     // 2. ショップ売上シミュレーション (Day start)
-                    if (u.shopName && state.isDay) {
+                    if (u.shopName && state.isDay && !u.isOff) {
                         const baseCustomers = Math.floor(Math.random() * 3); // 0-2人
                         const extraCustomers = Math.floor((u.rating || 0) / 2);
                         let customers = baseCustomers + extraCustomers;
