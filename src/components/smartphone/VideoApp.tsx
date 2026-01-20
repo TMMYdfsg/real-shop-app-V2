@@ -20,6 +20,7 @@ export default function VideoApp({ onClose }: { onClose: () => void }) {
     const [color, setColor] = useState('#ff0000');
     const [file, setFile] = useState<File | null>(null);
     const [isUploading, setIsUploading] = useState(false);
+    const [uploadProgress, setUploadProgress] = useState(0);
 
     // Helper: Check video duration
     const checkVideoDuration = (file: File): Promise<boolean> => {
