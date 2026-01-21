@@ -75,3 +75,6 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: 'Failed to create user' }, { status: 500 });
     }
 }
+
+export const dynamic = 'force-static';
+

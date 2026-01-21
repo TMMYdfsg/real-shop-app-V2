@@ -1,0 +1,27 @@
+
+> real-shop-app-v2@0.1.0 build:static
+> next build
+
+   笆ｲ Next.js 15.1.0
+   - Environments: .env.local, .env
+
+   Creating an optimized production build ...
+ 笳・(pwa) PWA support is disabled.
+ 笨・Compiled successfully
+   Skipping linting
+   Checking validity of types ...
+   Collecting page data ...
+[Prisma] DATABASE_URL is configured
+Error: export const dynamic = "force-static"/export const revalidate not configured on route "/api/admin/parcels" with "output: export". See more info here: https://nextjs.org/docs/advanced-features/static-html-export
+    at 52963 (C:\Users\tomoy\Desktop\program code\real-shop-app V2\.next\server\app\api\admin\parcels\route.js:1:2238)
+    at t (C:\Users\tomoy\Desktop\program code\real-shop-app V2\.next\server\webpack-runtime.js:1:128)
+    at t (C:\Users\tomoy\Desktop\program code\real-shop-app V2\.next\server\app\api\admin\parcels\route.js:1:4034)
+    at <unknown> (C:\Users\tomoy\Desktop\program code\real-shop-app V2\.next\server\app\api\admin\parcels\route.js:1:4072)
+    at t.X (C:\Users\tomoy\Desktop\program code\real-shop-app V2\.next\server\webpack-runtime.js:1:1206)
+    at <unknown> (C:\Users\tomoy\Desktop\program code\real-shop-app V2\.next\server\app\api\admin\parcels\route.js:1:4047)
+    at Object.<anonymous> (C:\Users\tomoy\Desktop\program code\real-shop-app V2\.next\server\app\api\admin\parcels\route.js:1:4100)
+
+> Build error occurred
+[Error: Failed to collect page data for /api/admin/parcels] {
+  type: 'Error'
+}

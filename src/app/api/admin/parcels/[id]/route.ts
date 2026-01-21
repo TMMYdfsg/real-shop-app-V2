@@ -2,7 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { cookies } from 'next/headers';
 
-// export const dynamic = 'force-dynamic';
+export const dynamic = 'force-static';
+export async function generateStaticParams() { return []; }
+
 
 /**
  * PATCH /api/admin/parcels/:id
@@ -107,3 +109,6 @@ export async function DELETE(
         );
     }
 }
+
+
+

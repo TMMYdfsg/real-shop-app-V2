@@ -1,6 +1,8 @@
 import { NextRequest } from 'next/server';
 import { eventManager } from '@/lib/eventManager';
 
+export const dynamic = 'force-static';
+
 export async function GET(req: NextRequest) {
     const stream = new ReadableStream({
         start(controller) {

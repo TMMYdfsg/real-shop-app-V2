@@ -9,8 +9,8 @@
     "build:static": "next build",
     "start": "next start",
     "lint": "eslint",
-    "cap:sync": "cd android-migration && npx cap sync android",
-    "cap:open": "cd android-migration && npx cap open android",
+    "cap:sync": "npx cap sync android",
+    "cap:open": "npx cap open android",
     "android:build": "npm run build:static && npm run cap:sync"
   },
   "dependencies": {

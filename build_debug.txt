@@ -1,0 +1,24 @@
+
+> real-shop-app-v2@0.1.0 build:static
+> next build
+
+   笆ｲ Next.js 15.1.0
+   - Environments: .env.local, .env
+
+   Creating an optimized production build ...
+ 笳・(pwa) PWA support is disabled.
+ 笨・Compiled successfully
+   Skipping linting
+   Checking validity of types ...
+   Collecting page data ...
+Error: export const dynamic = "force-static"/export const revalidate not configured on route "/api/events" with "output: export". See more info here: https://nextjs.org/docs/advanced-features/static-html-export
+    at 34001 (C:\Users\tomoy\Desktop\program code\real-shop-app V2\.next\server\app\api\events\route.js:3:336)
+    at t (C:\Users\tomoy\Desktop\program code\real-shop-app V2\.next\server\webpack-runtime.js:1:128)
+    at r (C:\Users\tomoy\Desktop\program code\real-shop-app V2\.next\server\app\api\events\route.js:3:1235)
+    at <unknown> (C:\Users\tomoy\Desktop\program code\real-shop-app V2\.next\server\app\api\events\route.js:3:1263)
+    at t.X (C:\Users\tomoy\Desktop\program code\real-shop-app V2\.next\server\webpack-runtime.js:1:1206)
+    at <unknown> (C:\Users\tomoy\Desktop\program code\real-shop-app V2\.next\server\app\api\events\route.js:3:1248)
+    at Object.<anonymous> (C:\Users\tomoy\Desktop\program code\real-shop-app V2\.next\server\app\api\events\route.js:3:1291)
+
+> Build error occurred
+[Error: Failed to collect page data for /api/events] { type: 'Error' }

@@ -1,0 +1,21 @@
+
+> real-shop-app-v2@0.1.0 build:static
+> next build
+
+   笆ｲ Next.js 15.1.0
+   - Environments: .env.local, .env
+
+   Creating an optimized production build ...
+ 笳・(pwa) PWA support is disabled.
+ 笨・Compiled successfully
+   Skipping linting
+   Checking validity of types ...
+   Collecting page data ...
+[Prisma] DATABASE_URL is configured
+[Prisma] DATABASE_URL is configured
+[Prisma] DATABASE_URL is configured
+[Prisma] DATABASE_URL is configured
+[Prisma] DATABASE_URL is configured
+
+> Build error occurred
+[Error: Page "/api/calls/[id]" is missing "generateStaticParams()" so it cannot be used with "output: export" config.]

@@ -2,7 +2,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { cookies } from 'next/headers';
 
-// export const dynamic = 'force-dynamic';
+export const dynamic = 'force-static';
+export async function generateStaticParams() { return []; }
+
+
 
 /**
  * POST /api/parcels/:id/buy
@@ -111,3 +114,7 @@ export async function POST(
         );
     }
 }
+
+
+
+

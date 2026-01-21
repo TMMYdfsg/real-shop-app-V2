@@ -154,3 +154,6 @@ function generateRtcToken(channelName: string, uid: number): string {
         expirationTimeInSeconds
     );
 }
+
+export const dynamic = 'force-static';
+
