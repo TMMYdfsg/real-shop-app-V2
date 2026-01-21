@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { getGameState, updateGameState, convertBigIntToNumber } from '@/lib/dataStore';
 import { processGameTick } from '@/lib/gameLogic';
 
-export const dynamic = 'force-dynamic';
+// // export const dynamic = 'force-dynamic';
 
 export async function GET() {
     try {

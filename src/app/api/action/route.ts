@@ -13,7 +13,7 @@ import { getGameState } from '@/lib/dataStore';
 import { calculateSalary } from '@/lib/career';
 import { JOBS, PART_TIME_JOBS } from '@/lib/gameData';
 
-export const dynamic = 'force-dynamic';
+// // export const dynamic = 'force-dynamic';
 
 // Validation Schema
 const ActionSchema = z.object({

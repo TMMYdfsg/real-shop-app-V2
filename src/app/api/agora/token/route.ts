@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { RtcTokenBuilder, RtcRole } from 'agora-access-token';
 
-export const dynamic = 'force-dynamic';
+// // export const dynamic = 'force-dynamic';
 
 export async function POST(request: Request) {
     try {

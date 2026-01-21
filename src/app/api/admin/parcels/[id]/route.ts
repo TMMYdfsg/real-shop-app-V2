@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { cookies } from 'next/headers';
 
-export const dynamic = 'force-dynamic';
+// export const dynamic = 'force-dynamic';
 
 /**
  * PATCH /api/admin/parcels/:id

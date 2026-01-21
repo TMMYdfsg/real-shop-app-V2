@@ -5,24 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="51268fa0-9658-461e-ad07-22efd73df376" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/../../next.config.ts" beforeDir="false" afterPath="$PROJECT_DIR$/../../next.config.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/../../package-lock.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../package.json" beforeDir="false" afterPath="$PROJECT_DIR$/../../package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../prisma/schema.prisma" beforeDir="false" afterPath="$PROJECT_DIR$/../../prisma/schema.prisma" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../src/app/api/action/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/../../src/app/api/action/route.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../src/app/api/admin/route.ts" beforeDir="false" afterPath="$PROJECT_DIR$/../../src/app/api/admin/route.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../src/app/banker/godmode/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../../src/app/banker/godmode/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../src/app/banker/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../../src/app/banker/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../src/app/globals.css" beforeDir="false" afterPath="$PROJECT_DIR$/../../src/app/globals.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../src/app/layout.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../../src/app/layout.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../src/components/layout/PlayerLayout.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../../src/components/layout/PlayerLayout.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../src/components/layout/TimeThemeWrapper.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../../src/components/layout/TimeThemeWrapper.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../src/components/smartphone/HomeScreen.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../../src/components/smartphone/HomeScreen.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../src/components/smartphone/SmartphoneOS.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../../src/components/smartphone/SmartphoneOS.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../src/components/smartphone/SmartphoneShell.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../../src/components/smartphone/SmartphoneShell.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../src/components/ui/magic/MagicButton.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../../src/components/ui/magic/MagicButton.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../src/lib/dataStore.ts" beforeDir="false" afterPath="$PROJECT_DIR$/../../src/lib/dataStore.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../src/types/index.ts" beforeDir="false" afterPath="$PROJECT_DIR$/../../src/types/index.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -35,9 +18,9 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/../.." />
   </component>
-  <component name="ProjectColorInfo"><![CDATA[{
-  "associatedIndex": 3
-}]]></component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 3
+}</component>
   <component name="ProjectId" id="38ZZle6BXpQU4ui3JN6rIsEdTps" />
   <component name="ProjectViewState">
     <option name="flattenPackages" value="true" />
@@ -63,12 +46,12 @@
     "RunOnceActivity.cidr.known.project.marker": "true",
     "RunOnceActivity.git.unshallow": "true",
     "RunOnceActivity.readMode.enableVisualFormatting": "true",
-    "android.gradle.sync.needed": "true",
     "cf.first.check.clang-format": "false",
     "cidr.known.project.marker": "true",
     "com.codeium.enabled": "true",
+    "com.google.services.firebase.aqiPopupShown": "true",
     "git-widget-placeholder": "master",
-    "last_opened_file_path": "C:/Users/tomoy/Desktop/program code/real-shop-app V2/android",
+    "last_opened_file_path": "C:/Users/tomoy/Desktop/program code/real-shop-app V2",
     "settings.editor.selected.configurable": "AndroidSdkUpdater"
   }
 }]]></component>

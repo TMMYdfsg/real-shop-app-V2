@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { v4 as uuidv4 } from 'uuid';
 
-export const dynamic = 'force-dynamic';
+// // export const dynamic = 'force-dynamic';
 
 export async function POST() {
     try {

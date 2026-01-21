@@ -3,7 +3,7 @@ import { updateGameState } from '@/lib/dataStore';
 import { User, Role } from '@/types';
 // import { v4 as uuidv4 } from 'uuid'; // Removed
 
-export const dynamic = 'force-dynamic';
+// // export const dynamic = 'force-dynamic';
 
 
 export async function POST(request: Request) {

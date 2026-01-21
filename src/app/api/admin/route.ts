@@ -5,7 +5,7 @@ import crypto from 'crypto';
 import { generateLands, PREFECTURES } from '@/lib/cityData';
 import { eventManager } from '@/lib/eventManager';
 
-export const dynamic = 'force-dynamic';
+// // export const dynamic = 'force-dynamic';
 
 // Helper for adding transactions (placed outside main function or inside if preferred scope allows)
 const addHistory = (user: User, type: Transaction['type'], amount: number, description: string, targetId?: string, senderId?: string) => {
