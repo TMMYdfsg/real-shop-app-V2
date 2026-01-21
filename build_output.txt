@@ -1,0 +1,42 @@
+
+> real-shop-app-v2@0.1.0 build
+> next build
+
+   笆ｲ Next.js 15.1.0
+   - Environments: .env.local, .env
+
+   Creating an optimized production build ...
+ 笨・Compiled successfully
+   Skipping linting
+   Checking validity of types ...
+   Collecting page data ...
+[Prisma] DATABASE_URL is configured
+[Prisma] DATABASE_URL is configured
+[Prisma] DATABASE_URL is configured
+[Prisma] DATABASE_URL is configured
+[Prisma] DATABASE_URL is configured
+[Prisma] DATABASE_URL is configured
+[Prisma] DATABASE_URL is configured
+[Prisma] DATABASE_URL is configured
+[Prisma] DATABASE_URL is configured
+[Prisma] DATABASE_URL is configured
+[Prisma] DATABASE_URL is configured
+[Prisma] DATABASE_URL is configured
+[Prisma] DATABASE_URL is configured
+[Prisma] DATABASE_URL is configured
+[Prisma] DATABASE_URL is configured
+   Generating static pages (0/26) ...
+Error occurred prerendering page "/". Read more: https://nextjs.org/docs/messages/prerender-error
+ReferenceError: window is not defined
+    at n (C:\Users\tomoy\Desktop\program code\real-shop-app V2\.next\server\chunks\9460.js:1:8046)
+    at nO (C:\Users\tomoy\Desktop\program code\real-shop-app V2\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:20:45959)
+    at nI (C:\Users\tomoy\Desktop\program code\real-shop-app V2\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:20:47734)
+    at nI (C:\Users\tomoy\Desktop\program code\real-shop-app V2\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:20:62515)
+    at nL (C:\Users\tomoy\Desktop\program code\real-shop-app V2\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:20:65533)
+    at nN (C:\Users\tomoy\Desktop\program code\real-shop-app V2\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:20:63164)
+    at nB (C:\Users\tomoy\Desktop\program code\real-shop-app V2\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:20:68946)
+    at nD (C:\Users\tomoy\Desktop\program code\real-shop-app V2\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:20:67647)
+    at nL (C:\Users\tomoy\Desktop\program code\real-shop-app V2\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:20:65800)
+    at nN (C:\Users\tomoy\Desktop\program code\real-shop-app V2\node_modules\next\dist\compiled\next-server\app-page.runtime.prod.js:20:63164)
+Export encountered an error on /page: /, exiting the build.
+ 筧ｯ Static worker exited with code: 1 and signal: null

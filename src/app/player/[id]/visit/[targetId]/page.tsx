@@ -270,8 +270,9 @@ export default function VisitShopPage() {
                         );
                     })}
                 </div>
+            )}
 
-                {/* Review Section */}
+            {/* Review Section */}
             <div className="mt-12 mb-20 mx-1">
                 <div className="flex justify-between items-center mb-4">
                     <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2">

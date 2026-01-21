@@ -81,8 +81,8 @@ const AnimatedBackground = () => {
             <motion.div
                 className="absolute w-[800px] h-[800px] bg-indigo-500/10 rounded-full blur-[120px]"
                 animate={{
-                    x: (mousePosition.x * window.innerWidth) - 400,
-                    y: (mousePosition.y * window.innerHeight) - 400,
+                    x: typeof window !== 'undefined' ? (mousePosition.x * window.innerWidth) - 400 : 0,
+                    y: typeof window !== 'undefined' ? (mousePosition.y * window.innerHeight) - 400 : 0,
                 }}
                 transition={{
                     type: "spring",

@@ -1,0 +1,132 @@
+
+> real-shop-app-v2@0.1.0 build
+> next build
+
+   笆ｲ Next.js 15.1.0
+   - Environments: .env.local, .env
+
+   Creating an optimized production build ...
+ 笨・Compiled successfully
+   Skipping linting
+   Checking validity of types ...
+   Collecting page data ...
+[Prisma] DATABASE_URL is configured
+[Prisma] DATABASE_URL is configured
+[Prisma] DATABASE_URL is configured
+[Prisma] DATABASE_URL is configured
+[Prisma] DATABASE_URL is configured
+[Prisma] DATABASE_URL is configured
+[Prisma] DATABASE_URL is configured
+[Prisma] DATABASE_URL is configured
+[Prisma] DATABASE_URL is configured
+[Prisma] DATABASE_URL is configured
+[Prisma] DATABASE_URL is configured
+[Prisma] DATABASE_URL is configured
+[Prisma] DATABASE_URL is configured
+[Prisma] DATABASE_URL is configured
+[Prisma] DATABASE_URL is configured
+   Generating static pages (0/26) ...
+[Prisma] DATABASE_URL is configured
+   Generating static pages (6/26) 
+[Prisma] DATABASE_URL is configured
+   Generating static pages (12/26) 
+   Generating static pages (19/26) 
+ 笨・Generating static pages (26/26)
+   Finalizing page optimization ...
+   Collecting build traces ...
+
+Route (app)                                Size     First Load JS
+笏・笳・/                                      4.18 kB         155 kB
+笏・笳・/_not-found                            990 B           107 kB
+笏・ﾆ・/api/action                            209 B           106 kB
+笏・ﾆ・/api/admin                             209 B           106 kB
+笏・ﾆ・/api/admin/parcels                     209 B           106 kB
+笏・ﾆ・/api/admin/parcels/[id]                209 B           106 kB
+笏・ﾆ・/api/agora/token                       209 B           106 kB
+笏・ﾆ・/api/calls                             209 B           106 kB
+笏・ﾆ・/api/calls/[id]                        209 B           106 kB
+笏・ﾆ・/api/events                            209 B           106 kB
+笏・ﾆ・/api/game                              209 B           106 kB
+笏・ﾆ・/api/messages                          209 B           106 kB
+笏・ﾆ・/api/news                              209 B           106 kB
+笏・ﾆ・/api/notifications                     209 B           106 kB
+笏・ﾆ・/api/parcels/[id]/buy                  209 B           106 kB
+笏・ﾆ・/api/parcels/for-sale                  209 B           106 kB
+笏・ﾆ・/api/politics                          209 B           106 kB
+笏・ﾆ・/api/politics/propose                  209 B           106 kB
+笏・ﾆ・/api/politics/resolve                  209 B           106 kB
+笏・ﾆ・/api/politics/vote                     209 B           106 kB
+笏・ﾆ・/api/setup/full                        209 B           106 kB
+笏・ﾆ・/api/setup/settings                    209 B           106 kB
+笏・ﾆ・/api/setup/user                        209 B           106 kB
+笏・ﾆ・/api/sns/posts                         209 B           106 kB
+笏・ﾆ・/api/upload/video                      209 B           106 kB
+笏・ﾆ・/api/video/list                        209 B           106 kB
+笏・笳・/banker                                7.27 kB         158 kB
+笏・笳・/banker/config                         2.1 kB          147 kB
+笏・笳・/banker/eventcontrol                   4.22 kB         155 kB
+笏・笳・/banker/events                         3.08 kB         154 kB
+笏・笳・/banker/finance                        2.13 kB         147 kB
+笏・笳・/banker/godmode                        4.68 kB         155 kB
+笏・笳・/banker/market                         2.86 kB         153 kB
+笏・笳・/banker/npcs                           3.91 kB         154 kB
+笏・笳・/banker/products                       7.34 kB         158 kB
+笏・笳・/banker/realestate                     9.45 kB         160 kB
+笏・笳・/banker/requests                       5.05 kB         156 kB
+笏・笳・/banker/roulette                       3.69 kB         154 kB
+笏・笳・/banker/season                         2.92 kB         154 kB
+笏・笳・/banker/timer                          3.15 kB         154 kB
+笏・笳・/banker/users                          4.08 kB         115 kB
+笏・笳・/help                                  6.06 kB         112 kB
+笏・ﾆ・/player/[id]                           1.05 kB         198 kB
+笏・ﾆ・/player/[id]/bank                      5.8 kB          156 kB
+笏・ﾆ・/player/[id]/casino                    8.85 kB         159 kB
+笏・ﾆ・/player/[id]/catalog                   3.49 kB         154 kB
+笏・ﾆ・/player/[id]/collection                4.97 kB         156 kB
+笏・ﾆ・/player/[id]/commute                   5.07 kB         162 kB
+笏・ﾆ・/player/[id]/commute/config            4.62 kB         155 kB
+笏・ﾆ・/player/[id]/commute/run               8.52 kB         159 kB
+笏・ﾆ・/player/[id]/config                    16.1 kB         172 kB
+笏・ﾆ・/player/[id]/debt                      3 kB            154 kB
+笏・ﾆ・/player/[id]/forbidden                 3.31 kB         154 kB
+笏・ﾆ・/player/[id]/gacha                     5.43 kB         156 kB
+笏・ﾆ・/player/[id]/history                   2.1 kB          113 kB
+笏・ﾆ・/player/[id]/items                     5.16 kB         162 kB
+笏・ﾆ・/player/[id]/job                       7.47 kB         158 kB
+笏・ﾆ・/player/[id]/kitchen                   1.69 kB         159 kB
+笏・ﾆ・/player/[id]/map                       1.39 kB         107 kB
+笏・ﾆ・/player/[id]/museum                    7.42 kB         164 kB
+笏・ﾆ・/player/[id]/myroom                    3.18 kB         154 kB
+笏・ﾆ・/player/[id]/payment                   61.2 kB         212 kB
+笏・ﾆ・/player/[id]/points                    2.98 kB         154 kB
+笏・ﾆ・/player/[id]/points/exchange           8.12 kB         159 kB
+笏・ﾆ・/player/[id]/points/exchange/[shopId]  6.93 kB         158 kB
+笏・ﾆ・/player/[id]/points/manage             7.29 kB         158 kB
+笏・ﾆ・/player/[id]/qualifications            13.2 kB         164 kB
+笏・ﾆ・/player/[id]/ranking                   2.56 kB         114 kB
+笏・ﾆ・/player/[id]/realestate                14.2 kB         165 kB
+笏・ﾆ・/player/[id]/receipts                  3.6 kB          154 kB
+笏・ﾆ・/player/[id]/room                      1.62 kB         159 kB
+笏・ﾆ・/player/[id]/roulette                  6.06 kB         157 kB
+笏・ﾆ・/player/[id]/shop                      55 kB           212 kB
+笏・ﾆ・/player/[id]/shop/exchange             7.3 kB          158 kB
+笏・ﾆ・/player/[id]/shop/vehicles             6 kB            163 kB
+笏・ﾆ・/player/[id]/smartphone                555 B           197 kB
+笏・ﾆ・/player/[id]/smartphone/sns            5.67 kB         156 kB
+笏・ﾆ・/player/[id]/smartphone/video          5.92 kB         157 kB
+笏・ﾆ・/player/[id]/special                   19.4 kB         170 kB
+笏・ﾆ・/player/[id]/stock                     4.66 kB         155 kB
+笏・ﾆ・/player/[id]/timemachine               6.92 kB         158 kB
+笏・ﾆ・/player/[id]/visit/[targetId]          5.58 kB         156 kB
+笏・ﾆ・/player/[id]/website/edit              3.48 kB         158 kB
+笏・ﾆ・/player/[id]/website/view              912 B           156 kB
+笏・ﾆ・/player/myshop                         1.78 kB         108 kB
++ First Load JS shared by all              106 kB
+  笏・chunks/1517-c189584bacb3c19e.js        50.7 kB
+  笏・chunks/4bd1b696-b23a874904082251.js    53 kB
+  笏・other shared chunks (total)            2.19 kB
+
+
+笳・ (Static)   prerendered as static content
+ﾆ・ (Dynamic)  server-rendered on demand
+

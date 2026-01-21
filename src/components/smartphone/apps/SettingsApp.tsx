@@ -15,7 +15,12 @@ const SOUND_LIST = Array.from({ length: 21 }, (_, i) => ({
 export const SettingsApp: React.FC<SettingsAppProps> = ({ onClose }) => {
     const { currentUser } = useGame();
     // In a real app, this would come from user preference in DB
-    const [selectedSound, setSelectedSound] = useState(localStorage.getItem('notification_sound') || 'notification_1.mp3');
+    const [selectedSound, setSelectedSound] = useState('notification_1.mp3');
+
+    useEffect(() => {
+        const saved = localStorage.getItem('notification_sound');
+        if (saved) setSelectedSound(saved);
+    }, []);
 
     const handlePlayPreview = (filename: string) => {
         const audio = new Audio(`/sounds/${filename}`);

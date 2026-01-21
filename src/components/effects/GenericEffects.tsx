@@ -50,8 +50,8 @@ export const ConfettiEffect: React.FC<{ trigger: number }> = ({ trigger }) => {
             {Array.from({ length: 30 }).map((_, i) => (
                 <Particle
                     key={`${trigger}-${i}`}
-                    x={window.innerWidth / 2}
-                    y={window.innerHeight / 2}
+                    x={typeof window !== 'undefined' ? window.innerWidth / 2 : 0}
+                    y={typeof window !== 'undefined' ? window.innerHeight / 2 : 0}
                     color={colors[i % colors.length]}
                 />
             ))}
