@@ -37,6 +37,7 @@ model GameSettings {
   marketTrend         String  @default("stable")
   taxRateAdjust       Float   @default(0.0)
   lastUpdateTurn      Int     @default(0)
+  economyTotalSales   Float   @default(0.0) // グローバル総売上
   envWeather          String  @default("sunny")
   envTemperature      Int     @default(20)
   envSeason           String  @default("spring")

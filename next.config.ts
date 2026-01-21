@@ -1,9 +1,17 @@
 import type { NextConfig } from "next";
+import withPWAInit from "@ducanh2912/next-pwa";
+
+const withPWA = withPWAInit({
+  dest: "public",
+  disable: process.env.NODE_ENV === "development",
+  register: true,
+});
 
 const nextConfig: NextConfig = {
-  output: 'standalone',
+  // 静的ビルドが必要な場合は export にする
+  output: process.env.NEXT_PUBLIC_STATIC_BUILD === 'true' ? 'export' : 'standalone',
   eslint: {
-    ignoreDuringBuilds: true, // ビルド時のLintエラーを無視（移行用）
+    ignoreDuringBuilds: true,
   },
   webpack: (config, { isServer }) => {
     if (isServer) {
@@ -28,4 +36,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+export default withPWA(nextConfig);

@@ -6,10 +6,18 @@
     "dev": "next dev",
     "dev:ssl": "concurrently \"local-ssl-proxy --source 3001 --target 3000 --hostname 0.0.0.0\" \"next dev\"",
     "build": "next build",
+    "build:static": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "cap:sync": "cd android-migration && npx cap sync android",
+    "cap:open": "cd android-migration && npx cap open android",
+    "android:build": "npm run build:static && npm run cap:sync"
   },
   "dependencies": {
+    "@capacitor/android": "^8.0.1",
+    "@capacitor/cli": "^8.0.1",
+    "@capacitor/core": "^8.0.1",
+    "@capacitor/haptics": "^8.0.0",
     "@googlemaps/js-api-loader": "^2.0.2",
     "@googlemaps/react-wrapper": "^1.2.0",
     "@prisma/client": "5.22.0",
@@ -45,6 +53,7 @@
     "zod": "^4.3.5"
   },
   "devDependencies": {
+    "@ducanh2912/next-pwa": "^10.2.9",
     "@types/mapbox-gl": "^3.4.1",
     "concurrently": "^9.2.1",
     "dotenv-cli": "^11.0.0",

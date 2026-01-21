@@ -1,5 +1,5 @@
 import React from 'react';
-
+import { getVibrationAdapter, VibrationPatterns } from '@/lib/vibration';
 
 interface SmartphoneShellProps {
     children: React.ReactNode;
@@ -7,6 +7,12 @@ interface SmartphoneShellProps {
 }
 
 export const SmartphoneShell = ({ children, onHome }: SmartphoneShellProps) => {
+    const handleHomeClick = () => {
+        const vibration = getVibrationAdapter();
+        vibration.vibrate(VibrationPatterns.tap);
+        onHome?.();
+    };
+
     return (
         <div
             className="relative w-[380px] h-[820px] rounded-[3.5rem] bg-[#121212] shadow-[0_30px_60px_-10px_rgba(0,0,0,0.6)] p-[14px] shrink-0 self-center border-[6px] border-[#333] ring-1 ring-white/10"
@@ -19,7 +25,7 @@ export const SmartphoneShell = ({ children, onHome }: SmartphoneShellProps) => {
                 {/* Home Indicator (Inside screen) */}
                 <div
                     className="absolute bottom-2 left-0 right-0 h-8 flex justify-center items-end pb-2 z-50 cursor-pointer"
-                    onClick={onHome}
+                    onClick={handleHomeClick}
                 >
                     <div className="w-32 h-1.5 bg-white/40 rounded-full backdrop-blur-md transition-all active:scale-x-110 active:bg-white/60" />
                 </div>

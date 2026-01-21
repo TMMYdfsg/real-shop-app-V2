@@ -11,15 +11,20 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "Real Shop App V2",
   description: "Financial education game for kids",
+  manifest: "/manifest.json",
+  themeColor: "#6366f1",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Real Shop App",
+  },
+  viewport: {
+    width: "device-width",
+    initialScale: 1,
+    maximumScale: 1,
+    userScalable: false,
+  },
 };
-
-export const viewport = {
-  width: "device-width",
-  initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
-};
-
 
 export default function RootLayout({
   children,

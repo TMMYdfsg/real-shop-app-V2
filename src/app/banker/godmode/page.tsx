@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/Button';
 import { motion } from 'framer-motion';
 
 export default function GodModePage() {
-    const { gameState } = useGame();
+    const { gameState, refresh } = useGame();
     const [selectedUserId, setSelectedUserId] = useState<string>('');
     const [balanceInput, setBalanceInput] = useState('');
     const [depositInput, setDepositInput] = useState('');
@@ -35,6 +35,7 @@ export default function GodModePage() {
         });
 
         setBalanceInput('');
+        await refresh();
         alert('残高を更新しました');
     };
 
@@ -52,6 +53,7 @@ export default function GodModePage() {
         });
 
         setDepositInput('');
+        await refresh();
         alert('預金を更新しました');
     };
 
@@ -69,6 +71,7 @@ export default function GodModePage() {
         });
 
         setDebtInput('');
+        await refresh();
         alert('借金を更新しました');
     };
 
@@ -86,6 +89,7 @@ export default function GodModePage() {
         });
 
         setHealthInput('');
+        await refresh();
         alert('体力を更新しました');
     };
 
@@ -103,6 +107,7 @@ export default function GodModePage() {
         });
 
         setHappinessInput('');
+        await refresh();
         alert('幸福度を更新しました');
     };
 
@@ -117,6 +122,7 @@ export default function GodModePage() {
             })
         });
 
+        await refresh();
         alert('全ユーザーをリセットしました');
     };
 
@@ -176,7 +182,16 @@ export default function GodModePage() {
                                                 type: 'update_settings',
                                                 updates: { moneyMultiplier: value }
                                             })
+                                        })
+                                        await fetch('/api/admin', {
+                                            method: 'POST',
+                                            headers: { 'Content-Type': 'application/json' },
+                                            body: JSON.stringify({
+                                                type: 'update_settings',
+                                                updates: { moneyMultiplier: value }
+                                            })
                                         });
+                                        await refresh();
                                     }}
                                     className="flex-1 p-3 border-2 border-amber-300 rounded-lg text-xl font-bold text-center"
                                 />
@@ -194,6 +209,7 @@ export default function GodModePage() {
                                                 updates: { moneyMultiplier: value }
                                             })
                                         });
+                                        await refresh();
                                         alert(`収入倍率を ${value.toLocaleString()}x に設定しました`);
                                     }}
                                 >
@@ -217,6 +233,7 @@ export default function GodModePage() {
                                                     updates: { moneyMultiplier: mult }
                                                 })
                                             });
+                                            await refresh();
                                             alert(`収入倍率を ${mult}x に設定しました`);
                                         }}
                                     >
@@ -239,6 +256,7 @@ export default function GodModePage() {
                                                     updates: { moneyMultiplier: mult }
                                                 })
                                             });
+                                            await refresh();
                                             alert(`収入倍率を ${mult.toLocaleString()}x に設定しました`);
                                         }}
                                     >

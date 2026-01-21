@@ -193,8 +193,6 @@ export interface User {
     stocks: { [stockId: string]: number }; // stockId -> quantity
     forbiddenStocks?: { [stockId: string]: number };
     isForbiddenUnlocked?: boolean;
-    isTimeMachineUnlocked?: boolean;
-
 
     // History
     transactions: Transaction[];
@@ -789,6 +787,7 @@ export interface EconomyState {
     marketTrend: 'bull' | 'bear' | 'stable';
     taxRateAdjust: number; // 税率補正
     lastUpdateTurn: number;
+    totalSales: number; // ゲーム全体の総売上高 NEW
 }
 
 // Environment Simulation

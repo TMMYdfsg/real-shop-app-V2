@@ -48,19 +48,51 @@ export const PlayerLayout: React.FC<{ children: React.ReactNode; id: string; ini
   const [displayTime, setDisplayTime] = useState<number>(gameState?.timeRemaining || 0);
   const lastDayStatus = useRef<boolean>(gameState?.isDay ?? true);
 
+  // 効果音用の単一オーディオインスタンス（重複再生防止）
+  const bgmAudioRef = useRef<HTMLAudioElement | null>(null);
+
   useEffect(() => {
     if (!gameState) return;
 
-    // SE Check
+    // 昼夜切替時の効果音（単一インスタンスで管理）
     if (lastDayStatus.current !== gameState.isDay) {
       const soundFile = gameState.isDay ? '/sounds/day.mp3' : '/sounds/night.mp3';
-      const audio = new Audio(soundFile);
-      audio.volume = 0.5;
-      audio.play().catch(e => console.log('SE Check:', e));
+
+      // 既存の音声をフェードアウトして停止
+      if (bgmAudioRef.current) {
+        const oldAudio = bgmAudioRef.current;
+        const fadeOut = setInterval(() => {
+          if (oldAudio.volume > 0.1) {
+            oldAudio.volume = Math.max(0, oldAudio.volume - 0.1);
+          } else {
+            clearInterval(fadeOut);
+            oldAudio.pause();
+            oldAudio.src = '';
+          }
+        }, 50);
+      }
+
+      // 新しい音声を再生（少し遅延させてフェードアウトと重ならないようにする）
+      setTimeout(() => {
+        const audio = new Audio(soundFile);
+        audio.volume = 0;
+        bgmAudioRef.current = audio;
+
+        audio.play().then(() => {
+          const fadeIn = setInterval(() => {
+            if (audio.volume < 0.5) {
+              audio.volume = Math.min(0.5, audio.volume + 0.1);
+            } else {
+              clearInterval(fadeIn);
+            }
+          }, 50);
+        }).catch(e => console.log('効果音再生エラー:', e));
+      }, 300);
+
       lastDayStatus.current = gameState.isDay;
     }
 
-    // Timer Logic
+    // タイマーロジック
     let animationFrameId: number;
     const startTimestamp = Date.now();
     const initialRemaining = gameState.timeRemaining;
@@ -73,8 +105,11 @@ export const PlayerLayout: React.FC<{ children: React.ReactNode; id: string; ini
     };
 
     updateTimer();
-    return () => cancelAnimationFrame(animationFrameId);
+    return () => {
+      cancelAnimationFrame(animationFrameId);
+    };
   }, [gameState]);
+
 
   // Income Sound Effect (PeiPei)
   const prevTransLength = useRef(currentUser?.transactions?.length || 0);
@@ -165,11 +200,6 @@ export const PlayerLayout: React.FC<{ children: React.ReactNode; id: string; ini
     navItems.push({ label: '闇市場', path: `${basePath}/forbidden`, icon: '💀' });
   }
 
-  if (currentUser.isTimeMachineUnlocked) {
-    navItems.push({ label: 'タイムマシン', path: `${basePath}/timemachine`, icon: '⌛' });
-  }
-
-
   const formatTime = (ms: number) => {
     if (isNaN(ms) || ms < 0) return '0:00';
     const seconds = Math.floor(ms / 1000);
@@ -184,15 +214,8 @@ export const PlayerLayout: React.FC<{ children: React.ReactNode; id: string; ini
   return (
     <TimeThemeWrapper>
       <div
-        style={{
-          height: '100vh',
-          overflowY: 'auto',
-          paddingBottom: '80px',
-          background: isForbiddenPage ? '#111' : undefined,
-          WebkitOverflowScrolling: 'touch'
-        }}
+        style={{ minHeight: '100vh', paddingBottom: '80px', background: isForbiddenPage ? '#111' : undefined }}
       >
-
         {/* Animated Notifications */}
         <AnimatePresence>
           {activeBills.length > 0 && (

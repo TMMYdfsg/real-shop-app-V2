@@ -1951,96 +1951,21 @@ export async function POST(request: NextRequest) {
             const SECRET_CODES: Record<string, string> = {
                 'DARK666': 'forbidden_market',
                 'SHADOW': 'forbidden_market',
-                'FORBIDDEN': 'forbidden_market',
-                'TIMEMACHINE': 'time_machine',
-                'BACKTOFUTURE': 'time_machine'
+                'FORBIDDEN': 'forbidden_market'
             };
 
             if (SECRET_CODES[code]) {
-                const unlockType = SECRET_CODES[code];
                 await updateGameState((state) => {
                     const user = state.users.find(u => u.id === requesterId);
                     if (user) {
-                        if (unlockType === 'forbidden_market') {
-                            user.isForbiddenUnlocked = true;
-                        } else if (unlockType === 'time_machine') {
-                            // We use a custom flag or just assume success if we can redirect
-                            (user as any).isTimeMachineUnlocked = true;
-                        }
+                        user.isForbiddenUnlocked = true;
                     }
                     return state;
                 });
-                return NextResponse.json({
-                    success: true,
-                    unlocked: unlockType,
-                    message: unlockType === 'time_machine' ? 'タイムマシンが解放されました！' : '禁断の市場が解放されました！'
-                });
+                return NextResponse.json({ success: true, unlocked: SECRET_CODES[code], message: '禁断の市場が解放されました！' });
             }
             return NextResponse.json({ success: false, message: 'コードが無効です' }, { status: 400 });
         }
-
-        // -----------------------------------------------------
-        // タイムマシン: 時代移動
-        // -----------------------------------------------------
-        if (type === 'travel_time') {
-            const { targetEra, cost } = safeParseDetails(details);
-            await updateGameState((state) => {
-                const user = state.users.find(u => u.id === requesterId);
-                if (user && user.balance >= cost) {
-                    user.balance -= cost;
-                    user.timeEra = targetEra;
-
-                    user.transactions.push({
-                        id: uuidv4(),
-                        type: 'payment',
-                        amount: cost,
-                        description: `タイムトラベル費用 (${targetEra === 'past' ? '過去' : targetEra === 'future' ? '未来' : '現在'}へ)`,
-                        timestamp: Date.now()
-                    });
-                }
-                return state;
-            });
-            return NextResponse.json({ success: true });
-        }
-
-        // -----------------------------------------------------
-        // タイムマシン: 未来投資
-        // -----------------------------------------------------
-        if (type === 'future_investment') {
-            const { amount } = safeParseDetails(details);
-            let message = '';
-            let profit = 0;
-
-            await updateGameState((state) => {
-                const user = state.users.find(u => u.id === requesterId);
-                if (user && user.balance >= amount) {
-                    user.balance -= amount;
-
-                    // Gamble logic
-                    const success = Math.random() > 0.6; // 40% success rate
-                    if (success) {
-                        const multiplier = 1.5 + Math.random() * 3.5; // 1.5x - 5.0x
-                        profit = Math.floor(amount * multiplier);
-                        user.balance += profit;
-                        message = `投資大成功！ ${profit.toLocaleString()}枚の利益を獲得しました。`;
-                    } else {
-                        profit = 0;
-                        message = '投資失敗... 資金がゼロになりました。';
-                    }
-
-                    user.transactions.push({
-                        id: uuidv4(),
-                        type: success ? 'income' : 'payment',
-                        amount: success ? profit - amount : amount,
-                        description: `未来投資: ${success ? '成功' : '失敗'}`,
-                        timestamp: Date.now()
-                    });
-                }
-                return state;
-            });
-            return NextResponse.json({ success: true, message, profit });
-        }
-
 
         await updateGameState((state) => {
             state.requests.push(newRequest);
@@ -3075,38 +3000,30 @@ export async function POST(request: NextRequest) {
         // レビュー投稿 (submit_review)
         // -----------------------------------------------------
         if (type === 'submit_review') {
-            const { purchaseId, targetId, rating, comment } = safeParseDetails(details);
+            const { purchaseId, rating, comment } = safeParseDetails(details);
 
             await updateGameState((state) => {
                 const reviewer = state.users.find(u => u.id === requesterId);
                 if (!reviewer) return state;
 
-                // If purchaseId is provided, find and mark receipt
-                let shopOwnerId = targetId;
-                if (purchaseId) {
-                    const receipt = reviewer.receipts?.find(r => r.id === purchaseId);
-                    if (receipt) {
-                        shopOwnerId = receipt.shopOwnerId;
-                        receipt.hasReview = true;
-                    }
-                }
+                // Find receipt
+                const receipt = reviewer.receipts?.find(r => r.id === purchaseId);
+                if (!receipt || receipt.hasReview) return state;
 
-                if (!shopOwnerId) return state;
-                const shopOwner = state.users.find(u => u.id === shopOwnerId);
+                const shopOwner = state.users.find(u => u.id === receipt.shopOwnerId);
                 if (!shopOwner) return state;
 
                 // Create review
                 const review = {
                     id: crypto.randomUUID(),
-                    shopOwnerId: shopOwnerId,
+                    shopOwnerId: receipt.shopOwnerId,
                     reviewerId: requesterId,
                     reviewerName: reviewer.name,
                     rating: Number(rating) as 1 | 2 | 3 | 4 | 5,
                     comment,
-                    purchaseId: purchaseId || 'general',
+                    purchaseId,
                     timestamp: Date.now()
                 };
-
 
                 // Add to reviewer's reviews
                 if (!reviewer.reviews) reviewer.reviews = [];

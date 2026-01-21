@@ -1,4 +1,5 @@
 import React, { useState, useCallback } from 'react';
+import { getVibrationAdapter, VibrationPatterns } from '@/lib/vibration';
 import { AnimatePresence, motion } from 'framer-motion';
 import { SmartphoneShell } from './SmartphoneShell';
 import { StatusBar } from './StatusBar';
@@ -36,10 +37,14 @@ export const SmartphoneOS = () => {
   const [currentApp, setCurrentApp] = useState<string | null>(null);
 
   const handleHome = useCallback(() => {
+    const vibration = getVibrationAdapter();
+    vibration.vibrate(VibrationPatterns.tap);
     setCurrentApp(null);
   }, []);
 
   const handleOpenApp = useCallback((appId: string) => {
+    const vibration = getVibrationAdapter();
+    vibration.vibrate(VibrationPatterns.tap);
     setCurrentApp(appId);
   }, []);
 
@@ -92,46 +97,43 @@ export const SmartphoneOS = () => {
   const statusBarVariant = currentApp ? 'dark' : 'light';
 
   return (
-    <div className="flex items-center justify-center h-full w-full bg-transparent py-4 overflow-hidden">
-      <div className="phone-scale-wrapper">
-        <SmartphoneShell onHome={handleHome}>
-          <StatusBar variant={statusBarVariant} />
+    <div className="flex items-center justify-center h-full w-full bg-transparent py-2">
+      <SmartphoneShell onHome={handleHome}>
+        <StatusBar variant={statusBarVariant} />
 
-          <AnimatePresence mode="wait">
-            {!currentApp && (
-              <motion.div
-                key="home"
-                layout={false}
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 1.1, filter: 'blur(10px)' }}
-                transition={{ duration: 0.3 }}
-                className="w-full h-full absolute inset-0"
-                style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}
-              >
-                <HomeScreen onOpenApp={handleOpenApp} />
-              </motion.div>
-            )}
+        <AnimatePresence mode="wait">
+          {!currentApp && (
+            <motion.div
+              key="home"
+              layout={false}
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 1.1, filter: 'blur(10px)' }}
+              transition={{ duration: 0.3 }}
+              className="w-full h-full absolute inset-0"
+              style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}
+            >
+              <HomeScreen onOpenApp={handleOpenApp} />
+            </motion.div>
+          )}
 
-            {currentApp && (
-              <motion.div
-                key="app"
-                layout={false}
-                initial={{ y: '100%', opacity: 1 }}
-                animate={{ y: 0, opacity: 1 }}
-                exit={{ y: '100%', opacity: 1, transition: { duration: 0.3, ease: 'easeInOut' } }}
-                transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-                className="w-full h-full absolute inset-0 bg-gray-50 z-20 overflow-hidden"
-                style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}
-              >
-                {/* App Container - adds some padding top for status bar if needed. */}
-                {renderApp()}
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </SmartphoneShell>
-      </div>
+          {currentApp && (
+            <motion.div
+              key="app"
+              layout={false}
+              initial={{ y: '100%', opacity: 1 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: '100%', opacity: 1, transition: { duration: 0.3, ease: 'easeInOut' } }}
+              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+              className="w-full h-full absolute inset-0 bg-gray-50 z-20 overflow-hidden"
+              style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}
+            >
+              {/* App Container - adds some padding top for status bar if needed. */}
+              {renderApp()}
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </SmartphoneShell>
     </div>
   );
-
 };

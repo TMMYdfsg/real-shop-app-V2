@@ -5,8 +5,16 @@ import { motion } from 'framer-motion';
 import { APPS, DOCK_APPS } from './constants';
 import { Search } from 'lucide-react';
 
+import { getVibrationAdapter, VibrationPatterns } from '@/lib/vibration';
+
 // Premium Glass Icon (High Fidelity CSS version)
 const PremiumGlassIcon = ({ app, onClick, size = "md" }: { app: typeof APPS[0], onClick: () => void, size?: "md" | "lg" }) => {
+    const handleAppClick = () => {
+        const vibration = getVibrationAdapter();
+        vibration.vibrate(VibrationPatterns.tap);
+        onClick();
+    };
+
     const containerSize = size === "lg" ? "w-[68px] h-[68px]" : "w-[64px] h-[64px]";
     const iconSize = size === "lg" ? "w-8 h-8" : "w-7 h-7";
 
@@ -30,7 +38,7 @@ const PremiumGlassIcon = ({ app, onClick, size = "md" }: { app: typeof APPS[0], 
     return (
         <motion.button
             whileTap={{ scale: 0.92, rotate: -1 }}
-            onClick={onClick}
+            onClick={handleAppClick}
             className="group flex flex-col items-center gap-1.5 focus:outline-none"
         >
             <div className={`

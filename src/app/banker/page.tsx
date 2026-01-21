@@ -27,7 +27,7 @@ const DashboardCard = ({ children, className = '', title, icon }: { children: Re
 );
 
 export default function BankerDashboard() {
-    const { gameState } = useGame();
+    const { gameState, refresh } = useGame();
     const router = useRouter();
     const [activeTab, setActiveTab] = React.useState<'overview' | 'crypto' | 'real_estate' | 'catalog'>('overview');
     const [showRequests, setShowRequests] = React.useState(false);
@@ -50,6 +50,7 @@ export default function BankerDashboard() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ action: 'next_turn' }),
         });
+        await refresh();
     };
 
     const handleFullReset = async () => {
@@ -75,6 +76,7 @@ export default function BankerDashboard() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ action, requestId }),
         });
+        await refresh();
     };
 
     return (
@@ -142,6 +144,7 @@ export default function BankerDashboard() {
                                                     headers: { 'Content-Type': 'application/json' },
                                                     body: JSON.stringify({ action: 'start_game' })
                                                 });
+                                                await refresh();
                                             }
                                         }}
                                     >
@@ -162,8 +165,8 @@ export default function BankerDashboard() {
                                 </div>
 
                                 <div className={`p-4 rounded-xl mb-6 flex items-center justify-center gap-3 font-bold text-lg transition-colors ${gameState.isDay
-                                        ? 'bg-amber-100 text-amber-700 border border-amber-200'
-                                        : 'bg-indigo-100 text-indigo-700 border border-indigo-200'
+                                    ? 'bg-amber-100 text-amber-700 border border-amber-200'
+                                    : 'bg-indigo-100 text-indigo-700 border border-indigo-200'
                                     }`}>
                                     <span className="text-2xl">{gameState.isDay ? '☀' : '🌙'}</span>
                                     <span>{gameState.isDay ? '現在: 昼 (ACTIVITY)' : '現在: 夜 (SLEEP)'}</span>
@@ -171,8 +174,8 @@ export default function BankerDashboard() {
 
                                 <Button
                                     className={`w-full h-14 text-lg font-bold shadow-lg transition-transform active:scale-95 ${gameState.isDay
-                                            ? 'bg-slate-800 hover:bg-slate-700 text-white'
-                                            : 'bg-amber-500 hover:bg-amber-400 text-white'
+                                        ? 'bg-slate-800 hover:bg-slate-700 text-white'
+                                        : 'bg-amber-500 hover:bg-amber-400 text-white'
                                         }`}
                                     onClick={handleNextTurn}
                                 >
@@ -270,7 +273,7 @@ export default function BankerDashboard() {
                                                                 headers: { 'Content-Type': 'application/json' },
                                                                 body: JSON.stringify({ action: 'toggle_vacation', requestId: user.id })
                                                             });
-                                                            window.location.reload();
+                                                            await refresh();
                                                         }
                                                     }}
                                                 >
@@ -280,8 +283,8 @@ export default function BankerDashboard() {
                                                 <Button
                                                     size="sm"
                                                     className={`text-[10px] h-8 px-3 rounded-lg border flex-1 ${user.isDebugAuthorized
-                                                            ? 'bg-rose-50 text-rose-600 border-rose-200 font-bold'
-                                                            : 'bg-white text-slate-400 border-slate-200'
+                                                        ? 'bg-rose-50 text-rose-600 border-rose-200 font-bold'
+                                                        : 'bg-white text-slate-400 border-slate-200'
                                                         }`}
                                                     onClick={async () => {
                                                         if (confirm(`${user.name} のデバッグ権限を操作しますか？`)) {
@@ -290,7 +293,7 @@ export default function BankerDashboard() {
                                                                 headers: { 'Content-Type': 'application/json' },
                                                                 body: JSON.stringify({ action: 'toggle_debug_auth', requestId: user.id })
                                                             });
-                                                            window.location.reload();
+                                                            await refresh();
                                                         }
                                                     }}
                                                 >

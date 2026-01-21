@@ -1088,8 +1088,17 @@ export async function POST(req: NextRequest) {
                 return state;
             });
 
+            // SSE経由で全クライアントに更新を通知
+            eventManager.broadcast({
+                type: 'STATE_SYNC',
+                payload: { action: 'god_mode_update', userId },
+                timestamp: Date.now(),
+                revision: 0
+            });
+
             return NextResponse.json({ success: true });
         }
+
 
         if (type === 'god_mode_reset_all') {
             await updateGameState((state) => {
