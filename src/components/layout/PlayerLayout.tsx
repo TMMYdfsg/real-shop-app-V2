@@ -6,7 +6,7 @@ import { useRef, useState, useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { useSWRConfig } from 'swr';
 import { useGame } from '@/context/GameContext';
-import { Sidebar } from './Sidebar';
+import { AppShell } from '@/components/shell/AppShell';
 import { PageTransition } from './PageTransition';
 import { SecretCodeInput } from './SecretCodeInput';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -15,11 +15,8 @@ import { useToast } from '@/components/ui/ToastProvider';
 import { Button } from '@/components/ui/Button';
 
 /*
- * A modernised version of the PlayerLayout component that incorporates a frosted glass header
- * using the new CSS variables defined in globals.css. The header background now uses
- * the `--glass-bg` and `--glass-border` variables for a subtle glassmorphic effect. We also
- * add a soft drop shadow for additional depth. These changes contribute to a more
- * contemporary look while maintaining readability across day and night themes.
+ * PlayerLayout の見た目を整えるためのメモです。
+ * 画面全体のトーンは tokens のサーフェス/影をベースに統一します。
  */
 
 export const PlayerLayout: React.FC<{ children: React.ReactNode; id: string; initialData?: any }> = ({ children, id, initialData }) => {
@@ -200,6 +197,13 @@ export const PlayerLayout: React.FC<{ children: React.ReactNode; id: string; ini
     navItems.push({ label: '闇市場', path: `${basePath}/forbidden`, icon: '💀' });
   }
 
+  const shellNavItems = navItems.map((item) => ({
+    label: item.label,
+    href: item.path,
+    icon: item.icon,
+    active: pathname === item.path || pathname?.startsWith(`${item.path}/`),
+  }));
+
   const formatTime = (ms: number) => {
     if (isNaN(ms) || ms < 0) return '0:00';
     const seconds = Math.floor(ms / 1000);
@@ -213,10 +217,7 @@ export const PlayerLayout: React.FC<{ children: React.ReactNode; id: string; ini
 
   return (
     <TimeThemeWrapper>
-      <div
-        style={{ minHeight: '100vh', paddingBottom: '80px', background: isForbiddenPage ? '#111' : undefined }}
-      >
-        {/* Animated Notifications */}
+      <div className={`player-shell ${isForbiddenPage ? "player-shell--forbidden" : ""}`}>
         <AnimatePresence>
           {activeBills.length > 0 && (
             <motion.div
@@ -224,22 +225,11 @@ export const PlayerLayout: React.FC<{ children: React.ReactNode; id: string; ini
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -50 }}
               transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-              style={{
-                position: 'fixed',
-                top: '80px',
-                left: '1rem',
-                right: '1rem',
-                zIndex: 100,
-                background: '#ef4444',
-                color: 'white',
-                padding: '1rem',
-                borderRadius: '8px',
-                boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
-              }}
+              className="ui-alert"
             >
               <motion.div animate={{ scale: [1, 1.02, 1] }} transition={{ repeat: Infinity, duration: 1 }}>
-                <div style={{ fontWeight: 'bold' }}>⚠️ 請求が届いています</div>
-                <div style={{ fontSize: '0.9rem' }}>
+                <div className="ui-alert__title">⚠️ 請求が届いています</div>
+                <div className="ui-alert__body">
                   {activeBills.length}件の支払いが求められています。銀行員が承認すると引き落とされます。
                 </div>
               </motion.div>
@@ -247,125 +237,66 @@ export const PlayerLayout: React.FC<{ children: React.ReactNode; id: string; ini
           )}
         </AnimatePresence>
 
-        {/* Night Blocking Overlay */}
         <AnimatePresence>
           {gameState && !gameState.isDay && (
             <>
-              {/* Allow Home and Smartphone, Block others */}
               {!(pathname === basePath || pathname?.includes('/smartphone')) ? (
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  style={{
-                    position: 'fixed',
-                    inset: 0,
-                    zIndex: 9999,
-                    background: 'rgba(15, 23, 42, 0.95)',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    color: 'white',
-                    textAlign: 'center',
-                  }}
+                  className="night-overlay"
                 >
                   <audio autoPlay loop src="/sounds/sleep.mp3" />
                   <motion.div
                     animate={{ rotate: [0, 10, -10, 0] }}
                     transition={{ repeat: Infinity, duration: 4 }}
-                    style={{ fontSize: '4rem', marginBottom: '1rem' }}
+                    className="night-overlay__icon"
                   >
                     🌙
                   </motion.div>
-                  <h2
-                    style={{ fontSize: '2rem', fontWeight: 'bold', marginBottom: '1rem' }}
-                  >
-                    夜は必ず寝ましょう
-                  </h2>
-                  <p style={{ fontSize: '1.2rem', opacity: 0.8 }}>次の朝までお待ちください...</p>
-                  <div style={{ marginTop: '2rem', fontFamily: 'monospace', fontSize: '1.5rem' }}>
-                    あと {formatTime(displayTime)}
-                  </div>
-                  <div className="mt-8">
-                    <button
-                      onClick={() => {
-                        window.location.href = basePath;
-                      }}
-                      className="px-6 py-2 bg-indigo-600 rounded-full font-bold hover:bg-indigo-700 transition"
-                    >
-                      🏠 自宅に戻る
-                    </button>
-                  </div>
+                  <h2 className="night-overlay__title">夜は必ず寝ましょう</h2>
+                  <p className="night-overlay__text">次の朝までお待ちください...</p>
+                  <div className="night-overlay__timer">あと {formatTime(displayTime)}</div>
+                  <Button onClick={() => { window.location.href = basePath; }}>
+                    🏠 自宅に戻る
+                  </Button>
                 </motion.div>
               ) : (
-                /* Non-intrusive Night Mode Indicator for Allowed Pages */
                 <motion.div
                   initial={{ opacity: 0, y: -20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="fixed top-20 right-4 z-40 bg-slate-900/90 text-indigo-200 px-4 py-2 rounded-full border border-indigo-500/30 shadow-lg backdrop-blur-md flex items-center gap-2"
+                  className="night-indicator"
                 >
-                  <span className="text-xl">🌙</span>
-                  <span className="font-bold text-sm">夜間モード中 (機能制限あり)</span>
+                  <span aria-hidden>🌙</span>
+                  <span>夜間モード中 (機能制限あり)</span>
                 </motion.div>
               )}
             </>
           )}
         </AnimatePresence>
 
-        {/* Header */}
-        <header
-          className="sticky top-0 z-50 transition-all duration-500"
-          style={{
-            background: gameState?.isDay ? 'rgba(255, 255, 255, 0.1)' : 'rgba(15, 23, 42, 0.8)',
-            backdropFilter: 'blur(20px)',
-            WebkitBackdropFilter: 'blur(20px)',
-            borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
-            boxShadow: '0 4px 30px rgba(0, 0, 0, 0.05)',
-            padding: '0.75rem 1rem',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            color: gameState?.isDay ? '#1e293b' : '#fff',
-          }}
+        <AppShell
+          title={currentUser.name}
+          navItems={shellNavItems}
+          actions={
+            <>
+              {currentUser.role === 'banker' && (
+                <Button onClick={() => router.push('/banker')} size="sm">
+                  🏦 銀行員に戻る
+                </Button>
+              )}
+              <div className="shell__status">
+                <span>Term {gameState?.turn}</span>
+                <span>{gameState?.isDay ? '☀️ DAY' : '🌙 NIGHT'}</span>
+                <span>{formatTime(displayTime)}</span>
+              </div>
+            </>
+          }
         >
-          <div className="flex items-center gap-3">
-            {/* Navigation Fix for Bankers */}
-            {currentUser.role === 'banker' && (
-              <Button
-                onClick={() => router.push('/banker')}
-                size="sm"
-                className="bg-rose-500 hover:bg-rose-600 text-white border-0 shadow-lg shadow-rose-500/30 font-bold px-3 py-1 text-xs"
-              >
-                🏦 銀行員に戻る
-              </Button>
-            )}
-            <div>
-              <div className="text-[10px] font-bold opacity-60 uppercase tracking-widest">
-                Term {gameState?.turn}
-              </div>
-              <div style={{ fontWeight: 'bold' }}>{currentUser.name}</div>
-            </div>
-          </div>
-          <div style={{ textAlign: 'right' }}>
-            <div className="flex flex-col items-end">
-              <div className="text-xs font-bold opacity-80 mb-0.5">
-                {gameState?.isDay ? '☀️ DAYTIME' : '🌙 NIGHTTIME'}
-              </div>
-              <div className="font-mono font-bold text-lg leading-none">
-                {formatTime(displayTime)}
-              </div>
-            </div>
-          </div>
-        </header>
-
-        {/* Main Content with Page Transition */}
-        <main style={{ padding: '1rem', maxWidth: '800px', margin: '0 auto' }}>
-          <Sidebar title={currentUser.name} items={navItems} role="player" player={currentUser}>
-            <SecretCodeInput onUnlock={handleSecretUnlock} />
-          </Sidebar>
+          <SecretCodeInput onUnlock={handleSecretUnlock} />
           <PageTransition>{children}</PageTransition>
-        </main>
+        </AppShell>
       </div>
     </TimeThemeWrapper>
   );
