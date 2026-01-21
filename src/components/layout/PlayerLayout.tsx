@@ -3,16 +3,16 @@
 import React from 'react';
 
 import { useRef, useState, useEffect } from 'react';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useSWRConfig } from 'swr';
 import { useGame } from '@/context/GameContext';
 import { Sidebar } from './Sidebar';
 import { PageTransition } from './PageTransition';
 import { SecretCodeInput } from './SecretCodeInput';
 import { motion, AnimatePresence } from 'framer-motion';
-import { EventAnnouncement, ActiveEventBar } from '@/components/effects/EventAnnouncement';
 import { TimeThemeWrapper } from './TimeThemeWrapper';
 import { useToast } from '@/components/ui/ToastProvider';
+import { Button } from '@/components/ui/Button';
 
 /*
  * A modernised version of the PlayerLayout component that incorporates a frosted glass header
@@ -24,6 +24,7 @@ import { useToast } from '@/components/ui/ToastProvider';
 
 export const PlayerLayout: React.FC<{ children: React.ReactNode; id: string; initialData?: any }> = ({ children, id, initialData }) => {
   const pathname = usePathname();
+  const router = useRouter();
   const { currentUser, gameState, login, refresh } = useGame();
   const { addToast } = useToast();
   const { mutate } = useSWRConfig();
@@ -190,7 +191,7 @@ export const PlayerLayout: React.FC<{ children: React.ReactNode; id: string; ini
               transition={{ type: 'spring', stiffness: 300, damping: 20 }}
               style={{
                 position: 'fixed',
-                top: '70px',
+                top: '80px',
                 left: '1rem',
                 right: '1rem',
                 zIndex: 100,
@@ -279,45 +280,46 @@ export const PlayerLayout: React.FC<{ children: React.ReactNode; id: string; ini
 
         {/* Header */}
         <header
+          className="sticky top-0 z-50 transition-all duration-500"
           style={{
-            position: 'sticky',
-            top: 0,
-            zIndex: 50,
-            // Use glassmorphism variables for a modern translucent header
-            background: gameState?.isDay ? 'var(--glass-bg)' : 'rgba(15, 23, 42, 0.8)',
-            backdropFilter: 'blur(10px)',
-            WebkitBackdropFilter: 'blur(10px)',
-            borderBottom: '1px solid var(--glass-border)',
-            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)',
+            background: gameState?.isDay ? 'rgba(255, 255, 255, 0.1)' : 'rgba(15, 23, 42, 0.8)',
+            backdropFilter: 'blur(20px)',
+            WebkitBackdropFilter: 'blur(20px)',
+            borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+            boxShadow: '0 4px 30px rgba(0, 0, 0, 0.05)',
             padding: '0.75rem 1rem',
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
-            color: gameState?.isDay ? 'var(--text-primary)' : '#fff',
-            transition: 'all 0.5s',
+            color: gameState?.isDay ? '#1e293b' : '#fff',
           }}
         >
-          <div>
-            <div style={{ fontSize: '0.8rem', opacity: 0.8 }}>Turn {gameState?.turn}</div>
-            <div style={{ fontWeight: 'bold' }}>{currentUser.name}</div>
+          <div className="flex items-center gap-3">
+            {/* Navigation Fix for Bankers */}
+            {currentUser.role === 'banker' && (
+              <Button
+                onClick={() => router.push('/banker')}
+                size="sm"
+                className="bg-rose-500 hover:bg-rose-600 text-white border-0 shadow-lg shadow-rose-500/30 font-bold px-3 py-1 text-xs"
+              >
+                🏦 銀行員に戻る
+              </Button>
+            )}
+            <div>
+              <div className="text-[10px] font-bold opacity-60 uppercase tracking-widest">
+                Term {gameState?.turn}
+              </div>
+              <div style={{ fontWeight: 'bold' }}>{currentUser.name}</div>
+            </div>
           </div>
           <div style={{ textAlign: 'right' }}>
-            <div style={{ fontSize: '0.8rem' }}>
-              <span style={{ marginRight: '0.5rem', color: '#fbbf24' }}>
-                {'★'.repeat(currentUser.rating || 0)}{'☆'.repeat(5 - (currentUser.rating || 0))}
-              </span>
-              {gameState?.isDay ? '☀️ 昼' : '🌙 夜'} {formatTime(displayTime)}
-            </div>
-            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-              <span style={{ fontSize: '0.9rem', opacity: 0.8 }}>所持金:</span>
-              <motion.span
-                key={currentUser.balance}
-                initial={{ scale: 1.2, color: '#3b82f6' }}
-                animate={{ scale: 1, color: 'var(--accent-color)' }}
-                style={{ fontSize: '1.2rem', fontWeight: 'bold' }}
-              >
-                {(currentUser.balance || 0).toLocaleString()}
-              </motion.span>
+            <div className="flex flex-col items-end">
+              <div className="text-xs font-bold opacity-80 mb-0.5">
+                {gameState?.isDay ? '☀️ DAYTIME' : '🌙 NIGHTTIME'}
+              </div>
+              <div className="font-mono font-bold text-lg leading-none">
+                {formatTime(displayTime)}
+              </div>
             </div>
           </div>
         </header>

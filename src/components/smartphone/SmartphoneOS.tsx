@@ -20,6 +20,8 @@ import { ForbiddenApp } from './apps/ForbiddenApp';
 import { SettingsApp } from './apps/SettingsApp';
 import PoliticsApp from '@/components/apps/PoliticsApp';
 import { VacationApp } from './apps/VacationApp';
+import { FamilyApp } from './apps/FamilyApp';
+import CityMap from '@/components/map/CityMap';
 
 /*
  * This modified version of the SmartphoneOS component includes a more modern container for the phone shell.
@@ -73,6 +75,10 @@ export const SmartphoneOS = () => {
         return <SettingsApp onClose={handleHome} />;
       case 'vacation':
         return <VacationApp onBack={handleHome} />;
+      case 'family':
+        return <FamilyApp onBack={handleHome} />;
+      case 'map':
+        return <div className="h-full w-full overflow-hidden rounded-[2.8rem]"><CityMap /></div>;
       case 'camera':
         return <div className="p-8 text-black font-bold text-center mt-20">カメラは起動できません</div>;
       case 'shopping':

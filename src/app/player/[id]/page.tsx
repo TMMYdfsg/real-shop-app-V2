@@ -1,17 +1,21 @@
 'use client';
 
-import React, { use } from 'react';
+import React, { use, useState } from 'react';
 import { useGame } from '@/context/GameContext';
 import { Button } from '@/components/ui/Button';
+import { StatusCard } from '@/components/home/StatusCard';
+import { ActionTabs } from '@/components/home/ActionTabs';
+import { RankingList } from '@/components/home/RankingList';
+import dynamic from 'next/dynamic';
 
-// Import SmartphoneOS and Shell
-import { SmartphoneOS } from '@/components/smartphone/SmartphoneOS';
-import { SmartphoneShell } from '@/components/smartphone/SmartphoneShell';
+// Dynamic import for BankTerminal to avoid SSR issues if any
+const BankTerminal = dynamic(() => import('@/components/banking/BankTerminal'), { ssr: false });
 
 export default function PlayerHome({ params }: { params: Promise<{ id: string }> }) {
     // Unwrapping params using React.use()
     const { id } = use(params);
-    const { gameState, currentUser } = useGame();
+    const { gameState, currentUser, refresh } = useGame();
+    const [isBankOpen, setIsBankOpen] = useState(false);
 
     if (!gameState) return <div className="p-8 text-center text-gray-500">Loading world data...</div>;
 
@@ -47,12 +51,44 @@ export default function PlayerHome({ params }: { params: Promise<{ id: string }>
         );
     }
 
-    // Main Phone Interface
+    const handleBankAction = async (type: string, details: any) => {
+        try {
+            await fetch('/api/action', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    type,
+                    requesterId: currentUser.id,
+                    details
+                })
+            });
+            await refresh();
+        } catch (error) {
+            console.error('Bank action failed:', error);
+        }
+    };
+
+    // Main Dashboard Interface
     return (
-        <div className="min-h-screen w-full flex items-center justify-center py-8">
-            <SmartphoneShell onHome={() => window.location.reload()}>
-                <SmartphoneOS />
-            </SmartphoneShell>
+        <div className="space-y-6 max-w-2xl mx-auto pb-12">
+            {/* Status Overview */}
+            <StatusCard user={currentUser} showBank={() => setIsBankOpen(true)} />
+
+            {/* Action Navigation */}
+            <ActionTabs userId={currentUser.id} onOpenBank={() => setIsBankOpen(true)} />
+
+            {/* Ranking */}
+            <RankingList users={gameState.users} currentUserId={currentUser.id} />
+
+            {/* Bank Modal */}
+            {isBankOpen && (
+                <BankTerminal
+                    user={currentUser}
+                    economy={gameState.economy}
+                    onClose={() => setIsBankOpen(false)}
+                    onAction={handleBankAction}
+                />
+            )}
         </div>
     );
 }

@@ -1,61 +1,62 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import Image from 'next/image';
+import { motion } from 'framer-motion';
 import { APPS, DOCK_APPS } from './constants';
-import { useGame } from '@/context/GameContext';
+import { Search } from 'lucide-react';
 
-// Premium Glass Icon (3D Style)
+// Premium Glass Icon (High Fidelity CSS version)
 const PremiumGlassIcon = ({ app, onClick, size = "md" }: { app: typeof APPS[0], onClick: () => void, size?: "md" | "lg" }) => {
-    // Size
-    const containerClass = size === "lg" ? "w-[66px] h-[66px]" : "w-[60px] h-[60px]";
-    const iconSizeClass = size === "lg" ? "w-8 h-8" : "w-7 h-7";
+    const containerSize = size === "lg" ? "w-[68px] h-[68px]" : "w-[64px] h-[64px]";
+    const iconSize = size === "lg" ? "w-8 h-8" : "w-7 h-7";
 
-    // Logic to map basic tailwind color classes to rich gradients
-    const getGradient = (colorClass: string) => {
-        if (colorClass.includes('green')) return 'bg-gradient-to-br from-[#6ee7b7] to-[#15803d]';
-        if (colorClass.includes('blue')) return 'bg-gradient-to-br from-[#60a5fa] to-[#1e40af]';
-        if (colorClass.includes('red') || colorClass.includes('rose')) return 'bg-gradient-to-br from-[#fb7185] to-[#be123c]';
-        if (colorClass.includes('orange')) return 'bg-gradient-to-br from-[#fbbf24] to-[#b45309]';
-        if (colorClass.includes('purple') || colorClass.includes('violet')) return 'bg-gradient-to-br from-[#c084fc] to-[#7e22ce]';
-        if (colorClass.includes('sky') || colorClass.includes('cyan')) return 'bg-gradient-to-br from-[#38bdf8] to-[#0369a1]';
-        if (colorClass.includes('pink')) return 'bg-gradient-to-br from-[#f472b6] to-[#be185d]';
-        if (colorClass.includes('indigo')) return 'bg-gradient-to-br from-[#818cf8] to-[#4338ca]';
-        if (colorClass.includes('teal')) return 'bg-gradient-to-br from-[#2dd4bf] to-[#0f766e]';
-        if (colorClass.includes('yellow')) return 'bg-gradient-to-br from-[#facc15] to-[#a16207]';
-        if (colorClass.includes('slate-900') || colorClass.includes('black')) return 'bg-gradient-to-br from-[#475569] to-[#0f172a]';
-        if (colorClass.includes('gray') || colorClass.includes('slate')) return 'bg-gradient-to-br from-[#94a3b8] to-[#475569]';
-        return 'bg-gradient-to-br from-blue-400 to-blue-700';
+    // Dynamic High-Fidelity Gradients to match the rejected image's quality
+    const getPremiumStyles = (colorClass: string) => {
+        if (colorClass.includes('green')) return 'from-[#4ade80] to-[#16a34a] shadow-green-500/30';
+        if (colorClass.includes('blue')) return 'from-[#60a5fa] to-[#2563eb] shadow-blue-500/30';
+        if (colorClass.includes('red') || colorClass.includes('rose')) return 'from-[#fb7185] to-[#e11d48] shadow-rose-500/30';
+        if (colorClass.includes('orange')) return 'from-[#fbbf24] to-[#ea580c] shadow-orange-500/30';
+        if (colorClass.includes('purple') || colorClass.includes('indigo')) return 'from-[#c084fc] to-[#9333ea] shadow-purple-500/30';
+        if (colorClass.includes('sky') || colorClass.includes('cyan')) return 'from-[#38bdf8] to-[#0284c7] shadow-sky-500/30';
+        if (colorClass.includes('pink')) return 'from-[#f472b6] to-[#db2777] shadow-pink-500/30';
+        if (colorClass.includes('teal')) return 'from-[#2dd4bf] to-[#0d9488] shadow-teal-500/30';
+        if (colorClass.includes('yellow')) return 'from-[#fde047] to-[#ca8a04] shadow-yellow-500/30';
+        if (colorClass.includes('slate-900') || colorClass.includes('black')) return 'from-[#475569] to-[#0f172a] shadow-slate-900/40';
+        return 'from-[#94a3b8] to-[#475569] shadow-slate-500/30';
     };
 
-    const gradientClass = getGradient(app.color);
+    const gradientClasses = getPremiumStyles(app.color);
 
     return (
         <motion.button
-            whileTap={{ scale: 0.9 }}
+            whileTap={{ scale: 0.92, rotate: -1 }}
             onClick={onClick}
-            className="relative flex flex-col items-center gap-1 group"
+            className="group flex flex-col items-center gap-1.5 focus:outline-none"
         >
-            {/* 3D Glass Body */}
-            <div className={`${containerClass} rounded-[20px] ${gradientClass} relative flex items-center justify-center shadow-[0_5px_15px_rgba(0,0,0,0.25)] ring-1 ring-white/10`}>
+            <div className={`
+                ${containerSize} rounded-[22px] bg-gradient-to-br ${gradientClasses}
+                relative flex items-center justify-center 
+                shadow-lg transition-all duration-200
+                group-hover:shadow-[0_0_25px_inherit] group-hover:scale-105
+            `}>
+                {/* 1. Bevel & Glass Layers */}
+                <div className="absolute inset-0 rounded-[22px] border border-white/20" />
+                <div className="absolute inset-[1px] rounded-[21px] border border-black/5 shadow-[inset_0_2px_4px_rgba(255,255,255,0.4),inset_0_-4px_8px_rgba(0,0,0,0.25)]" />
 
-                {/* 1. Bevel / Inner Depth */}
-                <div className="absolute inset-0 rounded-[20px] shadow-[inset_0_1px_1px_rgba(255,255,255,0.6),inset_0_-2px_4px_rgba(0,0,0,0.3)]" />
+                {/* 2. Top Gloss Highlight */}
+                <div className="absolute top-[2px] left-[4px] right-[4px] h-[35%] bg-gradient-to-b from-white/30 via-white/10 to-transparent rounded-t-[18px]" />
 
-                {/* 2. Top Gloss (Shininess) */}
-                <div className="absolute inset-x-0 top-0 h-[45%] bg-gradient-to-b from-white/40 via-white/10 to-transparent rounded-t-[20px]" />
-
-                {/* 3. Icon (Floats inside) */}
-                <div className={`${iconSizeClass} text-white drop-shadow-[0_2px_3px_rgba(0,0,0,0.3)] z-10 filter`}>
+                {/* 3. Icon Content (Lucide or custom) */}
+                <div className={`${iconSize} text-white drop-shadow-[0_2px_5px_rgba(0,0,0,0.4)] z-10 flex items-center justify-center`}>
                     {React.isValidElement(app.icon)
-                        ? React.cloneElement(app.icon as React.ReactElement<any>, { className: "w-full h-full stroke-[2.5px]", strokeWidth: 2.5 })
-                        : app.icon}
+                        ? React.cloneElement(app.icon as React.ReactElement<any>, { className: "w-full h-full stroke-[2.5px]" })
+                        : <span className="text-2xl">{app.icon}</span>}
                 </div>
-
-                {/* 4. Bottom Glow (Subtle bounce light) */}
-                <div className="absolute bottom-0 inset-x-0 h-1/3 bg-gradient-to-t from-black/20 to-transparent rounded-b-[20px]" />
             </div>
+
+            <span className="text-[10px] font-bold text-white shadow-black/80 drop-shadow-md text-center w-full truncate px-0.5 tracking-tight">
+                {app.name}
+            </span>
         </motion.button>
     );
 };
@@ -65,98 +66,76 @@ interface HomeScreenProps {
 }
 
 export const HomeScreen = ({ onOpenApp }: HomeScreenProps) => {
-    const { gameState } = useGame();
-    const [currentPage, setCurrentPage] = useState(0);
-    const [currentTime, setCurrentTime] = useState(new Date());
-
-    useEffect(() => {
-        const timer = setInterval(() => setCurrentTime(new Date()), 1000);
-        return () => clearInterval(timer);
-    }, []);
-
-    // Filter out dock apps from main grid
-    const gridApps = APPS.filter(app => !DOCK_APPS.includes(app.id));
-    const dockApps = DOCK_APPS.map(id => APPS.find(a => a.id === id)).filter(Boolean) as typeof APPS;
-
-    // Paging
-    const appsPerPage = 20; // 4x5 grid
-    const totalPages = Math.ceil(gridApps.length / appsPerPage);
-    const currentApps = gridApps.slice(currentPage * appsPerPage, (currentPage + 1) * appsPerPage);
+    // Sort and split apps: First 16 for the main grid as per user image
+    const mainGridApps = APPS.slice(0, 16);
+    const otherApps = APPS.slice(16);
 
     return (
-        <div className="w-full h-full pt-8 flex flex-col relative overflow-hidden text-slate-100 font-sans select-none">
-            {/* Wallpaper - Strict Layout Protection */}
-            <div className="absolute inset-0 z-[0] w-full h-full pointer-events-none select-none">
-                {/* Immediate parent of Image must be relative + overflow-hidden + sized */}
-                <div className="relative w-full h-full overflow-hidden bg-slate-900">
-                    <Image
-                        src="/assets/wallpaper.png"
-                        alt="wallpaper"
-                        fill
-                        className="object-cover"
-                        priority
-                        sizes="380px"
-                    />
-                    {/* Subtle scrim for readability */}
-                    <div className="absolute inset-0 bg-black/10" />
-                </div>
+        <div className="w-full h-full flex flex-col relative overflow-hidden bg-[#020617] font-sans select-none">
+
+            {/* Background: Depth and Ambient Light */}
+            <div className="absolute inset-0 z-0">
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,_#1e293b_0%,_#020617_100%)]" />
+
+                {/* Animated Light Blobs */}
+                <motion.div
+                    animate={{ x: [0, 40, 0], y: [0, 30, 0], opacity: [0.1, 0.2, 0.1] }}
+                    transition={{ duration: 18, repeat: Infinity, ease: "easeInOut" }}
+                    className="absolute -top-10 -left-10 w-80 h-80 bg-blue-500/20 blur-[100px] rounded-full"
+                />
+                <motion.div
+                    animate={{ x: [0, -40, 0], y: [0, -20, 0], opacity: [0.1, 0.15, 0.1] }}
+                    transition={{ duration: 22, repeat: Infinity, ease: "easeInOut" }}
+                    className="absolute bottom-[20%] -right-10 w-[400px] h-[400px] bg-purple-600/10 blur-[120px] rounded-full"
+                />
             </div>
 
-            {/* Content Container */}
-            <div className="absolute inset-0 z-[10] flex flex-col px-4 pt-8 h-full w-full overflow-hidden">
+            {/* Main Content Area */}
+            <div className="flex-1 flex flex-col pt-12 px-5 z-10 relative overflow-hidden">
 
-                {/* Search Bar (Samsung Style) */}
-                <div className="mt-2 mb-6 mx-1">
-                    <div className="h-[46px] w-full bg-slate-200/20 backdrop-blur-md rounded-[24px] flex items-center px-5 border border-white/10 shadow-sm">
-                        <span className="text-white/70 text-base font-normal">Search</span>
-                        <div className="ml-auto w-1 h-4 border-r border-white/30 flex items-center gap-3 pl-3">
-                            <div className="w-1 h-1 rounded-full bg-white/70" />
-                        </div>
+                {/* Modern Search Bar */}
+                <div className="mb-10 w-full">
+                    <div className="h-[44px] w-full bg-white/5 backdrop-blur-2xl rounded-2xl flex items-center px-4 border border-white/10 shadow-xl">
+                        <Search className="w-4 h-4 text-white/30 mr-2.5" />
+                        <span className="text-white/30 text-sm font-medium">アプリ検索</span>
                     </div>
                 </div>
 
-                {/* App Grid */}
-                <div className="flex-1 overflow-y-auto pb-20 no-scrollbar"> {/* Added overflow handling just in case */}
-                    <AnimatePresence mode="wait">
-                        <motion.div
-                            key={currentPage}
-                            className="grid grid-cols-4 gap-y-6 gap-x-2 justify-items-center pb-4"
-                            initial={{ opacity: 0, x: 20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            exit={{ opacity: 0, x: -20 }}
-                            transition={{ duration: 0.25, ease: "easeOut" }}
-                        >
-                            {currentApps.map((app) => (
-                                <div key={app.id} className="flex flex-col items-center w-[72px]">
-                                    <PremiumGlassIcon app={app} onClick={() => onOpenApp(app.id)} />
-                                    <span className="text-[10px] font-medium text-white shadow-black/60 drop-shadow-md text-center w-full truncate px-0.5 tracking-tight mt-1.5">
-                                        {app.name}
-                                    </span>
-                                </div>
-                            ))}
-                        </motion.div>
-                    </AnimatePresence>
-                </div>
+                {/* Main Content Scroll Area */}
+                <div className="flex-1 overflow-y-auto no-scrollbar pb-10">
 
-                {/* Pagination Dots */}
-                <div className="flex justify-center gap-2 mb-8 z-10 shrink-0">
-                    {Array.from({ length: totalPages }).map((_, i) => (
-                        <button
-                            key={i}
-                            onClick={() => setCurrentPage(i)}
-                            className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${i === currentPage ? 'bg-white scale-125' : 'bg-white/40'}`}
-                        />
-                    ))}
-                </div>
+                    {/* Primary 4x4 Grid (16 apps) */}
+                    <div className="grid grid-cols-4 gap-y-7 gap-x-2 justify-items-center mb-16">
+                        {mainGridApps.map((app) => (
+                            <div key={app.id} className="w-full flex justify-center">
+                                <PremiumGlassIcon app={app} onClick={() => onOpenApp(app.id)} />
+                            </div>
+                        ))}
+                    </div>
 
-                {/* Dock (Fixed at bottom) */}
-                <div className="mb-5 grid grid-cols-4 gap-x-2 px-1 justify-items-center shrink-0">
-                    {dockApps.map(app => (
-                        <div key={app.id} className="flex flex-col items-center justify-center w-[72px]">
-                            <PremiumGlassIcon app={app} size="lg" onClick={() => onOpenApp(app.id)} />
+                    {/* "Other Apps" Section */}
+                    {otherApps.length > 0 && (
+                        <div className="px-1 mb-10">
+                            <div className="flex items-center gap-3 mb-8">
+                                <h2 className="text-[10px] font-bold text-white/30 tracking-[0.2em] uppercase">その他のアプリ</h2>
+                                <div className="h-[1px] flex-1 bg-white/5" />
+                            </div>
+
+                            <div className="grid grid-cols-4 gap-y-7 gap-x-2 justify-items-center">
+                                {otherApps.map((app) => (
+                                    <div key={app.id} className="w-full flex justify-center">
+                                        <PremiumGlassIcon app={app} onClick={() => onOpenApp(app.id)} />
+                                    </div>
+                                ))}
+                            </div>
                         </div>
-                    ))}
+                    )}
                 </div>
+            </div>
+
+            {/* Small Home Indicator hint at the very bottom */}
+            <div className="absolute bottom-1 w-full flex justify-center pb-2 z-20 pointer-events-none">
+                <div className="w-12 h-1 bg-white/10 rounded-full" />
             </div>
         </div>
     );
