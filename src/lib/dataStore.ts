@@ -1,4 +1,6 @@
 import { prisma } from '@/lib/db';
+import { eventManager } from '@/lib/eventManager';
+
 import { GameState, User, Stock, Crypto, Request, Product, Transaction, Place, Land, NPC, GameEvent, Property, NewsItem, RouletteResult, CatalogItem } from '@/types';
 import { generateLands, BASE_LAT, BASE_LNG } from '@/lib/cityData';
 
@@ -378,297 +380,316 @@ export async function getGameState(): Promise<GameState> {
 // In a real app, you would optimize this to only update changed fields.
 // For the purpose of "Phase 1 Migration" where we keep the API signature (whole state update),
 // we will detect changes by ID and UPSERT.
+// -----------------------------------------------------------------------------
+// Serialization Lock for GameState Updates
+// -----------------------------------------------------------------------------
+let updateQueue: Promise<any> = Promise.resolve();
+
 export async function updateGameState(updater: (state: GameState) => GameState | void): Promise<GameState> {
-    const currentState = await getGameState();
+    // We wrap the update in a queue to ensure sequential processing
+    return new Promise((resolve, reject) => {
+        updateQueue = updateQueue.then(async () => {
+            try {
+                const currentState = await getGameState();
 
-    // Apply updater (it mutates currentState in place usually, or returns new one)
-    const result = updater(currentState);
-    const newState = result || currentState;
 
-    // Increment revision
-    newState.eventRevision = (newState.eventRevision || 0) + 1;
-    newState.lastTick = Date.now(); // Ensure tick update
+                // Apply updater (it mutates currentState in place usually, or returns new one)
+                const result = updater(currentState);
+                const newState = result || currentState;
 
-    // SAVE BACK TO DB (Critical Phase)
-    try {
-        // 1. Update Settings
-        await prisma.gameSettings.update({
-            where: { id: 'singleton' },
-            data: {
-                turn: newState.turn,
-                turnDuration: newState.settings.turnDuration,
-                moneyMultiplier: newState.settings.moneyMultiplier,
-                taxRate: newState.settings.taxRate,
-                insuranceRate: newState.settings.insuranceRate,
-                interestRate: newState.settings.interestRate,
-                salaryAutoSafeRate: newState.settings.salaryAutoSafeRate,
-                isDay: newState.isDay,
-                isTimerRunning: newState.isTimerRunning,
-                isGameStarted: newState.settings.isGameStarted ?? false,
-                lastTick: BigInt(newState.lastTick),
-                timeRemaining: newState.timeRemaining,
-                marketStatus: newState.marketStatus,
-                eventRevision: newState.eventRevision,
+                // Increment revision
+                newState.eventRevision = (newState.eventRevision || 0) + 1;
+                newState.lastTick = Date.now(); // Ensure tick update
 
-                // Economy & Env
-                economyStatus: newState.economy.status,
-                economyInterestRate: newState.economy.interestRate,
-                priceIndex: newState.economy.priceIndex,
-                marketTrend: newState.economy.marketTrend,
-                taxRateAdjust: newState.economy.taxRateAdjust,
-                lastUpdateTurn: newState.economy.lastUpdateTurn,
+                // SAVE BACK TO DB (Critical Phase)
+                try {
+                    // 1. Update Settings
+                    await prisma.gameSettings.update({
+                        where: { id: 'singleton' },
+                        data: {
+                            turn: newState.turn,
+                            turnDuration: newState.settings.turnDuration,
+                            moneyMultiplier: newState.settings.moneyMultiplier,
+                            taxRate: newState.settings.taxRate,
+                            insuranceRate: newState.settings.insuranceRate,
+                            interestRate: newState.settings.interestRate,
+                            salaryAutoSafeRate: newState.settings.salaryAutoSafeRate,
+                            isDay: newState.isDay,
+                            isTimerRunning: newState.isTimerRunning,
+                            isGameStarted: newState.settings.isGameStarted ?? false,
+                            lastTick: BigInt(newState.lastTick),
+                            timeRemaining: newState.timeRemaining,
+                            marketStatus: newState.marketStatus,
+                            eventRevision: newState.eventRevision,
 
-                envWeather: newState.environment.weather,
-                envTemperature: newState.environment.temperature,
-                envSeason: newState.environment.season,
-                infraPower: newState.environment.cityInfrastructure.power,
-                infraWater: newState.environment.cityInfrastructure.water,
-                infraNetwork: newState.environment.cityInfrastructure.network,
-                securityLevel: newState.environment.securityLevel,
-            }
-        });
+                            // Economy & Env
+                            economyStatus: newState.economy.status,
+                            economyInterestRate: newState.economy.interestRate,
+                            priceIndex: newState.economy.priceIndex,
+                            marketTrend: newState.economy.marketTrend,
+                            taxRateAdjust: newState.economy.taxRateAdjust,
+                            lastUpdateTurn: newState.economy.lastUpdateTurn,
 
-        // 2. Update Users (Iterate and upsert changed users - assuming modification)
-        // Optimization: In Phase 1, we just update ALL users in the state. 
-        // Sync Deletions: Remove users from DB that are no longer in state
-        const currentUserIds = newState.users.map(u => u.id);
-        await prisma.user.deleteMany({
-            where: { id: { notIn: currentUserIds } }
-        });
+                            envWeather: newState.environment.weather,
+                            envTemperature: newState.environment.temperature,
+                            envSeason: newState.environment.season,
+                            infraPower: newState.environment.cityInfrastructure.power,
+                            infraWater: newState.environment.cityInfrastructure.water,
+                            infraNetwork: newState.environment.cityInfrastructure.network,
+                            securityLevel: newState.environment.securityLevel,
+                        }
+                    });
 
-        for (const user of newState.users) {
-            await prisma.user.upsert({
-                where: { id: user.id },
-                update: {
-                    playerIcon: user.playerIcon,
-                    name: user.name,
-                    shopName: user.shopName,
-                    balance: user.balance,
-                    deposit: user.deposit,
-                    debt: user.debt,
-                    inventory: user.inventory as any,
-                    stocks: user.stocks as any,
-                    // ... Need to map almost ALL fields ...
-                    // This is verbose. A better way for Phase 1 is strictly JSON dumping?
-                    // But we defined schema. So we map.
-                    popularity: user.popularity,
-                    happiness: user.happiness,
-                    rating: user.rating,
-                    job: user.job,
-                    jobType: user.jobType,
-                    lastJobChangeTurn: user.lastJobChangeTurn,
-                    unpaidTax: user.unpaidTax,
-                    arrestCount: user.arrestCount,
-                    stolenAmount: user.stolenAmount,
-                    fanCount: user.fanCount,
-                    employmentStatus: user.employmentStatus,
-                    currentJobId: user.currentJobId,
-                    jobHistory: user.jobHistory as any,
-                    shopItems: user.shopItems as any,
+                    // 2. Update Users (Iterate and upsert changed users - assuming modification)
+                    // Optimization: In Phase 1, we just update ALL users in the state. 
+                    // Sync Deletions: Remove users from DB that are no longer in state
+                    const currentUserIds = newState.users.map(u => u.id);
+                    await prisma.user.deleteMany({
+                        where: { id: { notIn: currentUserIds } }
+                    });
 
-                    // Complex JSONs
-                    shopMenu: user.shopMenu as any,
-                    pointCards: user.pointCards as any,
-                    ingredients: user.ingredients as any,
-                    collection: user.collection as any,
-                    furniture: user.furniture as any,
-                    pets: user.pets as any,
-                    coupons: user.coupons as any,
-                    gachaCollection: user.gachaCollection as any,
-                    shopWebsite: user.shopWebsite as any,
-                    pointExchangeItems: user.pointExchangeItems as any,
-                    ownedLands: user.ownedLands as any,
-                    ownedPlaces: user.ownedPlaces as any,
-                    ownedVehicles: user.ownedVehicles as any,
-                    cryptoHoldings: user.cryptoHoldings as any,
-                    qualifications: user.qualifications as any,
-                    examHistory: user.examHistory as any,
-                    loans: user.loans as any,
-                    insurances: user.insurances as any,
-                    lifeStats: user.lifeStats as any,
-                    family: user.family as any,
-                    partners: user.partners as any,
-                    smartphone: user.smartphone as any,
-                    commuteInfo: user.commuteInfo as any,
-                    auditLogs: user.auditLogs as any,
-                    isOff: user.isOff,
-                    vacationReason: user.vacationReason,
-                    isDebugAuthorized: user.isDebugAuthorized,
-                } as any,
-                create: {
-                    id: user.id,
-                    playerIcon: user.playerIcon,
-                    name: user.name,
-                    role: user.role,
-                    balance: user.balance, // 必須フィールド
-                    deposit: user.deposit || 0,
-                    debt: user.debt || 0,
-                    popularity: user.popularity || 0,
-                    happiness: user.happiness || 50,
-                    rating: user.rating || 0,
-                    job: user.job || 'unemployed',
-                    employmentStatus: user.employmentStatus || 'unemployed',
-                    // JSON フィールドのデフォルト値
-                    shopItems: (user.shopItems as any) || [],
-                    stocks: (user.stocks as any) || {},
-                    forbiddenStocks: (user.forbiddenStocks as any) || {},
-                    isForbiddenUnlocked: user.isForbiddenUnlocked || false,
-                    inventory: (user.inventory as any) || [],
-                    shopMenu: (user.shopMenu as any) || [],
-                    pointCards: (user.pointCards as any) || [],
-                    collection: (user.collection as any) || {},
-                    ownedLands: (user.ownedLands as any) || [],
-                    ownedPlaces: (user.ownedPlaces as any) || [],
-                    ownedVehicles: (user.ownedVehicles as any) || [],
-                    cryptoHoldings: (user.cryptoHoldings as any) || {},
-                    qualifications: (user.qualifications as any) || [],
-                    jobHistory: (user.jobHistory as any) || null,
-                    isOff: user.isOff || false,
-                    vacationReason: user.vacationReason || null,
-                    isDebugAuthorized: user.isDebugAuthorized || false,
-                } as any
-            });
-        }
+                    for (const user of newState.users) {
+                        await prisma.user.upsert({
+                            where: { id: user.id },
+                            update: {
+                                playerIcon: user.playerIcon,
+                                name: user.name,
+                                shopName: user.shopName,
+                                balance: user.balance,
+                                deposit: user.deposit,
+                                debt: user.debt,
+                                inventory: user.inventory as any,
+                                stocks: user.stocks as any,
+                                // ... Need to map almost ALL fields ...
+                                // This is verbose. A better way for Phase 1 is strictly JSON dumping?
+                                // But we defined schema. So we map.
+                                popularity: user.popularity,
+                                happiness: user.happiness,
+                                rating: user.rating,
+                                job: user.job,
+                                jobType: user.jobType,
+                                lastJobChangeTurn: user.lastJobChangeTurn,
+                                unpaidTax: user.unpaidTax,
+                                arrestCount: user.arrestCount,
+                                stolenAmount: user.stolenAmount,
+                                fanCount: user.fanCount,
+                                employmentStatus: user.employmentStatus,
+                                currentJobId: user.currentJobId,
+                                jobHistory: user.jobHistory as any,
+                                shopItems: user.shopItems as any,
 
-        // 3. Update Stocks
-        for (const stock of newState.stocks) {
-            await prisma.stock.update({
-                where: { id: stock.id },
-                data: {
-                    price: stock.price,
-                    previousPrice: stock.previousPrice,
-                    volatility: stock.volatility,
-                    priceHistory: stock.priceHistory as any
-                }
-            });
-        }
-
-        // 4. Update Requests
-        const currentRequestIds = newState.requests.map(r => r.id);
-        await prisma.request.deleteMany({
-            where: { id: { notIn: currentRequestIds } }
-        });
-
-        for (const req of newState.requests) {
-            // Check if exists to avoid error? upsert is safer
-            await prisma.request.upsert({
-                where: { id: req.id },
-                update: {
-                    status: req.status,
-                    // other fields might change?
-                },
-                create: {
-                    id: req.id,
-                    type: req.type,
-                    requesterId: req.requesterId,
-                    amount: req.amount,
-                    details: typeof req.details === 'object' ? JSON.stringify(req.details) : String(req.details || ''),
-                    status: req.status,
-                    timestamp: BigInt(req.timestamp),
-                    idempotencyKey: req.idempotencyKey
-                }
-            });
-        }
-
-        // 5. Update Places (Sim)
-        for (const place of newState.places) {
-            await prisma.place.upsert({
-                where: { id: place.id },
-                update: {
-                    status: place.status,
-                    level: place.level,
-                    stats: place.stats as any,
-                    employees: place.employees as any,
-                },
-                create: {
-                    id: place.id,
-                    ownerId: place.ownerId,
-                    name: place.name,
-                    type: place.type,
-                    status: place.status,
-                    level: place.level,
-                    lat: place.location.lat,
-                    lng: place.location.lng,
-                    address: place.location.address,
-                    landId: place.location.landId || '',
-                    stats: place.stats as any
-                }
-            });
-        }
-
-        // 6. Update Cryptos
-        if (newState.cryptos) {
-            for (const c of newState.cryptos) {
-                await prisma.crypto.upsert({
-                    where: { id: c.id },
-                    update: {
-                        price: c.price,
-                        previousPrice: c.previousPrice,
-                        volatility: c.volatility,
-                        priceHistory: c.priceHistory as any,
-                        updatedAt: new Date()
-                    },
-                    create: {
-                        id: c.id,
-                        name: c.name,
-                        symbol: c.symbol,
-                        price: c.price,
-                        previousPrice: c.previousPrice,
-                        volatility: c.volatility,
-                        description: c.description,
-                        creatorId: c.creatorId,
-                        priceHistory: c.priceHistory as any,
-                        createdAt: new Date(Number(c.createdAt) || Date.now()),
-                        updatedAt: new Date()
+                                // Complex JSONs
+                                shopMenu: user.shopMenu as any,
+                                pointCards: user.pointCards as any,
+                                ingredients: user.ingredients as any,
+                                collection: user.collection as any,
+                                furniture: user.furniture as any,
+                                pets: user.pets as any,
+                                coupons: user.coupons as any,
+                                gachaCollection: user.gachaCollection as any,
+                                shopWebsite: user.shopWebsite as any,
+                                pointExchangeItems: user.pointExchangeItems as any,
+                                ownedLands: user.ownedLands as any,
+                                ownedPlaces: user.ownedPlaces as any,
+                                ownedVehicles: user.ownedVehicles as any,
+                                cryptoHoldings: user.cryptoHoldings as any,
+                                qualifications: user.qualifications as any,
+                                examHistory: user.examHistory as any,
+                                loans: user.loans as any,
+                                insurances: user.insurances as any,
+                                lifeStats: user.lifeStats as any,
+                                family: user.family as any,
+                                partners: user.partners as any,
+                                smartphone: user.smartphone as any,
+                                commuteInfo: user.commuteInfo as any,
+                                auditLogs: user.auditLogs as any,
+                                isOff: user.isOff,
+                                vacationReason: user.vacationReason,
+                                isDebugAuthorized: user.isDebugAuthorized,
+                            } as any,
+                            create: {
+                                id: user.id,
+                                playerIcon: user.playerIcon,
+                                name: user.name,
+                                role: user.role,
+                                balance: user.balance, // 必須フィールド
+                                deposit: user.deposit || 0,
+                                debt: user.debt || 0,
+                                popularity: user.popularity || 0,
+                                happiness: user.happiness || 50,
+                                rating: user.rating || 0,
+                                job: user.job || 'unemployed',
+                                employmentStatus: user.employmentStatus || 'unemployed',
+                                // JSON フィールドのデフォルト値
+                                shopItems: (user.shopItems as any) || [],
+                                stocks: (user.stocks as any) || {},
+                                forbiddenStocks: (user.forbiddenStocks as any) || {},
+                                isForbiddenUnlocked: user.isForbiddenUnlocked || false,
+                                inventory: (user.inventory as any) || [],
+                                shopMenu: (user.shopMenu as any) || [],
+                                pointCards: (user.pointCards as any) || [],
+                                collection: (user.collection as any) || {},
+                                ownedLands: (user.ownedLands as any) || [],
+                                ownedPlaces: (user.ownedPlaces as any) || [],
+                                ownedVehicles: (user.ownedVehicles as any) || [],
+                                cryptoHoldings: (user.cryptoHoldings as any) || {},
+                                qualifications: (user.qualifications as any) || [],
+                                jobHistory: (user.jobHistory as any) || null,
+                                isOff: user.isOff || false,
+                                vacationReason: user.vacationReason || null,
+                                isDebugAuthorized: user.isDebugAuthorized || false,
+                            } as any
+                        });
                     }
-                });
-            }
-        }
 
-        // 7. Update Lands
-        if (newState.lands) {
-            for (const land of newState.lands) {
-                await (prisma.land as any).upsert({
-                    where: { id: land.id },
-                    update: {
-                        ownerId: land.ownerId,
-                        price: land.price,
-                        isForSale: land.isForSale,
-                        status: land.status || 'active',
-                        maintenanceFee: land.maintenanceFee || 0,
-                        requiresApproval: land.requiresApproval || false,
-                        allowConstruction: land.allowConstruction ?? true,
-                        allowCompany: land.allowCompany ?? true,
-                        polygon: land.polygon as any
-                    },
-                    create: {
-                        id: land.id,
-                        lat: land.location.lat,
-                        lng: land.location.lng,
-                        address: land.address,
-                        price: land.price,
-                        ownerId: land.ownerId,
-                        type: 'land',
-                        size: land.size,
-                        zoning: land.zoning,
-                        status: land.status || 'active',
-                        isForSale: land.isForSale,
-                        maintenanceFee: land.maintenanceFee || 0,
-                        requiresApproval: land.requiresApproval || false,
-                        allowConstruction: land.allowConstruction ?? true,
-                        allowCompany: land.allowCompany ?? true,
-                        polygon: land.polygon as any
+                    // 3. Update Stocks
+                    for (const stock of newState.stocks) {
+                        await prisma.stock.update({
+                            where: { id: stock.id },
+                            data: {
+                                price: stock.price,
+                                previousPrice: stock.previousPrice,
+                                volatility: stock.volatility,
+                                priceHistory: stock.priceHistory as any
+                            }
+                        });
                     }
-                });
-            }
-        }
 
-    } catch (err) {
-        console.error('Failed to save GameState to DB:', err);
-        throw err;
-    }
+                    // 4. Update Requests
+                    const currentRequestIds = newState.requests.map(r => r.id);
+                    await prisma.request.deleteMany({
+                        where: { id: { notIn: currentRequestIds } }
+                    });
 
-    return newState;
+                    for (const req of newState.requests) {
+                        // Check if exists to avoid error? upsert is safer
+                        await prisma.request.upsert({
+                            where: { id: req.id },
+                            update: {
+                                status: req.status,
+                                // other fields might change?
+                            },
+                            create: {
+                                id: req.id,
+                                type: req.type,
+                                requesterId: req.requesterId,
+                                amount: req.amount,
+                                details: typeof req.details === 'object' ? JSON.stringify(req.details) : String(req.details || ''),
+                                status: req.status,
+                                timestamp: BigInt(req.timestamp),
+                                idempotencyKey: req.idempotencyKey
+                            }
+                        });
+                    }
+
+                    // 5. Update Places (Sim)
+                    for (const place of newState.places) {
+                        await prisma.place.upsert({
+                            where: { id: place.id },
+                            update: {
+                                status: place.status,
+                                level: place.level,
+                                stats: place.stats as any,
+                                employees: place.employees as any,
+                            },
+                            create: {
+                                id: place.id,
+                                ownerId: place.ownerId,
+                                name: place.name,
+                                type: place.type,
+                                status: place.status,
+                                level: place.level,
+                                lat: place.location.lat,
+                                lng: place.location.lng,
+                                address: place.location.address,
+                                landId: place.location.landId || '',
+                                stats: place.stats as any
+                            }
+                        });
+                    }
+
+                    // 6. Update Cryptos
+                    if (newState.cryptos) {
+                        for (const c of newState.cryptos) {
+                            await prisma.crypto.upsert({
+                                where: { id: c.id },
+                                update: {
+                                    price: c.price,
+                                    previousPrice: c.previousPrice,
+                                    volatility: c.volatility,
+                                    priceHistory: c.priceHistory as any,
+                                    updatedAt: new Date()
+                                },
+                                create: {
+                                    id: c.id,
+                                    name: c.name,
+                                    symbol: c.symbol,
+                                    price: c.price,
+                                    previousPrice: c.previousPrice,
+                                    volatility: c.volatility,
+                                    description: c.description,
+                                    creatorId: c.creatorId,
+                                    priceHistory: c.priceHistory as any,
+                                    createdAt: new Date(Number(c.createdAt) || Date.now()),
+                                    updatedAt: new Date()
+                                }
+                            });
+                        }
+                    }
+
+                    // 7. Update Lands
+                    if (newState.lands) {
+                        for (const land of newState.lands) {
+                            await (prisma.land as any).upsert({
+                                where: { id: land.id },
+                                update: {
+                                    ownerId: land.ownerId,
+                                    price: land.price,
+                                    isForSale: land.isForSale,
+                                    status: land.status || 'active',
+                                    maintenanceFee: land.maintenanceFee || 0,
+                                    requiresApproval: land.requiresApproval || false,
+                                    allowConstruction: land.allowConstruction ?? true,
+                                    allowCompany: land.allowCompany ?? true,
+                                    polygon: land.polygon as any
+                                },
+                                create: {
+                                    id: land.id,
+                                    lat: land.location.lat,
+                                    lng: land.location.lng,
+                                    address: land.address,
+                                    price: land.price,
+                                    ownerId: land.ownerId,
+                                    type: 'land',
+                                    size: land.size,
+                                    zoning: land.zoning,
+                                    status: land.status || 'active',
+                                    isForSale: land.isForSale,
+                                    maintenanceFee: land.maintenanceFee || 0,
+                                    requiresApproval: land.requiresApproval || false,
+                                    allowConstruction: land.allowConstruction ?? true,
+                                    allowCompany: land.allowCompany ?? true,
+                                    polygon: land.polygon as any
+                                }
+                            });
+                        }
+                    }
+
+
+                    // Broadcast the update to all connected SSE clients
+                    eventManager.broadcast({ type: 'game_update' });
+
+
+                    resolve(newState);
+                    return newState;
+                } catch (err) {
+                    console.error('Failed to save GameState to DB:', err);
+                    reject(err);
+                    throw err;
+                }
+            });
+
+    });
 }
 
 // Legacy save function - internal use only or deprecated

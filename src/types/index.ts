@@ -193,6 +193,8 @@ export interface User {
     stocks: { [stockId: string]: number }; // stockId -> quantity
     forbiddenStocks?: { [stockId: string]: number };
     isForbiddenUnlocked?: boolean;
+    isTimeMachineUnlocked?: boolean;
+
 
     // History
     transactions: Transaction[];

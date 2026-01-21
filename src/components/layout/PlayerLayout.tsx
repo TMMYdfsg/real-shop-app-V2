@@ -165,6 +165,11 @@ export const PlayerLayout: React.FC<{ children: React.ReactNode; id: string; ini
     navItems.push({ label: '闇市場', path: `${basePath}/forbidden`, icon: '💀' });
   }
 
+  if (currentUser.isTimeMachineUnlocked) {
+    navItems.push({ label: 'タイムマシン', path: `${basePath}/timemachine`, icon: '⌛' });
+  }
+
+
   const formatTime = (ms: number) => {
     if (isNaN(ms) || ms < 0) return '0:00';
     const seconds = Math.floor(ms / 1000);
@@ -179,8 +184,15 @@ export const PlayerLayout: React.FC<{ children: React.ReactNode; id: string; ini
   return (
     <TimeThemeWrapper>
       <div
-        style={{ minHeight: '100vh', paddingBottom: '80px', background: isForbiddenPage ? '#111' : undefined }}
+        style={{
+          height: '100vh',
+          overflowY: 'auto',
+          paddingBottom: '80px',
+          background: isForbiddenPage ? '#111' : undefined,
+          WebkitOverflowScrolling: 'touch'
+        }}
       >
+
         {/* Animated Notifications */}
         <AnimatePresence>
           {activeBills.length > 0 && (
