@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Plus_Jakarta_Sans } from "next/font/google";
 import { GameProvider } from "@/context/GameContext";
 import { GlobalSalesNotification } from "@/components/notifications/GlobalSalesNotification";
 import CommunicationNotifier from "@/components/notifications/CommunicationNotifier";
@@ -7,6 +8,12 @@ import { ToastProvider } from "@/components/ui/ToastProvider";
 import Script from "next/script";
 import AnimatedBackground from "@/components/ui/AnimatedBackground";
 import "./globals.css";
+
+const appFont = Plus_Jakarta_Sans({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-app",
+});
 
 export const metadata: Metadata = {
   title: "Real Shop App V2",
@@ -33,7 +40,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ja">
-      <body>
+      <body className={appFont.variable}>
         <Script
           src={`https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&libraries=places,geometry`}
           strategy="afterInteractive"

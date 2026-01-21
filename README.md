@@ -1,5 +1,30 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## デザインシステム (UI統一ルール)
+
+### トークン一覧 (抜粋)
+
+`src/styles/tokens.css` で定義しています。
+
+- サーフェス: `--bg`, `--surface`, `--surface-2`, `--surface-3`
+- テキスト: `--text`, `--text-muted`
+- ボーダー: `--border`, `--border-strong`
+- ブランド: `--primary`, `--primary-2`, `--primary-contrast`
+- ステータス: `--success`, `--warning`, `--danger`, `--info`
+- 角丸: `--r-xs` 〜 `--r-xl`
+- 余白: `--s-1` 〜 `--s-8`
+- 影: `--e-1`, `--e-2`
+- タイポ: `--font-sans`, `--fs-1` 〜 `--fs-6`, `--lh`
+- モーション: `--motion-fast`, `--motion-ui`, `--motion-sheet`
+
+### 使い方ガイド (短文)
+
+1. **ページ直書きのスタイルは避ける。** 代わりに `globals.css` のクラスとトークンを使用します。
+2. **UIプリミティブを優先利用。** `components/ui` にある Button/Card/Input/Chip/Skeleton/Modal/BottomSheet/DataTable を使います。
+3. **データ状態は data 属性で管理。** 例: `data-variant`, `data-size`, `data-state`。
+4. **モーションは共通定数を利用。** `src/lib/motion.ts` の `TRANSITION_*` / `SPRING_SHEET` を使用します。
+5. **将来のテーマ拡張を考慮。** ダークテーマは `data-theme="dark"` / `"night"` を使います。
+
 ## Getting Started
 
 First, run the development server:

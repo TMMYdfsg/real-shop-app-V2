@@ -1,0 +1,102 @@
+:root {
+  /* Surfaces */
+  --bg: #f7f5fe;
+  --surface: #ffffff;
+  --surface-2: #eef1f7;
+  --surface-3: #e7ebf5;
+
+  /* Text */
+  --text: #0d1013;
+  --text-muted: #5a6168;
+
+  /* Borders */
+  --border: #dce0e3;
+  --border-strong: #cfd6e4;
+
+  /* Brand */
+  --primary: #4f5892;
+  --primary-2: #7a7fd1;
+  --primary-contrast: #ffffff;
+
+  /* Status */
+  --success: #21c55d;
+  --warning: #eab308;
+  --danger: #f54546;
+  --info: #4f7cff;
+
+  /* Shadow color (rgb) */
+  --shadow: 15 23 42;
+
+  /* Radius */
+  --r-xs: 10px;
+  --r-sm: 14px;
+  --r-md: 16px;
+  --r-lg: 20px;
+  --r-xl: 24px;
+
+  /* Spacing */
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-5: 20px;
+  --s-6: 24px;
+  --s-7: 32px;
+  --s-8: 40px;
+
+  /* Elevation */
+  --e-1: 0 1px 2px rgba(var(--shadow) / 0.06), 0 6px 18px rgba(var(--shadow) / 0.06);
+  --e-2: 0 2px 6px rgba(var(--shadow) / 0.08), 0 14px 40px rgba(var(--shadow) / 0.08);
+
+  /* Typography */
+  --font-sans: var(--font-app), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --fs-1: 12px;
+  --fs-2: 14px;
+  --fs-3: 16px;
+  --fs-4: 18px;
+  --fs-5: 22px;
+  --fs-6: 28px;
+  --lh: 1.4;
+
+  /* Motion */
+  --motion-fast: 150ms;
+  --motion-ui: 220ms;
+  --motion-sheet: 300ms;
+
+  /* 互換用トークン (旧UI参照) */
+  --bg-primary: var(--bg);
+  --bg-secondary: var(--surface-2);
+  --text-primary: var(--text);
+  --text-secondary: var(--text-muted);
+  --accent-color: var(--primary);
+  --accent-hover: var(--primary-2);
+  --glass-bg: rgba(255, 255, 255, 0.7);
+  --glass-border: var(--border);
+  --radius-sm: var(--r-xs);
+  --radius-md: var(--r-md);
+  --radius-lg: var(--r-lg);
+  --spacing-xs: var(--s-1);
+  --spacing-sm: var(--s-2);
+  --spacing-md: var(--s-4);
+  --spacing-lg: var(--s-6);
+  --spacing-xl: var(--s-8);
+}
+
+[data-theme='dark'],
+[data-theme='night'] {
+  --bg: #0f111a;
+  --surface: #161a27;
+  --surface-2: #1f2433;
+  --surface-3: #2a3042;
+  --text: #f3f4f6;
+  --text-muted: #9aa2b1;
+  --border: #2a3142;
+  --border-strong: #3a435a;
+  --primary: #8b93ff;
+  --primary-2: #a1a6ff;
+  --primary-contrast: #111827;
+  --shadow: 5 8 18;
+
+  --glass-bg: rgba(22, 26, 39, 0.75);
+  --glass-border: rgba(255, 255, 255, 0.08);
+}

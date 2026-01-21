@@ -4,7 +4,11 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useGame } from '@/context/GameContext';
 import { Button } from '@/components/ui/Button';
-import { Card } from '@/components/ui/Card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card';
+import { Input } from '@/components/ui/Input';
+import { Select } from '@/components/ui/Select';
+import { Chip } from '@/components/ui/Chip';
+import { Skeleton } from '@/components/ui/Skeleton';
 import { Role } from '@/types';
 
 export default function Home() {
@@ -93,8 +97,9 @@ export default function Home() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="glass-panel p-8">Loading...</div>
+      <div className="ui-container ui-stack u-min-h-screen">
+        <Skeleton className="u-h-140" />
+        <Skeleton className="u-h-220" />
       </div>
     );
   }
@@ -102,110 +107,112 @@ export default function Home() {
   // Setup Mode
   if (gameState && gameState.users.length === 0) {
     return (
-      <main className="min-h-screen flex items-center justify-center p-4">
-        <Card title="初期セットアップ" className="max-w-md w-full" style={{ textAlign: 'center' }}>
-          <p style={{ marginBottom: '1rem' }}>プレイする人数と名前を入力してね</p>
+      <main className="ui-container">
+        <Card>
+          <CardHeader>
+            <CardTitle>初期セットアップ</CardTitle>
+            <CardDescription>プレイ人数と名前を入力して、ゲームを開始しよう。</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="ui-stack">
+              <label className="ui-inline">
+                <span className="ui-subtitle">人数</span>
+                <Select
+                  value={playerCount}
+                  onChange={(e) => {
+                    const count = Number(e.target.value);
+                    setPlayerCount(count);
+                    setNames(prev => {
+                      const newArr = [...prev];
+                      if (count > prev.length) for (let i = prev.length; i < count; i++) newArr.push('');
+                      else newArr.splice(count);
+                      return newArr;
+                    });
+                    setIds(prev => {
+                      const newArr = [...prev];
+                      if (count > prev.length) for (let i = prev.length; i < count; i++) newArr.push('');
+                      else newArr.splice(count);
+                      return newArr;
+                    });
+                  }}
+                >
+                  {[2, 3, 4].map(n => <option key={n} value={n}>{n}人</option>)}
+                </Select>
+              </label>
 
-          <div style={{ marginBottom: '1rem' }}>
-            <label>人数: </label>
-            <select
-              value={playerCount}
-              onChange={(e) => {
-                const count = Number(e.target.value);
-                setPlayerCount(count);
-                setNames(prev => {
-                  const newArr = [...prev];
-                  if (count > prev.length) for (let i = prev.length; i < count; i++) newArr.push('');
-                  else newArr.splice(count);
-                  return newArr;
-                });
-                setIds(prev => {
-                  const newArr = [...prev];
-                  if (count > prev.length) for (let i = prev.length; i < count; i++) newArr.push('');
-                  else newArr.splice(count);
-                  return newArr;
-                });
-              }}
-              style={{ padding: '0.5rem', borderRadius: '4px' }}
-            >
-              {[2, 3, 4].map(n => <option key={n} value={n}>{n}人</option>)}
-            </select>
-          </div>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '1.5rem' }}>
-            {names.map((name, index) => (
-              <div key={index} style={{ padding: '0.5rem', border: '1px solid #eee', borderRadius: '4px' }}>
-                <div style={{ fontSize: '0.8rem', marginBottom: '0.2rem', textAlign: 'left', fontWeight: 'bold' }}>
-                  {index === 0 ? '銀行員' : `プレイヤー${index}`}
-                </div>
-                <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem' }}>
-                  <input
-                    type="text"
-                    placeholder="名前"
-                    value={name}
-                    onChange={(e) => {
-                      const newNames = [...names];
-                      newNames[index] = e.target.value;
-                      setNames(newNames);
-                    }}
-                    style={{ flex: 1, padding: '0.5rem', borderRadius: '4px', border: '1px solid #ccc' }}
-                  />
-                </div>
-                <div style={{ display: 'flex', gap: '0.5rem' }}>
-                  <input
-                    type="text"
-                    placeholder="ID (任意: 英数字)"
-                    value={ids[index]}
-                    onChange={(e) => {
-                      const newIds = [...ids];
-                      newIds[index] = e.target.value;
-                      setIds(newIds);
-                    }}
-                    style={{ flex: 1, padding: '0.5rem', borderRadius: '4px', border: '1px solid #ccc', fontSize: '0.9rem' }}
-                  />
-                </div>
+              <div className="ui-stack">
+                {names.map((name, index) => (
+                  <Card key={index}>
+                    <CardContent>
+                      <div className="ui-stack">
+                        <div className="ui-inline">
+                          <Chip status={index === 0 ? 'success' : 'neutral'} density="compact">
+                            {index === 0 ? '銀行員' : `プレイヤー${index}`}
+                          </Chip>
+                        </div>
+                        <Input
+                          type="text"
+                          placeholder="名前"
+                          value={name}
+                          onChange={(e) => {
+                            const newNames = [...names];
+                            newNames[index] = e.target.value;
+                            setNames(newNames);
+                          }}
+                        />
+                        <Input
+                          type="text"
+                          placeholder="ID (任意: 英数字)"
+                          value={ids[index]}
+                          onChange={(e) => {
+                            const newIds = [...ids];
+                            newIds[index] = e.target.value;
+                            setIds(newIds);
+                          }}
+                        />
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
               </div>
-            ))}
-          </div>
 
-          {/* Admin Settings Accordion */}
-          <div className="mb-6 border rounded-lg overflow-hidden">
-            <button
-              onClick={() => setShowAdvanced(!showAdvanced)}
-              className="w-full p-2 bg-gray-50 text-left text-sm font-bold flex justify-between items-center hover:bg-gray-100"
-            >
-              <span>⚙️ 詳細設定 (管理者用)</span>
-              <span>{showAdvanced ? '▼' : '▶'}</span>
-            </button>
-            {showAdvanced && (
-              <div className="p-4 bg-gray-50 space-y-4 animate-in slide-in-from-top-2">
-                <div className="flex flex-col gap-1 text-left">
-                  <label className="text-xs font-bold text-gray-600">開始時の所持金 (プレイヤー)</label>
-                  <input
-                    type="number"
-                    value={startingMoney}
-                    onChange={(e) => setStartingMoney(Number(e.target.value))}
-                    className="p-2 border rounded"
-                  />
-                </div>
-                <div className="flex flex-col gap-1 text-left">
-                  <label className="text-xs font-bold text-gray-600">グローバル収入倍率 (給料等)</label>
-                  <input
-                    type="number"
-                    step="0.1"
-                    value={moneyMultiplier}
-                    onChange={(e) => setMoneyMultiplier(Number(e.target.value))}
-                    className="p-2 border rounded"
-                  />
-                  <p className="text-xs text-gray-400">※1.0 = 通常, 2.0 = 2倍</p>
-                </div>
-              </div>
-            )}
-          </div>
+              <Card clickable onClick={() => setShowAdvanced(!showAdvanced)}>
+                <CardContent>
+                  <div className="ui-inline u-justify-between u-w-full">
+                    <span className="ui-subtitle">⚙️ 詳細設定 (管理者用)</span>
+                    <span>{showAdvanced ? '▼' : '▶'}</span>
+                  </div>
+                </CardContent>
+              </Card>
 
-          <Button onClick={handleSetupSubmit} fullWidth disabled={isSetupBusy}>
-            {isSetupBusy ? '作成中...' : 'ゲームスタート！'}
-          </Button>
+              {showAdvanced && (
+                <div className="ui-stack">
+                  <label className="ui-stack">
+                    <span className="ui-subtitle">開始時の所持金 (プレイヤー)</span>
+                    <Input
+                      type="number"
+                      value={startingMoney}
+                      onChange={(e) => setStartingMoney(Number(e.target.value))}
+                    />
+                  </label>
+                  <label className="ui-stack">
+                    <span className="ui-subtitle">グローバル収入倍率 (給料等)</span>
+                    <Input
+                      type="number"
+                      step="0.1"
+                      value={moneyMultiplier}
+                      onChange={(e) => setMoneyMultiplier(Number(e.target.value))}
+                    />
+                    <span className="ui-muted">※1.0 = 通常, 2.0 = 2倍</span>
+                  </label>
+                </div>
+              )}
+
+              <Button onClick={handleSetupSubmit} fullWidth disabled={isSetupBusy}>
+                {isSetupBusy ? '作成中...' : 'ゲームスタート！'}
+              </Button>
+            </div>
+          </CardContent>
         </Card>
       </main>
     );
@@ -213,33 +220,27 @@ export default function Home() {
 
   // Login Mode
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center p-4 gap-8">
-      <h1 style={{ fontSize: '2.5rem', fontWeight: 'bold', background: 'linear-gradient(to right, #6366f1, #ec4899)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', marginBottom: '2rem' }}>
-        Real Shop
-      </h1>
+    <main className="ui-container ui-stack u-min-h-screen">
+      <div className="ui-stack u-text-center">
+        <div className="ui-title">Real Shop</div>
+        <div className="ui-muted">経済シミュ × ライフシミュのログイン</div>
+      </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '1rem', width: '100%', maxWidth: '400px' }}>
+      <div className="ui-stack u-max-w-md u-mx-auto u-w-full">
         {gameState?.users.map((user) => (
-          <Button
-            key={user.id}
-            variant={user.role === 'banker' ? 'primary' : 'secondary'}
-            size="lg"
-            fullWidth
-            onClick={() => handleLogin(user.id, user.role, user.name)}
-            style={{
-              justifyContent: 'space-between',
-              padding: '1.5rem',
-              fontSize: '1.2rem'
-            }}
-          >
-            <div>
-              <div style={{ fontWeight: 'bold' }}>{user.name}</div>
-              <div style={{ fontSize: '0.8rem', opacity: 0.6 }}>ID: {user.id}</div>
-            </div>
-            <span style={{ fontSize: '0.8rem', opacity: 0.8 }}>
-              {user.role === 'banker' ? '銀行員' : 'プレイヤー'}
-            </span>
-          </Button>
+          <Card key={user.id} clickable onClick={() => handleLogin(user.id, user.role, user.name)}>
+            <CardContent>
+              <div className="ui-inline u-justify-between u-w-full">
+                <div className="ui-stack u-gap-xs">
+                  <div className="ui-subtitle">{user.name}</div>
+                  <div className="ui-muted">ID: {user.id}</div>
+                </div>
+                <Chip status={user.role === 'banker' ? 'success' : 'neutral'}>
+                  {user.role === 'banker' ? '銀行員' : 'プレイヤー'}
+                </Chip>
+              </div>
+            </CardContent>
+          </Card>
         ))}
       </div>
 

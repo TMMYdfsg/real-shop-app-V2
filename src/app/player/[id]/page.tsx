@@ -1,11 +1,13 @@
 'use client';
 
-import React, { use, useState } from 'react';
+import React, { use, useMemo, useState } from 'react';
+import Link from 'next/link';
 import { useGame } from '@/context/GameContext';
 import { Button } from '@/components/ui/Button';
-import { StatusCard } from '@/components/home/StatusCard';
-import { ActionTabs } from '@/components/home/ActionTabs';
-import { RankingList } from '@/components/home/RankingList';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
+import { Chip } from '@/components/ui/Chip';
+import { DataTable } from '@/components/ui/DataTable';
+import { StatCard } from '@/components/kpi/StatCard';
 import dynamic from 'next/dynamic';
 
 // Dynamic import for BankTerminal to avoid SSR issues if any
@@ -17,21 +19,21 @@ export default function PlayerHome({ params }: { params: Promise<{ id: string }>
     const { gameState, currentUser, refresh } = useGame();
     const [isBankOpen, setIsBankOpen] = useState(false);
 
-    if (!gameState) return <div className="p-8 text-center text-gray-500">Loading world data...</div>;
+    if (!gameState) return <div className="ui-container ui-muted">Loading world data...</div>;
 
     // Game Start Lock (Check this FIRST, before currentUser check)
     if (gameState.settings.isGameStarted === false) {
         return (
-            <div className="fixed inset-0 bg-slate-900 z-50 flex items-center justify-center text-white p-8">
-                <div className="text-center max-w-md">
-                    <div className="text-6xl mb-6">🛑</div>
-                    <h1 className="text-3xl font-bold mb-4">準備中</h1>
-                    <p className="text-lg text-slate-300 leading-relaxed mb-8">
+            <div className="night-overlay">
+                <div className="u-text-center u-max-w-md">
+                    <div className="ui-title">🛑</div>
+                    <h1 className="ui-title">準備中</h1>
+                    <p className="ui-muted">
                         ゲームが初期化されました。<br />
                         管理者がゲームを開始するまで<br />
                         しばらくお待ちください。
                     </p>
-                    <div className="animate-pulse text-sm text-slate-500">Waiting for admin...</div>
+                    <div className="ui-muted">Waiting for admin...</div>
                 </div>
             </div>
         );
@@ -39,14 +41,20 @@ export default function PlayerHome({ params }: { params: Promise<{ id: string }>
 
     if (!currentUser) {
         return (
-            <div className="min-h-screen flex items-center justify-center">
-                <div className="text-center p-8 bg-white rounded-xl shadow-lg border border-red-100 max-w-sm">
-                    <h2 className="text-xl font-bold text-red-600 mb-2">ユーザーエラー</h2>
-                    <p className="text-gray-600 mb-6">ユーザー情報が見つかりませんでした。<br />ゲームがリセットされた可能性があります。</p>
-                    <Button onClick={() => window.location.href = '/'}>
-                        トップに戻る
-                    </Button>
-                </div>
+            <div className="ui-container">
+                <Card>
+                    <CardHeader>
+                        <CardTitle>ユーザーエラー</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <p className="ui-muted">ユーザー情報が見つかりませんでした。ゲームがリセットされた可能性があります。</p>
+                        <div className="u-mt-4">
+                            <Button onClick={() => window.location.href = '/'}>
+                                トップに戻る
+                            </Button>
+                        </div>
+                    </CardContent>
+                </Card>
             </div>
         );
     }
@@ -68,19 +76,106 @@ export default function PlayerHome({ params }: { params: Promise<{ id: string }>
         }
     };
 
+    const kpis = [
+        { label: '資産', value: `${currentUser.balance.toLocaleString()}枚`, icon: '💰' },
+        { label: '預金', value: `${currentUser.deposit.toLocaleString()}枚`, icon: '🏦' },
+        { label: '借金', value: `${currentUser.debt.toLocaleString()}枚`, icon: '💸' },
+        { label: '幸福', value: `${currentUser.happiness}`, icon: '😊' },
+        { label: '信用', value: `${currentUser.popularity}`, icon: '📈' },
+    ];
+
+    const actions = [
+        { label: '仕事をする', href: `${currentUser.id}/special`, badge: '収入' },
+        { label: 'マイショップ', href: `${currentUser.id}/shop`, badge: '経営' },
+        { label: '投資・株', href: `${currentUser.id}/stock`, badge: '投資' },
+        { label: '交流・移動', href: `${currentUser.id}/map`, badge: 'ライフ' },
+    ];
+
+    const marketRows = useMemo(() => {
+        return gameState.stocks.slice(0, 5).map((stock) => ({
+            id: stock.id,
+            name: stock.name,
+            price: stock.price,
+            previous: stock.previousPrice,
+        }));
+    }, [gameState.stocks]);
+
+    const columns = [
+        { key: 'name', header: '銘柄' },
+        {
+            key: 'price',
+            header: '価格',
+            render: (row: { price: number }) => `${row.price.toLocaleString()}枚`,
+        },
+        {
+            key: 'previous',
+            header: '変化',
+            render: (row: { price: number; previous: number }) => {
+                const diff = row.price - row.previous;
+                const trend = diff > 0 ? 'up' : diff < 0 ? 'down' : 'flat';
+                const label = `${diff >= 0 ? '+' : ''}${diff.toLocaleString()}`;
+                return <Chip status={trend === 'up' ? 'success' : trend === 'down' ? 'danger' : 'neutral'}>{label}</Chip>;
+            },
+        },
+    ];
+
     // Main Dashboard Interface
     return (
-        <div className="space-y-6 max-w-2xl mx-auto pb-12">
-            {/* Status Overview */}
-            <StatusCard user={currentUser} showBank={() => setIsBankOpen(true)} />
+        <div className="ui-stack u-max-w-lg u-mx-auto">
+            <div className="ui-stack">
+                <div className="ui-subtitle">今日のダッシュボード</div>
+                <div className="ui-muted">経済とライフの両面から状況を確認できます。</div>
+            </div>
 
-            {/* Action Navigation */}
-            <ActionTabs userId={currentUser.id} onOpenBank={() => setIsBankOpen(true)} />
+            <div className="ui-grid">
+                {kpis.map((kpi) => (
+                    <StatCard key={kpi.label} label={kpi.label} value={kpi.value} icon={kpi.icon} />
+                ))}
+            </div>
 
-            {/* Ranking */}
-            <RankingList users={gameState.users} currentUserId={currentUser.id} />
+            <Card>
+                <CardHeader>
+                    <CardTitle>今日の行動</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <div className="ui-grid">
+                        {actions.map((action) => (
+                            <Link key={action.label} href={`/player/${action.href}`}>
+                                <Card clickable>
+                                    <CardContent>
+                                        <div className="ui-stack">
+                                            <div className="ui-inline u-justify-between">
+                                                <div className="ui-subtitle">{action.label}</div>
+                                                <Chip density="compact">{action.badge}</Chip>
+                                            </div>
+                                            <span className="ui-muted">今すぐ行動する →</span>
+                                        </div>
+                                    </CardContent>
+                                </Card>
+                            </Link>
+                        ))}
+                    </div>
+                </CardContent>
+            </Card>
 
-            {/* Bank Modal */}
+            <Card>
+                <CardHeader>
+                    <CardTitle>市場トレンド</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <DataTable
+                        data={marketRows}
+                        columns={columns}
+                        rowKey={(row) => row.id}
+                        density="compact"
+                        emptyMessage="市場データがまだありません。"
+                    />
+                    <Button size="sm" onClick={() => setIsBankOpen(true)}>
+                        銀行端末を開く
+                    </Button>
+                </CardContent>
+            </Card>
+
             {isBankOpen && (
                 <BankTerminal
                     user={currentUser}

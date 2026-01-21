@@ -1,79 +1,93 @@
-import React, { useEffect, useState } from 'react';
-import { createPortal } from 'react-dom';
-import { Button } from './Button';
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
+import { Button } from "./Button";
 
 interface ModalProps {
-    isOpen: boolean;
-    onClose: () => void;
-    title: string;
-    children: React.ReactNode;
+  isOpen: boolean;
+  onClose: () => void;
+  title: string;
+  children: React.ReactNode;
+  description?: string;
 }
 
-export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children }) => {
-    const [mounted, setMounted] = useState(false);
+const getFocusable = (container: HTMLElement | null) => {
+  if (!container) return [];
+  return Array.from(
+    container.querySelectorAll<HTMLElement>(
+      'button,[href],input,select,textarea,[tabindex]:not([tabindex="-1"])'
+    )
+  ).filter(el => !el.hasAttribute("disabled"));
+};
 
-    useEffect(() => {
-        setMounted(true);
-        return () => setMounted(false);
-    }, []);
+export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, description }) => {
+  const [mounted, setMounted] = useState(false);
+  const contentRef = useRef<HTMLDivElement | null>(null);
+  const titleId = useMemo(() => `modal-${Math.random().toString(36).slice(2, 7)}`, []);
 
-    if (!isOpen || !mounted) return null;
+  useEffect(() => {
+    setMounted(true);
+    return () => setMounted(false);
+  }, []);
 
-    return createPortal(
-        <div
-            style={{
-                position: 'fixed',
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                background: 'rgba(0, 0, 0, 0.6)',
-                backdropFilter: 'blur(4px)',
-                zIndex: 9999, // Increased z-index
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                padding: '1rem',
-                animation: 'fadeIn 0.2s ease'
-            }}
-            onClick={onClose} // Optional background click close
-        >
-            <div
-                className="glass-panel"
-                style={{
-                    background: 'var(--bg-primary)',
-                    maxWidth: '500px',
-                    width: '100%',
-                    maxHeight: '90vh',
-                    overflowY: 'auto',
-                    padding: '1.5rem',
-                    position: 'relative',
-                    borderRadius: '12px', // Ensure explicit border radius
-                    animation: 'slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1)'
-                }}
-                onClick={(e) => e.stopPropagation()}
-            >
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                    <h2 style={{ fontSize: '1.5rem', fontWeight: 700 }}>{title}</h2>
-                    <Button variant="ghost" size="sm" onClick={onClose} aria-label="Close">
-                        ✕
-                    </Button>
-                </div>
-                <div>
-                    {children}
-                </div>
-            </div>
-            <style jsx global>{`
-                @keyframes fadeIn {
-                    from { opacity: 0; }
-                    to { opacity: 1; }
-                }
-                @keyframes slideUp {
-                    from { transform: translateY(20px); opacity: 0; }
-                    to { transform: translateY(0); opacity: 1; }
-                }
-            `}</style>
-        </div>,
-        document.body
-    );
+  useEffect(() => {
+    if (!isOpen) return;
+    const focusables = getFocusable(contentRef.current);
+    focusables[0]?.focus();
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        onClose();
+      }
+      if (event.key === "Tab") {
+        const items = getFocusable(contentRef.current);
+        if (items.length === 0) return;
+        const first = items[0];
+        const last = items[items.length - 1];
+        if (event.shiftKey && document.activeElement === first) {
+          event.preventDefault();
+          last.focus();
+        } else if (!event.shiftKey && document.activeElement === last) {
+          event.preventDefault();
+          first.focus();
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, onClose]);
+
+  if (!isOpen || !mounted) return null;
+
+  return createPortal(
+    <div className="ui-overlay" onClick={onClose}>
+      <div
+        ref={contentRef}
+        className="ui-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+        aria-describedby={description ? `${titleId}-desc` : undefined}
+        onClick={(event) => event.stopPropagation()}
+      >
+        <div className="ui-modal__header">
+          <div>
+            <h2 id={titleId} className="ui-modal__title">
+              {title}
+            </h2>
+            {description ? (
+              <p id={`${titleId}-desc`} className="ui-card__description">
+                {description}
+              </p>
+            ) : null}
+          </div>
+          <Button variant="ghost" size="sm" onClick={onClose} aria-label="閉じる">
+            ✕
+          </Button>
+        </div>
+        <div className="ui-modal__body">{children}</div>
+      </div>
+    </div>,
+    document.body
+  );
 };
