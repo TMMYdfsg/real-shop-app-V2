@@ -4,16 +4,17 @@
   --bg-secondary: #e2e8f0;
   --text-primary: #1e293b;
   --text-secondary: #64748b;
-  --accent-color: #6366f1; /* Indigo */
-  --accent-hover: #4f46e5;
+  /* Updated accent palette for a more modern and vibrant look */
+  --accent-color: #7f5af0; /* Neon purple */
+  --accent-hover: #6241ab;
   --success-color: #10b981;
   --danger-color: #ef4444;
   --warning-color: #f59e0b;
 
   /* Glassmorphism */
-  --glass-bg: rgba(255, 255, 255, 0.7);
-  --glass-border: rgba(255, 255, 255, 0.4);
-  --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+  --glass-bg: rgba(255, 255, 255, 0.6);
+  --glass-border: rgba(255, 255, 255, 0.3);
+  --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.2);
 
   /* Spacing */
   --spacing-xs: 0.25rem;
@@ -33,6 +34,7 @@
   --bg-secondary: #1e293b;
   --text-primary: #f1f5f9;
   --text-secondary: #94a3b8;
+  /* Adjust glassmorphism in night mode for better contrast */
   --glass-bg: rgba(15, 23, 42, 0.6);
   --glass-border: rgba(255, 255, 255, 0.1);
   --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
@@ -53,7 +55,12 @@ body {
   transition: background 0.3s ease, color 0.3s ease;
 }
 
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-weight: 700;
   line-height: 1.2;
 }
@@ -95,18 +102,34 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Animations */
 @keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-10px); }
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
 }
 
 @keyframes pulse-glow {
-  0%, 100% { box-shadow: 0 0 5px var(--accent-color); opacity: 1; }
-  50% { box-shadow: 0 0 20px var(--accent-color); opacity: 0.8; }
+  0%,
+  100% {
+    box-shadow: 0 0 5px var(--accent-color);
+    opacity: 1;
+  }
+  50% {
+    box-shadow: 0 0 20px var(--accent-color);
+    opacity: 0.8;
+  }
 }
 
 @keyframes shimmer {
-  0% { transform: translateX(-100%); }
-  100% { transform: translateX(100%); }
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
 }
 
 .animate-float {

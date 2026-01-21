@@ -267,8 +267,12 @@ export async function getGameState(): Promise<GameState> {
             ownedLands: (u.ownedLands as any) || [],
             ownedPlaces: (u.ownedPlaces as any) || [],
             ownedVehicles: (u.ownedVehicles as any) || [],
+            qualifiedPlaces: (u.qualifiedPlaces as any) || [],
             qualifications: (u.qualifications as any) || [],
             cryptoHoldings: (u.cryptoHoldings as any) || {},
+            isOff: u.isOff || false,
+            vacationReason: u.vacationReason || null,
+            isDebugAuthorized: u.isDebugAuthorized || false,
         })) as unknown as User[];
 
         const mappedPlaces = places.map((p: any) => ({
@@ -489,7 +493,8 @@ export async function updateGameState(updater: (state: GameState) => GameState |
                     auditLogs: user.auditLogs as any,
                     isOff: user.isOff,
                     vacationReason: user.vacationReason,
-                },
+                    isDebugAuthorized: user.isDebugAuthorized,
+                } as any,
                 create: {
                     id: user.id,
                     playerIcon: user.playerIcon,
@@ -519,8 +524,9 @@ export async function updateGameState(updater: (state: GameState) => GameState |
                     qualifications: (user.qualifications as any) || [],
                     jobHistory: (user.jobHistory as any) || null,
                     isOff: user.isOff || false,
-                    vacationReason: user.vacationReason || null
-                }
+                    vacationReason: user.vacationReason || null,
+                    isDebugAuthorized: user.isDebugAuthorized || false,
+                } as any
             });
         }
 

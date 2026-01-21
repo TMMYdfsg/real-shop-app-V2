@@ -70,9 +70,13 @@ export const JobBoardApp: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                     </div>
 
                     <div className="bg-gray-100 p-3 rounded-lg mb-4">
-                        <p className="font-bold text-lg text-blue-800">
-                            {activeTab === 'jobs' ? `月給 ¥${salary.toLocaleString()}` : `時給 ¥${hourlyWage.toLocaleString()}`}
-                        </p>
+                        <div className="font-bold text-lg text-blue-800">
+                            {selectedJob.id === 'job_debugger' ? (
+                                <span className="text-red-600">報酬なし (要承認)</span>
+                            ) : (
+                                activeTab === 'jobs' ? `月給 ¥${salary.toLocaleString()}` : `時給 ¥${hourlyWage.toLocaleString()}`
+                            )}
+                        </div>
                         <p className="text-xs text-gray-500 mt-1">※能力・資格により変動</p>
                     </div>
 
@@ -139,7 +143,11 @@ export const JobBoardApp: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                         <div>
                             <div className="font-bold text-sm">{job.name}</div>
                             <div className="text-xs text-gray-500 mt-1">
-                                {activeTab === 'jobs' ? `月給 ¥${Math.floor((job as any).salary * (gameState?.settings.moneyMultiplier || 1)).toLocaleString()}~` : `時給 ¥${Math.floor((job as any).hourlyWage * (gameState?.settings.moneyMultiplier || 1)).toLocaleString()}`}
+                                {job.id === 'job_debugger' ? (
+                                    <span className="text-red-500 font-bold">報酬: 0円 (要承認)</span>
+                                ) : (
+                                    activeTab === 'jobs' ? `月給 ¥${Math.floor((job as any).salary * (gameState?.settings.moneyMultiplier || 1)).toLocaleString()}~` : `時給 ¥${Math.floor((job as any).hourlyWage * (gameState?.settings.moneyMultiplier || 1)).toLocaleString()}`
+                                )}
                             </div>
                         </div>
                         <div className="text-gray-400">›</div>

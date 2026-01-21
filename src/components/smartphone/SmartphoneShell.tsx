@@ -1,5 +1,5 @@
 import React from 'react';
-import { motion } from 'framer-motion';
+
 
 interface SmartphoneShellProps {
     children: React.ReactNode;
@@ -8,33 +8,40 @@ interface SmartphoneShellProps {
 
 export const SmartphoneShell = ({ children, onHome }: SmartphoneShellProps) => {
     return (
-        <div className="relative w-[375px] h-[812px] bg-black rounded-[3rem] shadow-2xl overflow-hidden border-[8px] border-gray-900 ring-4 ring-gray-800 self-center shrink-0">
-            {/* Side Buttons (Visual only) */}
-            <div className="absolute top-24 -left-3 w-1 h-8 bg-gray-800 rounded-l-md" /> {/* Silent */}
-            <div className="absolute top-40 -left-3 w-1 h-16 bg-gray-800 rounded-l-md" /> {/* Vol Up */}
-            <div className="absolute top-60 -left-3 w-1 h-16 bg-gray-800 rounded-l-md" /> {/* Vol Down */}
-            <div className="absolute top-48 -right-3 w-1 h-24 bg-gray-800 rounded-r-md" /> {/* Power */}
-
-            {/* Screen */}
-            <div className="w-full h-full bg-black relative overflow-hidden rounded-[2.5rem] flex flex-col">
-                {/* Dynamic Island / Notch */}
-                <div className="absolute top-0 inset-x-0 h-8 z-50 flex justify-center pointer-events-none">
-                    <div className="w-32 h-7 bg-black rounded-b-3xl" />
-                </div>
-
+        <div
+            className="relative w-[380px] h-[820px] rounded-[3.5rem] bg-[#121212] shadow-[0_30px_60px_-10px_rgba(0,0,0,0.6)] p-[14px] shrink-0 self-center border-[6px] border-[#333] ring-1 ring-white/10"
+        >
+            {/* 1. Screen Container (The strict clipping boundary) */}
+            <div className="relative w-full h-full bg-black rounded-[2.8rem] overflow-hidden z-0 shadow-inner ring-1 ring-white/5" style={{ transform: 'translateZ(0)' }}>
                 {/* Content */}
-                <div className="block flex-1 w-full h-full relative z-0 overflow-hidden text-white">
-                    {children}
-                </div>
+                {children}
 
-                {/* Home Indicator */}
-                <div className="absolute bottom-1 inset-x-0 h-4 z-50 flex justify-center pb-2 pointer-events-auto cursor-pointer" onClick={onHome}>
-                    <motion.div
-                        whileTap={{ scaleY: 1.5, opacity: 0.5 }}
-                        className="w-32 h-1.5 bg-white/50 rounded-full backdrop-blur-md"
-                    />
+                {/* Home Indicator (Inside screen) */}
+                <div
+                    className="absolute bottom-2 left-0 right-0 h-8 flex justify-center items-end pb-2 z-50 cursor-pointer"
+                    onClick={onHome}
+                >
+                    <div className="w-32 h-1.5 bg-white/40 rounded-full backdrop-blur-md transition-all active:scale-x-110 active:bg-white/60" />
                 </div>
             </div>
+
+            {/* 2. Bezel & Hardware Details (Overlay) */}
+            {/* Dynamic Island / Notch */}
+            <div className="absolute top-[14px] left-1/2 -translate-x-1/2 w-[110px] h-[32px] bg-black rounded-b-[20px] z-50 pointer-events-none">
+                <div className="absolute top-[6px] right-[24px] w-2 h-2 rounded-full bg-[#1a1a1a] ring-1 ring-white/5" /> {/* Camera lens effect */}
+                <div className="absolute top-[6px] right-[10px] w-1.5 h-1.5 rounded-full bg-[#0a0a0a]" />
+            </div>
+
+            {/* Side Buttons (Physical) */}
+            <div className="absolute top-28 -left-[8px] w-[3px] h-7 bg-[#444] rounded-l-md shadow-sm" />
+            <div className="absolute top-44 -left-[8px] w-[3px] h-14 bg-[#444] rounded-l-md shadow-sm" />
+            <div className="absolute top-52 -right-[8px] w-[3px] h-20 bg-[#444] rounded-r-md shadow-sm" />
+
+            {/* 3. Gloss & Frame Reflections */}
+            <div className="absolute inset-0 rounded-[3.5rem] ring-1 ring-white/5 pointer-events-none z-50" />
+            {/* Corner reflections */}
+            <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-white/10 to-transparent rounded-tr-[3.5rem] pointer-events-none z-50 opacity-50" />
+            <div className="absolute bottom-0 left-0 w-32 h-32 bg-gradient-to-tr from-white/5 to-transparent rounded-bl-[3.5rem] pointer-events-none z-50 opacity-50" />
         </div>
     );
 };

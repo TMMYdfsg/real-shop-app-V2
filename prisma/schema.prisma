@@ -89,6 +89,7 @@ model User {
   suspicionScore       Int?
   playerIcon           String?
   isOff                Boolean  @default(false)
+  isDebugAuthorized    Boolean  @default(false)
   vacationReason       String?
   
   // JSON fields for complex data

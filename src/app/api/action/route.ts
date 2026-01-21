@@ -1117,6 +1117,8 @@ export async function POST(request: NextRequest) {
         }
 
         if (type === 'complete_job') {
+            let authError = false;
+
             await updateGameState((state) => {
                 const user = state.users.find(u => u.id === requesterId);
                 if (user) {
@@ -1125,10 +1127,19 @@ export async function POST(request: NextRequest) {
                     const job = JOBS.find(j => j.id === jobId) || PART_TIME_JOBS.find(j => j.id === jobId);
 
                     let reward = 0;
-                    if (job) {
+
+                    if (jobId === 'job_debugger') {
+                        // Debugger Logic
+                        if (!user.isDebugAuthorized) {
+                            authError = true;
+                            return state;
+                        }
+                        reward = 0; // Always 0 for debugger
+                    } else if (job) {
                         const multiplier = state.settings.moneyMultiplier || 1.0;
+                        // calculateSalary already applies multiplier
                         const dailySalary = calculateSalary(user as any, job, multiplier);
-                        // スコアに応じて日給を変動（100点で満額、低スコアなら減額）
+                        // Apply Score Percentage (e.g. 50 score -> 50% of potential earnings)
                         reward = Math.floor(dailySalary * (score / 100));
                     } else {
                         reward = Math.floor(100 * (score / 100)); // Default fallback
@@ -1146,6 +1157,11 @@ export async function POST(request: NextRequest) {
                 }
                 return state;
             });
+
+            if (authError) {
+                return NextResponse.json({ success: false, error: 'デバッグ権限がありません。管理者に承認をもらってください。' });
+            }
+
             return NextResponse.json({ success: true });
         }
 
@@ -3203,6 +3219,40 @@ export async function POST(request: NextRequest) {
         }
 
         // 既存の汎用リクエスト保存処理 (他のアクション用)
+
+        if (type === 'submit_review') {
+            await updateGameState((state) => {
+                const { targetId, rating, comment, reviewerName } = safeParseDetails(details);
+                const target = state.users.find(u => u.id === targetId);
+
+                if (target) {
+                    if (!target.receivedReviews) target.receivedReviews = [];
+
+                    const newReview = {
+                        id: uuidv4(),
+                        shopOwnerId: target.id,
+                        reviewerId: requesterId,
+                        reviewerName: reviewerName || '匿名',
+                        rating: Number(rating) as 1 | 2 | 3 | 4 | 5,
+                        comment: comment || '',
+                        purchaseId: 'visitor_review',
+                        timestamp: Date.now()
+                    };
+
+                    target.receivedReviews.push(newReview);
+
+                    // Recalculate Average Rating
+                    const totalScore = target.receivedReviews.reduce((acc: number, r: any) => acc + r.rating, 0);
+                    target.rating = Number((totalScore / target.receivedReviews.length).toFixed(1));
+
+                    // Boost Popularity slightly
+                    if (!target.popularity) target.popularity = 0;
+                    target.popularity += 1;
+                }
+                return state;
+            });
+            return NextResponse.json({ success: true });
+        }
 
         return NextResponse.json({ success: true, request: newRequest });
     } catch (error) {

@@ -270,60 +270,137 @@ export default function VisitShopPage() {
                         );
                     })}
                 </div>
-            )}
+
+                {/* Review Section */}
+            <div className="mt-12 mb-20 mx-1">
+                <div className="flex justify-between items-center mb-4">
+                    <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2">
+                        ⭐ レビュー
+                        <span className="text-sm font-normal text-slate-500">({seller?.receivedReviews?.length || 0}件)</span>
+                    </h3>
+                    <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={async () => {
+                            // Simple prompt for now, can be improved to modal later
+                            const scoreStr = prompt('評価を1〜5で入力してください:', '5');
+                            if (!scoreStr) return;
+                            const score = parseInt(scoreStr);
+                            if (isNaN(score) || score < 1 || score > 5) {
+                                alert('評価は1〜5の数字で入力してください');
+                                return;
+                            }
+
+                            const comment = prompt('コメントを入力してください:', '素敵なお店でした！');
+                            if (!comment) return;
+
+                            try {
+                                const res = await fetch('/api/action', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({
+                                        type: 'submit_review',
+                                        requesterId: currentUser!.id,
+                                        details: JSON.stringify({
+                                            targetId: seller.id,
+                                            rating: score,
+                                            comment: comment,
+                                            reviewerName: currentUser!.name
+                                        })
+                                    })
+                                });
+                                const data = await res.json();
+                                if (data.success) {
+                                    alert('レビューを投稿しました！');
+                                    window.location.reload();
+                                } else {
+                                    alert('エラー: ' + data.message);
+                                }
+                            } catch (e) {
+                                alert('送信エラーが発生しました');
+                            }
+                        }}
+                    >
+                        ✍️ レビューを書く
+                    </Button>
+                </div>
+
+                <div className="space-y-4">
+                    {(!seller?.receivedReviews || seller.receivedReviews.length === 0) ? (
+                        <div className="text-center py-8 bg-slate-50 rounded-lg border border-dashed border-slate-300">
+                            <p className="text-slate-500 text-sm">まだレビューはありません。<br />最初のお客様になりましょう！</p>
+                        </div>
+                    ) : (
+                        seller.receivedReviews.slice().reverse().map((r: any) => (
+                            <div key={r.id || Math.random()} className="bg-white p-4 rounded-xl shadow-sm border border-slate-100">
+                                <div className="flex justify-between items-start mb-2">
+                                    <div className="flex items-center gap-2">
+                                        <div className="font-bold text-yellow-400 text-sm">{'⭐'.repeat(r.rating)}<span className="text-slate-200">{'⭐'.repeat(5 - r.rating)}</span></div>
+                                        <span className="text-sm font-bold text-slate-700">{r.reviewerName || '匿名ユーザー'}</span>
+                                    </div>
+                                    <div className="text-xs text-slate-400">{new Date(r.timestamp).toLocaleDateString()}</div>
+                                </div>
+                                <p className="text-sm text-slate-600 leading-relaxed bg-slate-50 p-2 rounded">{r.comment}</p>
+                            </div>
+                        ))
+                    )}
+                </div>
+            </div>
 
             {/* Cart Summary Bar */}
-            {Object.keys(cartItems).length > 0 && (
-                <div className="fixed bottom-16 left-0 right-0 p-4 bg-white border-t shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] z-20 animate-slide-up">
-                    <div className="max-w-2xl mx-auto">
-                        {/* Coupon Section */}
-                        <div className="mb-3 flex gap-2">
-                            <input
-                                type="text"
-                                placeholder="クーポンコード"
-                                className={`flex-1 p-2 text-sm border rounded ${couponError ? 'border-red-500 bg-red-50' : ''}`}
-                                value={couponCode}
-                                onChange={e => setCouponCode(e.target.value.toUpperCase())}
-                            />
-                            <Button size="sm" variant="secondary" onClick={handleApplyCoupon}>
-                                適用
-                            </Button>
-                        </div>
-                        {couponError && <p className="text-xs text-red-500 mb-2">{couponError}</p>}
-                        {appliedCoupon && (
-                            <div className="text-xs text-green-600 font-bold mb-2 flex justify-between">
-                                <span>適用中: {appliedCoupon.code} ({appliedCoupon.discountPercent}% OFF)</span>
-                                <span>-{discountAmount}枚</span>
+            {
+                Object.keys(cartItems).length > 0 && (
+                    <div className="fixed bottom-16 left-0 right-0 p-4 bg-white border-t shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] z-20 animate-slide-up">
+                        <div className="max-w-2xl mx-auto">
+                            {/* Coupon Section */}
+                            <div className="mb-3 flex gap-2">
+                                <input
+                                    type="text"
+                                    placeholder="クーポンコード"
+                                    className={`flex-1 p-2 text-sm border rounded ${couponError ? 'border-red-500 bg-red-50' : ''}`}
+                                    value={couponCode}
+                                    onChange={e => setCouponCode(e.target.value.toUpperCase())}
+                                />
+                                <Button size="sm" variant="secondary" onClick={handleApplyCoupon}>
+                                    適用
+                                </Button>
                             </div>
-                        )}
+                            {couponError && <p className="text-xs text-red-500 mb-2">{couponError}</p>}
+                            {appliedCoupon && (
+                                <div className="text-xs text-green-600 font-bold mb-2 flex justify-between">
+                                    <span>適用中: {appliedCoupon!.code} ({appliedCoupon!.discountPercent}% OFF)</span>
+                                    <span>-{discountAmount}枚</span>
+                                </div>
+                            )}
 
-                        {/* Total & Action */}
-                        <div className="flex justify-between items-center gap-4">
-                            <div>
-                                <div className="text-xs text-gray-500">
-                                    {Object.values(cartItems).reduce((a, b) => a + b, 0)}点を選択中
-                                </div>
-                                <div className="text-xl font-bold text-indigo-700">
-                                    合計: {finalPrice.toLocaleString()}枚
-                                </div>
-                                {isBanker && currentUser.balance < finalPrice && (
-                                    <div className="text-xs text-orange-600 font-bold">
-                                        (残高不足でも購入可)
+                            {/* Total & Action */}
+                            <div className="flex justify-between items-center gap-4">
+                                <div>
+                                    <div className="text-xs text-gray-500">
+                                        {Object.values(cartItems).reduce((a, b) => a + b, 0)}点を選択中
                                     </div>
-                                )}
+                                    <div className="text-xl font-bold text-indigo-700">
+                                        合計: {finalPrice.toLocaleString()}枚
+                                    </div>
+                                    {isBanker && currentUser!.balance < finalPrice && (
+                                        <div className="text-xs text-orange-600 font-bold">
+                                            (残高不足でも購入可)
+                                        </div>
+                                    )}
+                                </div>
+                                <Button
+                                    onClick={() => handlePurchase()}
+                                    disabled={isProcessing || !canAfford}
+                                    className="flex-1 max-w-[200px]"
+                                    variant="primary"
+                                >
+                                    {isProcessing ? '処理中...' : 'まとめて購入'}
+                                </Button>
                             </div>
-                            <Button
-                                onClick={() => handlePurchase()}
-                                disabled={isProcessing || !canAfford}
-                                className="flex-1 max-w-[200px]"
-                                variant="primary"
-                            >
-                                {isProcessing ? '処理中...' : 'まとめて購入'}
-                            </Button>
                         </div>
                     </div>
-                </div>
-            )}
-        </div>
+                )
+            }
+        </div >
     );
 }

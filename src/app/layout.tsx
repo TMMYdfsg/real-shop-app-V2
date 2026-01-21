@@ -5,6 +5,7 @@ import CommunicationNotifier from "@/components/notifications/CommunicationNotif
 import HelpFloatingButton from "@/components/HelpFloatingButton";
 import { ToastProvider } from "@/components/ui/ToastProvider";
 import Script from "next/script";
+import AnimatedBackground from "@/components/ui/AnimatedBackground";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -24,6 +25,7 @@ export default function RootLayout({
           src={`https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&libraries=places,geometry`}
           strategy="afterInteractive"
         />
+        <AnimatedBackground />
         <ToastProvider>
           <GameProvider>
             <GlobalSalesNotification />

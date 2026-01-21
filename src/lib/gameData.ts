@@ -395,6 +395,18 @@ export const QUALIFICATIONS: Qualification[] = [
 // JOBS (Phase 5)
 // ======================
 export const JOBS: Occupation[] = [
+    // Special
+    {
+        id: 'job_debugger',
+        name: 'デバッガー',
+        type: 'technical',
+        rank: 0,
+        salary: 0,
+        requirements: {},
+        effects: { stress: 0, health: 0, prestige: 0 },
+        workTime: { start: 0, end: 24 },
+        description: 'システムの不具合を調査する仕事。報酬は発生しない（要承認）。'
+    },
     // Public / Transport
     {
         id: 'job_train_conductor',

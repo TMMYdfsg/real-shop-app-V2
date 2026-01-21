@@ -295,6 +295,7 @@ export interface User {
     };
     // Vacation System
     isOff?: boolean; // お休み中フラグ
+    isDebugAuthorized?: boolean; // デバッグ機能使用許可
     vacationReason?: string; // お休みの理由
 }
 

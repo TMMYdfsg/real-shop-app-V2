@@ -185,6 +185,18 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ success: true });
         }
 
+        if (action === 'toggle_debug_auth') {
+            await updateGameState((state) => {
+                const userId = requestId;
+                const user = state.users.find(u => u.id === userId);
+                if (user) {
+                    user.isDebugAuthorized = !user.isDebugAuthorized;
+                }
+                return state;
+            });
+            return NextResponse.json({ success: true });
+        }
+
         if (action === 'start_game') {
             await updateGameState((state) => {
                 state.settings.isGameStarted = true;
