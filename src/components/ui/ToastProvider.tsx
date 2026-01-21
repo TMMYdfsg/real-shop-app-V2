@@ -70,7 +70,7 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     return (
         <ToastContext.Provider value={{ addToast, removeToast }}>
             {children}
-            <div className="fixed bottom-4 right-4 z-[9999] flex flex-col gap-2 items-end pointer-events-none">
+            <div className="ui-toast-region" aria-live="polite" aria-atomic="true">
                 <AnimatePresence>
                     {toasts.map((toast) => (
                         <ToastItem key={toast.id} toast={toast} onRemove={removeToast} />
@@ -92,17 +92,6 @@ const ToastItem: React.FC<{ toast: Toast; onRemove: (id: string) => void }> = ({
         return () => clearInterval(interval);
     }, [toast.duration]);
 
-    const colors: Record<ToastType, string> = {
-        success: 'bg-emerald-500 text-white border-emerald-600',
-        error: 'bg-red-500 text-white border-red-600',
-        info: 'bg-blue-500 text-white border-blue-600',
-        warning: 'bg-amber-500 text-white border-amber-600',
-        special: 'bg-gradient-to-r from-purple-500 via-pink-500 to-red-500 text-white border-purple-600',
-        income: 'bg-gradient-to-r from-yellow-400 to-amber-500 text-slate-900 border-amber-600',
-        achievement: 'bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white border-indigo-600',
-        disaster: 'bg-gradient-to-r from-red-600 to-orange-600 text-white border-red-700',
-    };
-
     const icons: Record<ToastType, string> = {
         success: '✅',
         error: '❌',
@@ -117,36 +106,34 @@ const ToastItem: React.FC<{ toast: Toast; onRemove: (id: string) => void }> = ({
     return (
         <motion.div
             layout
-            initial={{ opacity: 0, x: 100, scale: 0.8 }}
+            initial={{ opacity: 0, x: 80, scale: 0.95 }}
             animate={{
                 opacity: 1,
                 x: 0,
                 scale: 1,
                 ...(toast.type === 'achievement' ? { rotate: [0, -2, 2, -2, 0] } : {})
             }}
-            exit={{ opacity: 0, x: 50, scale: 0.8 }}
+            exit={{ opacity: 0, x: 40, scale: 0.95 }}
             transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-            className={`pointer-events-auto min-w-[280px] max-w-md rounded-xl shadow-xl overflow-hidden border-2 ${colors[toast.type]}`}
+            className="ui-toast"
+            data-type={toast.type}
             onClick={() => onRemove(toast.id)}
             style={{ cursor: 'pointer' }}
         >
-            <div className="p-4 flex items-center gap-3">
+            <div className="ui-toast__body">
                 <motion.span
-                    className="text-2xl"
-                    animate={toast.type === 'income' || toast.type === 'achievement' ? { scale: [1, 1.2, 1] } : {}}
+                    className="ui-subtitle"
+                    animate={toast.type === 'income' || toast.type === 'achievement' ? { scale: [1, 1.1, 1] } : {}}
                     transition={{ repeat: Infinity, duration: 0.8 }}
                 >
                     {icons[toast.type]}
                 </motion.span>
-                <div className="flex-1 font-bold text-sm leading-tight">
-                    {toast.message}
-                </div>
+                <div>{toast.message}</div>
             </div>
-            {/* Progress Bar */}
             {toast.duration && toast.duration > 0 && (
-                <div className="h-1 bg-black/20 w-full">
+                <div className="ui-toast__progress">
                     <motion.div
-                        className="h-full bg-white/50"
+                        className="ui-toast__bar"
                         style={{ width: `${progress}%` }}
                     />
                 </div>
@@ -154,4 +141,3 @@ const ToastItem: React.FC<{ toast: Toast; onRemove: (id: string) => void }> = ({
         </motion.div>
     );
 };
-
