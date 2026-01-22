@@ -72,7 +72,13 @@ export async function POST(request: Request) {
                 ownedPlaces: [],
                 shopMenu: [],
                 isOff: false,
-                vacationReason: ''
+                vacationReason: '',
+                smartphone: {
+                    model: 'Android',
+                    apps: ['shopping'],
+                    broken: false,
+                    battery: 100
+                }
             };
         });
 

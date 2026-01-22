@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { SmartphoneShell } from './SmartphoneShell';
 import { StatusBar } from './StatusBar';
 import { HomeScreen } from './HomeScreen';
+import { useGame } from '@/context/GameContext';
 import PhoneApp from './PhoneApp';
 
 // Apps
@@ -21,6 +22,9 @@ import { SettingsApp } from './apps/SettingsApp';
 import { VacationApp } from './apps/VacationApp';
 import { FamilyApp } from './apps/FamilyApp';
 import CityMap from '@/components/map/CityMap';
+import { APPS } from './constants';
+import { StoreApp } from './apps/StoreApp';
+import { CameraApp } from './apps/CameraApp';
 
 /*
  * This modified version of the SmartphoneOS component includes a more modern container for the phone shell.
@@ -32,6 +36,7 @@ import CityMap from '@/components/map/CityMap';
  */
 
 export const SmartphoneOS = () => {
+  const { currentUser } = useGame();
   const [currentApp, setCurrentApp] = useState<string | null>(null);
 
   const handleHome = useCallback(() => {
@@ -61,6 +66,8 @@ export const SmartphoneOS = () => {
         return <PoliticsNewsApp onClose={handleHome} initialTab={currentApp === 'news' ? 'news' : 'politics'} />;
       case 'bank':
         return <BankAssetApp onBack={handleHome} />;
+      case 'job_board':
+        return <JobBoardApp onBack={handleHome} />;
       case 'life_status':
         return <LifeStatusApp onBack={handleHome} />;
       case 'audit_log':
@@ -78,9 +85,9 @@ export const SmartphoneOS = () => {
       case 'map':
         return <div className="h-full w-full overflow-hidden rounded-[2.8rem]"><CityMap /></div>;
       case 'camera':
-        return <div className="p-8 text-black font-bold text-center mt-20">カメラは起動できません</div>;
+        return <CameraApp onBack={handleHome} />;
       case 'shopping':
-        return <div className="p-8 text-black font-bold text-center mt-20">準備中</div>;
+        return <StoreApp onBack={handleHome} />;
       default:
         return null;
     }
@@ -94,6 +101,13 @@ export const SmartphoneOS = () => {
   };
 
   const statusBarVariant = getStatusBarVariant();
+  const installedAppIds = currentUser?.smartphone?.apps;
+  const installedApps = installedAppIds && installedAppIds.length > 0
+    ? APPS.filter(app => installedAppIds.includes(app.id))
+    : APPS;
+  const homeApps = installedApps.some(app => app.id === 'shopping')
+    ? installedApps
+    : [...installedApps, ...APPS.filter(app => app.id === 'shopping')];
 
   return (
     <div className="flex items-center justify-center h-full w-full bg-transparent py-2">
@@ -112,7 +126,7 @@ export const SmartphoneOS = () => {
               className="w-full h-full absolute inset-0"
               style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}
             >
-              <HomeScreen onOpenApp={handleOpenApp} />
+              <HomeScreen onOpenApp={handleOpenApp} apps={homeApps} />
             </motion.div>
           )}
 

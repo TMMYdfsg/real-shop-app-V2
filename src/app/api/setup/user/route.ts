@@ -60,7 +60,13 @@ export async function POST(request: Request) {
             shopItems: [],
             ownedLands: [],
             ownedPlaces: [],
-            shopMenu: []
+            shopMenu: [],
+            smartphone: {
+                model: 'Android',
+                apps: ['shopping'],
+                broken: false,
+                battery: 100
+            }
         };
 
         await updateGameState((state) => {

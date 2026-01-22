@@ -109,6 +109,42 @@ export async function POST(request: NextRequest) {
             }
         }
 
+        if (type === 'install_app' || type === 'uninstall_app') {
+            const parsedDetails = typeof details === 'string' ? JSON.parse(details || '{}') : details;
+            const appId = parsedDetails?.appId;
+            if (!appId) {
+                return NextResponse.json({ success: false, message: 'アプリIDが必要です' });
+            }
+
+            await updateGameState((state) => {
+                const user = state.users.find(u => u.id === requesterId);
+                if (!user) return state;
+
+                if (!user.smartphone) {
+                    user.smartphone = {
+                        model: 'Android',
+                        apps: ['shopping'],
+                        broken: false,
+                        battery: 100
+                    };
+                }
+
+                const installed = new Set(user.smartphone.apps || []);
+                if (type === 'install_app') {
+                    installed.add(appId);
+                    installed.add('shopping');
+                } else {
+                    if (appId !== 'shopping') installed.delete(appId);
+                    installed.add('shopping');
+                }
+
+                user.smartphone.apps = Array.from(installed);
+                return state;
+            });
+
+            return NextResponse.json({ success: true });
+        }
+
         if (type === 'change_job') {
             await updateGameState((state) => {
                 const user = state.users.find(u => u.id === requesterId);

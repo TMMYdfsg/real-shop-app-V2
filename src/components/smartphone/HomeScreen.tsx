@@ -61,12 +61,13 @@ const CompactGlassIcon = ({ app, onClick }: { app: typeof APPS[0], onClick: () =
 
 interface HomeScreenProps {
     onOpenApp: (appId: string) => void;
+    apps?: typeof APPS;
 }
 
-export const HomeScreen = ({ onOpenApp }: HomeScreenProps) => {
+export const HomeScreen = ({ onOpenApp, apps = APPS }: HomeScreenProps) => {
     const [currentPage, setCurrentPage] = useState(0);
     const appsPerPage = 20; // 5 rows × 4 columns
-    const totalPages = Math.ceil(APPS.length / appsPerPage);
+    const totalPages = Math.ceil(apps.length / appsPerPage);
 
     const handleDragEnd = (event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
         const threshold = 50;
@@ -79,7 +80,7 @@ export const HomeScreen = ({ onOpenApp }: HomeScreenProps) => {
 
     const getCurrentPageApps = () => {
         const startIndex = currentPage * appsPerPage;
-        return APPS.slice(startIndex, startIndex + appsPerPage);
+        return apps.slice(startIndex, startIndex + appsPerPage);
     };
 
     return (

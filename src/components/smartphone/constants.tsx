@@ -32,7 +32,7 @@ export const APPS: App[] = [
     // Row 4
     { id: 'vacation', name: '休暇', icon: <VacationIcon />, color: 'bg-cyan-500', description: '有給休暇の申請' },
     { id: 'camera', name: 'カメラ', icon: <CameraIcon />, color: 'bg-red-500', description: '写真を撮る' },
-    { id: 'shopping', name: 'ストア', icon: <ShoppingIcon />, color: 'bg-rose-500', description: '準備中' },
+    { id: 'shopping', name: 'ストア', icon: <ShoppingIcon />, color: 'bg-rose-500', description: 'アプリをダウンロード' },
     { id: 'settings', name: '設定', icon: <SettingsIcon />, color: 'bg-gray-500', description: 'アプリ設定' },
 
     // Other Apps

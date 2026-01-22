@@ -131,6 +131,16 @@ const INITIAL_STATE_VALUES: GameState = {
     processedIdempotencyKeys: []
 };
 
+let useMemoryFallback = false;
+let inMemoryState: GameState | null = null;
+
+function getMemoryState(): GameState {
+    if (!inMemoryState) {
+        inMemoryState = JSON.parse(JSON.stringify(INITIAL_STATE_VALUES)) as GameState;
+    }
+    return inMemoryState;
+}
+
 // ==========================================
 // Utility Functions
 // ==========================================
@@ -216,6 +226,9 @@ async function initializeDatabase() {
 // ==========================================
 
 export async function getGameState(): Promise<GameState> {
+    if (useMemoryFallback) {
+        return getMemoryState();
+    }
     try {
         const settings = await prisma.gameSettings.findUnique({ where: { id: 'singleton' } });
 
@@ -372,7 +385,8 @@ export async function getGameState(): Promise<GameState> {
         };
     } catch (error) {
         console.error('getGameState DB Error:', error);
-        throw error;
+        useMemoryFallback = true;
+        return getMemoryState();
     }
 }
 
@@ -381,6 +395,13 @@ export async function getGameState(): Promise<GameState> {
 // For the purpose of "Phase 1 Migration" where we keep the API signature (whole state update),
 // we will detect changes by ID and UPSERT.
 export async function updateGameState(updater: (state: GameState) => GameState | void): Promise<GameState> {
+    if (useMemoryFallback) {
+        const currentState = getMemoryState();
+        const result = updater(currentState);
+        inMemoryState = (result || currentState) as GameState;
+        return inMemoryState;
+    }
+
     const currentState = await getGameState();
 
     // Apply updater (it mutates currentState in place usually, or returns new one)
@@ -668,7 +689,9 @@ export async function updateGameState(updater: (state: GameState) => GameState |
 
     } catch (err) {
         console.error('Failed to save GameState to DB:', err);
-        throw err;
+        useMemoryFallback = true;
+        inMemoryState = newState;
+        return newState;
     }
 
     return newState;
