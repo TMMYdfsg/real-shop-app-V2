@@ -3,6 +3,7 @@ import { useGame } from '@/context/GameContext';
 import { useRealtime } from '@/hooks/useRealtime';
 import { VideoContent } from '@/types';
 import { useToast } from '@/components/ui/ToastProvider';
+import { AppHeader } from './AppHeader';
 
 export default function VideoApp({ onClose }: { onClose: () => void }) {
     const { currentUser, sendRequest } = useGame();
@@ -111,26 +112,20 @@ export default function VideoApp({ onClose }: { onClose: () => void }) {
 
     return (
         <div className="h-full bg-white flex flex-col font-sans text-gray-900">
-            {/* Header */}
-            <div className="bg-white p-3 flex items-center justify-between sticky top-0 z-10 shadow-sm">
-                <button
-                    onClick={() => {
-                        if (view === 'watch') setView('list');
-                        else onClose();
-                    }}
-                    className="text-gray-500 hover:bg-gray-100 p-2 rounded-full"
-                >
-                    ⬅
-                </button>
-                <div className="flex items-center gap-1 font-bold text-lg">
-                    <span className="text-red-600 text-2xl">▶</span> Tube
-                </div>
-                {view === 'list' && (
-                    <button onClick={() => setView('upload')} className="p-2 text-gray-600 hover:bg-gray-100 rounded-full">
-                        📹
-                    </button>
-                )}
-            </div>
+            <AppHeader 
+                title="▶ Tube"
+                onBack={() => {
+                    if (view === 'watch') setView('list');
+                    else onClose();
+                }}
+                rightActions={
+                    view === 'list' ? (
+                        <button onClick={() => setView('upload')} className="p-2 text-gray-600 hover:bg-gray-100 rounded-full">
+                            📹
+                        </button>
+                    ) : undefined
+                }
+            />
 
             {/* Content Switcher */}
             {view === 'upload' && (

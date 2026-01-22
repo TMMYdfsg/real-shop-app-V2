@@ -10,13 +10,15 @@ const withPWA = withPWAInit({
 });
 
 const nextConfig: NextConfig = {
-  output: "export", // ← static export 必須
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
+  ...(isCapacitor && { output: "export" }), // ← Capacitorビルド時のみstatic export
   images: {
     unoptimized: true, // ← export 必須
-    domains: ["lh3.googleusercontent.com"],
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "lh3.googleusercontent.com",
+      },
+    ],
     formats: ["image/avif", "image/webp"],
   },
   webpack: (config, { isServer }) => {
@@ -27,6 +29,9 @@ const nextConfig: NextConfig = {
       });
     }
     return config;
+  },
+  turbopack: {
+    root: "c:/Users/tomoy/Desktop/program code/real-shop-app V2",
   },
   experimental: {
     optimizePackageImports: ["lucide-react", "recharts", "framer-motion"],

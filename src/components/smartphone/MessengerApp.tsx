@@ -2,6 +2,7 @@ import { useState, useRef } from 'react';
 import { useRealtime } from '@/hooks/useRealtime';
 import { useGame } from '@/context/GameContext';
 import { PlayerIcon } from '@/components/ui/PlayerIcon';
+import { AppHeader } from './AppHeader';
 
 interface Message {
     id: string;
@@ -109,18 +110,18 @@ export default function MessengerApp({ onClose }: { onClose: () => void }) {
         <div className="flex h-full bg-gray-50">
             {/* 会話リスト / ユーザー選択 */}
             <div className="w-1/3 bg-white border-r border-gray-200 overflow-y-auto flex flex-col">
-                <div className="p-4 bg-blue-600 text-white font-bold flex justify-between items-center sticky top-0 z-10">
-                    <div className="flex items-center gap-2">
-                        <button onClick={onClose} className="hover:bg-white/20 p-1 rounded-full text-lg" title="戻る">⬅️</button>
-                        <span>💬 メッセージ</span>
-                    </div>
-                    <button
-                        onClick={() => setIsSelectingUser(!isSelectingUser)}
-                        className="text-white hover:text-blue-100 text-xl font-bold px-2 rounded hover:bg-white/10"
-                    >
-                        {isSelectingUser ? '✕' : '＋'}
-                    </button>
-                </div>
+                <AppHeader
+                    title="メッセージ"
+                    onBack={onClose}
+                    rightActions={
+                        <button
+                            onClick={() => setIsSelectingUser(!isSelectingUser)}
+                            className="text-gray-700 hover:text-gray-900 text-xl font-bold px-2 rounded hover:bg-gray-100 transition"
+                        >
+                            {isSelectingUser ? '✕' : '＋'}
+                        </button>
+                    }
+                />
 
                 {isSelectingUser ? (
                     <div className="flex-1 overflow-y-auto">

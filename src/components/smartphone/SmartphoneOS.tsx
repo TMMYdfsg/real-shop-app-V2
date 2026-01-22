@@ -125,7 +125,7 @@ export const SmartphoneOS = () => {
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: '100%', opacity: 1, transition: { duration: 0.3, ease: 'easeInOut' } }}
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="w-full h-full absolute inset-0 bg-gray-50 z-20 overflow-hidden"
+              className="w-full h-full absolute inset-0 bg-white z-20 overflow-hidden"
               style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}
             >
               {/* App Container - adds some padding top for status bar if needed. */}

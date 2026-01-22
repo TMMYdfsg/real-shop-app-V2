@@ -3,66 +3,8 @@
 import React from 'react';
 import { useGame } from '@/context/GameContext';
 import { motion } from 'framer-motion';
-
-interface StatusCardProps {
-    label: string;
-    value: number;
-    max: number;
-    icon: string;
-    color: string;
-    warning?: boolean;
-    hint?: string;
-}
-
-const StatusCard = ({ label, value, max, icon, color, warning, hint }: StatusCardProps) => {
-    const percentage = Math.min((value / max) * 100, 100);
-    const isLow = percentage < 25;
-    const isHigh = percentage > 75;
-
-    return (
-        <motion.div
-            className={`bg-white rounded-xl p-3 shadow-sm border ${warning ? 'border-red-300 bg-red-50' : 'border-gray-100'}`}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-        >
-            <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-2">
-                    <span className="text-xl">{icon}</span>
-                    <span className="font-bold text-sm text-gray-700">{label}</span>
-                </div>
-                <span className={`text-sm font-bold ${warning ? 'text-red-500' : 'text-gray-600'}`}>
-                    {value}/{max}
-                </span>
-            </div>
-            <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
-                <motion.div
-                    className={`h-full rounded-full ${color}`}
-                    initial={{ width: 0 }}
-                    animate={{ width: `${percentage}%` }}
-                    transition={{ duration: 0.5, ease: "easeOut" }}
-                />
-            </div>
-            {hint && (
-                <p className="text-xs text-gray-400 mt-1">{hint}</p>
-            )}
-            {warning && (
-                <p className="text-xs text-red-500 mt-1 font-medium">⚠️ 警告レベル</p>
-            )}
-        </motion.div>
-    );
-};
-
-const StatBadge = ({ label, value, icon, color }: { label: string; value: number | string; icon: string; color: string }) => (
-    <div className={`flex items-center gap-2 px-3 py-2 rounded-lg ${color}`}>
-        <span className="text-lg">{icon}</span>
-        <div>
-            <div className="text-xs font-medium opacity-70">{label}</div>
-            <div className="font-bold text-sm">{value}</div>
-        </div>
-    </div>
-);
-
 import { FurniturePlacement } from '@/components/housing/FurniturePlacement';
+import { AppHeader } from '../AppHeader';
 
 export const LifeStatusApp: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     const { currentUser } = useGame();
@@ -91,29 +33,18 @@ export const LifeStatusApp: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
     return (
         <div className="h-full flex flex-col bg-gradient-to-b from-pink-50 to-white text-gray-900">
-            {/* ヘッダー */}
-            <div className="p-4 bg-gradient-to-r from-pink-500 to-rose-500 text-white">
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                        <button
-                            onClick={onBack}
-                            className="w-8 h-8 flex items-center justify-center rounded-full bg-white/20 hover:bg-white/30 transition"
-                        >
-                            ←
-                        </button>
-                        <div>
-                            <h2 className="font-bold text-lg">ヘルスケア</h2>
-                            <p className="text-xs opacity-80">ライフステータス管理</p>
-                        </div>
-                    </div>
+            <AppHeader
+                title="ヘルスケア"
+                onBack={onBack}
+                rightActions={
                     <button
                         onClick={() => setShowFurniturePlacement(true)}
-                        className="text-xs bg-white/20 px-2 py-1 rounded hover:bg-white/30"
+                        className="text-xs bg-pink-500 text-white px-2 py-1 rounded hover:bg-pink-600"
                     >
                         🏠 模様替え
                     </button>
-                </div>
-            </div>
+                }
+            />
 
             {/* コンテンツ */}
             <div className="flex-1 p-4 overflow-y-auto space-y-6">

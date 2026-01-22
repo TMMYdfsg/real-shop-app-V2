@@ -1,6 +1,7 @@
 import React from 'react';
 import { useGame } from '@/context/GameContext';
 import { Button } from '@/components/ui/Button';
+import { AppHeader } from '../AppHeader';
 
 interface AuditLogAppProps {
     onBack: () => void;
@@ -31,11 +32,7 @@ export const AuditLogApp: React.FC<AuditLogAppProps> = ({ onBack }) => {
 
     return (
         <div className="h-full flex flex-col bg-gray-900 text-white">
-            {/* Header */}
-            <div className="p-4 border-b border-gray-700 flex items-center gap-2">
-                <Button size="sm" variant="ghost" className="text-white p-0" onClick={onBack}>⬅️</Button>
-                <h2 className="font-bold text-lg">行動記録 (監査ログ)</h2>
-            </div>
+            <AppHeader title="行動記録 (監査ログ)" onBack={onBack} variant="transparent" />
 
             <div className="flex-1 overflow-y-auto p-4 space-y-4">
                 {/* Score Panel */}

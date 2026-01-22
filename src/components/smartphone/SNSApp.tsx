@@ -3,6 +3,7 @@ import { useGame } from '@/context/GameContext';
 import { useRealtime } from '@/hooks/useRealtime';
 import { SNSPost } from '@/types';
 import { Button } from '@/components/ui/Button';
+import { AppHeader } from './AppHeader';
 
 export default function SNSApp({ onClose }: { onClose: () => void }) {
     const { currentUser, sendRequest } = useGame();
@@ -32,14 +33,7 @@ export default function SNSApp({ onClose }: { onClose: () => void }) {
 
     return (
         <div className="h-full bg-slate-50 flex flex-col font-sans">
-            {/* Header */}
-            <div className="bg-white p-3 border-b flex items-center justify-between sticky top-0 z-10 shadow-sm">
-                <button onClick={onClose} className="text-gray-500 hover:bg-gray-100 p-2 rounded-full">
-                    ⬅
-                </button>
-                <h2 className="font-bold text-lg text-blue-500">Buzzer</h2>
-                <div className="w-8"></div>
-            </div>
+            <AppHeader title="Buzzer" onBack={onClose} />
 
             {/* Feed */}
             <div className="flex-1 overflow-y-auto p-0">

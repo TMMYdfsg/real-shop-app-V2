@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { useGame } from '@/context/GameContext';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/Button';
+import { AppHeader } from '../AppHeader';
 
 export const VacationApp: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     const { currentUser, gameState } = useGame();
@@ -49,13 +50,7 @@ export const VacationApp: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
     return (
         <div className="h-full flex flex-col bg-indigo-50 text-gray-900">
-            {/* Header */}
-            <div className="p-4 bg-indigo-600 text-white shadow-md">
-                <div className="flex items-center gap-3">
-                    <button onClick={onBack} className="text-2xl">←</button>
-                    <h1 className="text-xl font-bold">お休み申請 (有給)</h1>
-                </div>
-            </div>
+            <AppHeader title="お休み申請 (有給)" onBack={onBack} />
 
             <div className="flex-1 p-6 overflow-y-auto">
                 <div className="bg-white rounded-2xl p-5 shadow-sm mb-6">

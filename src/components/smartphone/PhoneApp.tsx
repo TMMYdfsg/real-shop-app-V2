@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useRealtime } from '@/hooks/useRealtime';
 import { useGame } from '@/context/GameContext';
 import { getAgoraClient, createMicrophoneTrack, generateChannelName } from '@/lib/agora';
+import { AppHeader } from './AppHeader';
 
 interface VoiceCall {
     id: string;
@@ -253,11 +254,8 @@ export default function PhoneApp({ onClose }: { onClose: () => void }) {
 
     // Default: Contacts List
     return (
-        <div className="h-full bg-white flex flex-col pt-12">
-            <div className="px-6 pb-4 border-b flex items-center gap-4">
-                <button onClick={onClose} className="text-gray-500 hover:text-black transition-colors p-1" title="戻る">⬅️</button>
-                <h1 className="text-3xl font-bold text-gray-900">電話</h1>
-            </div>
+        <div className="h-full bg-white flex flex-col">
+            <AppHeader title="電話" onBack={onClose} />
 
             {/* Warnings */}
             {httpsError && (

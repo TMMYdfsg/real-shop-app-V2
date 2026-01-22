@@ -1,3 +1,4 @@
+// Note: ForbiddenApp maintains its unique Dark Web aesthetic and doesn't use AppHeader
 import React, { useState } from 'react';
 import { useGame } from '@/context/GameContext';
 import { Stock, InventoryItem } from '@/types';

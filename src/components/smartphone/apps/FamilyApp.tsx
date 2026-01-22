@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { useGame } from '@/context/GameContext';
 import { motion, AnimatePresence } from 'framer-motion';
+import { AppHeader } from '../AppHeader';
 
 export const FamilyApp: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     const { currentUser, gameState } = useGame();
@@ -72,37 +73,7 @@ export const FamilyApp: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
     return (
         <div className="h-full flex flex-col bg-pink-50 text-gray-900">
-            {/* Header */}
-            <div className="p-4 bg-gradient-to-r from-pink-500 to-rose-400 text-white shadow-md z-10">
-                <div className="flex items-center gap-3">
-                    <button
-                        onClick={onBack}
-                        className="w-8 h-8 flex items-center justify-center rounded-full bg-white/20 hover:bg-white/30 transition"
-                    >
-                        ←
-                    </button>
-                    <div>
-                        <h2 className="font-bold text-lg">Family</h2>
-                        <p className="text-xs opacity-90">家族・パートナー</p>
-                    </div>
-                </div>
-
-                {/* Tabs */}
-                <div className="flex mt-4 bg-black/10 p-1 rounded-lg">
-                    <button
-                        onClick={() => setTab('family')}
-                        className={`flex-1 py-1 rounded-md text-sm font-bold transition ${tab === 'family' ? 'bg-white text-pink-600 shadow' : 'text-white/80'}`}
-                    >
-                        家族リスト
-                    </button>
-                    <button
-                        onClick={() => setTab('matchmaking')}
-                        className={`flex-1 py-1 rounded-md text-sm font-bold transition ${tab === 'matchmaking' ? 'bg-white text-pink-600 shadow' : 'text-white/80'}`}
-                    >
-                        マッチング
-                    </button>
-                </div>
-            </div>
+            <AppHeader title="Family" onBack={onBack} />
 
             {/* Content */}
             <div className="flex-1 overflow-y-auto p-4">

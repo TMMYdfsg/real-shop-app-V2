@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useGame } from '@/context/GameContext';
 import { ArrowLeft, Volume2, Save } from 'lucide-react';
+import { AppHeader } from '../AppHeader';
 
 interface SettingsAppProps {
     onClose: () => void;
@@ -39,17 +40,7 @@ export const SettingsApp: React.FC<SettingsAppProps> = ({ onClose }) => {
 
     return (
         <div className="h-full w-full bg-slate-50 flex flex-col font-sans text-slate-900">
-            {/* Header */}
-            <div className="px-4 py-3 bg-white border-b border-slate-200 flex items-center justify-between shadow-sm z-10">
-                <button
-                    onClick={onClose}
-                    className="p-2 -ml-2 rounded-full hover:bg-slate-100 transition-colors"
-                >
-                    <ArrowLeft className="w-6 h-6 text-slate-600" />
-                </button>
-                <h1 className="text-lg font-bold">設定</h1>
-                <div className="w-8" /> {/* Spacer */}
-            </div>
+            <AppHeader title="設定" onBack={onClose} />
 
             <div className="flex-1 overflow-y-auto p-4 space-y-6">
 

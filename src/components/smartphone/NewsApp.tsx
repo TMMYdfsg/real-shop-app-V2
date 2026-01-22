@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { useGame } from '@/context/GameContext';
 import { useRealtime } from '@/hooks/useRealtime';
 import { motion, AnimatePresence } from 'framer-motion';
+import { AppHeader } from './AppHeader';
 
 // News Item Type
 interface NewsItem {
@@ -122,14 +123,7 @@ export default function NewsApp({ onClose }: { onClose: () => void }) {
 
     return (
         <div className="h-full bg-slate-100 flex flex-col font-sans">
-            {/* Header */}
-            <div className="bg-gradient-to-r from-orange-500 to-red-500 text-white p-4 flex items-center justify-between shadow-lg">
-                <button onClick={onClose} className="hover:bg-white/20 p-2 rounded-full transition">
-                    ⬅
-                </button>
-                <h2 className="font-black text-lg tracking-wide">📰 ワールドニュース</h2>
-                <div className="w-8" />
-            </div>
+            <AppHeader title="📰 ワールドニュース" onBack={onClose} />
 
             {/* Tabs */}
             <div className="bg-white border-b flex">

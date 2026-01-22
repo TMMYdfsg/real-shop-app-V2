@@ -19,19 +19,22 @@ export const metadata: Metadata = {
   title: "Real Shop App V2",
   description: "Financial education game for kids",
   manifest: "/manifest.json",
-  themeColor: "#6366f1",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
     title: "Real Shop App",
   },
-  viewport: {
+};
+
+export function generateViewport() {
+  return {
     width: "device-width",
     initialScale: 1,
     maximumScale: 1,
     userScalable: false,
-  },
-};
+    themeColor: "#6366f1",
+  };
+}
 
 export default function RootLayout({
   children,

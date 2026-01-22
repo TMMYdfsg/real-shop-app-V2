@@ -1951,7 +1951,8 @@ export async function POST(request: NextRequest) {
             const SECRET_CODES: Record<string, string> = {
                 'DARK666': 'forbidden_market',
                 'SHADOW': 'forbidden_market',
-                'FORBIDDEN': 'forbidden_market'
+                'FORBIDDEN': 'forbidden_market',
+                'タイムマシン': 'timemachine'
             };
 
             if (SECRET_CODES[code]) {

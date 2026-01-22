@@ -160,6 +160,13 @@ export const PlayerLayout: React.FC<{ children: React.ReactNode; id: string; ini
     const data = await res.json();
     if (data.success) {
       addToast(data.message || '解放されました！', 'success');
+
+      // unlockedの値に応じてリダイレクト
+      if (data.unlocked === 'timemachine') {
+        router.push(`/player/${currentUser.id}/timemachine`);
+      } else if (data.unlocked === 'forbidden_market') {
+        refresh(); // 禁断の市場はメニュー追加のみ
+      }
     } else {
       addToast(data.message || 'コードが無効です', 'error');
     }

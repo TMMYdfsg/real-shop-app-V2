@@ -3,6 +3,7 @@ import { useGame } from '@/context/GameContext';
 import { JOBS, PART_TIME_JOBS } from '@/lib/gameData';
 import { canApplyJob, calculateSalary } from '@/lib/career';
 import { Button } from '@/components/ui/Button';
+import { AppHeader } from '../AppHeader';
 
 // Mock API call function (replace with actual API later)
 const applyForJob = async (jobId: string, type: 'full' | 'part') => {
@@ -54,10 +55,7 @@ export const JobBoardApp: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
         return (
             <div className="h-full flex flex-col bg-white text-gray-900">
-                <div className="p-4 bg-blue-600 text-white flex items-center gap-2">
-                    <button onClick={() => setSelectedJobId(null)}>←</button>
-                    <h2 className="font-bold text-lg">詳細</h2>
-                </div>
+                <AppHeader title="詳細" onBack={() => setSelectedJobId(null)} />
                 <div className="flex-1 p-4 overflow-y-auto">
                     <h3 className="text-2xl font-bold mb-2">{selectedJob.name}</h3>
                     <div className="mb-4">
@@ -114,9 +112,7 @@ export const JobBoardApp: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     // List View
     return (
         <div className="h-full flex flex-col bg-slate-50 text-gray-900">
-            <div className="p-4 bg-blue-600 text-white">
-                <h2 className="font-bold text-lg">求人検索</h2>
-            </div>
+            <AppHeader title="求人検索" onBack={onBack} />
 
             <div className="flex border-b bg-white">
                 <button

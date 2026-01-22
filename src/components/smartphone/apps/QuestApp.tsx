@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useGame } from '@/context/GameContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Quest, QuestProgress } from '@/types';
+import { AppHeader } from '../AppHeader';
 
 // Hardcoded Quest Database for Display (Simulating Client-Side Knowledge or Fetched Data)
 // In a real app, this might come from an API or shared constant
@@ -37,16 +38,7 @@ export const QuestApp: React.FC<QuestAppProps> = ({ onBack }) => {
 
     return (
         <div className="h-full w-full bg-slate-900 text-white flex flex-col font-sans">
-            {/* Header */}
-            <div className="bg-gradient-to-r from-violet-600 to-indigo-600 p-4 pt-12 pb-4 shadow-md flex items-center justify-between shrink-0">
-                <button onClick={onBack} className="text-white p-1 rounded-full hover:bg-white/20 transition">
-                    <span className="text-xl">◀</span>
-                </button>
-                <h1 className="text-lg font-bold flex items-center gap-2">
-                    <span>⚔️</span> クエスト
-                </h1>
-                <div className="w-8"></div> {/* Spacer */}
-            </div>
+            <AppHeader title="⚔️ クエスト" onBack={onBack} variant="transparent" />
 
             {/* Tabs */}
             <div className="flex border-b border-white/10 shrink-0">
