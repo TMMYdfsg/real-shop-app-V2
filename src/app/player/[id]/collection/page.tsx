@@ -7,6 +7,14 @@ import { Card } from '@/components/ui/Card';
 import { motion, AnimatePresence } from 'framer-motion';
 
 type CollectionCategory = 'furniture' | 'pets' | 'recipes' | 'insects' | 'fossils' | 'cards' | 'all';
+type CollectionCategoryKey = Exclude<CollectionCategory, 'all'>;
+
+type CollectionDisplayItem = {
+    id: string;
+    type: CollectionCategoryKey;
+    emoji: string;
+    name: string;
+};
 
 export default function CollectionPage() {
     const { gameState } = useGame();
@@ -24,13 +32,30 @@ export default function CollectionPage() {
         );
     }
 
-    // コレクションデータ（仮のサンプルデータ）
-    const collections = {
+    // コレクションデータ（inventory と catalog から派生）
+    const catalog = gameState?.catalogInventory || [];
+    const inventory = (player.inventory || []) as { itemId: string; name?: string }[];
+
+    const detectCategory = (itemId: string): CollectionCategoryKey | 'other' => {
+        const catalogItem = catalog.find(c => c.id === itemId);
+        if (catalogItem) {
+            if (catalogItem.category === 'furniture') return 'furniture';
+            if (catalogItem.category === 'pet') return 'pets';
+            if (catalogItem.category === 'ingredient') return 'recipes';
+        }
+        // Fallback: prefix-based detection
+        if (itemId.startsWith('recipe_')) return 'recipes';
+        if (itemId.startsWith('insect_')) return 'insects';
+        if (itemId.startsWith('fossil_')) return 'fossils';
+        return 'other';
+    };
+
+    const collections: Record<CollectionCategoryKey, string[]> = {
         furniture: player.furniture || [],
         pets: player.pets || [],
-        recipes: [], // TODO: レシピシステム実装時に追加
-        insects: [], // TODO: 昆虫採集システム実装時に追加
-        fossils: [], // TODO: 化石発掘システム実装時に追加
+        recipes: inventory.filter(i => detectCategory(i.itemId) === 'recipes').map(i => i.itemId),
+        insects: inventory.filter(i => detectCategory(i.itemId) === 'insects').map(i => i.itemId),
+        fossils: inventory.filter(i => detectCategory(i.itemId) === 'fossils').map(i => i.itemId),
         cards: player.gachaCollection || []
     };
 
@@ -44,20 +69,22 @@ export default function CollectionPage() {
         { id: 'cards' as const, name: 'カード', emoji: '🎴', count: collections.cards.length }
     ];
 
-    const getDisplayItems = () => {
+    const getDisplayItems = (): CollectionDisplayItem[] => {
         if (selectedCategory === 'all') {
             return [
-                ...collections.furniture.map(id => ({ id, type: 'furniture', emoji: '🛋️', name: `家具 #${id}` })),
-                ...collections.pets.map(id => ({ id, type: 'pets', emoji: '🐶', name: `ペット #${id}` })),
-                ...collections.cards.map(id => ({ id, type: 'cards', emoji: '🎴', name: `カード #${id}` }))
-            ];
+                ...collections.furniture.map(id => ({ id, type: 'furniture' as CollectionCategoryKey, emoji: '🛋️', name: `家具 #${id}` })),
+                ...collections.pets.map(id => ({ id, type: 'pets' as CollectionCategoryKey, emoji: '🐶', name: `ペット #${id}` })),
+                ...collections.cards.map(id => ({ id, type: 'cards' as CollectionCategoryKey, emoji: '🎴', name: `カード #${id}` }))
+            ] as CollectionDisplayItem[];
         } else {
-            return collections[selectedCategory].map(id => ({
+            const category = selectedCategory as CollectionCategoryKey;
+            const categoryMeta = categories.find(c => c.id === category);
+            return collections[category].map(id => ({
                 id,
-                type: selectedCategory,
-                emoji: categories.find(c => c.id === selectedCategory)?.emoji || '📦',
-                name: `${categories.find(c => c.id === selectedCategory)?.name} #${id}`
-            }));
+                type: category as CollectionCategoryKey,
+                emoji: categoryMeta?.emoji || '📦',
+                name: `${categoryMeta?.name || ''} #${id}`
+            })) as CollectionDisplayItem[];
         }
     };
 

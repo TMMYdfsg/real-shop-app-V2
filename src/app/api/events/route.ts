@@ -1,7 +1,10 @@
 import { NextRequest } from 'next/server';
 import { eventManager } from '@/lib/eventManager';
 
-export const dynamic = 'force-static';
+// This route implements Server-Sent Events and must be handled dynamically
+// to avoid static prerendering attempting to execute a long-lived stream
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 export async function GET(req: NextRequest) {
     const stream = new ReadableStream({

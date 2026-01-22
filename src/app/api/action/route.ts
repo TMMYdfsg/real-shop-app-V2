@@ -709,8 +709,19 @@ export async function POST(request: NextRequest) {
                     item.exchangedCount = 1;
                 }
 
-                // TODO: 交換したアイテムをbuyerのインベントリに追加する処理
-                // （現在は簡易実装、将来的にユーザーのインベントリを追加）
+                // 交換したアイテムを buyer のインベントリに追加
+                if (!buyer.inventory) buyer.inventory = [];
+                const existing = buyer.inventory.find(inv => inv.itemId === item.id);
+                if (existing) {
+                    existing.quantity = (existing.quantity || 0) + 1;
+                } else {
+                    buyer.inventory.push({
+                        id: crypto.randomUUID(),
+                        itemId: item.id,
+                        name: item.name,
+                        quantity: 1,
+                    });
+                }
 
                 return state;
             });
@@ -772,7 +783,8 @@ export async function POST(request: NextRequest) {
                 const buyer = state.users.find(u => u.id === requesterId);
                 if (!buyer) return state;
 
-                const { itemId, sellerId } = details ? safeParseDetails(details) : {};
+                const parsedDetails: { itemId?: string; sellerId?: string } = details ? safeParseDetails(details) : {};
+                const { itemId, sellerId } = parsedDetails;
                 const seller = state.users.find(u => u.id === sellerId);
 
                 if (!seller || !seller.shopMenu) return state;
@@ -862,12 +874,12 @@ export async function POST(request: NextRequest) {
             if (eventToBroadcast) {
                 eventManager.broadcast(eventToBroadcast);
                 // Also general sync
-                eventManager.broadcast({
-                    type: 'INVENTORY_UPDATED',
-                    payload: { sellerId: safeParseDetails(details).sellerId },
-                    timestamp: Date.now(),
-                    revision: 0
-                });
+                    eventManager.broadcast({
+                        type: 'INVENTORY_UPDATED',
+                        payload: { sellerId: eventToBroadcast.payload?.sellerId ?? '' },
+                        timestamp: Date.now(),
+                        revision: 0
+                    });
             }
 
             return NextResponse.json({ success: true });
