@@ -7,7 +7,7 @@ import { HomeScreen } from './HomeScreen';
 
 // Apps
 import UnifiedMessengerApp from './apps/UnifiedMessengerApp';
-import PoliticsNewsApp from './apps/PoliticsNewsApp';
+import PoliticsNewsApp from '@/components/smartphone/apps/PoliticsNewsApp';
 import SNSApp from './SNSApp';
 import VideoApp from './VideoApp';
 import { JobBoardApp } from './apps/JobBoardApp';

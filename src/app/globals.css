@@ -128,8 +128,30 @@ a {
 .bg-gradient {
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at 50% 50%, #ffffff 0%, var(--bg) 60%);
-  opacity: 0.7;
+  background: radial-gradient(circle at 50% 50%, #ffffff 0%, var(--bg) 100%);
+  opacity: 0.8;
+}
+
+/* Glassmorphism Utilities */
+.glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px) saturate(180%);
+  border: 1px solid var(--glass-border);
+}
+
+.glass-dark {
+  background: rgba(15, 23, 42, 0.7);
+  backdrop-filter: blur(16px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
 .bg-shape {
@@ -144,7 +166,7 @@ a {
   left: -10%;
   width: 50vw;
   height: 50vw;
-  background: rgba(79, 88, 146, 0.45);
+  background: rgba(79, 70, 229, 0.4);
 }
 
 .bg-shape--secondary {
@@ -152,7 +174,7 @@ a {
   right: -10%;
   width: 60vw;
   height: 60vw;
-  background: rgba(122, 127, 209, 0.4);
+  background: rgba(139, 92, 246, 0.35);
 }
 
 .bg-orb {
@@ -239,15 +261,17 @@ a {
 }
 
 .ui-button[data-variant='primary'] {
-  background: var(--primary);
+  background: linear-gradient(135deg, var(--primary), var(--primary-2));
   color: var(--primary-contrast);
-  box-shadow: var(--e-1);
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+  border: none;
 }
 
 .ui-button[data-variant='secondary'] {
-  background: var(--surface-2);
+  background: var(--surface);
   color: var(--text);
-  border-color: var(--border);
+  border: 1px solid var(--border);
+  box-shadow: var(--e-1);
 }
 
 .ui-button[data-variant='ghost'] {
@@ -256,13 +280,17 @@ a {
 }
 
 .ui-button[data-variant='danger'] {
-  background: var(--danger);
-  color: var(--primary-contrast);
+  background: linear-gradient(135deg, #ef4444, #f87171);
+  color: #fff;
 }
 
 .ui-button:hover:not(:disabled):not([data-loading='true']) {
-  transform: translateY(-1px);
-  box-shadow: var(--e-2);
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+}
+
+.ui-button:active:not(:disabled):not([data-loading='true']) {
+  transform: translateY(0) scale(0.98);
 }
 
 /* Card */
@@ -270,22 +298,24 @@ a {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--r-lg);
-  box-shadow: var(--e-1);
+  box-shadow: var(--e-2);
+  overflow: hidden;
+  transition: all var(--motion-ui) cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .ui-card[data-clickable='true'] {
   cursor: pointer;
-  transition: transform var(--motion-fast) ease, box-shadow var(--motion-fast) ease;
 }
 
 .ui-card[data-clickable='true']:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--e-2);
+  transform: translateY(-4px);
+  box-shadow: var(--e-3);
+  border-color: var(--primary-2);
 }
 
 .ui-card[data-selected='true'] {
   border-color: var(--primary);
-  box-shadow: 0 0 0 2px rgba(var(--shadow) / 0.1);
+  box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
 }
 
 .ui-card__header,
@@ -320,13 +350,15 @@ a {
   border: 1px solid var(--border);
   background: var(--surface);
   color: var(--text);
-  transition: border var(--motion-fast) ease, box-shadow var(--motion-fast) ease;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+  transition: all var(--motion-fast) ease;
 }
 
 .ui-input:focus {
   outline: none;
   border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(var(--shadow) / 0.12);
+  box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.15), inset 0 2px 4px rgba(0, 0, 0, 0.02);
+  transform: translateY(-1px);
 }
 
 .ui-input-group {
@@ -349,12 +381,14 @@ a {
   display: inline-flex;
   align-items: center;
   gap: var(--s-1);
-  padding: var(--s-1) var(--s-3);
-  border-radius: var(--r-sm);
+  padding: var(--s-1) var(--s-4);
+  border-radius: var(--r-xl);
   font-size: var(--fs-2);
+  font-weight: 600;
   background: var(--surface-2);
   color: var(--text);
   border: 1px solid var(--border);
+  box-shadow: var(--e-1);
 }
 
 .ui-chip[data-status='success'] {
@@ -416,12 +450,13 @@ a {
 }
 
 .ui-toast {
-  min-width: 240px;
-  max-width: 360px;
-  border-radius: var(--r-lg);
-  border: 1px solid var(--border);
-  background: var(--surface);
-  box-shadow: var(--e-2);
+  min-width: 280px;
+  max-width: 400px;
+  border-radius: var(--r-xl);
+  border: 1px solid var(--glass-border);
+  background: var(--glass-bg);
+  backdrop-filter: blur(16px) saturate(180%);
+  box-shadow: var(--e-3);
   overflow: hidden;
   pointer-events: auto;
 }

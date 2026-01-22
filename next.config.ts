@@ -22,6 +22,7 @@ const nextConfig: NextConfig = {
     formats: ["image/avif", "image/webp"],
   },
   turbopack: {
+    root: ".",
     rules: {
       // Prisma externalization for server-side
       "*.prisma": {

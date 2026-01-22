@@ -1,5 +1,7 @@
 'use client';
 
+export const dynamic = "force-dynamic";
+
 import React, { use, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useGame } from '@/context/GameContext';
@@ -8,10 +10,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Chip } from '@/components/ui/Chip';
 import { DataTable } from '@/components/ui/DataTable';
 import { StatCard } from '@/components/kpi/StatCard';
-import dynamic from 'next/dynamic';
+import nextDynamic from 'next/dynamic';
 
 // Dynamic import for BankTerminal to avoid SSR issues if any
-const BankTerminal = dynamic(() => import('@/components/banking/BankTerminal'), { ssr: false });
+const BankTerminal = nextDynamic(() => import('@/components/banking/BankTerminal'), { ssr: false });
 
 export default function PlayerHome({ params }: { params: Promise<{ id: string }> }) {
     // Unwrapping params using React.use()

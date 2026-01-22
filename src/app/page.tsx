@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
 import { Chip } from '@/components/ui/Chip';
 import { Skeleton } from '@/components/ui/Skeleton';
+import { motion } from 'framer-motion';
 import { Role } from '@/types';
 
 export default function Home() {
@@ -220,34 +221,43 @@ export default function Home() {
 
   // Login Mode
   return (
-    <main className="ui-container ui-stack u-min-h-screen">
-      <div className="ui-stack u-text-center">
-        <div className="ui-title">Real Shop</div>
-        <div className="ui-muted">経済シミュ × ライフシミュのログイン</div>
-      </div>
+    <main className="min-h-screen bg-[#020617] relative overflow-hidden flex flex-col justify-center p-6 sm:p-12">
+      {/* Background Orbs */}
+      <div className="absolute top-[-20%] left-[-10%] w-[70%] h-[70%] bg-indigo-600/20 blur-[120px] rounded-full animate-pulse" />
+      <div className="absolute bottom-[-20%] right-[-10%] w-[70%] h-[70%] bg-violet-600/15 blur-[120px] rounded-full animate-pulse" style={{ animationDelay: '2s' }} />
 
-      <div className="ui-stack u-max-w-md u-mx-auto u-w-full">
-        {gameState?.users.map((user) => (
-          <Card key={user.id} clickable onClick={() => handleLogin(user.id, user.role, user.name)}>
-            <CardContent>
-              <div className="ui-inline u-justify-between u-w-full">
-                <div className="ui-stack u-gap-xs">
-                  <div className="ui-subtitle">{user.name}</div>
-                  <div className="ui-muted">ID: {user.id}</div>
+      <div className="relative z-10 w-full max-w-lg mx-auto">
+        <div className="text-center mb-12">
+          <h1 className="text-6xl font-black text-white tracking-tighter mb-2 italic">Real Shop<span className="text-indigo-500">.</span></h1>
+          <p className="text-slate-400 font-medium">経済 × ライフスタイル シミュレーター</p>
+        </div>
+
+        <div className="grid gap-4">
+          {gameState?.users.map((user) => (
+            <motion.div
+              key={user.id}
+              whileHover={{ scale: 1.02, y: -4 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => handleLogin(user.id, user.role, user.name)}
+            >
+              <div className="bg-slate-900/40 backdrop-blur-2xl border border-white/10 p-6 rounded-[2rem] flex items-center justify-between cursor-pointer hover:bg-slate-900/60 transition-all shadow-2xl">
+                <div className="flex items-center gap-4">
+                  <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-2xl shadow-inner ${user.role === 'banker' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-indigo-500/20 text-indigo-400'}`}>
+                    {user.role === 'banker' ? '🏦' : '👤'}
+                  </div>
+                  <div>
+                    <div className="text-xl font-bold text-white">{user.name}</div>
+                    <div className="text-xs text-slate-500 uppercase tracking-widest font-bold">ID: {user.id}</div>
+                  </div>
                 </div>
-                <Chip status={user.role === 'banker' ? 'success' : 'neutral'}>
-                  {user.role === 'banker' ? '銀行員' : 'プレイヤー'}
-                </Chip>
+                <div className={`px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-tighter ${user.role === 'banker' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-slate-800 text-slate-400 border border-slate-700'}`}>
+                  {user.role === 'banker' ? 'Banker' : 'Player'}
+                </div>
               </div>
-            </CardContent>
-          </Card>
-        ))}
+            </motion.div>
+          ))}
+        </div>
       </div>
-
-      {/* Reset Button (Debug) */}
-      {/* <div style={{ marginTop: '2rem' }}>
-        <Button variant="ghost" size="sm" onClick={() => fetch('/api/reset')}>リセット</Button>
-      </div> */}
     </main>
   );
 }

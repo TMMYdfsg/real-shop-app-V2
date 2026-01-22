@@ -262,3 +262,40 @@ export const LifeStatusApp: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         </div>
     );
 };
+
+// --- Sub Components ---
+
+const StatBadge: React.FC<{ label: string; value: string | number; icon: string; color: string }> = ({ label, value, icon, color }) => (
+    <div className={cn("p-2 rounded-xl flex flex-col items-center justify-center text-center", color)}>
+        <span className="text-xl mb-1">{icon}</span>
+        <div className="text-[10px] opacity-70 uppercase font-bold">{label}</div>
+        <div className="text-sm font-black">{value}</div>
+    </div>
+);
+
+const StatusCard: React.FC<{ label: string; value: number; max: number; icon: string; color: string; warning?: boolean; hint?: string }> = ({ label, value, max, icon, color, warning, hint }) => {
+    const percentage = Math.min(Math.max((value / max) * 100, 0), 100);
+    return (
+        <div className={cn("bg-white p-3 rounded-xl border shadow-sm transition-all", warning ? "border-red-200 bg-red-50/30" : "border-pink-50")}>
+            <div className="flex justify-between items-center mb-1.5">
+                <div className="flex items-center gap-2">
+                    <span className="text-lg">{icon}</span>
+                    <span className="text-xs font-bold text-gray-700">{label}</span>
+                </div>
+                <span className={cn("text-xs font-black", warning ? "text-red-500" : "text-gray-500")}>
+                    {value} / {max}
+                </span>
+            </div>
+            <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
+                <motion.div
+                    initial={{ width: 0 }}
+                    animate={{ width: `${percentage}%` }}
+                    className={cn("h-full rounded-full", color)}
+                />
+            </div>
+            {hint && <div className="mt-1.5 text-[10px] text-gray-400 font-medium leading-tight">{hint}</div>}
+        </div>
+    );
+};
+
+import { cn } from "@/lib/cn";

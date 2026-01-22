@@ -1,0 +1,36 @@
+
+> real-shop-app-v2@0.1.0 build
+> next build
+
+笞 Warning: Next.js inferred your workspace root, but it may not be correct.
+ We detected multiple lockfiles and selected the directory of C:\Users\tomoy\package-lock.json as the root directory.
+ To silence this warning, set `turbopack.root` in your Next.js config, or consider removing one of the lockfiles if it's not needed.
+   See https://nextjs.org/docs/app/api-reference/config/next-config-js/turbopack#root-directory for more information.
+ Detected additional lockfiles: 
+   * C:\Users\tomoy\Desktop\program code\real-shop-app V2\package-lock.json
+
+笆ｲ Next.js 16.1.4 (Turbopack)
+- Environments: .env.local, .env
+- Experiments (use with caution):
+  ﾂｷ optimizePackageImports
+
+  Creating an optimized production build ...
+笨・Compiled successfully in 5.0s
+  Running TypeScript ...
+Failed to compile.
+
+./src/components/ui/BottomSheet.tsx:38:9
+Type error: Type '{ type: string; stiffness: number; damping: number; }' is not assignable to type 'Transition<any> | undefined'.
+  Type '{ type: string; stiffness: number; damping: number; }' is not assignable to type 'TransitionWithValueOverrides<any>'.
+    Type '{ type: string; stiffness: number; damping: number; }' is not assignable to type 'ValueAnimationTransition<any>'.
+      Types of property 'type' are incompatible.
+        Type 'string' is not assignable to type 'AnimationGeneratorType | undefined'.
+
+  36 |         animate={{ y: 0, opacity: 1 }}
+  37 |         exit={{ y: 80, opacity: 0 }}
+> 38 |         transition={SPRING_SHEET}
+     |         ^
+  39 |         drag="y"
+  40 |         dragConstraints={{ top: 0, bottom: 120 }}
+  41 |         onDragEnd={(_, info) => {
+Next.js build worker exited with code: 1 and signal: null

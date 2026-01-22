@@ -228,18 +228,23 @@ export const PlayerLayout: React.FC<{ children: React.ReactNode; id: string; ini
         <AnimatePresence>
           {activeBills.length > 0 && (
             <motion.div
-              initial={{ opacity: 0, y: -50 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -50 }}
-              transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-              className="ui-alert"
+              initial={{ opacity: 0, y: -50, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -50, scale: 0.95 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+              className="fixed top-24 left-4 right-4 z-[100] shadow-2xl"
             >
-              <motion.div animate={{ scale: [1, 1.02, 1] }} transition={{ repeat: Infinity, duration: 1 }}>
-                <div className="ui-alert__title">⚠️ 請求が届いています</div>
-                <div className="ui-alert__body">
-                  {activeBills.length}件の支払いが求められています。銀行員が承認すると引き落とされます。
+              <div className="glass border-red-200/50 p-5 rounded-2xl flex items-center gap-4 border-l-8 border-l-red-500">
+                <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center shrink-0">
+                  <span className="text-2xl">⚠️</span>
                 </div>
-              </motion.div>
+                <div>
+                  <div className="font-bold text-red-900 leading-tight">請求が届いています</div>
+                  <div className="text-sm text-red-800/80 mt-1">
+                    {activeBills.length}件の支払いが求められています。銀行員が承認すると引き落とされます。
+                  </div>
+                </div>
+              </div>
             </motion.div>
           )}
         </AnimatePresence>
@@ -252,22 +257,33 @@ export const PlayerLayout: React.FC<{ children: React.ReactNode; id: string; ini
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  className="night-overlay"
+                  className="night-overlay glass-dark backdrop-blur-3xl"
                 >
                   <audio autoPlay loop src="/sounds/sleep.mp3" />
-                  <motion.div
-                    animate={{ rotate: [0, 10, -10, 0] }}
-                    transition={{ repeat: Infinity, duration: 4 }}
-                    className="night-overlay__icon"
-                  >
-                    🌙
-                  </motion.div>
-                  <h2 className="night-overlay__title">夜は必ず寝ましょう</h2>
-                  <p className="night-overlay__text">次の朝までお待ちください...</p>
-                  <div className="night-overlay__timer">あと {formatTime(displayTime)}</div>
-                  <Button onClick={() => { window.location.href = basePath; }}>
-                    🏠 自宅に戻る
-                  </Button>
+                  <div className="bg-white/10 p-8 rounded-[3rem] border border-white/20 shadow-2xl flex flex-col items-center max-w-[85%]">
+                    <motion.div
+                      animate={{
+                        rotate: [0, 5, -5, 0],
+                        scale: [1, 1.05, 1]
+                      }}
+                      transition={{ repeat: Infinity, duration: 6, ease: "easeInOut" }}
+                      className="text-8xl mb-6 filter drop-shadow-[0_0_30px_rgba(255,255,255,0.3)]"
+                    >
+                      🌙
+                    </motion.div>
+                    <h2 className="text-3xl font-black text-white mb-2 tracking-tight">おやすみなさい</h2>
+                    <p className="text-blue-200/80 mb-8 font-medium">夜間は休息の時間です。朝までお待ちください。</p>
+                    <div className="text-4xl font-mono text-white/90 mb-8 bg-black/30 px-6 py-2 rounded-2xl border border-white/10 tracking-widest">
+                      {formatTime(displayTime)}
+                    </div>
+                    <Button
+                      variant="secondary"
+                      className="bg-white/20 text-white border-white/30 hover:bg-white/30 px-8 py-4 rounded-2xl w-full"
+                      onClick={() => { window.location.href = basePath; }}
+                    >
+                      🏠 自宅に戻る
+                    </Button>
+                  </div>
                 </motion.div>
               ) : (
                 <motion.div

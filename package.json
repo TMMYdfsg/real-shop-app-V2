@@ -51,18 +51,18 @@
     "typescript": "^5.9.3",
     "uuid": "^13.0.0",
     "zod": "^4.3.5",
-    "@ducanh2912/next-pwa": "^10.2.9"
+    "@ducanh2912/next-pwa": "^10.2.9",
+    "@tailwindcss/postcss": "^4.1.18",
+    "postcss": "^8.5.6",
+    "autoprefixer": "^10.4.23"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4.1.18",
     "@types/mapbox-gl": "^3.4.1",
-    "autoprefixer": "^10.4.23",
     "concurrently": "^9.2.1",
     "dotenv-cli": "^11.0.0",
     "eslint": "^8",
     "eslint-config-next": "15.0.3",
     "local-ssl-proxy": "^2.0.5",
-    "postcss": "^8.5.6",
     "tailwindcss": "^4.1.18"
   }
 }

@@ -5,6 +5,7 @@ export interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
   title?: string;
   clickable?: boolean;
   selected?: boolean;
+  padding?: string | number;
 }
 
 export const Card = React.forwardRef<HTMLDivElement, CardProps>(

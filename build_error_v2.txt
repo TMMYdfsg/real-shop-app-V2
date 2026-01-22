@@ -1,0 +1,31 @@
+
+> real-shop-app-v2@0.1.0 build
+> next build
+
+笞 turbopack.root should be absolute, using: C:\Users\tomoy\Desktop\program code\real-shop-app V2
+笆ｲ Next.js 16.1.4 (Turbopack)
+- Environments: .env.local, .env
+- Experiments (use with caution):
+  ﾂｷ optimizePackageImports
+
+  Creating an optimized production build ...
+
+<--- Last few GCs --->
+
+[20796:000001C7D9438000]    27637 ms: Mark-Compact (reduce) 74.8 (117.1) -> 71.7 (75.1) MB, pooled: 0 MB, 1034.23 / 0.08 ms  (+ 2024.0 ms in 0 steps since start of marking, biggest step 0.0 ms, walltime since start of marking 3060 ms) (average mu = 0.881,
+
+<--- JS stacktrace --->
+
+FATAL ERROR: Committing semi space failed. Allocation failed - JavaScript heap out of memory
+----- Native stack trace -----
+
+ 1: 00007FF6B3ED20AD node::SetCppgcReference+17245
+ 2: 00007FF6B3E3A4D8 v8::base::CPU::num_virtual_address_bits+92376
+ 3: 00007FF6B49BA1B1 v8::Isolate::ReportExternalAllocationLimitReached+65
+ 4: 00007FF6B49A7096 v8::Function::Experimental_IsNopFunction+2790
+ 5: 00007FF6B47F6920 v8::internal::StrongRootAllocatorBase::StrongRootAllocatorBase+31392
+ 6: 00007FF6B47AF6C3 v8::PrimitiveArray::Length+130451
+ 7: 00007FF6B47FFA1C v8::internal::StrongRootAllocatorBase::StrongRootAllocatorBase+68508
+ 8: 00007FF6B47F02E9 v8::internal::StrongRootAllocatorBase::StrongRootAllocatorBase+5225
+ 9: 00007FF6B47EBCF5 v8::CpuProfileNode::GetScriptResourceNameStr+188069
+10: 00007FF6B41713BD BIO_ssl_shutdown+189

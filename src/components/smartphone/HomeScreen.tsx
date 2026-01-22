@@ -83,16 +83,19 @@ export const HomeScreen = ({ onOpenApp }: HomeScreenProps) => {
     };
 
     return (
-        <div className="w-full h-full flex flex-col relative overflow-hidden font-sans select-none bg-gradient-to-br from-[#d97757] via-[#c9667a] to-[#8b5a9e]">
+        <div className="w-full h-full flex flex-col relative overflow-hidden font-sans select-none bg-gradient-to-br from-[#1e1b4b] via-[#312e81] to-[#1e1b4b]">
+            {/* Animated Glows */}
+            <div className="absolute top-[-10%] left-[-10%] w-[60%] h-[40%] bg-indigo-500/30 blur-[100px] rounded-full" />
+            <div className="absolute bottom-[-10%] right-[-10%] w-[60%] h-[40%] bg-violet-600/20 blur-[120px] rounded-full" />
 
             {/* Main Content Area */}
             <div className="flex-1 flex flex-col pt-8 px-4 z-10 relative">
 
                 {/* Search Bar - matching reference style */}
                 <div className="mb-6 w-full">
-                    <div className="h-[48px] w-full bg-white/20 backdrop-blur-xl rounded-[28px] flex items-center px-5 border border-white/30 shadow-lg">
-                        <Search className="w-4 h-4 text-white/60 mr-3" strokeWidth={2.5} />
-                        <span className="text-white/60 text-[15px] font-medium">Search</span>
+                    <div className="h-[48px] w-full bg-white/10 backdrop-blur-2xl rounded-[24px] flex items-center px-5 border border-white/20 shadow-xl group transition-all hover:bg-white/15">
+                        <Search className="w-4 h-4 text-white/50 mr-3" strokeWidth={2.5} />
+                        <span className="text-white/50 text-[15px] font-medium">Search Apps...</span>
                     </div>
                 </div>
 

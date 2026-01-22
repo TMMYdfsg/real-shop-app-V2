@@ -118,50 +118,59 @@ export default function CommunicationNotifier() {
             {/* メッセージ通知トースト (右上) */}
             {showMsgToast && notif?.latestMessage && (
                 <div
-                    className="fixed top-20 right-4 z-[9999] bg-white rounded-lg shadow-xl p-4 border-l-4 border-blue-500 animate-slide-in-right cursor-pointer hover:bg-gray-50 transition max-w-sm w-full"
+                    className="fixed top-20 right-4 z-[9999] glass-dark rounded-2xl shadow-2xl p-4 border border-white/10 animate-slide-in-right cursor-pointer hover:bg-white/10 transition-all max-w-sm w-full"
                     onClick={handleMessageClick}
                 >
-                    <div className="flex items-start justify-between">
-                        <div>
-                            <div className="font-bold text-gray-800 flex items-center gap-2">
-                                📩 新着メッセージ ({notif.unreadCount})
+                    <div className="flex items-start gap-4">
+                        <div className="w-12 h-12 bg-indigo-500/20 rounded-full flex items-center justify-center shrink-0 border border-indigo-500/30">
+                            <span className="text-xl text-indigo-400">📩</span>
+                        </div>
+                        <div className="flex-1">
+                            <div className="flex justify-between items-center mb-1">
+                                <div className="text-xs font-black text-indigo-400 uppercase tracking-widest">New Message</div>
+                                <button
+                                    onClick={(e) => { e.stopPropagation(); setShowMsgToast(false); }}
+                                    className="text-white/40 hover:text-white"
+                                >
+                                    ✕
+                                </button>
                             </div>
-                            <div className="text-sm font-semibold text-blue-600 mt-1">
+                            <div className="font-bold text-white text-md">
                                 {notif.latestMessage.sender.name}
                             </div>
-                            <div className="text-sm text-gray-600 truncate mt-1">
+                            <div className="text-sm text-slate-400 line-clamp-2 mt-0.5">
                                 {notif.latestMessage.content}
                             </div>
                         </div>
-                        <button
-                            onClick={(e) => { e.stopPropagation(); setShowMsgToast(false); }}
-                            className="text-gray-400 hover:text-gray-600"
-                        >
-                            ✕
-                        </button>
                     </div>
                 </div>
             )}
 
             {/* 着信全画面オーバーレイ/カード (右下) */}
             {notif?.incomingCall && (
-                <div className="fixed bottom-24 right-4 z-[9999] bg-gray-900 text-white rounded-xl shadow-2xl p-6 w-80 animate-bounce-subtle border border-gray-700">
+                <div className="fixed inset-x-4 bottom-24 lg:right-4 lg:left-auto lg:w-96 z-[9999] glass-dark border border-white/20 rounded-[2.5rem] shadow-[0_32px_64px_rgba(0,0,0,0.5)] p-8 animate-bounce-subtle">
                     <div className="flex flex-col items-center text-center">
-                        <div className="w-16 h-16 bg-gradient-to-br from-green-400 to-blue-500 rounded-full flex items-center justify-center text-3xl mb-3 animate-pulse">
+                        <div className="w-24 h-24 bg-gradient-to-br from-green-400 to-emerald-600 rounded-full flex items-center justify-center text-5xl mb-6 shadow-[0_0_40px_rgba(52,211,153,0.3)] animate-pulse">
                             📞
                         </div>
-                        <h3 className="text-xl font-bold mb-1">{notif.incomingCall.caller.name}</h3>
-                        <p className="text-gray-400 text-sm mb-4">から着信中...</p>
+                        <div className="text-xs font-black text-green-400 uppercase tracking-[0.2em] mb-2">Incoming Call</div>
+                        <h3 className="text-3xl font-black text-white mb-1 tracking-tight">{notif.incomingCall.caller.name}</h3>
+                        <p className="text-slate-400 text-sm mb-8 font-medium">Apple iPhone</p>
 
-                        <button
-                            onClick={() => handleAnswerCall(notif.incomingCall!.id)}
-                            className="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 rounded-lg transition transform hover:scale-105 shadow-lg mb-2"
-                        >
-                            すぐに応答する
-                        </button>
-                        <p className="text-xs text-gray-500 mt-2">
-                            ※他のページにいても応答できます
-                        </p>
+                        <div className="flex gap-4 w-full">
+                            <button
+                                onClick={() => handleAnswerCall(notif.incomingCall!.id)}
+                                className="flex-1 bg-green-500 hover:bg-green-600 text-white font-black py-4 rounded-2xl transition transform hover:scale-105 shadow-xl flex items-center justify-center gap-2"
+                            >
+                                <span className="text-xl">📞</span> Answer
+                            </button>
+                            <button
+                                onClick={() => setShowMsgToast(false)} // Assume ignore for now
+                                className="bg-red-500/20 hover:bg-red-500/30 text-red-500 p-4 rounded-2xl transition border border-red-500/30"
+                            >
+                                Ignore
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}
