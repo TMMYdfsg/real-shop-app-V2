@@ -16,17 +16,14 @@ export interface App {
 export const APPS: App[] = [
     // Row 1
     { id: 'map', name: '地図', icon: <MapIcon />, color: 'bg-emerald-600', description: '街マップを開く' },
-    { id: 'bank', name: '銀行', icon: <BankIcon />, color: 'bg-blue-700', description: '口座管理' },
+    { id: 'bank', name: 'Olive', icon: <BankIcon />, color: 'bg-emerald-800', description: '銀行・資産管理' },
     { id: 'job_board', name: '求人', icon: <JobIcon />, color: 'bg-indigo-600', description: '求人情報を確認' },
     { id: 'life_status', name: '生活', icon: <StatusIcon />, color: 'bg-pink-500', description: 'ライフステータス' },
 
     // Row 2
     { id: 'family', name: '連絡先', icon: <FamilyIcon />, color: 'bg-orange-500', description: '家族・パートナー' },
     { id: 'audit_log', name: 'ログ', icon: <AuditIcon />, color: 'bg-slate-600', description: '監査ログ確認' },
-    { id: 'crypto', name: '資産', icon: <CryptoIcon />, color: 'bg-purple-600', description: '取引・チャート' },
     { id: 'quests', name: 'クエスト', icon: <QuestIcon />, color: 'bg-yellow-400', description: '目標・実績' },
-
-    // Row 3
     { id: 'sns', name: 'つぶやき', icon: <SNSIcon />, color: 'bg-sky-500', description: 'みんなの投稿を見る' },
     { id: 'messenger', name: 'トーク', icon: <MessageIcon />, color: 'bg-blue-500', description: 'メッセージを送る' },
     { id: 'phone', name: '電話', icon: <PhoneIcon />, color: 'bg-green-500', description: '通話する' },

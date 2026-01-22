@@ -17,13 +17,17 @@ interface AppShellProps {
   actions?: React.ReactNode;
 }
 
-export const AppShell: React.FC<AppShellProps> = ({ title, navItems, children, actions }) => (
-  <div className="shell">
-    <ShellSidebar title={title} navItems={navItems} />
-    <div className="shell__content">
-      <ShellTopbar title={title} actions={actions} />
-      <main className="shell__main">{children}</main>
+export const AppShell: React.FC<AppShellProps> = ({ title, navItems, children, actions }) => {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
+
+  return (
+    <div className="shell">
+      <ShellSidebar title={title} navItems={navItems} isOpen={isMobileMenuOpen} onClose={() => setIsMobileMenuOpen(false)} />
+      <div className="shell__content">
+        <ShellTopbar title={title} actions={actions} onMenuToggle={() => setIsMobileMenuOpen(!isMobileMenuOpen)} />
+        <main className="shell__main">{children}</main>
+      </div>
+      <ShellBottomTabs navItems={navItems} />
     </div>
-    <ShellBottomTabs navItems={navItems} />
-  </div>
-);
+  );
+};

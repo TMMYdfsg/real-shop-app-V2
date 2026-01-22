@@ -21,17 +21,13 @@ const nextConfig: NextConfig = {
     ],
     formats: ["image/avif", "image/webp"],
   },
-  webpack: (config, { isServer }) => {
-    if (isServer) {
-      config.externals = config.externals || [];
-      config.externals.push({
-        "@prisma/client": "commonjs @prisma/client",
-      });
-    }
-    return config;
-  },
   turbopack: {
-    root: "c:/Users/tomoy/Desktop/program code/real-shop-app V2",
+    rules: {
+      // Prisma externalization for server-side
+      "*.prisma": {
+        loaders: ["ignore-loader"],
+      },
+    },
   },
   experimental: {
     optimizePackageImports: ["lucide-react", "recharts", "framer-motion"],

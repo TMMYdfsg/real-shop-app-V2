@@ -1,7 +1,4 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
+@import "tailwindcss";
 @import "../styles/tokens.css";
 
 *,
@@ -662,21 +659,25 @@ a {
 }
 
 @keyframes float {
+
   0%,
   100% {
     transform: translateY(0);
   }
+
   50% {
     transform: translateY(-10px);
   }
 }
 
 @keyframes pulse-glow {
+
   0%,
   100% {
     box-shadow: 0 0 5px rgba(var(--shadow) / 0.2);
     opacity: 1;
   }
+
   50% {
     box-shadow: 0 0 20px rgba(var(--shadow) / 0.3);
     opacity: 0.7;
@@ -873,7 +874,37 @@ a {
   }
 
   .shell__sidebar {
-    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 280px;
+    z-index: 1000;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+    display: block;
+    /* sidebar is initially hidden in desktop media query, override it */
+    box-shadow: 20px 0 50px rgba(0, 0, 0, 0.5);
+  }
+
+  .shell__sidebar--open {
+    transform: translateX(0);
+  }
+
+  .shell__sidebar-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    z-index: -1;
+  }
+
+  .shell__sidebar-close {
+    display: block !important;
+  }
+
+  .shell__menu-toggle {
+    display: flex !important;
   }
 
   .shell__main {
@@ -884,4 +915,43 @@ a {
     display: flex;
     gap: var(--s-2);
   }
+
+  .shell__topbar-brand {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .shell__topbar-brand .ui-subtitle {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+.shell__sidebar-close {
+  display: none;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: var(--s-2);
+}
+
+.shell__menu-toggle {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--r-md);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.shell__topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
 }

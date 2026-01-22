@@ -6,20 +6,17 @@ import { StatusBar } from './StatusBar';
 import { HomeScreen } from './HomeScreen';
 
 // Apps
-import PhoneApp from './PhoneApp';
-import MessengerApp from './MessengerApp';
+import UnifiedMessengerApp from './apps/UnifiedMessengerApp';
+import PoliticsNewsApp from './apps/PoliticsNewsApp';
 import SNSApp from './SNSApp';
 import VideoApp from './VideoApp';
-import NewsApp from './NewsApp';
-import { CryptoApp } from './CryptoApp';
 import { JobBoardApp } from './apps/JobBoardApp';
-import { BankApp } from './apps/BankApp';
+import { BankAssetApp } from './apps/BankAssetApp';
 import { LifeStatusApp } from './apps/LifeStatusApp';
 import { AuditLogApp } from './apps/AuditLogApp';
 import { QuestApp } from './apps/QuestApp';
 import { ForbiddenApp } from './apps/ForbiddenApp';
 import { SettingsApp } from './apps/SettingsApp';
-import PoliticsApp from '@/components/apps/PoliticsApp';
 import { VacationApp } from './apps/VacationApp';
 import { FamilyApp } from './apps/FamilyApp';
 import CityMap from '@/components/map/CityMap';
@@ -51,21 +48,18 @@ export const SmartphoneOS = () => {
   const renderApp = () => {
     switch (currentApp) {
       case 'phone':
-        return <PhoneApp onClose={handleHome} />;
+        return <UnifiedMessengerApp onClose={handleHome} initialTab="calls" />;
       case 'messenger':
-        return <MessengerApp onClose={handleHome} />;
+        return <UnifiedMessengerApp onClose={handleHome} initialTab="chats" />;
       case 'sns':
         return <SNSApp onClose={handleHome} />;
       case 'video':
         return <VideoApp onClose={handleHome} />;
+      case 'politics':
       case 'news':
-        return <NewsApp onClose={handleHome} />;
-      case 'crypto':
-        return <CryptoApp onClose={handleHome} />;
-      case 'job_board':
-        return <JobBoardApp onBack={handleHome} />;
+        return <PoliticsNewsApp onClose={handleHome} initialTab={currentApp === 'news' ? 'news' : 'politics'} />;
       case 'bank':
-        return <BankApp onBack={handleHome} />;
+        return <BankAssetApp onBack={handleHome} />;
       case 'life_status':
         return <LifeStatusApp onBack={handleHome} />;
       case 'audit_log':
@@ -74,8 +68,6 @@ export const SmartphoneOS = () => {
         return <QuestApp onBack={handleHome} />;
       case 'dark_web':
         return <ForbiddenApp onBack={handleHome} />;
-      case 'politics':
-        return <PoliticsApp onClose={handleHome} />;
       case 'settings':
         return <SettingsApp onClose={handleHome} />;
       case 'vacation':
@@ -94,7 +86,13 @@ export const SmartphoneOS = () => {
   };
 
   // Determine status bar color based on app; keep dark for apps unless on home screen.
-  const statusBarVariant = currentApp ? 'dark' : 'light';
+  const getStatusBarVariant = (): 'light' | 'dark' => {
+    if (!currentApp) return 'light';
+    const lightApps = ['sns', 'politics', 'news', 'vacation'];
+    return lightApps.includes(currentApp) ? 'light' : 'dark';
+  };
+
+  const statusBarVariant = getStatusBarVariant();
 
   return (
     <div className="flex items-center justify-center h-full w-full bg-transparent py-2">

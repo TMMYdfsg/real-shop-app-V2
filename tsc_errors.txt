@@ -1,0 +1,264 @@
+src/app/banker/config/page.tsx(40,19): error TS2322: Type '{ children: Element[]; padding: string; style: { border: string; background: string; }; }' is not assignable to type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+  Property 'padding' does not exist on type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+src/app/banker/eventcontrol/page.tsx(54,23): error TS2322: Type '{ children: Element[]; padding: string; className: string; }' is not assignable to type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+  Property 'padding' does not exist on type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+src/app/banker/eventcontrol/page.tsx(94,23): error TS2322: Type '{ children: Element[]; padding: string; className: string; }' is not assignable to type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+  Property 'padding' does not exist on type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+src/app/banker/eventcontrol/page.tsx(118,23): error TS2322: Type '{ children: Element[]; padding: string; }' is not assignable to type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+  Property 'padding' does not exist on type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+src/app/banker/eventcontrol/page.tsx(162,23): error TS2322: Type '{ children: Element[]; padding: string; }' is not assignable to type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+  Property 'padding' does not exist on type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+src/app/banker/events/page.tsx(40,19): error TS2322: Type '{ children: Element[]; padding: string; style: { marginTop: string; }; }' is not assignable to type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+  Property 'padding' does not exist on type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+src/app/banker/events/page.tsx(77,19): error TS2322: Type '{ children: Element[]; padding: string; style: { marginTop: string; }; }' is not assignable to type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+  Property 'padding' does not exist on type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+src/app/banker/godmode/page.tsx(138,23): error TS2322: Type '{ children: Element; padding: string; className: string; }' is not assignable to type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+  Property 'padding' does not exist on type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+src/app/banker/godmode/page.tsx(151,23): error TS2322: Type '{ children: Element[]; padding: string; className: string; }' is not assignable to type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+  Property 'padding' does not exist on type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+src/app/banker/godmode/page.tsx(276,23): error TS2322: Type '{ children: Element[]; padding: string; className: string; }' is not assignable to type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+  Property 'padding' does not exist on type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+src/app/banker/godmode/page.tsx(307,31): error TS2322: Type '{ children: Element[]; padding: string; }' is not assignable to type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+  Property 'padding' does not exist on type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+src/app/banker/godmode/page.tsx(433,31): error TS2322: Type '{ children: Element[]; padding: string; }' is not assignable to type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+  Property 'padding' does not exist on type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+src/app/banker/godmode/page.tsx(492,23): error TS2322: Type '{ children: Element[]; padding: string; className: string; }' is not assignable to type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+  Property 'padding' does not exist on type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+src/app/banker/npcs/page.tsx(103,48): error TS2322: Type '{ children: Element[]; key: string; padding: string; style: { borderLeft: string; }; }' is not assignable to type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+  Property 'padding' does not exist on type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+src/app/banker/npcs/page.tsx(126,45): error TS2322: Type '{ children: Element[]; key: string; padding: string; style: { position: "relative"; }; }' is not assignable to type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+  Property 'padding' does not exist on type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+src/app/banker/products/page.tsx(138,46): error TS2322: Type '{ children: Element[]; key: "other" | "furniture" | "appliance" | "pet" | "ingredient"; padding: string; }' is not assignable to type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+  Property 'padding' does not exist on type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+src/app/banker/requests/page.tsx(64,23): error TS2322: Type '{ children: Element; padding: string; }' is not assignable to type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+  Property 'padding' does not exist on type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+src/app/banker/requests/page.tsx(83,43): error TS2322: Type '{ children: Element[]; padding: string; style: { display: "flex"; justifyContent: "space-between"; alignItems: "center"; borderLeft: string; position: "relative"; overflow: "hidden"; }; }' is not assignable to type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+  Property 'padding' does not exist on type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+src/app/banker/roulette/page.tsx(82,19): error TS2322: Type '{ children: Element[]; padding: string; }' is not assignable to type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+  Property 'padding' does not exist on type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+src/app/banker/roulette/page.tsx(125,19): error TS2322: Type '{ children: Element[]; padding: string; style: { marginTop: string; }; }' is not assignable to type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+  Property 'padding' does not exist on type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+src/app/banker/season/page.tsx(41,23): error TS2322: Type '{ children: Element[]; padding: string; style: { textAlign: "center"; }; }' is not assignable to type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+  Property 'padding' does not exist on type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+src/app/banker/season/page.tsx(52,23): error TS2322: Type '{ children: Element[]; padding: string; }' is not assignable to type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+  Property 'padding' does not exist on type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+src/app/banker/timer/page.tsx(44,23): error TS2322: Type '{ children: Element[]; padding: string; }' is not assignable to type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+  Property 'padding' does not exist on type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+src/app/banker/timer/page.tsx(80,23): error TS2322: Type '{ children: Element[]; padding: string; }' is not assignable to type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+  Property 'padding' does not exist on type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+src/app/banker/users/page.tsx(51,41): error TS2322: Type '{ children: Element[]; key: string; padding: string; style: { display: "flex"; justifyContent: "space-between"; alignItems: "center"; }; }' is not assignable to type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+  Property 'padding' does not exist on type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+src/app/player/[id]/bank/page.tsx(94,120): error TS2322: Type '{ children: Element[]; className: string; padding: string; }' is not assignable to type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+  Property 'padding' does not exist on type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+src/app/player/[id]/bank/page.tsx(128,31): error TS2322: Type '{ children: Element[]; padding: string; className: string; }' is not assignable to type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+  Property 'padding' does not exist on type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+src/app/player/[id]/bank/page.tsx(135,31): error TS2322: Type '{ children: Element[]; padding: string; className: string; }' is not assignable to type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+  Property 'padding' does not exist on type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+src/app/player/[id]/bank/page.tsx(166,35): error TS2322: Type '{ children: (false | Element)[]; padding: string; className: string; }' is not assignable to type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+  Property 'padding' does not exist on type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+src/app/player/[id]/bank/page.tsx(190,35): error TS2322: Type '{ children: Element[]; padding: string; }' is not assignable to type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+  Property 'padding' does not exist on type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+src/app/player/[id]/casino/page.tsx(93,19): error TS2322: Type '{ children: (false | Element)[]; padding: string; }' is not assignable to type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+  Property 'padding' does not exist on type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+src/app/player/[id]/catalog/page.tsx(77,49): error TS2322: Type '{ children: Element; key: string; padding: string; className: string; }' is not assignable to type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+  Property 'padding' does not exist on type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+src/app/player/[id]/collection/page.tsx(78,23): error TS2322: Type '{ children: Element; padding: string; }' is not assignable to type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+  Property 'padding' does not exist on type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+src/app/player/[id]/collection/page.tsx(87,23): error TS2322: Type '{ children: Element; padding: string; }' is not assignable to type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+  Property 'padding' does not exist on type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+src/app/player/[id]/collection/page.tsx(96,23): error TS2322: Type '{ children: Element; padding: string; }' is not assignable to type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+  Property 'padding' does not exist on type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+src/app/player/[id]/collection/page.tsx(105,23): error TS2322: Type '{ children: Element; padding: string; }' is not assignable to type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+  Property 'padding' does not exist on type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+src/app/player/[id]/collection/page.tsx(145,19): error TS2322: Type '{ children: Element; padding: string; }' is not assignable to type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+  Property 'padding' does not exist on type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+src/app/player/[id]/commute/page.tsx(98,35): error TS2322: Type '{ children: Element; padding: string; className: string; }' is not assignable to type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+  Property 'padding' does not exist on type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+src/app/player/[id]/commute/page.tsx(120,39): error TS2322: Type '{ children: Element[]; padding: string; }' is not assignable to type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+  Property 'padding' does not exist on type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+src/app/player/[id]/commute/page.tsx(139,39): error TS2322: Type '{ children: Element[]; padding: string; }' is not assignable to type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+  Property 'padding' does not exist on type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+src/app/player/[id]/commute/page.tsx(264,61): error TS2322: Type '{ children: Element[]; key: string; padding: string; className: string; }' is not assignable to type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+  Property 'padding' does not exist on type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+src/app/player/[id]/config/page.tsx(66,23): error TS2322: Type '{ children: Element[]; padding: string; className: string; }' is not assignable to type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+  Property 'padding' does not exist on type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+src/app/player/[id]/config/page.tsx(116,23): error TS2322: Type '{ children: Element[]; padding: string; className: string; }' is not assignable to type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+  Property 'padding' does not exist on type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+src/app/player/[id]/config/page.tsx(178,23): error TS2322: Type '{ children: Element[]; padding: string; className: string; }' is not assignable to type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+  Property 'padding' does not exist on type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+src/app/player/[id]/debt/page.tsx(44,43): error TS2322: Type '{ children: Element[]; className: string; padding: string; style: { background: string; color: "#b91c1c"; border: string; }; }' is not assignable to type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+  Property 'padding' does not exist on type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+src/app/player/[id]/debt/page.tsx(55,34): error TS2322: Type '{ children: Element[]; title: string; padding: string; }' is not assignable to type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+  Property 'padding' does not exist on type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+src/app/player/[id]/debt/page.tsx(72,33): error TS2322: Type '{ children: Element[]; title: string; padding: string; }' is not assignable to type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+  Property 'padding' does not exist on type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+src/app/player/[id]/forbidden/page.tsx(69,42): error TS2322: Type '{ children: Element[]; key: string; padding: string; style: { background: string; border: string; color: "#fff"; }; }' is not assignable to type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+  Property 'padding' does not exist on type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+src/app/player/[id]/gacha/page.tsx(148,43): error TS2322: Type '{ children: Element[]; padding: string; className: string; }' is not assignable to type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+  Property 'padding' does not exist on type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+src/app/player/[id]/history/page.tsx(27,23): error TS2322: Type '{ children: Element; padding: string; }' is not assignable to type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+  Property 'padding' does not exist on type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+src/app/player/[id]/history/page.tsx(34,41): error TS2322: Type '{ children: Element; key: any; padding: string; style: { borderLeft: string; }; }' is not assignable to type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+  Property 'padding' does not exist on type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+src/app/player/[id]/items/page.tsx(86,27): error TS2322: Type '{ children: Element[]; padding: string; }' is not assignable to type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+  Property 'padding' does not exist on type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+src/app/player/[id]/job/page.tsx(90,19): error TS2322: Type '{ children: (false | Element)[]; padding: string; style: { background: string; border: string; }; }' is not assignable to type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+  Property 'padding' does not exist on type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+src/app/player/[id]/job/page.tsx(97,37): error TS2322: Type '{ children: Element[]; key: JobType; padding: string; style: { display: "flex"; flexDirection: "column"; alignItems: "center"; gap: string; textAlign: "center"; border: string; }; }' is not assignable to type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+  Property 'padding' does not exist on type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+src/app/player/[id]/job/page.tsx(115,27): error TS2322: Type '{ children: Element[]; padding: string; style: { display: "flex"; flexDirection: "column"; alignItems: "center"; justifyContent: "center"; background: string; }; }' is not assignable to type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+  Property 'padding' does not exist on type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+src/app/player/[id]/kitchen/page.tsx(66,19): error TS2322: Type '{ children: Element[]; padding: string; className: string; }' is not assignable to type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+  Property 'padding' does not exist on type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+src/app/player/[id]/kitchen/page.tsx(90,19): error TS2322: Type '{ children: Element[]; padding: string; className: string; }' is not assignable to type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+  Property 'padding' does not exist on type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+src/app/player/[id]/kitchen/page.tsx(101,35): error TS2322: Type '{ children: Element; padding: string; }' is not assignable to type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+  Property 'padding' does not exist on type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+src/app/player/[id]/kitchen/page.tsx(116,19): error TS2322: Type '{ children: Element[]; padding: string; }' is not assignable to type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+  Property 'padding' does not exist on type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+src/app/player/[id]/kitchen/page.tsx(125,51): error TS2322: Type '{ children: Element; key: string; padding: string; className: string; }' is not assignable to type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+  Property 'padding' does not exist on type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+src/app/player/[id]/museum/page.tsx(97,19): error TS2322: Type '{ children: Element; padding: string; className: string; }' is not assignable to type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+  Property 'padding' does not exist on type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+src/app/player/[id]/museum/page.tsx(151,42): error TS2322: Type '{ children: Element[]; key: string; padding: string; }' is not assignable to type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+  Property 'padding' does not exist on type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+src/app/player/[id]/myroom/page.tsx(46,54): error TS2322: Type '{ children: Element; key: string; padding: string; className: string; }' is not assignable to type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+  Property 'padding' does not exist on type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+src/app/player/[id]/payment/page.tsx(206,23): error TS2322: Type '{ children: Element; padding: string; style: { border: string; marginBottom: string; }; }' is not assignable to type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+  Property 'padding' does not exist on type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+src/app/player/[id]/payment/page.tsx(224,19): error TS2322: Type '{ children: Element[]; padding: string; id: string; }' is not assignable to type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+  Property 'padding' does not exist on type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+src/app/player/[id]/points/exchange/[shopId]/page.tsx(119,39): error TS2322: Type '{ children: Element; padding: string; className: string; }' is not assignable to type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+  Property 'padding' does not exist on type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+src/app/player/[id]/points/exchange/page.tsx(243,49): error TS2322: Type '{ children: Element[]; key: string; padding: string; className: string; }' is not assignable to type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+  Property 'padding' does not exist on type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+src/app/player/[id]/points/exchange/page.tsx(289,43): error TS2322: Type '{ children: ("" | Element | undefined)[]; padding: string; className: string; }' is not assignable to type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+  Property 'padding' does not exist on type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+src/app/player/[id]/points/exchange/page.tsx(335,23): error TS2322: Type '{ children: Element; padding: string; }' is not assignable to type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+  Property 'padding' does not exist on type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+src/app/player/[id]/points/page.tsx(33,23): error TS2322: Type '{ children: Element; padding: string; }' is not assignable to type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+  Property 'padding' does not exist on type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+src/app/player/[id]/points/page.tsx(40,39): error TS2322: Type '{ children: Element[]; key: number; padding: string; style: { background: string; border: string; }; }' is not assignable to type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+  Property 'padding' does not exist on type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+src/app/player/[id]/qualifications/page.tsx(162,160): error TS2322: Type '{ children: (false | Element)[]; key: string; className: string; padding: string; }' is not assignable to type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+  Property 'padding' does not exist on type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+src/app/player/[id]/ranking/page.tsx(50,19): error TS2322: Type '{ children: Element; padding: string; style: { background: string; color: "white"; marginBottom: string; }; }' is not assignable to type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+  Property 'padding' does not exist on type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+src/app/player/[id]/ranking/page.tsx(69,25): error TS2322: Type '{ children: Element; key: string; padding: string; style: { background: string; border: string; }; }' is not assignable to type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+  Property 'padding' does not exist on type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+src/app/player/[id]/ranking/page.tsx(106,25): error TS2322: Type '{ children: Element; key: string; padding: string; style: { background: string; border: string; }; }' is not assignable to type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+  Property 'padding' does not exist on type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+src/app/player/[id]/realestate/page.tsx(402,45): error TS2322: Type '{ children: (false | Element)[]; key: any; className: string; padding: string; onClick: () => void; }' is not assignable to type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+  Property 'padding' does not exist on type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+src/app/player/[id]/realestate/page.tsx(455,177): error TS2322: Type '{ children: (false | Element)[]; key: any; className: string; padding: string; }' is not assignable to type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+  Property 'padding' does not exist on type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+src/app/player/[id]/realestate/page.tsx(489,31): error TS2322: Type '{ children: (Element | null)[]; padding: string; }' is not assignable to type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+  Property 'padding' does not exist on type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+src/app/player/[id]/receipts/page.tsx(54,48): error TS2322: Type '{ children: Element[]; key: string; padding: string; }' is not assignable to type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+  Property 'padding' does not exist on type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+src/app/player/[id]/receipts/page.tsx(101,59): error TS2322: Type '{ children: Element[]; className: string; padding: string; }' is not assignable to type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+  Property 'padding' does not exist on type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+src/app/player/[id]/room/page.tsx(68,19): error TS2322: Type '{ children: Element; padding: string; className: string; }' is not assignable to type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+  Property 'padding' does not exist on type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+src/app/player/[id]/room/page.tsx(76,19): error TS2322: Type '{ children: Element[]; padding: string; className: string; }' is not assignable to type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+  Property 'padding' does not exist on type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+src/app/player/[id]/room/page.tsx(96,19): error TS2322: Type '{ children: Element[]; padding: string; className: string; }' is not assignable to type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+  Property 'padding' does not exist on type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+src/app/player/[id]/room/page.tsx(117,19): error TS2322: Type '{ children: Element[]; padding: string; className: string; }' is not assignable to type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+  Property 'padding' does not exist on type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+src/app/player/[id]/room/page.tsx(123,49): error TS2322: Type '{ children: Element; key: string; padding: string; className: string; }' is not assignable to type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+  Property 'padding' does not exist on type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+src/app/player/[id]/room/page.tsx(146,19): error TS2322: Type '{ children: Element[]; padding: string; }' is not assignable to type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+  Property 'padding' does not exist on type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+src/app/player/[id]/room/page.tsx(152,48): error TS2322: Type '{ children: Element; key: string; padding: string; className: string; }' is not assignable to type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+  Property 'padding' does not exist on type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+src/app/player/[id]/roulette/page.tsx(90,19): error TS2322: Type '{ children: Element[]; padding: string; style: { width: string; maxWidth: string; marginBottom: string; textAlign: "left"; }; }' is not assignable to type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+  Property 'padding' does not exist on type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+src/app/player/[id]/roulette/page.tsx(123,31): error TS2322: Type '{ children: Element[]; padding: string; style: { border: string; }; }' is not assignable to type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+  Property 'padding' does not exist on type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+src/app/player/[id]/shop/exchange/page.tsx(102,19): error TS2322: Type '{ children: Element; padding: string; className: string; }' is not assignable to type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+  Property 'padding' does not exist on type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+src/app/player/[id]/shop/exchange/page.tsx(121,45): error TS2322: Type '{ children: Element; key: string; padding: string; }' is not assignable to type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+  Property 'padding' does not exist on type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+src/app/player/[id]/shop/page.tsx(348,63): error TS2322: Type '{ children: Element[]; className: string; padding: string; }' is not assignable to type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+  Property 'padding' does not exist on type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+src/app/player/[id]/shop/page.tsx(431,31): error TS2322: Type '{ children: (false | Element)[]; padding: string; className: string; }' is not assignable to type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+  Property 'padding' does not exist on type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+src/app/player/[id]/shop/page.tsx(491,65): error TS2322: Type '{ children: Element; key: string; padding: string; className: string; }' is not assignable to type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+  Property 'padding' does not exist on type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+src/app/player/[id]/shop/page.tsx(514,35): error TS2322: Type '{ children: Element[]; padding: string; className: string; }' is not assignable to type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+  Property 'padding' does not exist on type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+src/app/player/[id]/shop/page.tsx(521,57): error TS2322: Type '{ children: Element[]; key: string; padding: string; }' is not assignable to type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+  Property 'padding' does not exist on type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+src/app/player/[id]/shop/page.tsx(590,49): error TS2322: Type '{ children: Element; padding: string; className: string; }' is not assignable to type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+  Property 'padding' does not exist on type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+src/app/player/[id]/shop/page.tsx(795,43): error TS2322: Type '{ children: Element[]; padding: string; className: string; }' is not assignable to type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+  Property 'padding' does not exist on type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+src/app/player/[id]/special/page.tsx(120,23): error TS2322: Type '{ children: (false | Element)[]; padding: string; style: { marginBottom: string; textAlign: "center"; border: string; }; }' is not assignable to type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+  Property 'padding' does not exist on type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+src/app/player/[id]/special/page.tsx(150,19): error TS2322: Type '{ children: Element[]; padding: string; style: { marginBottom: string; background: string; color: "white"; }; }' is not assignable to type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+  Property 'padding' does not exist on type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+src/app/player/[id]/special/page.tsx(183,23): error TS2322: Type '{ children: Element[]; padding: string; }' is not assignable to type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+  Property 'padding' does not exist on type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+src/app/player/[id]/special/page.tsx(236,23): error TS2322: Type '{ children: Element[]; padding: string; }' is not assignable to type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+  Property 'padding' does not exist on type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+src/app/player/[id]/special/page.tsx(289,23): error TS2322: Type '{ children: Element[]; padding: string; }' is not assignable to type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+  Property 'padding' does not exist on type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+src/app/player/[id]/special/page.tsx(316,23): error TS2322: Type '{ children: Element; padding: string; style: { marginTop: string; background: string; }; }' is not assignable to type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+  Property 'padding' does not exist on type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+src/app/player/[id]/stock/page.tsx(64,42): error TS2322: Type '{ children: Element[]; key: string; padding: string; }' is not assignable to type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+  Property 'padding' does not exist on type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+src/app/player/[id]/timemachine/page.tsx(102,21): error TS2322: Type '{ children: (false | Element)[]; padding: string; className: string; onClick: () => Promise<void>; }' is not assignable to type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+  Property 'padding' does not exist on type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+src/app/player/[id]/timemachine/page.tsx(119,21): error TS2322: Type '{ children: Element[]; padding: string; className: string; onClick: () => Promise<void>; }' is not assignable to type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+  Property 'padding' does not exist on type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+src/app/player/[id]/timemachine/page.tsx(130,21): error TS2322: Type '{ children: (false | Element)[]; padding: string; className: string; onClick: () => Promise<void>; }' is not assignable to type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+  Property 'padding' does not exist on type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+src/app/player/[id]/visit/[targetId]/page.tsx(196,23): error TS2322: Type '{ children: Element; padding: string; className: string; }' is not assignable to type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+  Property 'padding' does not exist on type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+src/app/player/[id]/visit/[targetId]/page.tsx(206,49): error TS2322: Type '{ children: (false | Element | undefined)[]; key: string; padding: string; className: string; }' is not assignable to type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+  Property 'padding' does not exist on type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+src/components/admin/CatalogManagerAdmin.tsx(78,40): error TS2322: Type '{ children: Element; title: string; padding: string; }' is not assignable to type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+  Property 'padding' does not exist on type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+src/components/admin/CatalogManagerAdmin.tsx(175,49): error TS2322: Type '{ children: Element[]; key: string; padding: string; className: string; }' is not assignable to type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+  Property 'padding' does not exist on type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+src/components/admin/CryptoManager.tsx(102,30): error TS2322: Type '{ children: Element; title: string; padding: string; }' is not assignable to type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+  Property 'padding' does not exist on type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+src/components/admin/RealEstateManager.tsx(378,50): error TS2322: Type '{ children: Element[]; key: string; padding: string; className: string; }' is not assignable to type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+  Property 'padding' does not exist on type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+src/components/admin/RealEstateManager.tsx(589,49): error TS2322: Type '{ children: Element; title: string; padding: string; }' is not assignable to type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+  Property 'padding' does not exist on type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+src/components/minigames/MiniGameFrame.tsx(51,31): error TS2322: Type '{ children: Element[]; padding: string; style: { width: string; maxWidth: string; textAlign: "center"; border: string; }; }' is not assignable to type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+  Property 'padding' does not exist on type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+src/components/minigames/MiniGameFrame.tsx(134,31): error TS2322: Type '{ children: Element[]; padding: string; style: { width: string; maxWidth: string; textAlign: "center"; }; }' is not assignable to type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+  Property 'padding' does not exist on type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+src/components/points/PointExchangeManager.tsx(95,23): error TS2322: Type '{ children: Element; padding: string; }' is not assignable to type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+  Property 'padding' does not exist on type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+src/components/points/PointExchangeManager.tsx(113,35): error TS2322: Type '{ children: ("" | Element | undefined)[]; padding: string; }' is not assignable to type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+  Property 'padding' does not exist on type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+src/components/shop-website/WebsiteEditor.tsx(121,23): error TS2322: Type '{ children: Element[]; padding: string; className: string; }' is not assignable to type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+  Property 'padding' does not exist on type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+src/components/shop-website/WebsiteEditor.tsx(149,23): error TS2322: Type '{ children: Element[]; padding: string; className: string; }' is not assignable to type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+  Property 'padding' does not exist on type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+src/components/shop-website/WebsiteEditor.tsx(196,23): error TS2322: Type '{ children: Element[]; padding: string; className: string; }' is not assignable to type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+  Property 'padding' does not exist on type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+src/components/shop-website/WebsiteEditor.tsx(226,23): error TS2322: Type '{ children: Element[]; padding: string; className: string; }' is not assignable to type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+  Property 'padding' does not exist on type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+src/components/shop/ShopSetupWizard.tsx(95,92): error TS2322: Type '{ children: Element[]; className: string; padding: string; }' is not assignable to type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+  Property 'padding' does not exist on type 'IntrinsicAttributes & CardProps & RefAttributes<HTMLDivElement>'.
+src/components/smartphone/apps/LifeStatusApp.tsx(54,22): error TS2304: Cannot find name 'StatBadge'.
+src/components/smartphone/apps/LifeStatusApp.tsx(60,22): error TS2304: Cannot find name 'StatBadge'.
+src/components/smartphone/apps/LifeStatusApp.tsx(66,22): error TS2304: Cannot find name 'StatBadge'.
+src/components/smartphone/apps/LifeStatusApp.tsx(80,26): error TS2552: Cannot find name 'StatusCard'. Did you mean 'statusbar'?
+src/components/smartphone/apps/LifeStatusApp.tsx(89,26): error TS2552: Cannot find name 'StatusCard'. Did you mean 'statusbar'?
+src/components/smartphone/apps/LifeStatusApp.tsx(98,26): error TS2552: Cannot find name 'StatusCard'. Did you mean 'statusbar'?
+src/components/smartphone/apps/LifeStatusApp.tsx(114,26): error TS2552: Cannot find name 'StatusCard'. Did you mean 'statusbar'?
+src/components/smartphone/apps/LifeStatusApp.tsx(123,26): error TS2552: Cannot find name 'StatusCard'. Did you mean 'statusbar'?
+src/components/smartphone/apps/LifeStatusApp.tsx(140,26): error TS2552: Cannot find name 'StatusCard'. Did you mean 'statusbar'?
+src/components/smartphone/apps/LifeStatusApp.tsx(148,26): error TS2304: Cannot find name 'StatusCard'.
+src/components/smartphone/SmartphoneOS.tsx(57,17): error TS2304: Cannot find name 'VideoApp'.
+src/components/ui/BottomSheet.tsx(38,9): error TS2322: Type '{ type: string; stiffness: number; damping: number; }' is not assignable to type 'Transition<any> | undefined'.
+  Type '{ type: string; stiffness: number; damping: number; }' is not assignable to type 'TransitionWithValueOverrides<any>'.
+    Type '{ type: string; stiffness: number; damping: number; }' is not assignable to type 'ValueAnimationTransition<any>'.
+      Types of property 'type' are incompatible.
+        Type 'string' is not assignable to type 'AnimationGeneratorType | undefined'.
