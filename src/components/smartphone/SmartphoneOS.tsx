@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { SmartphoneShell } from './SmartphoneShell';
 import { StatusBar } from './StatusBar';
 import { HomeScreen } from './HomeScreen';
+import PhoneApp from './PhoneApp';
 
 // Apps
 import UnifiedMessengerApp from './apps/UnifiedMessengerApp';
@@ -48,7 +49,7 @@ export const SmartphoneOS = () => {
   const renderApp = () => {
     switch (currentApp) {
       case 'phone':
-        return <UnifiedMessengerApp onClose={handleHome} initialTab="calls" />;
+        return <PhoneApp onClose={handleHome} />;
       case 'messenger':
         return <UnifiedMessengerApp onClose={handleHome} initialTab="chats" />;
       case 'sns':

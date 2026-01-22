@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
+import { generateChannelName } from '@/lib/agora';
 import { cookies } from 'next/headers';
 
 // // export const dynamic = 'force-dynamic';
@@ -109,7 +110,8 @@ export async function POST(req: NextRequest) {
         });
 
         // Agoraトークン生成
-        const token = generateRtcToken(call.id, 0); // uid=0 for simplicity or use numeric uid if possible
+        const channelName = generateChannelName(call.id);
+        const token = generateRtcToken(channelName, 0); // uid=0 for simplicity or use numeric uid if possible
 
         return NextResponse.json({
             call,

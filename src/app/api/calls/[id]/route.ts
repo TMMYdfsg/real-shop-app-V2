@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
+import { generateChannelName } from '@/lib/agora';
 import { cookies } from 'next/headers';
 
 export const dynamic = 'force-static';
@@ -64,7 +65,8 @@ export async function PATCH(
         // 応答時(ACTIVE)ならトークンを生成して返す
         let token = undefined;
         if (status === 'ACTIVE') {
-            token = generateRtcToken(id, 0);
+            const channelName = generateChannelName(id);
+            token = generateRtcToken(channelName, 0);
         }
 
         return NextResponse.json({ ...updatedCall, token });

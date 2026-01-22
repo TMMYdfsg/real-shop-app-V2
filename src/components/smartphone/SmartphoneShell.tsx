@@ -19,6 +19,8 @@ export const SmartphoneShell = ({ children, onHome }: SmartphoneShellProps) => {
         >
             {/* 1. Screen Container (The strict clipping boundary) */}
             <div className="relative w-full h-full bg-black rounded-[2.8rem] overflow-hidden z-0 shadow-inner ring-1 ring-white/5" style={{ transform: 'translateZ(0)' }}>
+                {/* Back button portal slot */}
+                <div id="smartphone-back-slot" className="absolute bottom-12 left-0 right-0 z-40 flex justify-center pointer-events-none" />
                 {/* Content */}
                 {children}
 

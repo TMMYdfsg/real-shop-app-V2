@@ -87,7 +87,8 @@ export default function PhoneApp({ onClose }: { onClose: () => void }) {
             });
             const { call, token, channelId } = await res.json();
             setActiveCall(call);
-            await joinVoiceChannel(channelId, token);
+            const safeToken = typeof token === 'string' && token.length > 0 ? token : null;
+            await joinVoiceChannel(channelId, safeToken);
         } catch (error) {
             console.error('Failed to initiate call:', error);
             alert('通話の開始に失敗しました');
@@ -102,10 +103,10 @@ export default function PhoneApp({ onClose }: { onClose: () => void }) {
                 body: JSON.stringify({ status: 'ACTIVE' }),
             });
             const data = await res.json();
-            const token = data.token;
+            const token = typeof data.token === 'string' && data.token.length > 0 ? data.token : null;
             setIncomingCall(null);
             setActiveCall(call);
-            await joinVoiceChannel(call.id, token || 'dummy-token');
+            await joinVoiceChannel(call.id, token);
         } catch (error) {
             console.error('Failed to answer call:', error);
         }
@@ -138,8 +139,14 @@ export default function PhoneApp({ onClose }: { onClose: () => void }) {
         } catch (error) { }
     };
 
-    const joinVoiceChannel = async (channelId: string, token: string) => {
+    const joinVoiceChannel = async (channelId: string, token: string | null) => {
         if (typeof window === 'undefined') return;
+        const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+        if (window.location.protocol !== 'https:' && !isLocalhost) {
+            setHttpsError(true);
+            alert('通話にはHTTPS接続が必要です。HTTPSまたはlocalhostで実行してください。');
+            return;
+        }
 
         try {
             setConnectionState('CONNECTING');
@@ -158,7 +165,7 @@ export default function PhoneApp({ onClose }: { onClose: () => void }) {
                 if (mediaType === 'audio') user.audioTrack?.play();
             });
 
-            await client.join(process.env.NEXT_PUBLIC_AGORA_APP_ID!, generateChannelName(channelId), token, null);
+            await client.join(process.env.NEXT_PUBLIC_AGORA_APP_ID!, generateChannelName(channelId), token ?? null, null);
             setConnectionState('CONNECTED');
 
             const track = await createMicrophoneTrack();

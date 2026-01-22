@@ -14,6 +14,7 @@ export const BiometricAuth: React.FC<BiometricAuthProps> = ({
     title = "三井住友銀行"
 }) => {
     const [status, setStatus] = useState<'locked' | 'scanning' | 'success'>('locked');
+    const [unlocking, setUnlocking] = useState(false);
 
     useEffect(() => {
         // Start scanning automatically
@@ -24,6 +25,7 @@ export const BiometricAuth: React.FC<BiometricAuthProps> = ({
         // Success after scanning
         const timer2 = setTimeout(() => {
             setStatus('success');
+            setUnlocking(true);
             // Provide haptic feedback if available
             if (window.navigator?.vibrate) {
                 window.navigator.vibrate([10, 30, 10]);
@@ -33,7 +35,7 @@ export const BiometricAuth: React.FC<BiometricAuthProps> = ({
         // Notify parent after success animation
         const timer3 = setTimeout(() => {
             onAuthenticated();
-        }, 3000);
+        }, 3200);
 
         return () => {
             clearTimeout(timer1);
@@ -153,6 +155,38 @@ export const BiometricAuth: React.FC<BiometricAuthProps> = ({
             {/* Background Decorative Circles */}
             <div className="absolute top-[-10%] right-[-10%] w-64 h-64 bg-emerald-50/50 rounded-full -z-10 blur-3xl overflow-hidden" />
             <div className="absolute bottom-[-10%] left-[-10%] w-64 h-64 bg-blue-50/50 rounded-full -z-10 blur-3xl overflow-hidden" />
+
+            {/* Unlocking Animation Overlay */}
+            <AnimatePresence>
+                {unlocking && (
+                    <motion.div
+                        key="unlocking"
+                        className="absolute inset-0 z-[120] pointer-events-none"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                    >
+                        <motion.div
+                            initial={{ scale: 0.2, opacity: 0.9 }}
+                            animate={{ scale: 6, opacity: 0 }}
+                            transition={{ duration: 0.9, ease: 'easeOut' }}
+                            className="absolute left-1/2 top-1/2 w-32 h-32 -translate-x-1/2 -translate-y-1/2 rounded-full bg-emerald-300/40 blur-xl"
+                        />
+                        <motion.div
+                            initial={{ x: '-120%', opacity: 0 }}
+                            animate={{ x: '120%', opacity: [0, 0.6, 0] }}
+                            transition={{ duration: 1.1, ease: 'easeInOut' }}
+                            className="absolute inset-0 bg-gradient-to-r from-transparent via-white/60 to-transparent"
+                        />
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: [0, 0.8, 0] }}
+                            transition={{ duration: 0.9, ease: 'easeOut' }}
+                            className="absolute inset-0 bg-emerald-600/10"
+                        />
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
     );
 };
