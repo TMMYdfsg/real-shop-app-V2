@@ -3,6 +3,7 @@
 import React from 'react';
 import { useGame } from '@/context/GameContext';
 import { Card } from '@/components/ui/Card';
+import { PlayerIcon } from '@/components/ui/PlayerIcon';
 
 export default function RankingPage() {
     const { gameState, currentUser } = useGame();
@@ -77,6 +78,7 @@ export default function RankingPage() {
                                 <div style={{ fontSize: '1.5rem', fontWeight: 'bold', minWidth: '3rem' }}>
                                     {getRankIcon(index + 1, user)}
                                 </div>
+                                <PlayerIcon playerIcon={user.playerIcon} playerName={user.name} size={36} />
                                 <div>
                                     <div style={{ fontWeight: 'bold', color: user.role === 'banker' ? '#d97706' : 'inherit' }}>
                                         {user.name} {user.role === 'banker' && '(神)'}
@@ -114,6 +116,7 @@ export default function RankingPage() {
                                 <div style={{ fontSize: '1.5rem', fontWeight: 'bold', minWidth: '3rem' }}>
                                     {getRankIcon(index + 1, user)}
                                 </div>
+                                <PlayerIcon playerIcon={user.playerIcon} playerName={user.name} size={36} />
                                 <div>
                                     <div style={{ fontWeight: 'bold', color: user.role === 'banker' ? '#d97706' : 'inherit' }}>
                                         {user.name} {user.role === 'banker' && '(神)'}

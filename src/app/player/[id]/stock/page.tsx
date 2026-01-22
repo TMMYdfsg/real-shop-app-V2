@@ -1,14 +1,35 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useGame } from '@/context/GameContext';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { StockChart } from '@/components/stock/StockChart';
 
 export default function StockPage() {
-    const { gameState, currentUser } = useGame();
+    const { gameState, currentUser, sendRequest } = useGame();
     const [amount, setAmount] = useState<{ [key: string]: string }>({});
+
+    useEffect(() => {
+        if (!currentUser || currentUser.timeEra === 'past') return;
+        let isMounted = true;
+
+        const tick = async () => {
+            if (!isMounted) return;
+            try {
+                await sendRequest('stock_tick', 0, {});
+            } catch (error) {
+                console.error('Stock tick failed', error);
+            }
+        };
+
+        tick();
+        const interval = setInterval(tick, 10000);
+        return () => {
+            isMounted = false;
+            clearInterval(interval);
+        };
+    }, [currentUser?.id, currentUser?.timeEra, sendRequest]);
 
     if (!gameState || !currentUser) return <div>Loading...</div>;
 
@@ -65,6 +86,12 @@ export default function StockPage() {
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
                             <div>
                                 <div style={{ fontWeight: 'bold', fontSize: '1.2rem' }}>{stock.name}</div>
+                                {stock.category && (
+                                    <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+                                        ジャンル: {stock.category}
+                                        {stock.marketCap ? ` / 規模: ${stock.marketCap}` : ''}
+                                    </div>
+                                )}
                                 <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)' }}>
                                     保有: {holding}株
                                 </div>

@@ -13,6 +13,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { TimeThemeWrapper } from './TimeThemeWrapper';
 import { useToast } from '@/components/ui/ToastProvider';
 import { Button } from '@/components/ui/Button';
+import { TRAITS } from '@/lib/gameData';
 
 /*
  * PlayerLayout の見た目を整えるためのメモです。
@@ -22,9 +23,11 @@ import { Button } from '@/components/ui/Button';
 export const PlayerLayout: React.FC<{ children: React.ReactNode; id: string; initialData?: any }> = ({ children, id, initialData }) => {
   const pathname = usePathname();
   const router = useRouter();
-  const { currentUser, gameState, login, refresh } = useGame();
+  const { currentUser, gameState, login, refresh, sendRequest } = useGame();
   const { addToast } = useToast();
   const { mutate } = useSWRConfig();
+  const [selectedTrait, setSelectedTrait] = useState<string | null>(null);
+  const [isTraitSaving, setIsTraitSaving] = useState(false);
 
   // SSRで取得したデータがあれば即座にキャッシュに反映
   useEffect(() => {
@@ -39,6 +42,10 @@ export const PlayerLayout: React.FC<{ children: React.ReactNode; id: string; ini
       login(id);
     }
   }, [id, currentUser, login]);
+
+  useEffect(() => {
+    setSelectedTrait(null);
+  }, [currentUser?.id, currentUser?.traits?.length]);
 
   // Notification logic kept simple for now
   // ... Timer Logic ...
@@ -185,7 +192,7 @@ export const PlayerLayout: React.FC<{ children: React.ReactNode; id: string; ini
     { label: 'マイショップ', path: `${basePath}/shop`, icon: '🛍️' },
     { label: '不動産', path: `${basePath}/realestate`, icon: '🏠' },
     { label: '通勤', path: `${basePath}/commute`, icon: '🚃' },
-    { label: '資格・試験', path: `${basePath}/qualifications`, icon: '🎓' },
+    { label: 'スキル', path: `${basePath}/skills`, icon: '🧠' },
     { label: 'ポイント', path: `${basePath}/points`, icon: '💳' },
     { label: '株', path: `${basePath}/stock`, icon: '📈' },
     { label: '貯金', path: `${basePath}/bank`, icon: '🏦' },
@@ -219,8 +226,38 @@ export const PlayerLayout: React.FC<{ children: React.ReactNode; id: string; ini
     return `${m}:${s.toString().padStart(2, '0')}`;
   };
 
+  const handleTraitSave = async () => {
+    if (!selectedTrait || isTraitSaving) return;
+    setIsTraitSaving(true);
+    try {
+      await sendRequest('update_profile', 0, { traits: [selectedTrait], needsTraitSelection: false });
+      addToast('性格を設定しました', 'success');
+      setSelectedTrait(null);
+      refresh();
+      router.push(basePath);
+    } catch (error) {
+      console.error(error);
+      addToast('性格の保存に失敗しました', 'error');
+    } finally {
+      setIsTraitSaving(false);
+    }
+  };
+
   // Determine if current path is the forbidden page for conditional styling
   const isForbiddenPage = pathname?.includes('/forbidden');
+  const isPast = currentUser.timeEra === 'past';
+  const pastRestrictions = [
+    { label: 'スマホ/SNS', paths: ['/smartphone'] },
+    { label: '株式市場', paths: ['/stock'] },
+    { label: 'カジノ', paths: ['/casino'] }
+  ];
+  const blockedPastPaths = pastRestrictions.flatMap((item) => item.paths);
+  const isPastRestricted = isPast && blockedPastPaths.some((path) => pathname?.includes(path));
+  const pastRestrictionLabels = pastRestrictions.map((item) => item.label).join('・');
+  const shouldPickTrait =
+    currentUser.role === 'player' &&
+    currentUser.needsTraitSelection &&
+    (!currentUser.traits || currentUser.traits.length === 0);
 
   return (
     <TimeThemeWrapper>
@@ -243,6 +280,66 @@ export const PlayerLayout: React.FC<{ children: React.ReactNode; id: string; ini
                   <div className="text-sm text-red-800/80 mt-1">
                     {activeBills.length}件の支払いが求められています。銀行員が承認すると引き落とされます。
                   </div>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        <AnimatePresence>
+          {isPastRestricted && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-[120] flex items-center justify-center bg-[#f4e4bc]/95 text-[#3b2f1f] p-6"
+            >
+              <div className="max-w-md w-full bg-[#fbf2d6] border-2 border-[#bfa979] rounded-3xl p-6 text-center shadow-[0_20px_50px_rgba(60,45,28,0.25)]">
+                <div className="text-5xl mb-4">⏳</div>
+                <h2 className="text-xl font-black mb-2">1950年代では利用できません</h2>
+                <p className="text-sm font-medium mb-2">この時代には存在しない機能のため、アクセスできません。</p>
+                <p className="text-xs font-semibold text-[#6b4e2e] mb-6">禁止対象: {pastRestrictionLabels}</p>
+                <Button variant="secondary" onClick={() => router.push(`${basePath}/timemachine`)}>
+                  タイムマシンへ戻る
+                </Button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        <AnimatePresence>
+          {shouldPickTrait && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-[130] flex items-center justify-center bg-black/60 p-6"
+            >
+              <div className="max-w-2xl w-full bg-white rounded-3xl p-6 shadow-2xl">
+                <div className="text-center mb-4">
+                  <div className="text-3xl mb-2">🧠</div>
+                  <h2 className="text-xl font-black">性格を選んでください</h2>
+                  <p className="text-xs text-gray-500 mt-1">リセット後の初回のみ選択が必要です。</p>
+                </div>
+                <div className="grid sm:grid-cols-2 gap-3 max-h-[50vh] overflow-y-auto pr-1">
+                  {Object.entries(TRAITS).map(([name, data]) => (
+                    <button
+                      key={name}
+                      onClick={() => setSelectedTrait(name)}
+                      className={`p-4 rounded-2xl border text-left transition ${selectedTrait === name ? 'border-indigo-500 bg-indigo-50' : 'border-gray-200 bg-gray-50 hover:border-gray-300'}`}
+                    >
+                      <div className="text-sm font-bold">{name}</div>
+                      <div className="text-[11px] text-gray-500 mt-1">{data.description}</div>
+                    </button>
+                  ))}
+                </div>
+                <div className="mt-5 flex gap-3">
+                  <Button variant="secondary" className="flex-1" onClick={() => setSelectedTrait(null)}>
+                    選び直す
+                  </Button>
+                  <Button className="flex-1" disabled={!selectedTrait || isTraitSaving} onClick={handleTraitSave}>
+                    決定する
+                  </Button>
                 </div>
               </div>
             </motion.div>
@@ -301,6 +398,7 @@ export const PlayerLayout: React.FC<{ children: React.ReactNode; id: string; ini
 
         <AppShell
           title={currentUser.name}
+          titleIcon={currentUser.playerIcon}
           navItems={shellNavItems}
           actions={
             <>

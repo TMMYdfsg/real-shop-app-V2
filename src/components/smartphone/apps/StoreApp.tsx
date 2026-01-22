@@ -1,21 +1,30 @@
 'use client';
 
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useGame } from '@/context/GameContext';
 import { APPS } from '@/components/smartphone/constants';
 import { AppHeader } from '@/components/smartphone/AppHeader';
 import { Download, CheckCircle2, Search, Trash2 } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export const StoreApp: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     const { currentUser, sendRequest } = useGame();
     const [query, setQuery] = useState('');
     const [busyId, setBusyId] = useState<string | null>(null);
+    const [confirmAppId, setConfirmAppId] = useState<string | null>(null);
 
-    const installedIds = currentUser?.smartphone?.apps || [];
-    const effectiveInstalledIds = installedIds.length > 0
-        ? installedIds
-        : APPS.map(app => app.id);
+    const baseInstalledIds = useMemo(() => {
+        const source = currentUser?.smartphone?.apps?.length ? currentUser.smartphone.apps : ['shopping'];
+        const next = new Set(source);
+        next.add('shopping');
+        return Array.from(next);
+    }, [currentUser?.smartphone?.apps]);
+
+    const [installedIds, setInstalledIds] = useState<string[]>(baseInstalledIds);
+
+    useEffect(() => {
+        setInstalledIds(baseInstalledIds);
+    }, [baseInstalledIds]);
 
     const filteredApps = useMemo(() => {
         const q = query.trim().toLowerCase();
@@ -26,6 +35,11 @@ export const StoreApp: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     const handleInstall = async (appId: string) => {
         setBusyId(appId);
         try {
+            const next = Array.from(new Set([...installedIds, appId, 'shopping']));
+            setInstalledIds(next);
+            if (typeof window !== 'undefined') {
+                window.dispatchEvent(new CustomEvent('smartphone-apps-updated', { detail: next }));
+            }
             await sendRequest('install_app', 0, { appId });
         } finally {
             setBusyId(null);
@@ -35,6 +49,12 @@ export const StoreApp: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     const handleRemove = async (appId: string) => {
         setBusyId(appId);
         try {
+            const next = installedIds.filter(id => id !== appId || id === 'shopping');
+            const normalized = Array.from(new Set([...next, 'shopping']));
+            setInstalledIds(normalized);
+            if (typeof window !== 'undefined') {
+                window.dispatchEvent(new CustomEvent('smartphone-apps-updated', { detail: normalized }));
+            }
             await sendRequest('uninstall_app', 0, { appId });
         } finally {
             setBusyId(null);
@@ -59,7 +79,7 @@ export const StoreApp: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
             <div className="flex-1 overflow-y-auto no-scrollbar px-5 pb-8 space-y-3">
                 {filteredApps.map((app) => {
-                    const isInstalled = effectiveInstalledIds.includes(app.id);
+                    const isInstalled = installedIds.includes(app.id);
                     const isStore = app.id === 'shopping';
                     const isBusy = busyId === app.id;
 
@@ -83,7 +103,7 @@ export const StoreApp: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
                             {isInstalled ? (
                                 <button
-                                    onClick={() => !isStore && handleRemove(app.id)}
+                                    onClick={() => !isStore && setConfirmAppId(app.id)}
                                     disabled={isStore || isBusy}
                                     className={`px-3 py-1.5 rounded-full text-xs font-black flex items-center gap-1.5 ${isStore ? 'bg-slate-100 text-slate-400' : 'bg-slate-900 text-white hover:bg-slate-800'}`}
                                 >
@@ -104,6 +124,46 @@ export const StoreApp: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                     );
                 })}
             </div>
+
+            <AnimatePresence>
+                {confirmAppId && (
+                    <motion.div
+                        key="confirm"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="absolute inset-0 z-50 bg-black/50 flex items-center justify-center p-6"
+                    >
+                        <motion.div
+                            initial={{ scale: 0.95, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0.95, opacity: 0 }}
+                            className="bg-white rounded-2xl p-6 w-full max-w-[320px] text-center shadow-xl"
+                        >
+                            <p className="text-sm font-bold text-slate-800 mb-3">アプリを削除しますか？</p>
+                            <p className="text-xs text-slate-500 mb-6">ホーム画面からアプリが消えます。</p>
+                            <div className="flex gap-3">
+                                <button
+                                    onClick={() => setConfirmAppId(null)}
+                                    className="flex-1 py-2 rounded-xl text-xs font-bold bg-slate-100 text-slate-600"
+                                >
+                                    キャンセル
+                                </button>
+                                <button
+                                    onClick={async () => {
+                                        const target = confirmAppId;
+                                        setConfirmAppId(null);
+                                        if (target) await handleRemove(target);
+                                    }}
+                                    className="flex-1 py-2 rounded-xl text-xs font-bold bg-rose-500 text-white"
+                                >
+                                    削除する
+                                </button>
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
     );
 };

@@ -2,7 +2,7 @@
 
 export const dynamic = "force-dynamic";
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useGame } from '@/context/GameContext';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
@@ -16,12 +16,39 @@ export default function TimeMachinePage() {
     const params = useParams<{ id: string }>();
     const { addToast } = useToast();
     const [isProcessing, setIsProcessing] = useState(false);
+    const [futureTab, setFutureTab] = useState<'race' | 'slot' | 'timeline'>('race');
+    const [horseBet, setHorseBet] = useState('1000');
+    const [selectedHorse, setSelectedHorse] = useState(1);
+    const [slotBet, setSlotBet] = useState('500');
+    const [slotResult, setSlotResult] = useState<string[]>([]);
 
     if (!currentUser || currentUser.id !== params.id) {
         return <div className="p-8 text-center">Unauthorized</div>;
     }
 
     const currentEra = currentUser.timeEra || 'present';
+
+    const horseOptions = useMemo(() => ([
+        { id: 1, name: 'ネオンブレイズ', odds: 2.5 },
+        { id: 2, name: 'クロノスウィング', odds: 3.2 },
+        { id: 3, name: 'ルミナスラン', odds: 4.1 },
+        { id: 4, name: 'オーロラステップ', odds: 5.5 }
+    ]), []);
+
+    const timelineItems = useMemo(() => ([
+        { year: '2061', text: '量子ネットワークが世界標準に。情報伝送が瞬時化。' },
+        { year: '2075', text: '都市AIにより渋滞・犯罪率が大幅低下。' },
+        { year: '2088', text: '火星コロニー正式稼働、宇宙物流が日常化。' },
+        { year: '2094', text: '感情シンクロ通信が普及、遠隔会話が没入型に。' },
+        { year: '2100', text: '未来暦2100到達。個別最適化社会が完成。' }
+    ]), []);
+
+    const pastRestrictions = useMemo(() => ([
+        { icon: '📵', title: 'スマホ/通信', detail: 'スマホ・SNS・動画などの通信系は利用不可。' },
+        { icon: '📈', title: '株式市場', detail: '株取引・投資系の機能は停止。' },
+        { icon: '🎰', title: 'カジノ', detail: '電子系ギャンブルは時代的に不可。' },
+        { icon: '🛰️', title: '先端テクノロジー', detail: '現代/未来に存在する技術の多くが封印。' }
+    ]), []);
 
     const handleTravel = async (targetEra: 'present' | 'past' | 'future') => {
         if (targetEra === currentEra) return;
@@ -48,6 +75,16 @@ export default function TimeMachinePage() {
         setIsProcessing(true);
         try {
             await sendRequest('travel_time', 0, JSON.stringify({ targetEra, cost }));
+            if (targetEra === 'past') {
+                const audio = new Audio('/sounds/coingame.mp3');
+                audio.volume = 0.7;
+                audio.play().catch(() => { });
+            }
+            if (targetEra === 'future') {
+                const audio = new Audio('/sounds/Cyber09-1.mp3');
+                audio.volume = 0.7;
+                audio.play().catch(() => { });
+            }
             addToast('時間移動に成功しました', 'success');
             router.refresh();
         } catch (error) {
@@ -89,6 +126,72 @@ export default function TimeMachinePage() {
             }
         } catch (e) {
             addToast('通信エラー', 'error');
+        } finally {
+            setIsProcessing(false);
+        }
+    };
+
+    const handleFutureRace = async () => {
+        if (currentEra !== 'future') return;
+        const bet = Number(horseBet);
+        if (!Number.isFinite(bet) || bet <= 0) {
+            addToast('賭け金を入力してください', 'error');
+            return;
+        }
+        if (bet > currentUser.balance) {
+            addToast('資金が足りません', 'error');
+            return;
+        }
+        setIsProcessing(true);
+        try {
+            const winner = Math.floor(Math.random() * horseOptions.length) + 1;
+            const option = horseOptions.find((item) => item.id === selectedHorse);
+            const payout = winner === selectedHorse && option ? Math.floor(bet * option.odds) : 0;
+            await sendRequest('gamble_horse', bet, { payout, selectedHorse, winner });
+            addToast(
+                payout > 0
+                    ? `的中！配当 ${payout.toLocaleString()} 枚`
+                    : `ハズレ… 勝者は馬${winner}`,
+                payout > 0 ? 'success' : 'info'
+            );
+            router.refresh();
+        } catch (error) {
+            console.error(error);
+            addToast('競馬結果の処理に失敗しました', 'error');
+        } finally {
+            setIsProcessing(false);
+        }
+    };
+
+    const handleFutureSlot = async () => {
+        if (currentEra !== 'future') return;
+        const bet = Number(slotBet);
+        if (!Number.isFinite(bet) || bet <= 0) {
+            addToast('賭け金を入力してください', 'error');
+            return;
+        }
+        if (bet > currentUser.balance) {
+            addToast('資金が足りません', 'error');
+            return;
+        }
+        setIsProcessing(true);
+        try {
+            const symbols = ['◆', '▲', '●', '★', '✦', '■'];
+            const result = Array.from({ length: 3 }, () => symbols[Math.floor(Math.random() * symbols.length)]);
+            setSlotResult(result);
+            const isJackpot = result.every((item) => item === result[0]);
+            const isPair = !isJackpot && (result[0] === result[1] || result[1] === result[2] || result[0] === result[2]);
+            const payout = isJackpot ? bet * 6 : isPair ? bet * 2 : 0;
+            const message = isJackpot ? 'ジャックポット' : isPair ? 'ペア' : 'ハズレ';
+            await sendRequest('gamble_slot', bet, { payout, message });
+            addToast(
+                payout > 0 ? `${message}！配当 ${payout.toLocaleString()} 枚` : 'ハズレ…',
+                payout > 0 ? 'success' : 'info'
+            );
+            router.refresh();
+        } catch (error) {
+            console.error(error);
+            addToast('スロット結果の処理に失敗しました', 'error');
         } finally {
             setIsProcessing(false);
         }
@@ -154,15 +257,112 @@ export default function TimeMachinePage() {
                         className="p-6 bg-black/80 rounded-xl border border-cyan-500/50 shadow-lg text-cyan-50"
                     >
                         <h3 className="text-2xl font-bold mb-4 font-mono text-cyan-400">FUTURE TERMINAL</h3>
-                        <p className="mb-6">未来の株式市場へのアクセスが可能です。ハイリスク・ハイリターンな投資を行いますか？</p>
-                        <Button
-                            fullWidth
-                            disabled={isProcessing}
-                            onClick={handleInvestment}
-                            className="bg-cyan-600 hover:bg-cyan-500 text-white font-mono text-lg py-4 shadow-[0_0_15px_cyan]"
-                        >
-                            未来技術へ投資する (Win: x1.5~5.0 / Lose: x0)
-                        </Button>
+                        <p className="mb-6">未来の娯楽・予測プラットフォームへアクセスできます。</p>
+
+                        <div className="flex flex-wrap gap-2 mb-6">
+                            {[
+                                { key: 'race', label: '量子競馬' },
+                                { key: 'slot', label: 'ネオンスロット' },
+                                { key: 'timeline', label: '年表' }
+                            ].map((tab) => (
+                                <button
+                                    key={tab.key}
+                                    onClick={() => setFutureTab(tab.key as typeof futureTab)}
+                                    className={`px-4 py-2 rounded-full text-xs font-bold border ${futureTab === tab.key ? 'bg-cyan-500 text-black border-cyan-300' : 'bg-transparent text-cyan-200 border-cyan-700'}`}
+                                >
+                                    {tab.label}
+                                </button>
+                            ))}
+                        </div>
+
+                        {futureTab === 'race' && (
+                            <div className="space-y-4">
+                                <div className="grid gap-3">
+                                    {horseOptions.map((horse) => (
+                                        <button
+                                            key={horse.id}
+                                            onClick={() => setSelectedHorse(horse.id)}
+                                            className={`w-full text-left p-4 rounded-xl border transition ${selectedHorse === horse.id ? 'border-cyan-400 bg-cyan-500/20' : 'border-cyan-800 bg-white/5'}`}
+                                        >
+                                            <div className="flex items-center justify-between">
+                                                <span className="font-bold">{horse.name}</span>
+                                                <span className="text-xs text-cyan-200">オッズ x{horse.odds}</span>
+                                            </div>
+                                            <div className="text-[11px] text-cyan-300 mt-1">AI予測同期率: {(horse.odds * 12).toFixed(0)}%</div>
+                                        </button>
+                                    ))}
+                                </div>
+
+                                <div className="flex flex-col sm:flex-row gap-3">
+                                    <input
+                                        value={horseBet}
+                                        onChange={(e) => setHorseBet(e.target.value)}
+                                        placeholder="賭け金"
+                                        className="flex-1 px-4 py-3 rounded-xl bg-black/60 border border-cyan-800 text-cyan-100 text-sm"
+                                    />
+                                    <Button
+                                        disabled={isProcessing}
+                                        onClick={handleFutureRace}
+                                        className="bg-cyan-600 hover:bg-cyan-500 text-white font-mono text-sm py-3 px-6 shadow-[0_0_15px_cyan]"
+                                    >
+                                        レース開始
+                                    </Button>
+                                </div>
+                            </div>
+                        )}
+
+                        {futureTab === 'slot' && (
+                            <div className="space-y-4">
+                                <div className="flex items-center justify-center gap-4 text-4xl font-mono bg-black/60 rounded-2xl py-6 border border-cyan-800">
+                                    {slotResult.length === 0 ? (
+                                        <span className="text-cyan-200">◆ ◆ ◆</span>
+                                    ) : (
+                                        slotResult.map((symbol, index) => (
+                                            <span key={index} className="text-cyan-100">{symbol}</span>
+                                        ))
+                                    )}
+                                </div>
+
+                                <div className="flex flex-col sm:flex-row gap-3">
+                                    <input
+                                        value={slotBet}
+                                        onChange={(e) => setSlotBet(e.target.value)}
+                                        placeholder="賭け金"
+                                        className="flex-1 px-4 py-3 rounded-xl bg-black/60 border border-cyan-800 text-cyan-100 text-sm"
+                                    />
+                                    <Button
+                                        disabled={isProcessing}
+                                        onClick={handleFutureSlot}
+                                        className="bg-fuchsia-600 hover:bg-fuchsia-500 text-white font-mono text-sm py-3 px-6 shadow-[0_0_15px_rgba(217,70,239,0.8)]"
+                                    >
+                                        スピン
+                                    </Button>
+                                </div>
+                                <div className="text-xs text-cyan-300">3つ揃い: x6 / 2つ揃い: x2</div>
+                            </div>
+                        )}
+
+                        {futureTab === 'timeline' && (
+                            <div className="space-y-3">
+                                {timelineItems.map((item) => (
+                                    <div key={item.year} className="p-4 rounded-xl border border-cyan-800 bg-white/5">
+                                        <div className="text-xs text-cyan-300">{item.year}</div>
+                                        <div className="text-sm font-bold text-cyan-100">{item.text}</div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+
+                        <div className="mt-6">
+                            <Button
+                                fullWidth
+                                disabled={isProcessing}
+                                onClick={handleInvestment}
+                                className="bg-cyan-600 hover:bg-cyan-500 text-white font-mono text-lg py-4 shadow-[0_0_15px_cyan]"
+                            >
+                                未来技術へ投資する (Win: x1.5~5.0 / Lose: x0)
+                            </Button>
+                        </div>
                     </motion.div>
                 )}
 
@@ -175,7 +375,18 @@ export default function TimeMachinePage() {
                     >
                         <h3 className="text-2xl font-bold mb-4 font-serif text-[#8b4513]">OLD NEWSPAPER</h3>
                         <p className="mb-4 font-serif italic">"本日のニュース: 高度経済成長の波、到る。"</p>
-                        <p>この時代では、物価が少し安く感じるかもしれません...（未実装: 物価変動ロジック）</p>
+                        <p>この時代では、先端技術系の行動が制限されます。スマホやデジタル娯楽は利用不可です。</p>
+                        <div className="mt-5 grid gap-3 sm:grid-cols-2">
+                            {pastRestrictions.map((item) => (
+                                <div key={item.title} className="rounded-xl border border-[#c9b48a] bg-[#fff8e8] p-3 shadow-[0_8px_18px_rgba(120,90,50,0.2)]">
+                                    <div className="flex items-center gap-2 font-bold">
+                                        <span className="text-lg">{item.icon}</span>
+                                        <span>{item.title}</span>
+                                    </div>
+                                    <div className="text-xs mt-1 text-[#6b4e2e]">{item.detail}</div>
+                                </div>
+                            ))}
+                        </div>
                     </motion.div>
                 )}
             </AnimatePresence>

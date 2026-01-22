@@ -144,3 +144,11 @@ export const VacationIcon = ({ className = "" }) => (
         <path d="M7 12V8a5 5 0 0 1 5-5 5 5 0 0 1 5 5v4" />
     </svg>
 );
+
+export const CapIcon = ({ className = "" }) => (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+        <path d="M2 7l10-4 10 4-10 4-10-4z" />
+        <path d="M6 9v6c0 1.5 2.7 3 6 3s6-1.5 6-3V9" />
+        <path d="M22 7v5" />
+    </svg>
+);

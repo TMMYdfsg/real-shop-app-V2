@@ -1,19 +1,22 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useGame } from '@/context/GameContext';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { IconSelector } from '@/components/ui/IconSelector';
 import { motion } from 'framer-motion';
+import { TRAITS } from '@/lib/gameData';
 
 export default function ConfigPage() {
-    const { gameState, currentUser } = useGame();
+    const { currentUser, sendRequest, refresh } = useGame();
 
     // プロファイル設定
     const [playerName, setPlayerName] = useState(currentUser?.name || '');
     const [shopName, setShopName] = useState(currentUser?.shopName || currentUser?.name || '');
     const [playerIcon, setPlayerIcon] = useState(currentUser?.playerIcon || 'default.png');
+    const [traits, setTraits] = useState<string[]>(currentUser?.traits || []);
+    const [customIcons, setCustomIcons] = useState<string[]>(currentUser?.smartphone?.settings?.customIcons || []);
 
     // ショップ・契約設定
     const [cardType, setCardType] = useState<'point' | 'stamp'>(currentUser?.cardType || 'point');
@@ -22,29 +25,39 @@ export default function ConfigPage() {
 
     const [isSaving, setIsSaving] = useState(false);
 
+    useEffect(() => {
+        if (!currentUser) return;
+        setPlayerName(currentUser.name || '');
+        setShopName(currentUser.shopName || currentUser.name || '');
+        setPlayerIcon(currentUser.playerIcon || 'default.png');
+        setCardType(currentUser.cardType || 'point');
+        setIsInsured(currentUser.isInsured || false);
+        setPropertyLevel(currentUser.propertyLevel || 'none');
+        setTraits(currentUser.traits || []);
+        setCustomIcons(currentUser.smartphone?.settings?.customIcons || []);
+    }, [currentUser]);
+
     if (!currentUser) return <div>Loading...</div>;
 
     const handleSave = async () => {
         setIsSaving(true);
-        await fetch('/api/action', {
-            method: 'POST',
-            body: JSON.stringify({
-                type: 'update_profile',
-                requesterId: currentUser.id,
-                amount: 0,
-                details: JSON.stringify({
-                    name: playerName,
-                    shopName,
-                    playerIcon,
-                    cardType,
-                    isInsured,
-                    propertyLevel
-                })
-            })
+        await sendRequest('update_profile', 0, {
+            name: playerName,
+            shopName,
+            playerIcon,
+            cardType,
+            isInsured,
+            propertyLevel,
+            smartphone: { settings: { customIcons } }
         });
-        alert('保存しました');
+        refresh();
         setIsSaving(false);
-        window.location.reload();
+    };
+
+    const handleTraitReset = async () => {
+        if (!confirm('性格をリセットしますか？次の画面で再選択が必要です。')) return;
+        await sendRequest('update_profile', 0, { traits: [], needsTraitSelection: true });
+        refresh();
     };
 
     return (
@@ -98,11 +111,32 @@ export default function ConfigPage() {
                         </label>
                         <IconSelector
                             selectedIcon={playerIcon}
-                            onSelect={setPlayerIcon}
+                            customIcons={customIcons}
+                            onSelect={(icon) => {
+                                if (icon.startsWith('data:image') && !customIcons.includes(icon)) {
+                                    setCustomIcons((prev) => [...prev, icon]);
+                                }
+                                setPlayerIcon(icon);
+                            }}
                         />
                         <p style={{ fontSize: '0.8rem', color: '#666', marginTop: '0.5rem' }}>
                             プロフィール画像として使用されます。プリセットまたはカスタム画像を選択できます。
                         </p>
+                    </div>
+
+                    <div style={{ marginBottom: '1.5rem' }}>
+                        <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>
+                            性格
+                        </label>
+                        <div style={{ padding: '0.8rem', borderRadius: '6px', border: '1px solid #e5e7eb', background: '#f9fafb' }}>
+                            <div style={{ fontWeight: 'bold' }}>{traits?.[0] || '未設定'}</div>
+                            <div style={{ fontSize: '0.8rem', color: '#6b7280', marginTop: '0.3rem' }}>
+                                {traits?.[0] ? TRAITS[traits[0]]?.description : '性格をリセットすると最初の画面で選べます。'}
+                            </div>
+                        </div>
+                        <Button variant="secondary" onClick={handleTraitReset} style={{ marginTop: '0.8rem' }}>
+                            性格をリセット
+                        </Button>
                     </div>
                 </Card>
             </motion.div>

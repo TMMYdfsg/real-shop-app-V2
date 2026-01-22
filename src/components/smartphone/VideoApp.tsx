@@ -96,7 +96,7 @@ export default function VideoApp({ onClose }: { onClose: () => void }) {
             // Refresh list immediately
             setTimeout(() => refetch(), 500); // Small delay to ensure DB write
 
-            addToast('動画を投稿しました！', 'success');
+            addToast('動画を投稿しました！', 'info');
         } catch (e) {
             console.error(e);
             addToast('アップロードに失敗しました', 'error');

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { updateGameState } from '@/lib/dataStore';
+import { INITIAL_MONEY } from '@/lib/gameData';
 import { User, Role } from '@/types';
 import { prisma } from '@/lib/prisma';
 
@@ -37,7 +38,7 @@ export async function POST(request: Request) {
         });
 
         // 2. Prepare User objects
-        const startingMoney = setupSettings?.startingMoney || 2000;
+        const startingMoney = setupSettings?.startingMoney || INITIAL_MONEY;
 
         const newUsers: User[] = users.map((u: any, index: number) => {
             const role = u.role || (index === 0 ? 'banker' : 'player');
@@ -59,6 +60,8 @@ export async function POST(request: Request) {
                 popularity: 50,
                 happiness: 50,
                 rating: 3,
+                traits: [],
+                skills: {},
                 inventory: [],
                 stocks: {},
                 forbiddenStocks: {},
@@ -76,6 +79,7 @@ export async function POST(request: Request) {
                 smartphone: {
                     model: 'Android',
                     apps: ['shopping'],
+                    appOrder: ['shopping'],
                     broken: false,
                     battery: 100
                 }

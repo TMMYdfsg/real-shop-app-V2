@@ -342,6 +342,52 @@ a {
   font-size: var(--fs-2);
 }
 
+/* Past era overrides */
+:root[data-era='past'] .ui-button[data-variant='primary'] {
+  background: linear-gradient(135deg, #8b5e34, #b07a3f);
+  color: #fff7e6;
+  box-shadow: 0 6px 14px rgba(83, 54, 30, 0.35);
+}
+
+:root[data-era='past'] .ui-button[data-variant='secondary'] {
+  background: #fbf2d6;
+  color: #3b2f1f;
+  border: 1px solid #c9b48a;
+  box-shadow: 0 4px 10px rgba(83, 54, 30, 0.2);
+}
+
+:root[data-era='past'] .ui-button[data-variant='ghost'] {
+  color: #6b4e2e;
+}
+
+:root[data-era='past'] .ui-card {
+  background: linear-gradient(180deg, #fff7e3 0%, #f5e4be 100%);
+  border: 2px solid #c9b48a;
+  box-shadow: 0 12px 24px rgba(83, 54, 30, 0.2);
+}
+
+:root[data-era='past'] .ui-card__header {
+  border-bottom: 1px solid #d8c39a;
+}
+
+:root[data-era='past'] .ui-card__footer {
+  border-top: 1px solid #d8c39a;
+}
+
+:root[data-era='past'] .ui-input {
+  background: #fff4db;
+  border: 1px solid #c9b48a;
+  color: #3b2f1f;
+  box-shadow: inset 0 2px 4px rgba(83, 54, 30, 0.15);
+}
+
+:root[data-era='past'] .ui-chip {
+  background: #f7e6c0;
+  color: #3b2f1f;
+  border: 1px solid #c9b48a;
+  box-shadow: 0 4px 10px rgba(83, 54, 30, 0.18);
+}
+
 /* Input */
 .ui-input {
   width: 100%;
@@ -904,6 +950,11 @@ a {
 }
 
 @media (max-width: 960px) {
+  html,
+  body {
+    font-size: 10px;
+  }
+
   .shell {
     grid-template-columns: 1fr;
   }
@@ -918,8 +969,25 @@ a {
     transform: translateX(-100%);
     transition: transform 0.3s ease;
     display: block;
+    background: rgba(15, 23, 42, 0.95);
+    border-right: 1px solid rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(18px);
     /* sidebar is initially hidden in desktop media query, override it */
     box-shadow: 20px 0 50px rgba(0, 0, 0, 0.5);
+  }
+
+  .shell__sidebar .shell__nav-item {
+    color: #e2e8f0;
+  }
+
+  .shell__sidebar .shell__nav-item[data-active='true'] {
+    background: rgba(255, 255, 255, 0.12);
+    color: #ffffff;
+  }
+
+  .shell__sidebar .shell__nav-item:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: #ffffff;
   }
 
   .shell__sidebar--open {
@@ -929,7 +997,7 @@ a {
   .shell__sidebar-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.5);
+    background: rgba(0, 0, 0, 0.65);
     backdrop-filter: blur(4px);
     z-index: -1;
   }
@@ -943,11 +1011,11 @@ a {
   }
 
   .shell__main {
-    padding: var(--s-5) var(--s-4) calc(var(--s-7) + env(safe-area-inset-bottom));
+    padding: var(--s-5) var(--s-4) calc(var(--s-5) + env(safe-area-inset-bottom));
   }
 
   .shell__bottom-tabs {
-    display: flex;
+    display: none;
     gap: var(--s-2);
   }
 

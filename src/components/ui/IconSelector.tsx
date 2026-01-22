@@ -11,6 +11,7 @@ import { Button } from './Button';
 interface IconSelectorProps {
     selectedIcon?: string;
     onSelect: (iconName: string) => void;
+    customIcons?: string[];
 }
 
 const AVAILABLE_ICONS = [
@@ -21,7 +22,7 @@ const AVAILABLE_ICONS = [
     { name: 'default.png', label: 'デフォルト' },
 ];
 
-export const IconSelector: React.FC<IconSelectorProps> = ({ selectedIcon = 'default.png', onSelect }) => {
+export const IconSelector: React.FC<IconSelectorProps> = ({ selectedIcon = 'default.png', onSelect, customIcons = [] }) => {
     const [isDragging, setIsDragging] = useState(false);
     const [customPreview, setCustomPreview] = useState<string | null>(null);
 
@@ -131,6 +132,17 @@ export const IconSelector: React.FC<IconSelectorProps> = ({ selectedIcon = 'defa
         };
     }, [isCropping, handleCropConfirm]);
 
+    const customIconEntries = React.useMemo(() => {
+        const list = [...customIcons];
+        if (customPreview && !list.includes(customPreview)) {
+            list.unshift(customPreview);
+        }
+        if (isCustomIcon && selectedIcon && !list.includes(selectedIcon)) {
+            list.unshift(selectedIcon);
+        }
+        return list;
+    }, [customIcons, customPreview, isCustomIcon, selectedIcon]);
+
     return (
         <div className="space-y-4">
             {/* カスタムアップロードゾーン */}
@@ -173,51 +185,50 @@ export const IconSelector: React.FC<IconSelectorProps> = ({ selectedIcon = 'defa
             <div>
                 <p className="text-sm font-semibold text-gray-700 mb-2">アイコンを選択：</p>
                 <div className="grid grid-cols-3 md:grid-cols-5 gap-4">
-                    {/* カスタムアイコンのプレビュー（グリッド内） */}
-                    {(customPreview || isCustomIcon) && (
-                        <motion.div
-                            initial={{ opacity: 0, scale: 0.8 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            exit={{ opacity: 0, scale: 0.8 }}
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
-                            onClick={() => {
-                                if (customPreview) {
-                                    onSelect(customPreview);
-                                }
-                            }}
-                            className={`
-                                cursor-pointer rounded-lg p-3 text-center transition-all
-                                ${(isCustomIcon && !customPreview) || (customPreview && selectedIcon === customPreview)
-                                    ? 'bg-indigo-100 border-2 border-indigo-500 shadow-lg'
-                                    : 'bg-gray-50 border-2 border-gray-200 hover:border-gray-300'
-                                }
-                            `}
-                        >
-                            <div className="w-16 h-16 mx-auto mb-2 relative rounded-full overflow-hidden shrink-0 ring-2 ring-offset-2 ring-indigo-400">
-                                <Image
-                                    src={customPreview || selectedIcon || ''}
-                                    alt="カスタムアイコン"
-                                    width={64}
-                                    height={64}
-                                    unoptimized
-                                    className="w-full h-full object-cover"
-                                />
-                            </div>
-                            <div className="text-xs font-semibold text-gray-700">
-                                カスタム
-                            </div>
-                            {((isCustomIcon && !customPreview) || (customPreview && selectedIcon === customPreview)) && (
-                                <motion.div
-                                    initial={{ scale: 0 }}
-                                    animate={{ scale: 1 }}
-                                    className="mt-1 text-indigo-600 text-lg"
-                                >
-                                    ✓
-                                </motion.div>
-                            )}
-                        </motion.div>
-                    )}
+                    {customIconEntries.map((icon, index) => {
+                        const isSelected = selectedIcon === icon;
+                        return (
+                            <motion.div
+                                key={`custom-${index}`}
+                                initial={{ opacity: 0, scale: 0.8 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                exit={{ opacity: 0, scale: 0.8 }}
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                                onClick={() => onSelect(icon)}
+                                className={`
+                                    cursor-pointer rounded-lg p-3 text-center transition-all
+                                    ${isSelected
+                                        ? 'bg-indigo-100 border-2 border-indigo-500 shadow-lg'
+                                        : 'bg-gray-50 border-2 border-gray-200 hover:border-gray-300'
+                                    }
+                                `}
+                            >
+                                <div className="w-16 h-16 mx-auto mb-2 relative rounded-full overflow-hidden shrink-0 ring-2 ring-offset-2 ring-indigo-400">
+                                    <Image
+                                        src={icon}
+                                        alt={`カスタムアイコン${index + 1}`}
+                                        width={64}
+                                        height={64}
+                                        unoptimized
+                                        className="w-full h-full object-cover"
+                                    />
+                                </div>
+                                <div className="text-xs font-semibold text-gray-700">
+                                    カスタム{index + 1}
+                                </div>
+                                {isSelected && (
+                                    <motion.div
+                                        initial={{ scale: 0 }}
+                                        animate={{ scale: 1 }}
+                                        className="mt-1 text-indigo-600 text-lg"
+                                    >
+                                        ✓
+                                    </motion.div>
+                                )}
+                            </motion.div>
+                        );
+                    })}
 
                     {AVAILABLE_ICONS.map((icon) => {
                         const iconPath = `/icons/player/${icon.name}`;

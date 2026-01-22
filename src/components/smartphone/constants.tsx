@@ -2,7 +2,7 @@ import {
     PhoneIcon, MessageIcon, SNSIcon, VideoIcon, NewsIcon, MapIcon,
     BankIcon, JobIcon, StatusIcon, FamilyIcon, AuditIcon, CryptoIcon,
     QuestIcon, DarkWebIcon, ShoppingIcon, CameraIcon, SettingsIcon,
-    PoliticsIcon, VacationIcon
+    PoliticsIcon, VacationIcon, CapIcon
 } from './assets/Icons';
 
 export interface App {
@@ -18,6 +18,7 @@ export const APPS: App[] = [
     { id: 'map', name: '地図', icon: <MapIcon />, color: 'bg-emerald-600', description: '街マップを開く' },
     { id: 'bank', name: 'Olive', icon: <BankIcon />, color: 'bg-emerald-800', description: '銀行・資産管理' },
     { id: 'job_board', name: '求人', icon: <JobIcon />, color: 'bg-indigo-600', description: '求人情報を確認' },
+    { id: 'qualifications', name: '資格', icon: <CapIcon />, color: 'bg-violet-600', description: '資格・試験センター' },
     { id: 'life_status', name: '生活', icon: <StatusIcon />, color: 'bg-pink-500', description: 'ライフステータス' },
 
     // Row 2

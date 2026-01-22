@@ -32,14 +32,53 @@ export const TimeThemeWrapper: React.FC<{ children: React.ReactNode }> = ({ chil
         }
     }, [currentUser?.timeEra]);
 
+    useEffect(() => {
+        document.documentElement.setAttribute('data-era', era);
+        return () => {
+            document.documentElement.removeAttribute('data-era');
+        };
+    }, [era]);
+
     // 時代・時間に基づくテーマスタイル
     const themeStyles = useMemo(() => {
         if (era === 'past') return {
+            style: {
+                '--bg': '#f4e4bc',
+                '--surface': '#fbf2d6',
+                '--surface-2': '#f1e0b5',
+                '--surface-3': '#e7d1a1',
+                '--text': '#3b2f1f',
+                '--text-muted': '#6b5b3e',
+                '--border': '#d9c18f',
+                '--border-strong': '#bfa979',
+                '--primary': '#8b5e34',
+                '--primary-2': '#b07a3f',
+                '--primary-contrast': '#fff7e6',
+                '--shadow': '67 40 24',
+                '--glass-bg': 'rgba(244, 228, 188, 0.7)',
+                '--glass-border': 'rgba(139, 94, 52, 0.3)'
+            } as React.CSSProperties,
             background: '#f4e4bc',
             filter: 'sepia(0.4) contrast(1.1)',
             font: "'Courier New', Courier, monospace"
         };
         if (era === 'future') return {
+            style: {
+                '--bg': '#050510',
+                '--surface': '#0b1026',
+                '--surface-2': '#0f1b3d',
+                '--surface-3': '#14224a',
+                '--text': '#e0f7ff',
+                '--text-muted': '#7dd3fc',
+                '--border': '#1e3a5f',
+                '--border-strong': '#38bdf8',
+                '--primary': '#22d3ee',
+                '--primary-2': '#a855f7',
+                '--primary-contrast': '#020617',
+                '--shadow': '2 8 23',
+                '--glass-bg': 'rgba(8, 13, 33, 0.7)',
+                '--glass-border': 'rgba(56, 189, 248, 0.2)'
+            } as React.CSSProperties,
             background: '#050510',
             color: '#00f0ff',
             font: "'Orbitron', sans-serif"
@@ -96,7 +135,7 @@ export const TimeThemeWrapper: React.FC<{ children: React.ReactNode }> = ({ chil
     const currentStyle = (themeStyles as any).style || {};
 
     // テキスト色の決定（夜間は白、昼間は黒）
-    const textColor = !isDay ? '#f1f5f9' : (isSunset ? '#431407' : '#1e293b');
+    const textColor = (themeStyles as any).color || (!isDay ? '#f1f5f9' : (isSunset ? '#431407' : '#1e293b'));
 
     return (
         <div

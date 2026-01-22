@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { updateGameState } from '@/lib/dataStore';
+import { INITIAL_MONEY } from '@/lib/gameData';
 import { User, Role } from '@/types';
 // import { v4 as uuidv4 } from 'uuid'; // Removed
 
@@ -19,7 +20,7 @@ export async function POST(request: Request) {
         // リクエストから initialBalance が渡された場合はそれを使用 (初期設定画面からの値)
         const requestedBalance = body.initialBalance !== undefined ? Number(body.initialBalance) : undefined;
 
-        let initialBalance = role === 'banker' ? 1000000 : 100;
+        let initialBalance = role === 'banker' ? 1000000 : INITIAL_MONEY;
         if (requestedBalance !== undefined && !isNaN(requestedBalance)) {
             initialBalance = requestedBalance;
             // Banker usually gets infinite or very high, but if specific amount is requested (e.g. for players), use it.
@@ -31,7 +32,7 @@ export async function POST(request: Request) {
             }
         } else {
             // Fallback default
-            initialBalance = role === 'banker' ? 1000000 : 2000; // Default to 2000 if not specified
+            initialBalance = role === 'banker' ? 1000000 : INITIAL_MONEY;
         }
 
         if (isNaN(initialBalance) || !isFinite(initialBalance)) {
@@ -49,6 +50,9 @@ export async function POST(request: Request) {
             popularity: 50,
             happiness: 50,
             rating: 3, // 初期評価: 3つ星
+            traits: [],
+            skills: {},
+            needsTraitSelection: false,
             inventory: [],
             stocks: {},
             forbiddenStocks: {},
@@ -64,8 +68,12 @@ export async function POST(request: Request) {
             smartphone: {
                 model: 'Android',
                 apps: ['shopping'],
+                appOrder: ['shopping'],
                 broken: false,
-                battery: 100
+                battery: 100,
+                settings: {
+                    customIcons: []
+                }
             }
         };
 

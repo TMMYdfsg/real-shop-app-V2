@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo } from 'react';
 import { useGame } from '@/context/GameContext';
-import { JOBS, PART_TIME_JOBS } from '@/lib/gameData';
+import { JOBS, PART_TIME_JOBS, QUALIFICATIONS } from '@/lib/gameData';
 import { canApplyJob, calculateSalary } from '@/lib/career';
 import { Button } from '@/components/ui/Button';
 import { AppHeader } from '../AppHeader';
@@ -51,7 +51,36 @@ export const JobBoardApp: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || ''
     });
 
-    const jobs = activeTab === 'jobs' ? JOBS : PART_TIME_JOBS;
+    const qualificationsById = useMemo(() => {
+        return new Map(QUALIFICATIONS.map(q => [q.id, q.name]));
+    }, []);
+
+    const jobTypeLabels: Record<string, string> = {
+        public: '公共',
+        medical: '医療',
+        creative: 'クリエイティブ',
+        technical: '技術',
+        service: 'サービス',
+        business: 'ビジネス',
+        freelance: 'フリー',
+        criminal: '犯罪',
+        agriculture: '農業',
+        educational: '教育'
+    };
+
+    const jobs = useMemo(() => {
+        const source = activeTab === 'jobs' ? JOBS : PART_TIME_JOBS;
+        const typeOrder = ['business', 'technical', 'medical', 'public', 'creative', 'service', 'agriculture', 'educational', 'freelance', 'criminal'];
+        return [...source].sort((a, b) => {
+            const typeIndexA = typeOrder.indexOf(a.type);
+            const typeIndexB = typeOrder.indexOf(b.type);
+            if (typeIndexA !== typeIndexB) return typeIndexA - typeIndexB;
+            if ('salary' in a && 'salary' in b) return (b.salary || 0) - (a.salary || 0);
+            if ('hourlyWage' in a && 'hourlyWage' in b) return (b.hourlyWage || 0) - (a.hourlyWage || 0);
+            return a.name.localeCompare(b.name, 'ja-JP');
+        });
+    }, [activeTab]);
+
     const selectedJob = jobs.find(j => j.id === selectedJobId);
 
     // Filter places that could offer jobs based on category
@@ -108,9 +137,12 @@ export const JobBoardApp: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                         <span className={`px-3 py-1 rounded-full text-[10px] font-black ${activeTab === 'jobs' ? 'bg-blue-600 text-white' : 'bg-orange-500 text-white'}`}>
                             {activeTab === 'jobs' ? '正社員' : 'アルバイト'}
                         </span>
+                        <span className="px-3 py-1 rounded-full bg-slate-900 text-[10px] font-black text-white">
+                            {jobTypeLabels[selectedJob.type] || 'その他'}
+                        </span>
                         {selectedJob.requirements.qualifications?.map(q => (
                             <span key={q} className="px-3 py-1 rounded-full bg-slate-100 text-[10px] font-bold text-slate-600">
-                                {q}
+                                {qualificationsById.get(q) || q}
                             </span>
                         ))}
                     </div>
@@ -312,6 +344,18 @@ const TownworkTab = ({ label, active, onClick }: { label: string, active: boolea
 
 const JobListItem = ({ job, onClick, type }: { job: any, onClick: () => void, type: 'jobs' | 'part-time' }) => {
     const hourlyWage = job.hourlyWage || (job.salary / 160); // approximation if missing
+    const jobTypeLabels: Record<string, string> = {
+        public: '公共',
+        medical: '医療',
+        creative: 'クリエイティブ',
+        technical: '技術',
+        service: 'サービス',
+        business: 'ビジネス',
+        freelance: 'フリー',
+        criminal: '犯罪',
+        agriculture: '農業',
+        educational: '教育'
+    };
 
     return (
         <motion.div
@@ -330,6 +374,9 @@ const JobListItem = ({ job, onClick, type }: { job: any, onClick: () => void, ty
                         <span className="text-[10px] font-bold text-slate-500">店舗・事業所勤務</span>
                     </div>
                 </div>
+                <span className="px-2 py-0.5 rounded-full bg-slate-900 text-[9px] font-black text-white">
+                    {jobTypeLabels[job.type] || 'その他'}
+                </span>
             </div>
 
             <div className="flex gap-4 pl-2">

@@ -12,19 +12,20 @@ export interface ShellNavItem {
 
 interface AppShellProps {
   title: string;
+  titleIcon?: string;
   navItems: ShellNavItem[];
   children: React.ReactNode;
   actions?: React.ReactNode;
 }
 
-export const AppShell: React.FC<AppShellProps> = ({ title, navItems, children, actions }) => {
+export const AppShell: React.FC<AppShellProps> = ({ title, titleIcon, navItems, children, actions }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
 
   return (
     <div className="shell">
       <ShellSidebar title={title} navItems={navItems} isOpen={isMobileMenuOpen} onClose={() => setIsMobileMenuOpen(false)} />
       <div className="shell__content">
-        <ShellTopbar title={title} actions={actions} onMenuToggle={() => setIsMobileMenuOpen(!isMobileMenuOpen)} />
+        <ShellTopbar title={title} titleIcon={titleIcon} actions={actions} onMenuToggle={() => setIsMobileMenuOpen(!isMobileMenuOpen)} />
         <main className="shell__main">{children}</main>
       </div>
       <ShellBottomTabs navItems={navItems} />

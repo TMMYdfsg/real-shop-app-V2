@@ -347,7 +347,7 @@ export default function CityMap({
                 isOpen={isConstructionModalOpen}
                 onClose={() => setIsConstructionModalOpen(false)}
                 land={selectedLand || null}
-                onBuild={async (name, type, companyType) => {
+                onBuild={async (name, type, companyType, abilityId, statId) => {
                     // 建設処理
                     if (!selectedLand) return;
 
@@ -362,7 +362,9 @@ export default function CityMap({
                                     landId: selectedLand.id,
                                     buildingType: type,
                                     buildingName: name,
-                                    companyType: companyType
+                                    companyType: companyType,
+                                    companyAbilityId: abilityId,
+                                    companyStatId: statId
                                 })
                             })
                         });

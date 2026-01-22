@@ -1,4 +1,6 @@
 
+import { QUALIFICATIONS as MASTER_QUALIFICATIONS } from '@/lib/masterData';
+
 export interface QualificationGenre {
     id: string;
     name: string;
@@ -55,7 +57,8 @@ export const QUALIFICATION_GENRES: QualificationGenre[] = [
     { id: "lifestyle", name: "生活・サービス" },
     { id: "transport", name: "車両・航空・船舶" },
     { id: "public", name: "公務員・教育" },
-    { id: "aptitude", name: "適性検査" }
+    { id: "aptitude", name: "適性検査" },
+    { id: "official", name: "公式・国家資格" }
 ];
 
 // --- Qualification Names Definition (10 per genre) ---
@@ -144,6 +147,7 @@ function generateQualifications(): Qualification[] {
     const qualifications: Qualification[] = [];
 
     QUALIFICATION_GENRES.forEach(genre => {
+        if (genre.id === 'official') return;
         const names = QUAL_NAMES[genre.id] || Array.from({ length: 10 }, (_, i) => `${genre.name}検定 ${10 - i}級`);
         const topics = TOPICS[genre.id] || GENERIC_TOPICS;
 
@@ -206,6 +210,53 @@ function generateQualifications(): Qualification[] {
             });
         });
     });
+
+    const masterList = Object.entries(MASTER_QUALIFICATIONS).map(([id, data]) => {
+        const level = Math.min(10, Math.max(1, Math.ceil(data.cost / 10)));
+        const difficultyStars = Math.min(5, Math.ceil(level / 2));
+        const feeYen = data.cost * 10000;
+        const questions: KidExamQuestion[] = [];
+
+        for (let q = 0; q < 10; q += 1) {
+            const src = GENERIC_TOPICS[(q + level) % GENERIC_TOPICS.length];
+            const allChoices = [src.a, ...src.w];
+            const shuffledChoices = allChoices.map(value => ({ value, sort: Math.random() }))
+                .sort((a, b) => a.sort - b.sort)
+                .map(({ value }) => value);
+            const answerIndex = shuffledChoices.indexOf(src.a);
+            const wrongIndices = shuffledChoices.map((_, i) => i).filter(i => i !== answerIndex);
+
+            questions.push({
+                id: `official_${id}_q${q + 1}`,
+                type: 'mcq',
+                prompt: `Q${q + 1}. ${src.t}`,
+                choices: shuffledChoices.map(c => ({ label: c })),
+                answerIndex: answerIndex,
+                hints: [
+                    { type: 'text', text: src.h[0] || 'よく考えてみよう。' },
+                    { type: 'eliminate', removeChoiceIndexes: wrongIndices.slice(0, 2) },
+                    { type: 'reveal', answer: src.a, explanation: src.h[2] || 'これが正解です。' }
+                ]
+            });
+        }
+
+        return {
+            id: `q_${id}`,
+            genreId: 'official',
+            name: data.name,
+            difficultyStars,
+            feeYen,
+            kidExam: {
+                recommendedAgeMin: 12,
+                questionCount: 10,
+                timeLimitSec: 300,
+                questions
+            },
+            tags: ['official', 'license']
+        };
+    });
+
+    qualifications.push(...masterList);
 
     return qualifications;
 }

@@ -180,7 +180,7 @@ export default function RealEstatePage() {
         setIsConstructionModalOpen(true);
     };
 
-    const handleBuildSubmit = async (name: string, type: BuildingCategory, companyType?: CompanyType) => {
+    const handleBuildSubmit = async (name: string, type: BuildingCategory, companyType?: CompanyType, abilityId?: string, statId?: string) => {
         if (!selectedLandForBuild || !currentUser) return;
 
         try {
@@ -194,7 +194,9 @@ export default function RealEstatePage() {
                         landId: selectedLandForBuild.id,
                         buildingType: type,
                         buildingName: name,
-                        companyType: companyType
+                        companyType: companyType,
+                        companyAbilityId: abilityId,
+                        companyStatId: statId
                     })
                 })
             });

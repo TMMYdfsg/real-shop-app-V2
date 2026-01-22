@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useGame } from '@/context/GameContext';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import {
     ChevronRight,
     Volume2,
@@ -12,13 +12,13 @@ import {
     Wifi,
     Bluetooth,
     Antenna,
+    Clock,
     Lock,
     Info,
     User,
     ChevronLeft,
     Check
 } from 'lucide-react';
-import { AppHeader } from '../AppHeader';
 
 const SOUND_LIST = Array.from({ length: 21 }, (_, i) => ({
     id: `notification_${i + 1}`,
@@ -26,13 +26,63 @@ const SOUND_LIST = Array.from({ length: 21 }, (_, i) => ({
     label: `通知音 ${i + 1}`
 }));
 
+const AUTO_LOCK_OPTIONS = [
+    { label: 'なし', seconds: 0 },
+    { label: '30秒', seconds: 30 },
+    { label: '1分', seconds: 60 },
+    { label: '2分', seconds: 120 },
+    { label: '5分', seconds: 300 },
+    { label: '10分', seconds: 600 }
+];
+
+const TEXT_SIZE_OPTIONS = [
+    { label: '小', scale: 0.9 },
+    { label: '標準', scale: 1 },
+    { label: '大', scale: 1.1 },
+    { label: '特大', scale: 1.2 }
+];
+
+const THEME_OPTIONS = [
+    { label: 'ライト', value: 'light' },
+    { label: 'ダーク', value: 'dark' },
+    { label: '自動', value: 'system' }
+] as const;
+
 export const SettingsApp: React.FC<{ onClose: () => void }> = ({ onClose }) => {
-    const { currentUser } = useGame();
+    const { currentUser, sendRequest } = useGame();
     const [selectedSound, setSelectedSound] = useState('notification_1.mp3');
-    const [activeView, setActiveView] = useState<'main' | 'sounds' | 'detail'>('main');
+    const [activeView, setActiveView] = useState<'main' | 'sounds' | 'detail' | 'display' | 'autolock' | 'auth' | 'passcode' | 'wallpaper'>('main');
     const [detailTitle, setDetailTitle] = useState('');
     const [detailItems, setDetailItems] = useState<string[]>([]);
     const [isDarkMode, setIsDarkMode] = useState(false);
+    const [passcodeMode, setPasscodeMode] = useState<'set' | 'change'>('set');
+    const [passcodeStep, setPasscodeStep] = useState<'current' | 'new' | 'confirm'>('new');
+    const [currentPasscodeInput, setCurrentPasscodeInput] = useState('');
+    const [passcodeInput, setPasscodeInput] = useState('');
+    const [passcodeConfirmInput, setPasscodeConfirmInput] = useState('');
+    const [passcodeError, setPasscodeError] = useState('');
+    const [wallpaperError, setWallpaperError] = useState('');
+    const [wallpaperUrl, setWallpaperUrl] = useState('');
+    const [galleryImages, setGalleryImages] = useState<string[]>([]);
+
+    const baseSmartphoneSettings = useMemo(() => ({
+        theme: 'system' as const,
+        autoLockSeconds: 60,
+        autoLockOnUpdate: false,
+        autoLockOnHome: true,
+        textScale: 1,
+        trueTone: true,
+        passcode: '',
+        biometricEnabled: false,
+        lockScreenImage: ''
+    }), []);
+
+    const resolvedSmartphoneSettings = useMemo(() => ({
+        ...baseSmartphoneSettings,
+        ...(currentUser?.smartphone?.settings || {})
+    }), [baseSmartphoneSettings, currentUser?.smartphone?.settings]);
+
+    const [smartphoneSettings, setSmartphoneSettings] = useState(resolvedSmartphoneSettings);
 
     useEffect(() => {
         const saved = localStorage.getItem('notification_sound');
@@ -41,6 +91,25 @@ export const SettingsApp: React.FC<{ onClose: () => void }> = ({ onClose }) => {
         const dark = localStorage.getItem('dark_mode') === 'true';
         setIsDarkMode(dark);
     }, []);
+
+    useEffect(() => {
+        setSmartphoneSettings(resolvedSmartphoneSettings);
+    }, [resolvedSmartphoneSettings]);
+
+    useEffect(() => {
+        if (!currentUser?.id) return;
+        const storageKey = `smartphone_gallery_${currentUser.id}`;
+        const saved = localStorage.getItem(storageKey);
+        if (saved) {
+            try {
+                setGalleryImages(JSON.parse(saved));
+            } catch {
+                setGalleryImages([]);
+            }
+        } else {
+            setGalleryImages([]);
+        }
+    }, [currentUser?.id]);
 
     const handlePlayPreview = (filename: string) => {
         const audio = new Audio(`/sounds/${filename}`);
@@ -59,6 +128,56 @@ export const SettingsApp: React.FC<{ onClose: () => void }> = ({ onClose }) => {
         setIsDarkMode(newVal);
         localStorage.setItem('dark_mode', String(newVal));
     };
+
+    const saveSmartphoneSettings = async (next: typeof smartphoneSettings) => {
+        setSmartphoneSettings(next);
+        try {
+            await sendRequest('update_profile', 0, { smartphone: { settings: next } });
+        } catch (e) {
+            console.error('Failed to save smartphone settings', e);
+        }
+    };
+
+    const updateSmartphoneSetting = async (patch: Partial<typeof smartphoneSettings>) => {
+        const next = { ...smartphoneSettings, ...patch };
+        await saveSmartphoneSettings(next);
+    };
+
+    const handleWallpaperFile = (file?: File | null) => {
+        if (!file) return;
+        if (file.size > 1024 * 700) {
+            setWallpaperError('画像サイズは700KB以内にしてください');
+            return;
+        }
+        const reader = new FileReader();
+        reader.onload = () => {
+            const result = typeof reader.result === 'string' ? reader.result : '';
+            if (!result) {
+                setWallpaperError('画像の読み込みに失敗しました');
+                return;
+            }
+            setWallpaperError('');
+            updateSmartphoneSetting({ lockScreenImage: result });
+        };
+        reader.onerror = () => {
+            setWallpaperError('画像の読み込みに失敗しました');
+        };
+        reader.readAsDataURL(file);
+    };
+
+    const openPasscodeFlow = (mode: 'set' | 'change') => {
+        setPasscodeMode(mode);
+        setPasscodeStep(mode === 'change' ? 'current' : 'new');
+        setCurrentPasscodeInput('');
+        setPasscodeInput('');
+        setPasscodeConfirmInput('');
+        setPasscodeError('');
+        setActiveView('passcode');
+    };
+
+    const autoLockLabel = useMemo(() => {
+        return AUTO_LOCK_OPTIONS.find(opt => opt.seconds === smartphoneSettings.autoLockSeconds)?.label || 'なし';
+    }, [smartphoneSettings.autoLockSeconds]);
 
     const openDetail = (title: string, items: string[]) => {
         setDetailTitle(title);
@@ -90,6 +209,381 @@ export const SettingsApp: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                             </button>
                         ))}
                     </div>
+                </div>
+            </div>
+        );
+    }
+
+    if (activeView === 'display') {
+        const wallpaperStatus = smartphoneSettings.lockScreenImage ? 'カスタム' : '標準';
+        return (
+            <div className="h-full bg-[#f2f2f7] flex flex-col font-sans">
+                <div className="px-4 pt-14 pb-4 bg-white/80 backdrop-blur-xl border-b border-slate-200 sticky top-0 z-50 flex items-center">
+                    <button onClick={() => setActiveView('main')} className="flex items-center text-[#007aff] font-medium -ml-1">
+                        <ChevronLeft className="w-6 h-6" />
+                        <span>設定</span>
+                    </button>
+                    <h2 className="flex-1 text-center font-black pr-10">画面表示と明るさ</h2>
+                </div>
+
+                <div className="flex-1 overflow-y-auto no-scrollbar p-4 space-y-6">
+                    <div className="bg-white rounded-xl p-4 shadow-sm border border-slate-200 space-y-4">
+                        <div>
+                            <p className="text-xs font-black text-slate-500 mb-2">ライト/ダーク</p>
+                            <div className="flex gap-2">
+                                {THEME_OPTIONS.map(option => (
+                                    <button
+                                        key={option.value}
+                                        onClick={() => updateSmartphoneSetting({ theme: option.value })}
+                                        className={`flex-1 py-2 rounded-lg text-xs font-black ${smartphoneSettings.theme === option.value ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-600'}`}
+                                    >
+                                        {option.label}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        <div>
+                            <p className="text-xs font-black text-slate-500 mb-2">文字サイズ</p>
+                            <div className="grid grid-cols-4 gap-2">
+                                {TEXT_SIZE_OPTIONS.map(option => (
+                                    <button
+                                        key={option.label}
+                                        onClick={() => updateSmartphoneSetting({ textScale: option.scale })}
+                                        className={`py-2 rounded-lg text-xs font-black ${smartphoneSettings.textScale === option.scale ? 'bg-[#007aff] text-white' : 'bg-slate-100 text-slate-600'}`}
+                                    >
+                                        {option.label}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <p className="text-sm font-bold text-slate-900">True Tone</p>
+                                <p className="text-[10px] text-slate-400">色味を暖色寄りに調整します</p>
+                            </div>
+                            <button
+                                onClick={() => updateSmartphoneSetting({ trueTone: !smartphoneSettings.trueTone })}
+                                className={`w-12 h-7 rounded-full transition-all relative p-1 ${smartphoneSettings.trueTone ? 'bg-green-500' : 'bg-slate-200'}`}
+                            >
+                                <motion.div
+                                    animate={{ x: smartphoneSettings.trueTone ? 20 : 0 }}
+                                    className="w-5 h-5 bg-white rounded-full shadow-sm"
+                                />
+                            </button>
+                        </div>
+                    </div>
+
+                    <button
+                        onClick={() => setActiveView('wallpaper')}
+                        className="w-full bg-white rounded-xl p-4 shadow-sm border border-slate-200 flex items-center justify-between"
+                    >
+                        <div>
+                            <p className="text-sm font-bold text-slate-900">ロック画面の壁紙</p>
+                            <p className="text-[10px] text-slate-400">現在: {wallpaperStatus}</p>
+                        </div>
+                        <ChevronRight className="w-4 h-4 text-slate-300" />
+                    </button>
+                </div>
+            </div>
+        );
+    }
+
+    if (activeView === 'autolock') {
+        return (
+            <div className="h-full bg-[#f2f2f7] flex flex-col font-sans">
+                <div className="px-4 pt-14 pb-4 bg-white/80 backdrop-blur-xl border-b border-slate-200 sticky top-0 z-50 flex items-center">
+                    <button onClick={() => setActiveView('main')} className="flex items-center text-[#007aff] font-medium -ml-1">
+                        <ChevronLeft className="w-6 h-6" />
+                        <span>設定</span>
+                    </button>
+                    <h2 className="flex-1 text-center font-black pr-10">自動ロック</h2>
+                </div>
+
+                <div className="flex-1 overflow-y-auto no-scrollbar p-4">
+                    <div className="bg-white rounded-xl overflow-hidden shadow-sm border border-slate-200">
+                        {AUTO_LOCK_OPTIONS.map((option, i) => (
+                            <button
+                                key={option.label}
+                                onClick={() => updateSmartphoneSetting({ autoLockSeconds: option.seconds })}
+                                className={`w-full flex items-center justify-between p-4 ${i !== 0 ? 'border-t border-slate-100' : ''} active:bg-slate-50 transition-colors`}
+                            >
+                                <span className="text-sm font-medium text-slate-900">{option.label}</span>
+                                {smartphoneSettings.autoLockSeconds === option.seconds && <Check className="w-4 h-4 text-[#007aff]" />}
+                            </button>
+                        ))}
+                    </div>
+
+                    <div className="bg-white rounded-xl p-4 shadow-sm border border-slate-200 mt-4 flex items-center justify-between">
+                        <div>
+                            <p className="text-sm font-bold text-slate-900">更新時に自動ロック</p>
+                            <p className="text-[10px] text-slate-400">データ更新が入ると即ロックします</p>
+                        </div>
+                        <button
+                            onClick={() => updateSmartphoneSetting({ autoLockOnUpdate: !smartphoneSettings.autoLockOnUpdate })}
+                            className={`w-12 h-7 rounded-full transition-all relative p-1 ${smartphoneSettings.autoLockOnUpdate ? 'bg-green-500' : 'bg-slate-200'}`}
+                        >
+                            <motion.div
+                                animate={{ x: smartphoneSettings.autoLockOnUpdate ? 20 : 0 }}
+                                className="w-5 h-5 bg-white rounded-full shadow-sm"
+                            />
+                        </button>
+                    </div>
+
+                    <div className="bg-white rounded-xl p-4 shadow-sm border border-slate-200 mt-4 flex items-center justify-between">
+                        <div>
+                            <p className="text-sm font-bold text-slate-900">ホーム復帰時に自動ロック</p>
+                            <p className="text-[10px] text-slate-400">ホーム画面に戻るとロックします</p>
+                        </div>
+                        <button
+                            onClick={() => updateSmartphoneSetting({ autoLockOnHome: !smartphoneSettings.autoLockOnHome })}
+                            className={`w-12 h-7 rounded-full transition-all relative p-1 ${smartphoneSettings.autoLockOnHome ? 'bg-green-500' : 'bg-slate-200'}`}
+                        >
+                            <motion.div
+                                animate={{ x: smartphoneSettings.autoLockOnHome ? 20 : 0 }}
+                                className="w-5 h-5 bg-white rounded-full shadow-sm"
+                            />
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    if (activeView === 'wallpaper') {
+        return (
+            <div className="h-full bg-[#f2f2f7] flex flex-col font-sans">
+                <div className="px-4 pt-14 pb-4 bg-white/80 backdrop-blur-xl border-b border-slate-200 sticky top-0 z-50 flex items-center">
+                    <button onClick={() => setActiveView('display')} className="flex items-center text-[#007aff] font-medium -ml-1">
+                        <ChevronLeft className="w-6 h-6" />
+                        <span>戻る</span>
+                    </button>
+                    <h2 className="flex-1 text-center font-black pr-10">ロック画面の壁紙</h2>
+                </div>
+
+                <div className="flex-1 overflow-y-auto no-scrollbar p-4 space-y-4">
+                    <div className="bg-white rounded-xl p-4 shadow-sm border border-slate-200 space-y-3">
+                        <div className="w-full aspect-[9/16] rounded-2xl overflow-hidden bg-slate-900 flex items-center justify-center text-white text-xs font-bold">
+                            {smartphoneSettings.lockScreenImage ? (
+                                <img
+                                    src={smartphoneSettings.lockScreenImage}
+                                    alt="lockscreen preview"
+                                    className="w-full h-full object-cover"
+                                />
+                            ) : (
+                                <span>標準壁紙</span>
+                            )}
+                        </div>
+
+                        {wallpaperError && (
+                            <p className="text-xs text-rose-500 font-bold">{wallpaperError}</p>
+                        )}
+
+                        <label className="block">
+                            <input
+                                type="file"
+                                accept="image/*"
+                                className="hidden"
+                                onChange={(e) => handleWallpaperFile(e.target.files?.[0])}
+                            />
+                            <span className="block w-full text-center px-4 py-2 rounded-xl bg-slate-900 text-white text-xs font-bold cursor-pointer">
+                                画像を選択
+                            </span>
+                        </label>
+
+                        <div className="space-y-2">
+                            <p className="text-[10px] font-bold text-slate-500">URLから設定</p>
+                            <input
+                                value={wallpaperUrl}
+                                onChange={(e) => setWallpaperUrl(e.target.value)}
+                                placeholder="https://..."
+                                className="w-full px-3 py-2 rounded-lg border border-slate-200 text-xs"
+                            />
+                            <button
+                                onClick={() => {
+                                    if (!wallpaperUrl.trim()) {
+                                        setWallpaperError('URLを入力してください');
+                                        return;
+                                    }
+                                    setWallpaperError('');
+                                    updateSmartphoneSetting({ lockScreenImage: wallpaperUrl.trim() });
+                                }}
+                                className="w-full text-center px-4 py-2 rounded-xl bg-slate-100 text-slate-700 text-xs font-bold"
+                            >
+                                URLを適用
+                            </button>
+                        </div>
+
+                        <button
+                            onClick={() => {
+                                setWallpaperError('');
+                                updateSmartphoneSetting({ lockScreenImage: '' });
+                            }}
+                            className="w-full text-center px-4 py-2 rounded-xl bg-slate-100 text-slate-600 text-xs font-bold"
+                        >
+                            標準に戻す
+                        </button>
+                    </div>
+
+                    <div className="bg-white rounded-xl p-4 shadow-sm border border-slate-200 space-y-3">
+                        <p className="text-xs font-black text-slate-600">ギャラリーから選択</p>
+                        {galleryImages.length === 0 ? (
+                            <p className="text-[10px] text-slate-400">カメラのギャラリーに画像がありません</p>
+                        ) : (
+                            <div className="grid grid-cols-3 gap-2">
+                                {galleryImages.map((src, index) => (
+                                    <button
+                                        key={`${src}-${index}`}
+                                        onClick={() => updateSmartphoneSetting({ lockScreenImage: src })}
+                                        className="relative w-full aspect-[9/12] rounded-lg overflow-hidden border border-slate-100"
+                                    >
+                                        <img src={src} alt="gallery" className="w-full h-full object-cover" />
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    if (activeView === 'auth') {
+        const hasPasscode = Boolean(smartphoneSettings.passcode);
+        return (
+            <div className="h-full bg-[#f2f2f7] flex flex-col font-sans">
+                <div className="px-4 pt-14 pb-4 bg-white/80 backdrop-blur-xl border-b border-slate-200 sticky top-0 z-50 flex items-center">
+                    <button onClick={() => setActiveView('main')} className="flex items-center text-[#007aff] font-medium -ml-1">
+                        <ChevronLeft className="w-6 h-6" />
+                        <span>設定</span>
+                    </button>
+                    <h2 className="flex-1 text-center font-black pr-10">Face ID/パスコード</h2>
+                </div>
+
+                <div className="flex-1 overflow-y-auto no-scrollbar p-4 space-y-6">
+                    <div className="bg-white rounded-xl overflow-hidden shadow-sm border border-slate-200">
+                        <button
+                            onClick={() => openPasscodeFlow(hasPasscode ? 'change' : 'set')}
+                            className="w-full flex items-center justify-between p-4 border-b border-slate-100"
+                        >
+                            <span className="text-sm font-medium text-slate-900">{hasPasscode ? 'パスコードを変更' : 'パスコードを設定'}</span>
+                            <ChevronRight className="w-4 h-4 text-slate-300" />
+                        </button>
+                        {hasPasscode && (
+                            <button
+                                onClick={() => updateSmartphoneSetting({ passcode: '', biometricEnabled: false })}
+                                className="w-full flex items-center justify-between p-4"
+                            >
+                                <span className="text-sm font-medium text-rose-500">パスコードをオフ</span>
+                            </button>
+                        )}
+                    </div>
+
+                    <div className="bg-white rounded-xl overflow-hidden shadow-sm border border-slate-200">
+                        <div className="w-full flex items-center justify-between p-4 border-b border-slate-100">
+                            <span className={`text-sm font-medium ${hasPasscode ? 'text-slate-900' : 'text-slate-300'}`}>Face ID</span>
+                            <button
+                                onClick={() => hasPasscode && updateSmartphoneSetting({ biometricEnabled: !smartphoneSettings.biometricEnabled })}
+                                className={`w-12 h-7 rounded-full transition-all relative p-1 ${smartphoneSettings.biometricEnabled && hasPasscode ? 'bg-green-500' : 'bg-slate-200'}`}
+                            >
+                                <motion.div
+                                    animate={{ x: smartphoneSettings.biometricEnabled && hasPasscode ? 20 : 0 }}
+                                    className="w-5 h-5 bg-white rounded-full shadow-sm"
+                                />
+                            </button>
+                        </div>
+                        <button
+                            onClick={() => hasPasscode && updateSmartphoneSetting({ biometricEnabled: true })}
+                            className={`w-full flex items-center justify-between p-4 ${hasPasscode ? '' : 'text-slate-300'}`}
+                        >
+                            <span className="text-sm font-medium">Face IDの再設定</span>
+                            <ChevronRight className="w-4 h-4 text-slate-300" />
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    if (activeView === 'passcode') {
+        const hasPasscode = Boolean(smartphoneSettings.passcode);
+        const title = passcodeMode === 'change' ? 'パスコード変更' : 'パスコード設定';
+        const instruction = passcodeStep === 'current'
+            ? '現在のパスコードを入力'
+            : passcodeStep === 'new'
+                ? '新しいパスコードを入力'
+                : '新しいパスコードを再入力';
+
+        const inputValue = passcodeStep === 'current'
+            ? currentPasscodeInput
+            : passcodeStep === 'new'
+                ? passcodeInput
+                : passcodeConfirmInput;
+
+        const setInputValue = (val: string) => {
+            const numeric = val.replace(/\D/g, '').slice(0, 4);
+            if (passcodeStep === 'current') setCurrentPasscodeInput(numeric);
+            if (passcodeStep === 'new') setPasscodeInput(numeric);
+            if (passcodeStep === 'confirm') setPasscodeConfirmInput(numeric);
+        };
+
+        const handleNext = async () => {
+            setPasscodeError('');
+            if (passcodeStep === 'current') {
+                if (currentPasscodeInput !== smartphoneSettings.passcode) {
+                    setPasscodeError('パスコードが一致しません');
+                    return;
+                }
+                setPasscodeStep('new');
+                return;
+            }
+            if (passcodeStep === 'new') {
+                if (passcodeInput.length < 4) {
+                    setPasscodeError('4桁の数字を入力してください');
+                    return;
+                }
+                setPasscodeStep('confirm');
+                return;
+            }
+            if (passcodeStep === 'confirm') {
+                if (passcodeConfirmInput !== passcodeInput) {
+                    setPasscodeError('パスコードが一致しません');
+                    return;
+                }
+                await updateSmartphoneSetting({ passcode: passcodeInput, biometricEnabled: hasPasscode ? smartphoneSettings.biometricEnabled : false });
+                setActiveView('auth');
+            }
+        };
+
+        return (
+            <div className="h-full bg-[#f2f2f7] flex flex-col font-sans">
+                <div className="px-4 pt-14 pb-4 bg-white/80 backdrop-blur-xl border-b border-slate-200 sticky top-0 z-50 flex items-center">
+                    <button onClick={() => setActiveView('auth')} className="flex items-center text-[#007aff] font-medium -ml-1">
+                        <ChevronLeft className="w-6 h-6" />
+                        <span>戻る</span>
+                    </button>
+                    <h2 className="flex-1 text-center font-black pr-10">{title}</h2>
+                </div>
+
+                <div className="flex-1 flex flex-col items-center justify-center px-8 text-center">
+                    <p className="text-sm font-bold text-slate-700 mb-4">{instruction}</p>
+                    <input
+                        value={inputValue}
+                        onChange={(e) => setInputValue(e.target.value)}
+                        inputMode="numeric"
+                        type="password"
+                        maxLength={4}
+                        className="text-center text-2xl tracking-[0.3em] px-6 py-3 rounded-xl bg-white shadow-sm border border-slate-200 outline-none w-48"
+                    />
+                    {passcodeError && <p className="text-xs text-rose-500 mt-3 font-bold">{passcodeError}</p>}
+                    <button
+                        onClick={handleNext}
+                        className={`mt-6 px-6 py-2 rounded-full text-sm font-black ${inputValue.length === 4 ? 'bg-[#007aff] text-white' : 'bg-slate-200 text-slate-400'}`}
+                        disabled={inputValue.length < 4}
+                    >
+                        {passcodeStep === 'confirm' ? '保存' : '次へ'}
+                    </button>
                 </div>
             </div>
         );
@@ -184,9 +678,10 @@ export const SettingsApp: React.FC<{ onClose: () => void }> = ({ onClose }) => {
 
                 {/* System */}
                 <div className="bg-white rounded-xl overflow-hidden shadow-sm border border-slate-200">
-                    <SettingItem icon={<Smartphone />} color="bg-slate-700" label="画面表示と明るさ" onClick={() => openDetail('画面表示と明るさ', ['ライト/ダーク', '自動ロック', '文字サイズ', 'True Tone'])} />
+                    <SettingItem icon={<Smartphone />} color="bg-slate-700" label="画面表示と明るさ" onClick={() => setActiveView('display')} />
+                    <SettingItem icon={<Clock />} color="bg-slate-500" label="自動ロック" value={autoLockLabel} onClick={() => setActiveView('autolock')} />
                     <SettingItem icon={<Bell />} color="bg-yellow-500" label="サウンド" onClick={() => setActiveView('sounds')} />
-                    <SettingItem icon={<Lock />} color="bg-emerald-600" label="Face ID/パスコード" onClick={() => openDetail('Face ID/パスコード', ['認証', 'パスコード変更', 'Face IDの再設定'])} />
+                    <SettingItem icon={<Lock />} color="bg-emerald-600" label="Face ID/パスコード" onClick={() => setActiveView('auth')} />
                     <SettingItem icon={<Info />} color="bg-purple-600" label="バッテリー" onClick={() => openDetail('バッテリー', ['バッテリーの状態', '低電力モード', '使用状況'])} />
                 </div>
 

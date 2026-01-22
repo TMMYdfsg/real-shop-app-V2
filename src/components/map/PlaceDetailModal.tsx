@@ -1,7 +1,10 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
-import { Place } from '@/types';
+import { Place, Qualification } from '@/types';
+import { useGame } from '@/context/GameContext';
+import { QUALIFICATIONS } from '@/lib/gameData';
+import { COMPANY_ABILITIES, COMPANY_STATS, COMPANY_ABILITY_QUAL_CATEGORIES, COMPANY_STAT_QUAL_CATEGORIES } from '@/lib/companyData';
 
 interface PlaceDetailModalProps {
     place: Place | null;
@@ -14,9 +17,59 @@ export const PlaceDetailModal: React.FC<PlaceDetailModalProps> = ({
     isOpen,
     onClose
 }) => {
+    const { currentUser } = useGame();
     if (!place) return null;
 
     const isConstruction = place.status === 'construction';
+    const abilityLabel = place.companyProfile
+        ? (COMPANY_ABILITIES.find((a) => a.id === place.companyProfile?.abilityId)?.name || place.companyProfile.abilityId)
+        : '';
+    const statLabel = place.companyProfile
+        ? (COMPANY_STATS.find((s) => s.id === place.companyProfile?.statId)?.name || place.companyProfile.statId)
+        : '';
+
+    type QualificationCategory = Qualification['category'];
+    const qualificationCategoryLabels: Record<QualificationCategory, string> = {
+        business: 'ビジネス',
+        creative: 'クリエイティブ',
+        driving: '運転',
+        food: 'フード',
+        hobby: '趣味',
+        language: '語学',
+        medical: '医療',
+        special: '専門'
+    };
+
+    const companyBonusSummary = useMemo(() => {
+        if (!place.companyProfile || currentUser?.id !== place.ownerId) return null;
+        const abilityBonus = COMPANY_ABILITIES.find((a) => a.id === place.companyProfile?.abilityId)?.salaryBonusPercent || 0;
+        const statBonus = COMPANY_STATS.find((s) => s.id === place.companyProfile?.statId)?.salaryBonusPercent || 0;
+        const qualificationBonus = (currentUser?.qualifications || []).reduce((sum, qualId) => {
+            const qual = QUALIFICATIONS.find((q) => q.id === qualId);
+            return sum + (qual?.effects?.salaryBonus || 0);
+        }, 0);
+        const abilityCategories = COMPANY_ABILITY_QUAL_CATEGORIES[place.companyProfile.abilityId] || [];
+        const statCategories = COMPANY_STAT_QUAL_CATEGORIES[place.companyProfile.statId] || [];
+        const matchedCategories = Array.from(new Set([...abilityCategories, ...statCategories]));
+        const matchedQualifications = (currentUser?.qualifications || [])
+            .map((qualId) => QUALIFICATIONS.find((q) => q.id === qualId))
+            .filter((qual): qual is Qualification => Boolean(qual))
+            .filter((qual) => matchedCategories.includes(qual.category));
+        const synergyBonus = Math.min(12, matchedQualifications.length * 2);
+        const totalBonus = abilityBonus + statBonus + qualificationBonus + synergyBonus;
+        const estimatedSalary = Math.floor((place.companyProfile.baseSalary || 180000) * (1 + totalBonus / 100));
+
+        return {
+            abilityBonus,
+            statBonus,
+            qualificationBonus,
+            synergyBonus,
+            totalBonus,
+            estimatedSalary,
+            matchedCategories,
+            matchedQualifications
+        };
+    }, [place.companyProfile, place.ownerId, currentUser?.id, currentUser?.qualifications]);
 
     return (
         <Modal isOpen={isOpen} onClose={onClose} title="施設詳細">
@@ -69,6 +122,59 @@ export const PlaceDetailModal: React.FC<PlaceDetailModalProps> = ({
                                 <div className="font-bold text-indigo-800">¥{place.stats.profit.toLocaleString()}</div>
                             </div>
                         </div>
+                    </div>
+                )}
+
+                {place.buildingCategory === 'company' && place.companyProfile && (
+                    <div className="space-y-2">
+                        <h3 className="font-bold text-gray-700">会社プロファイル</h3>
+                        <div className="grid grid-cols-2 gap-2 text-sm">
+                            <div className="p-2 border rounded">
+                                <div className="text-gray-500">特殊能力</div>
+                                <div className="font-bold text-indigo-700">{abilityLabel}</div>
+                            </div>
+                            <div className="p-2 border rounded">
+                                <div className="text-gray-500">ステータス</div>
+                                <div className="font-bold text-emerald-700">{statLabel}</div>
+                            </div>
+                            <div className="p-2 border rounded col-span-2">
+                                <div className="text-gray-500">基準給与</div>
+                                <div className="font-bold text-gray-800">¥{place.companyProfile.baseSalary.toLocaleString()}</div>
+                            </div>
+                        </div>
+                        {companyBonusSummary && (
+                            <div className="mt-3 rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs">
+                                <div className="font-bold text-amber-900 mb-2">資格連動ボーナス</div>
+                                <div className="grid grid-cols-2 gap-2">
+                                    <div className="flex items-center justify-between bg-white/70 p-2 rounded-lg">
+                                        <span className="text-amber-800">能力+ステ</span>
+                                        <span className="font-bold text-amber-900">+{companyBonusSummary.abilityBonus + companyBonusSummary.statBonus}%</span>
+                                    </div>
+                                    <div className="flex items-center justify-between bg-white/70 p-2 rounded-lg">
+                                        <span className="text-amber-800">資格(共通)</span>
+                                        <span className="font-bold text-amber-900">+{companyBonusSummary.qualificationBonus}%</span>
+                                    </div>
+                                    <div className="flex items-center justify-between bg-white/70 p-2 rounded-lg">
+                                        <span className="text-amber-800">資格シナジー</span>
+                                        <span className="font-bold text-amber-900">+{companyBonusSummary.synergyBonus}%</span>
+                                    </div>
+                                    <div className="flex items-center justify-between bg-amber-200/80 p-2 rounded-lg">
+                                        <span className="text-amber-900">見込み給与</span>
+                                        <span className="font-bold text-amber-900">¥{companyBonusSummary.estimatedSalary.toLocaleString()}</span>
+                                    </div>
+                                </div>
+                                <div className="mt-2 text-[11px] text-amber-800">
+                                    対象カテゴリ: {companyBonusSummary.matchedCategories.length
+                                        ? companyBonusSummary.matchedCategories.map((category) => qualificationCategoryLabels[category]).join(' / ')
+                                        : 'なし'}
+                                </div>
+                                {companyBonusSummary.matchedQualifications.length > 0 && (
+                                    <div className="mt-1 text-[11px] text-amber-900">
+                                        適用資格: {companyBonusSummary.matchedQualifications.map((qual) => qual.name).join(' / ')}
+                                    </div>
+                                )}
+                            </div>
+                        )}
                     </div>
                 )}
 

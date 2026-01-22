@@ -1,7 +1,7 @@
 import { NextResponse, NextRequest } from 'next/server';
 import { updateGameState } from '@/lib/dataStore';
 import { v4 as uuidv4 } from 'uuid';
-import { Request as GameRequest } from '@/types';
+import { Request as GameRequest, GameState } from '@/types';
 import crypto from 'crypto';
 import { z } from 'zod'; // Zod Import
 
@@ -12,6 +12,7 @@ import { eventManager } from '@/lib/eventManager';
 import { getGameState } from '@/lib/dataStore';
 import { calculateSalary } from '@/lib/career';
 import { JOBS, PART_TIME_JOBS } from '@/lib/gameData';
+import { COMPANY_BASE_SALARY } from '@/lib/companyData';
 
 // // export const dynamic = 'force-dynamic';
 
@@ -23,6 +24,26 @@ const ActionSchema = z.object({
     details: z.any().optional(), // Flexible for now, can be tightened later
     idempotencyKey: z.string().optional()
 });
+
+const STOCK_TICK_INTERVAL_MS = 10000;
+let lastStockTickAt = 0;
+
+const applyStockPriceTick = (state: GameState) => {
+    state.stocks.forEach((stock) => {
+        const changePercent = (Math.random() - 0.5) * stock.volatility * 2;
+        const change = Math.floor(stock.price * changePercent);
+        stock.previousPrice = stock.price;
+        stock.price += change;
+        if (stock.price < 1) stock.price = 1;
+        stock.price = Math.round(stock.price / 10) * 10;
+
+        if (!stock.priceHistory) stock.priceHistory = [];
+        stock.priceHistory.push(stock.price);
+        if (stock.priceHistory.length > 20) {
+            stock.priceHistory.shift();
+        }
+    });
+};
 
 export async function POST(request: NextRequest) {
     const safeParseDetails = (d: any) => {
@@ -73,6 +94,43 @@ export async function POST(request: NextRequest) {
             timestamp: Date.now(),
             idempotencyKey
         };
+
+        const timeGateState = await getGameState();
+        const timeGateUser = timeGateState.users.find(u => u.id === requesterId);
+        if (timeGateUser?.timeEra === 'past') {
+            const blockedActions = new Set([
+                'install_app',
+                'uninstall_app',
+                'post_sns',
+                'like_sns',
+                'upload_video',
+                'buy_stock',
+                'sell_stock',
+                'stock_tick',
+                'gamble_dice',
+                'gamble_blackjack',
+                'gamble_slot',
+                'gamble_horse'
+            ]);
+
+            if (blockedActions.has(type)) {
+                return NextResponse.json({ success: false, message: '1950年代では利用できません。' }, { status: 403 });
+            }
+        }
+
+        if (type === 'stock_tick') {
+            const now = Date.now();
+            if (now - lastStockTickAt < STOCK_TICK_INTERVAL_MS) {
+                return NextResponse.json({ success: true, skipped: true });
+            }
+
+            await updateGameState((state) => {
+                applyStockPriceTick(state);
+                return state;
+            });
+            lastStockTickAt = now;
+            return NextResponse.json({ success: true });
+        }
 
         if (type === 'apply_job') {
             const newJobName = details;
@@ -251,7 +309,7 @@ export async function POST(request: NextRequest) {
         }
 
         if (type === 'city_build_place') {
-            const { landId, buildingType, buildingName, companyType } = safeParseDetails(details);
+            const { landId, buildingType, buildingName, companyType, companyAbilityId, companyStatId } = safeParseDetails(details);
             let checkSuccess = false;
 
             await updateGameState((state) => {
@@ -272,13 +330,20 @@ export async function POST(request: NextRequest) {
 
                     // Place作成
                     const placeId = `plc_${uuidv4()}`;
+                    const normalizedCompanyType = companyType || 'start_up';
+                    const baseSalary = COMPANY_BASE_SALARY[normalizedCompanyType as keyof typeof COMPANY_BASE_SALARY] || 180000;
                     const newPlace: any = { // Use 'any' or correct Place type matching updated index.ts
                         id: placeId,
                         ownerId: user.id,
                         name: buildingName || 'New Building',
                         type: buildingType === 'house' ? 'residential' : (buildingType === 'shop' ? 'retail' : 'office'),
                         buildingCategory: buildingType,
-                        companyType: companyType,
+                        companyType: normalizedCompanyType,
+                        companyProfile: buildingType === 'company' ? {
+                            abilityId: companyAbilityId || 'automation',
+                            statId: companyStatId || 'management',
+                            baseSalary
+                        } : undefined,
                         location: { ...land.location, address: land.address, landId: land.id },
                         status: 'active',
                         level: 1,
@@ -290,6 +355,8 @@ export async function POST(request: NextRequest) {
 
                     if (!state.places) state.places = [];
                     state.places.push(newPlace);
+                    if (!user.ownedPlaces) user.ownedPlaces = [];
+                    if (!user.ownedPlaces.includes(placeId)) user.ownedPlaces.push(placeId);
 
                     // 土地情報更新
                     land.placeId = placeId;
@@ -666,19 +733,61 @@ export async function POST(request: NextRequest) {
             await updateGameState((state) => {
                 const user = state.users.find(u => u.id === requesterId);
                 if (user && details) {
-                    const { name, shopName, cardType, isInsured, propertyLevel, playerIcon, settings } = safeParseDetails(details);
+                    const { name, shopName, cardType, isInsured, propertyLevel, playerIcon, settings, smartphone, traits, skills, needsTraitSelection } = safeParseDetails(details);
                     if (name !== undefined) user.name = name;
                     if (shopName !== undefined) user.shopName = shopName;
                     if (cardType !== undefined) user.cardType = cardType;
                     if (isInsured !== undefined) user.isInsured = isInsured;
                     if (propertyLevel !== undefined) user.propertyLevel = propertyLevel;
                     if (playerIcon !== undefined) user.playerIcon = playerIcon;
+                    if (traits !== undefined) user.traits = Array.isArray(traits) ? traits : [];
+                    if (skills !== undefined && typeof skills === 'object') user.skills = skills;
+                    if (needsTraitSelection !== undefined) user.needsTraitSelection = !!needsTraitSelection;
                     if (settings !== undefined) {
                         user.settings = { ...user.settings, ...settings };
+                    }
+                    if (smartphone !== undefined) {
+                        const baseSmartphone = user.smartphone || {
+                            model: 'Android',
+                            apps: ['shopping'],
+                            appOrder: ['shopping'],
+                            broken: false,
+                            battery: 100,
+                            settings: { customIcons: [] }
+                        };
+                        user.smartphone = { ...baseSmartphone, ...smartphone };
+                        if (smartphone.settings) {
+                            user.smartphone.settings = {
+                                ...baseSmartphone.settings,
+                                ...smartphone.settings,
+                                customIcons: smartphone.settings.customIcons ?? baseSmartphone.settings?.customIcons ?? []
+                            };
+                        }
                     }
                 }
                 return state;
             });
+            return NextResponse.json({ success: true });
+        }
+
+        if (type === 'train_skill') {
+            const parsed = safeParseDetails(details);
+            const skillName = parsed?.skillName;
+            const score = Number(parsed?.score || 0);
+            if (!skillName) {
+                return NextResponse.json({ success: false, message: 'スキル名が必要です' }, { status: 400 });
+            }
+
+            await updateGameState((state) => {
+                const user = state.users.find(u => u.id === requesterId);
+                if (!user) return state;
+                if (!user.skills) user.skills = {};
+                const current = user.skills[skillName] || 0;
+                const gain = Math.max(1, Math.min(5, Math.floor(score / 20)));
+                user.skills[skillName] = current + gain;
+                return state;
+            });
+
             return NextResponse.json({ success: true });
         }
 
@@ -2948,6 +3057,7 @@ export async function POST(request: NextRequest) {
         // -----------------------------------------------------
         if (type === 'next_turn') {
             const { simulateTurn } = require('@/lib/simulation');
+            const { EVENT_TEMPLATES, PLAYER_EVENT_TEMPLATES, EVENT_SPAWN_RATES } = require('@/lib/eventData');
 
             await updateGameState((state) => {
                 // 1. Increment Turn
@@ -2955,6 +3065,50 @@ export async function POST(request: NextRequest) {
 
                 // 2. Run Simulation
                 const newState = simulateTurn(state);
+
+                if (!newState.activeEvents) newState.activeEvents = [];
+                if (!newState.news) newState.news = [];
+
+                if (Math.random() < EVENT_SPAWN_RATES.global) {
+                    const template = EVENT_TEMPLATES[Math.floor(Math.random() * EVENT_TEMPLATES.length)];
+                    const isDuplicate = newState.activeEvents.some((e) => e.type === template.type && !e.targetUserId);
+                    if (!isDuplicate) {
+                        newState.activeEvents.push({
+                            ...template,
+                            id: crypto.randomUUID(),
+                            startTime: Date.now()
+                        });
+                        newState.news.unshift({
+                            id: crypto.randomUUID(),
+                            type: 'global_event',
+                            message: `📢 グローバルイベント: ${template.name}`,
+                            timestamp: Date.now()
+                        });
+                    }
+                }
+
+                newState.users
+                    .filter((u) => u.role === 'player')
+                    .forEach((user) => {
+                        if (Math.random() >= EVENT_SPAWN_RATES.player) return;
+                        const template = PLAYER_EVENT_TEMPLATES[Math.floor(Math.random() * PLAYER_EVENT_TEMPLATES.length)];
+                        const existsForUser = newState.activeEvents.some(
+                            (e) => e.type === template.type && e.targetUserId === user.id
+                        );
+                        if (existsForUser) return;
+                        newState.activeEvents.push({
+                            ...template,
+                            id: crypto.randomUUID(),
+                            startTime: Date.now(),
+                            targetUserId: user.id
+                        });
+                        newState.news.unshift({
+                            id: crypto.randomUUID(),
+                            type: 'player_event',
+                            message: `🎯 ${user.name}にイベント: ${template.name}`,
+                            timestamp: Date.now()
+                        });
+                    });
 
                 // 3. Reset Timer (if needed by client logic, or client calls timer_reset separately)
                 // Let's reset interval helpers

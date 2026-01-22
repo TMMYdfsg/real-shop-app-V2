@@ -1,6 +1,7 @@
+'use client';
+
 import React from 'react';
 import { useGame } from '@/context/GameContext';
-import { Button } from '@/components/ui/Button';
 import { AppHeader } from '../AppHeader';
 
 interface AuditLogAppProps {

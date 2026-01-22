@@ -1,4 +1,22 @@
-import { Recipe, Ingredient, CollectionItem, FurnitureItem, Pet, Vehicle, Occupation, PartTimeJob } from '@/types';
+import { Recipe, Ingredient, CollectionItem, FurnitureItem, Pet, Vehicle, Occupation, PartTimeJob, Qualification, Stock } from '@/types';
+import {
+    INITIAL_MONEY as MASTER_INITIAL_MONEY,
+    JOBS as MASTER_JOBS,
+    QUALIFICATIONS as MASTER_QUALIFICATIONS,
+    TRAITS as MASTER_TRAITS,
+    SKILLS as MASTER_SKILLS,
+    COLLECTIBLES as MASTER_COLLECTIBLES,
+    RECIPES as MASTER_RECIPES,
+    GAME_EVENTS as MASTER_GAME_EVENTS,
+    FURNITURE as MASTER_FURNITURE,
+    CARD_REWARDS as MASTER_CARD_REWARDS,
+    PETS as MASTER_PETS,
+    FORBIDDEN_STOCKS as MASTER_FORBIDDEN_STOCKS,
+    FORBIDDEN_NEWS as MASTER_FORBIDDEN_NEWS,
+    STOCKS as MASTER_STOCKS,
+    NPCS as MASTER_NPCS,
+    NEWS_EVENTS as MASTER_NEWS_EVENTS
+} from '@/lib/masterData';
 
 export type { CollectionItem }; // Re-export for museum page
 
@@ -39,6 +57,157 @@ export const GACHA_ITEMS: GachaItem[] = [
 ];
 
 // ======================
+// Master Data Helpers
+// ======================
+const MASTER_JOB_ENTRIES = Object.entries(MASTER_JOBS);
+const MASTER_JOB_ID_MAP = new Map<string, string>();
+MASTER_JOB_ENTRIES.forEach(([name], index) => {
+    MASTER_JOB_ID_MAP.set(name, `job_master_${index + 1}`);
+});
+
+const resolveMasterJobType = (name: string, type: string): Occupation['type'] => {
+    if (type === '犯罪') return 'criminal';
+    if (type === '特殊') return 'technical';
+    if (name.includes('医') || name.includes('薬') || name.includes('救急')) return 'medical';
+    if (name.includes('警察') || name.includes('公務')) return 'public';
+    if (name.includes('教師') || name.includes('教員')) return 'educational';
+    if (name.includes('農')) return 'agriculture';
+    if (name.includes('投資') || name.includes('会計') || name.includes('銀行')) return 'business';
+    if (name.includes('芸') || name.includes('作家') || name.includes('漫画') || name.includes('アニメ') || name.includes('音楽')) return 'creative';
+    return 'service';
+};
+
+const resolveMasterJobSalary = (description: string, type: Occupation['type']): number => {
+    const turnMatch = description.match(/毎ターン(\d+)万円/);
+    if (turnMatch) return Number(turnMatch[1]) * 10000;
+
+    const base: Record<Occupation['type'], number> = {
+        public: 220000,
+        medical: 400000,
+        creative: 220000,
+        technical: 260000,
+        service: 180000,
+        business: 240000,
+        freelance: 200000,
+        criminal: 160000,
+        agriculture: 200000,
+        educational: 220000
+    };
+    return base[type] || 200000;
+};
+
+const resolveMasterJobRank = (type: Occupation['type']): number => {
+    const rankMap: Record<Occupation['type'], number> = {
+        public: 4,
+        medical: 8,
+        creative: 3,
+        technical: 5,
+        service: 2,
+        business: 4,
+        freelance: 3,
+        criminal: 3,
+        agriculture: 2,
+        educational: 4
+    };
+    return rankMap[type] || 2;
+};
+
+const resolveQualificationCategory = (id: string): Qualification['category'] => {
+    if (id.includes('driver') || id.includes('pilot')) return 'driving';
+    if (id.includes('medical') || id.includes('pharmacist') || id.includes('dentist') || id.includes('vet')) return 'medical';
+    if (id.includes('chef') || id.includes('food')) return 'food';
+    if (id.includes('language')) return 'language';
+    if (id.includes('law') || id.includes('accounting') || id.includes('security') || id.includes('engineer')) return 'business';
+    return 'special';
+};
+
+const resolveQualificationDifficulty = (cost: number): Qualification['difficulty'] => {
+    if (cost <= 20) return 1;
+    if (cost <= 40) return 2;
+    if (cost <= 60) return 3;
+    if (cost <= 80) return 4;
+    return 5;
+};
+
+const resolveCollectibleRarity = (name: string): CollectionItem['rarity'] => {
+    if (name.includes('伝説') || name.includes('幻') || name.includes('キング') || name.includes('時空')) return 'legendary';
+    if (name.includes('オオ') || name.includes('巨大') || name.includes('ホロ')) return 'epic';
+    if (name.includes('レア')) return 'rare';
+    return 'common';
+};
+
+const resolveCollectibleType = (category: string): CollectionItem['type'] => {
+    if (category === '昆虫') return 'insect';
+    if (category === '魚') return 'fish';
+    if (category === 'キラキラカード') return 'card';
+    if (category === '化石') return 'fossil';
+    return 'treasure';
+};
+
+const resolveFurnitureEmoji = (name: string): string => {
+    if (name.includes('ベッド')) return '🛏️';
+    if (name.includes('本棚')) return '📚';
+    if (name.includes('ゲーム')) return '🎮';
+    if (name.includes('ソファ')) return '🛋️';
+    if (name.includes('ランプ')) return '💡';
+    if (name.includes('テーブル')) return '🪵';
+    if (name.includes('チェア')) return '🪑';
+    if (name.includes('ピアノ')) return '🎹';
+    if (name.includes('カーテン')) return '🪟';
+    if (name.includes('テレビ')) return '📺';
+    if (name.includes('ミラー')) return '🪞';
+    if (name.includes('暖炉')) return '🔥';
+    return '🧸';
+};
+
+const resolvePetEmoji = (name: string): string => {
+    if (name.includes('いぬ')) return '🐶';
+    if (name.includes('ねこ')) return '🐱';
+    if (name.includes('うさぎ')) return '🐰';
+    if (name.includes('ハムスター')) return '🐹';
+    if (name.includes('フェレット')) return '🦫';
+    if (name.includes('オウム')) return '🦜';
+    if (name.includes('金魚')) return '🐟';
+    if (name.includes('カメ')) return '🐢';
+    if (name.includes('モルモット')) return '🐹';
+    if (name.includes('リス')) return '🐿️';
+    if (name.includes('ヘビ')) return '🐍';
+    if (name.includes('カエル')) return '🐸';
+    if (name.includes('ハリネズミ')) return '🦔';
+    if (name.includes('フクロウ')) return '🦉';
+    if (name.includes('シマリス')) return '🐿️';
+    if (name.includes('ミニブタ')) return '🐷';
+    if (name.includes('ポニー')) return '🐴';
+    if (name.includes('ネズミ')) return '🐭';
+    if (name.includes('ウーパールーパー')) return '🦎';
+    if (name.includes('イグアナ')) return '🦎';
+    return '🐾';
+};
+
+const resolveRecipeEmoji = (name: string): string => {
+    if (name.includes('おにぎり')) return '🍙';
+    if (name.includes('焼き魚')) return '🐟';
+    if (name.includes('タルト')) return '🥧';
+    if (name.includes('味噌汁')) return '🥣';
+    if (name.includes('カレー')) return '🍛';
+    if (name.includes('焼きそば')) return '🍜';
+    if (name.includes('卵焼き')) return '🥚';
+    if (name.includes('サラダ')) return '🥗';
+    if (name.includes('パンケーキ')) return '🥞';
+    if (name.includes('寿司')) return '🍣';
+    if (name.includes('唐揚げ')) return '🍗';
+    if (name.includes('団子')) return '🍡';
+    if (name.includes('スープ')) return '🥣';
+    if (name.includes('プリン')) return '🍮';
+    if (name.includes('焼き芋')) return '🍠';
+    if (name.includes('おでん')) return '🍢';
+    if (name.includes('ピザ')) return '🍕';
+    if (name.includes('餃子')) return '🥟';
+    if (name.includes('アイス')) return '🍨';
+    if (name.includes('チャーハン')) return '🍳';
+    return '🍽️';
+};
+
 // INGREDIENTS
 // ======================
 export const INGREDIENTS: Ingredient[] = [
@@ -50,11 +219,48 @@ export const INGREDIENTS: Ingredient[] = [
     { id: 'ing_flour', name: '小麦粉', emoji: '🌾', price: 60 },
     { id: 'ing_milk', name: '牛乳', emoji: '🥛', price: 80 },
     { id: 'ing_sugar', name: '砂糖', emoji: '🍬', price: 50 },
+    { id: 'ing_miso', name: '味噌', emoji: '🥣', price: 70 },
+    { id: 'ing_tofu', name: '豆腐', emoji: '🧊', price: 60 },
+    { id: 'ing_fruit', name: 'フルーツ', emoji: '🍓', price: 120 },
+    { id: 'ing_tomato', name: 'トマト', emoji: '🍅', price: 50 },
+    { id: 'ing_cheese', name: 'チーズ', emoji: '🧀', price: 90 },
+    { id: 'ing_chicken', name: '鶏肉', emoji: '🍗', price: 140 },
+    { id: 'ing_seasoning', name: '調味料', emoji: '🧂', price: 40 },
+    { id: 'ing_mochi', name: 'もち', emoji: '🍡', price: 80 },
+    { id: 'ing_sweet_potato', name: 'さつまいも', emoji: '🍠', price: 70 },
+    { id: 'ing_daikon', name: '大根', emoji: '🥕', price: 60 },
+    { id: 'ing_konnyaku', name: 'こんにゃく', emoji: '🧊', price: 40 },
 ];
 
 // ======================
 // RECIPES
 // ======================
+const INGREDIENT_NAME_TO_ID = new Map(INGREDIENTS.map((ingredient) => [ingredient.name, ingredient.id]));
+const MASTER_RECIPE_LIST: Recipe[] = Object.entries(MASTER_RECIPES).map(([name, recipe], index) => {
+    const ingredients: { [ingredientId: string]: number } = {};
+    Object.entries(recipe.ingredients).forEach(([ingredientName, amount]) => {
+        const id = INGREDIENT_NAME_TO_ID.get(ingredientName);
+        if (id) ingredients[id] = amount;
+    });
+
+    const effect = recipe.effectDescription;
+    const happinessBonus = effect.includes('大幅') ? 25 : effect.includes('大き') ? 20 : effect.includes('少し') ? 8 : 12;
+    const healthBonus = effect.includes('体力') ? 10 : effect.includes('健康') ? 8 : undefined;
+
+    return {
+        id: `recipe_master_${index + 1}`,
+        name,
+        emoji: resolveRecipeEmoji(name),
+        ingredients,
+        sellPrice: 300 + (Object.keys(ingredients).length * 100),
+        description: recipe.effectDescription,
+        effects: {
+            happinessBonus,
+            healthBonus
+        }
+    };
+});
+
 export const RECIPES: Recipe[] = [
     {
         id: 'recipe_tamagokake',
@@ -105,6 +311,7 @@ export const RECIPES: Recipe[] = [
             happinessBonus: 30
         }
     },
+    ...MASTER_RECIPE_LIST
 ];
 
 // ======================
@@ -116,6 +323,16 @@ export const COLLECTION_ITEMS: CollectionItem[] = [
     { id: 'col_fish', name: 'メダカ', emoji: '🐟', type: 'fish', rarity: 'common', description: '元気に泳ぐメダカ' },
     { id: 'col_shell', name: '貝殻', emoji: '🐚', type: 'fossil', rarity: 'rare', description: '海辺で拾った貝殻' },
     { id: 'col_diamond', name: 'ダイヤモンド', emoji: '💎', type: 'fossil', rarity: 'legendary', description: '激レア！輝くダイヤモンド' },
+    ...Object.entries(MASTER_COLLECTIBLES).flatMap(([category, items], categoryIndex) =>
+        items.map((name, index) => ({
+            id: `col_master_${categoryIndex + 1}_${index + 1}`,
+            name,
+            emoji: resolveCollectibleType(category) === 'fish' ? '🐟' : resolveCollectibleType(category) === 'card' ? '🎴' : resolveCollectibleType(category) === 'fossil' ? '🦴' : '🪲',
+            type: resolveCollectibleType(category),
+            rarity: resolveCollectibleRarity(name),
+            description: `${name}をコレクションに追加しました。`
+        }))
+    )
 ];
 
 // ======================
@@ -127,6 +344,14 @@ export const FURNITURE_CATALOG: FurnitureItem[] = [
     { id: 'fur_sofa', name: 'ソファ', emoji: '🛋️', price: 1500, description: 'くつろぎのひととき' },
     { id: 'fur_lamp', name: 'ランプ', emoji: '💡', price: 300, description: 'お部屋を明るく' },
     { id: 'fur_tv', name: 'テレビ', emoji: '📺', price: 2000, description: '映画やドラマを楽しもう' },
+    ...Object.entries(MASTER_FURNITURE).map(([name, item], index) => ({
+        id: `fur_master_${index + 1}`,
+        name,
+        emoji: resolveFurnitureEmoji(name),
+        price: item.price * 1000,
+        happinessBonus: item.happinessBoost,
+        description: 'インテリアアイテム'
+    }))
 ];
 
 // ======================
@@ -138,6 +363,14 @@ export const PET_CATALOG: Pet[] = [
     { id: 'pet_bird', name: 'インコ', emoji: '🦜', price: 1000, loyalty: 30, description: 'おしゃべりインコ' },
     { id: 'pet_rabbit', name: 'ウサギ', emoji: '🐰', price: 1500, loyalty: 40, description: 'ふわふわウサギ' },
     { id: 'pet_hamster', name: 'ハムスター', emoji: '🐹', price: 800, loyalty: 25, description: 'ちっちゃなハムスター' },
+    ...Object.entries(MASTER_PETS).map(([name, pet], index) => ({
+        id: `pet_master_${index + 1}`,
+        name,
+        emoji: resolvePetEmoji(name),
+        price: pet.price * 1000,
+        happinessBonus: pet.happinessBoost,
+        description: 'ペットとして飼える'
+    }))
 ];
 
 // ======================
@@ -299,7 +532,28 @@ export const COMMUTE_EVENTS: CommuteEventDefinition[] = [
 // ======================
 // QUALIFICATIONS (Phase 3)
 // ======================
-import { Qualification } from '@/types';
+
+const MASTER_QUALIFICATIONS_ARRAY: Qualification[] = Object.entries(MASTER_QUALIFICATIONS).map(([id, data], index) => {
+    const mappedId = `q_${id}`;
+    const jobUnlock = data.unlocks
+        .map((name) => MASTER_JOB_ID_MAP.get(name))
+        .filter((value): value is string => Boolean(value));
+    const salaryBonus = data.maintenance ? Math.min(15, data.maintenance * 2) : undefined;
+
+    return {
+        id: mappedId,
+        name: data.name,
+        category: resolveQualificationCategory(id),
+        difficulty: resolveQualificationDifficulty(data.cost),
+        examFee: data.cost * 10000,
+        description: `${data.name}を取得すると関連職に就けます。維持費: ${data.maintenance}`,
+        effects: {
+            jobUnlock: jobUnlock.length > 0 ? jobUnlock : undefined,
+            salaryBonus
+        },
+        minigameType: 'quiz'
+    };
+});
 
 export const QUALIFICATIONS: Qualification[] = [
     // Driving
@@ -388,13 +642,40 @@ export const QUALIFICATIONS: Qualification[] = [
         description: 'Webサイト制作の実務能力を証明する資格。',
         effects: { jobUnlock: ['job_web_designer'], salaryBonus: 10 },
         minigameType: 'typing'
-    }
+    },
+    ...MASTER_QUALIFICATIONS_ARRAY
 ];
 
 // ======================
 // JOBS (Phase 5)
 // ======================
-export const JOBS: Occupation[] = [
+const MASTER_JOB_ADDITIONS: Occupation[] = MASTER_JOB_ENTRIES.map(([name, job], index) => {
+    const type = resolveMasterJobType(name, job.type);
+    const description = job.description;
+    const salary = resolveMasterJobSalary(description, type);
+    const rank = resolveMasterJobRank(type);
+    const qualificationId = job.requiresQualification ? `q_${job.requiresQualification}` : undefined;
+
+    return {
+        id: MASTER_JOB_ID_MAP.get(name) || `job_master_${index + 1}`,
+        name,
+        type,
+        rank,
+        salary,
+        requirements: {
+            qualifications: qualificationId ? [qualificationId] : undefined
+        },
+        effects: {
+            stress: type === 'criminal' ? 25 : type === 'medical' ? 20 : 10,
+            health: type === 'medical' ? -5 : 0,
+            prestige: type === 'criminal' ? -5 : type === 'medical' ? 8 : 2
+        },
+        workTime: { start: 9, end: 18 },
+        description
+    };
+});
+
+const BASE_JOBS: Occupation[] = [
     // Special
     {
         id: 'job_debugger',
@@ -535,6 +816,11 @@ export const JOBS: Occupation[] = [
     }
 ];
 
+export const JOBS: Occupation[] = [
+    ...BASE_JOBS,
+    ...MASTER_JOB_ADDITIONS.filter((masterJob) => !BASE_JOBS.some((job) => job.name === masterJob.name))
+];
+
 // ======================
 // PART TIME JOBS (Phase 5)
 // ======================
@@ -593,6 +879,46 @@ export const PART_TIME_JOBS: PartTimeJob[] = [
         description: '自転車で料理を届ける仕事。体力が必要。'
     }
 ];
+
+// ======================
+// Master Data Exports
+// ======================
+export const INITIAL_MONEY = MASTER_INITIAL_MONEY;
+export const TRAITS = MASTER_TRAITS;
+export const SKILLS = MASTER_SKILLS;
+export const CARD_REWARDS = MASTER_CARD_REWARDS;
+export const GAME_EVENTS = MASTER_GAME_EVENTS;
+export const NPCS = MASTER_NPCS;
+export const NEWS_EVENTS = MASTER_NEWS_EVENTS;
+export const COLLECTIBLES = MASTER_COLLECTIBLES;
+export const FURNITURE = MASTER_FURNITURE;
+export const PETS = MASTER_PETS;
+
+export const STOCKS: Stock[] = MASTER_STOCKS.map((stock, index) => ({
+    id: `s_master_${index + 1}`,
+    name: stock.name,
+    price: stock.price,
+    previousPrice: stock.price,
+    volatility: stock.volatility,
+    isForbidden: false,
+    category: stock.category,
+    marketCap: stock.marketCap ?? undefined,
+    owner: stock.owner ?? undefined
+}));
+
+export const FORBIDDEN_STOCKS: Stock[] = MASTER_FORBIDDEN_STOCKS.map((stock, index) => ({
+    id: `f_master_${index + 1}`,
+    name: stock.name,
+    price: stock.price,
+    previousPrice: stock.price,
+    volatility: stock.volatility,
+    isForbidden: true,
+    category: stock.category,
+    marketCap: stock.marketCap ?? undefined,
+    owner: stock.owner ?? undefined
+}));
+
+export const FORBIDDEN_NEWS = MASTER_FORBIDDEN_NEWS;
 
 // ======================
 // MINI-GAME DATA

@@ -9,6 +9,9 @@ export interface Stock {
     priceHistory?: number[]; // Last 20 price points for charts
     volatility: number; // 変動幅
     isForbidden: boolean;
+    category?: string;
+    marketCap?: number;
+    owner?: string | null;
 }
 
 export interface Crypto {
@@ -176,6 +179,9 @@ export interface User {
     arrestCount?: number;
     stolenAmount?: number;
     fanCount?: number;
+    traits?: string[];
+    skills?: { [skillName: string]: number };
+    needsTraitSelection?: boolean;
 
     // Employment
     employmentStatus: 'employed' | 'unemployed' | 'retired';
@@ -390,6 +396,30 @@ export interface RouletteResult {
     text: string;
     timestamp: number;
     targetUserId?: string;
+    roulettePresetId?: string;
+    roulettePresetName?: string;
+}
+
+export interface RouletteSettings {
+    wheelFontSize: number;
+    resultFontSize: number;
+    spinDurationMs: number;
+    autoScroll: boolean;
+}
+
+export interface RouletteItem {
+    id: number;
+    text: string;
+    effect: string;
+    weight?: number;
+    color?: string;
+}
+
+export interface RoulettePreset {
+    id: string;
+    name: string;
+    items: RouletteItem[];
+    settings: RouletteSettings;
 }
 
 // Social Media & Video Types
@@ -433,9 +463,11 @@ export interface GameState {
     settings: GameSettings;
     news: (NewsItem | string)[]; // ニュースログ (文字列またはオブジェクト)
     roulette: {
-        items: { id: number; text: string; effect: string; weight?: number }[];
+        items: RouletteItem[];
         currentResult: RouletteResult | null;
     };
+    roulettePresets: RoulettePreset[];
+    rouletteActivePresetId?: string;
     season: 'spring' | 'summer' | 'autumn' | 'winter';
     products: Product[];
     activeNPCs: NPC[];
@@ -706,6 +738,20 @@ export type CompanyType =
     | 'white_company' | 'black_company'
     | 'sole_proprietorship' | 'corporation' | 'small_business' | 'global_enterprise';
 
+export type CompanyAbilityId =
+    | 'automation'
+    | 'talent_network'
+    | 'brand_engine'
+    | 'cost_optimizer'
+    | 'research_lab';
+
+export type CompanyStatId =
+    | 'management'
+    | 'sales'
+    | 'tech'
+    | 'finance'
+    | 'brand';
+
 
 
 export interface Place {
@@ -717,6 +763,11 @@ export interface Place {
     // New Building Properties
     buildingCategory?: BuildingCategory;
     companyType?: CompanyType;
+    companyProfile?: {
+        abilityId: CompanyAbilityId;
+        statId: CompanyStatId;
+        baseSalary: number;
+    };
 
     // 地理情報
     location: {
@@ -881,8 +932,25 @@ export interface FamilyMember {
 export interface SmartphoneState {
     model: string;
     apps: string[]; // Installed app IDs
+    appOrder?: string[];
     broken: boolean;
     battery: number;
+    isCharging?: boolean;
+    chargeStartedAt?: number;
+    settings?: SmartphoneSettings;
+}
+
+export interface SmartphoneSettings {
+    theme: 'light' | 'dark' | 'system';
+    autoLockSeconds: number; // 0 = never
+    autoLockOnUpdate?: boolean;
+    autoLockOnHome?: boolean;
+    textScale: number; // e.g. 0.9 - 1.2
+    trueTone: boolean;
+    passcode?: string;
+    biometricEnabled?: boolean;
+    lockScreenImage?: string;
+    customIcons?: string[];
 }
 
 // ==========================================

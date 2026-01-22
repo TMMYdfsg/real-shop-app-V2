@@ -4,6 +4,7 @@ import { GameState, User, Transaction } from '@/types';
 import crypto from 'crypto';
 import { generateLands, PREFECTURES } from '@/lib/cityData';
 import { eventManager } from '@/lib/eventManager';
+import { STOCKS as MASTER_STOCKS, FORBIDDEN_STOCKS as MASTER_FORBIDDEN_STOCKS, INITIAL_MONEY, NEWS_EVENTS as MASTER_NEWS_EVENTS, NPCS as MASTER_NPCS } from '@/lib/gameData';
 
 // // export const dynamic = 'force-dynamic';
 
@@ -401,11 +402,14 @@ export async function POST(req: NextRequest) {
             await updateGameState((state) => {
                 const items = state.roulette.items;
                 const randomItem = items[Math.floor(Math.random() * items.length)];
+                const activePreset = state.roulettePresets?.find(p => p.id === state.rouletteActivePresetId);
 
                 state.roulette.currentResult = {
                     text: randomItem.text,
                     timestamp: Date.now(),
-                    targetUserId: targetUserId || undefined // Save target ID
+                    targetUserId: targetUserId || undefined,
+                    roulettePresetId: activePreset?.id,
+                    roulettePresetName: activePreset?.name
                 };
 
                 if (targetUserId) {
@@ -472,10 +476,22 @@ export async function POST(req: NextRequest) {
         // ルーレット設定変更
         // -----------------------------------------------------
         if (action === 'update_roulette_config') {
-            const { items } = body; // items: { id, text, effect }[]
+            const { items, presets, activePresetId } = body;
             await updateGameState((state) => {
+                if (presets && Array.isArray(presets)) {
+                    state.roulettePresets = presets;
+                }
+                if (activePresetId) {
+                    state.rouletteActivePresetId = activePresetId;
+                }
+
                 if (items && Array.isArray(items)) {
                     state.roulette.items = items;
+                } else if (state.roulettePresets?.length) {
+                    const activePreset = state.roulettePresets.find(p => p.id === state.rouletteActivePresetId) || state.roulettePresets[0];
+                    if (activePreset) {
+                        state.roulette.items = activePreset.items;
+                    }
                 }
                 return state;
             });
@@ -878,7 +894,7 @@ export async function POST(req: NextRequest) {
                 // 1. Reset Users (Keep ID, Name, Role)
                 state.users.forEach(u => {
                     if (u.role === 'player') {
-                        u.balance = 2000; // 初期所持金
+                        u.balance = u.role === 'banker' ? 1000000 : INITIAL_MONEY; // 初期所持金
                         u.deposit = 0;
                         u.debt = 0;
                         u.popularity = 0;
@@ -906,20 +922,31 @@ export async function POST(req: NextRequest) {
                 });
 
                 // 2. Reset Stocks
-                state.stocks = [
-                    { id: 's1', name: 'テック・フューチャー', price: 1000, previousPrice: 1000, volatility: 0.1, isForbidden: false },
-                    { id: 's2', name: 'ハッピー・フーズ', price: 500, previousPrice: 500, volatility: 0.05, isForbidden: false },
-                    { id: 's3', name: 'ミラクル建設', price: 800, previousPrice: 800, volatility: 0.08, isForbidden: false },
-                    // Forbidden Stocks
-                    { id: 'f1', name: 'シャドウ・コーポレーション', price: 5000, previousPrice: 5000, volatility: 0.5, isForbidden: true },
-                    { id: 'f2', name: 'ブラックバイオ研究所', price: 2000, previousPrice: 2000, volatility: 0.8, isForbidden: true },
-                    { id: 'f3', name: 'ネオカルト証券', price: 10000, previousPrice: 10000, volatility: 1.0, isForbidden: true },
-                ];
+                state.stocks = [...MASTER_STOCKS, ...MASTER_FORBIDDEN_STOCKS];
 
                 // 3. Reset Game Cycle
                 state.turn = 1;
                 state.isDay = true;
                 state.gameId = crypto.randomUUID(); // Force refresh context
+                state.news = MASTER_NEWS_EVENTS.map((event, index) => ({
+                    id: `news_master_${index + 1}`,
+                    message: `${event.headline} ${event.description}`,
+                    timestamp: Date.now()
+                }));
+                state.npcTemplates = (state.npcTemplates || []).filter(t => t.id === 'guest' || t.id === 'thief' || t.id === 'scammer' || t.id === 'rich_guest');
+                state.npcTemplates = [
+                    ...(state.npcTemplates || []),
+                    ...Object.entries(MASTER_NPCS).map(([name, npc], index) => ({
+                        id: `npc_master_${index + 1}`,
+                        name,
+                        description: npc.description,
+                        duration: 45 * 1000,
+                        spawnRate: 8,
+                        actionType: 'buy',
+                        minPayment: 300,
+                        maxPayment: 2000
+                    }))
+                ];
 
                 return state;
             });

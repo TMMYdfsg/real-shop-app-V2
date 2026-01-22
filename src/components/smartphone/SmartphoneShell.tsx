@@ -4,9 +4,12 @@ import { getVibrationAdapter, VibrationPatterns } from '@/lib/vibration';
 interface SmartphoneShellProps {
     children: React.ReactNode;
     onHome?: () => void;
+    screenStyle?: React.CSSProperties;
+    screenClassName?: string;
+    toneOverlay?: React.ReactNode;
 }
 
-export const SmartphoneShell = ({ children, onHome }: SmartphoneShellProps) => {
+export const SmartphoneShell = ({ children, onHome, screenStyle, screenClassName, toneOverlay }: SmartphoneShellProps) => {
     const handleHomeClick = () => {
         const vibration = getVibrationAdapter();
         vibration.vibrate(VibrationPatterns.tap);
@@ -15,14 +18,26 @@ export const SmartphoneShell = ({ children, onHome }: SmartphoneShellProps) => {
 
     return (
         <div
-            className="relative w-[380px] h-[820px] rounded-[3.5rem] bg-[#121212] shadow-[0_30px_60px_-10px_rgba(0,0,0,0.6)] p-[14px] shrink-0 self-center border-[6px] border-[#333] ring-1 ring-white/10"
+            className="relative w-[340px] h-[740px] max-[480px]:w-[300px] max-[480px]:h-[640px] rounded-[3.5rem] bg-[#121212] shadow-[0_30px_60px_-10px_rgba(0,0,0,0.6)] p-[14px] shrink-0 self-center border-[6px] border-[#333] ring-1 ring-white/10"
         >
             {/* 1. Screen Container (The strict clipping boundary) */}
-            <div className="relative w-full h-full bg-black rounded-[2.8rem] overflow-hidden z-0 shadow-inner ring-1 ring-white/5" style={{ transform: 'translateZ(0)' }}>
+            {(() => {
+                const mergedStyle: React.CSSProperties = { ...screenStyle };
+                if (screenStyle?.transform) {
+                    mergedStyle.transform = `translateZ(0) ${screenStyle.transform}`;
+                } else {
+                    mergedStyle.transform = 'translateZ(0)';
+                }
+                return (
+                    <div
+                        className={`relative w-full h-full bg-black rounded-[2.8rem] overflow-hidden z-0 shadow-inner ring-1 ring-white/5 ${screenClassName || ''}`}
+                        style={mergedStyle}
+                    >
                 {/* Back button portal slot */}
                 <div id="smartphone-back-slot" className="absolute bottom-12 left-0 right-0 z-40 flex justify-center pointer-events-none" />
                 {/* Content */}
                 {children}
+                {toneOverlay}
 
                 {/* Home Indicator (Inside screen) */}
                 <div
@@ -31,7 +46,9 @@ export const SmartphoneShell = ({ children, onHome }: SmartphoneShellProps) => {
                 >
                     <div className="w-32 h-1.5 bg-white/40 rounded-full backdrop-blur-md transition-all active:scale-x-110 active:bg-white/60" />
                 </div>
-            </div>
+                    </div>
+                );
+            })()}
 
             {/* 2. Bezel & Hardware Details (Overlay) */}
             {/* Dynamic Island / Notch */}

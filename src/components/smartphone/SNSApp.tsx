@@ -21,8 +21,9 @@ import { PlayerIcon } from '@/components/ui/PlayerIcon';
 export default function SNSApp({ onClose }: { onClose: () => void }) {
     const { currentUser, sendRequest } = useGame();
     const [compose, setCompose] = useState('');
+    const [isPosting, setIsPosting] = useState(false);
 
-    const { data: posts } = useRealtime<SNSPost[]>('/api/sns/posts', { interval: 3000 });
+    const { data: posts, refetch } = useRealtime<SNSPost[]>('/api/sns/posts', { interval: 3000 });
 
     const sortedPosts = useMemo(() => {
         return (posts || []).slice().sort((a, b) => b.timestamp - a.timestamp);
@@ -31,6 +32,18 @@ export default function SNSApp({ onClose }: { onClose: () => void }) {
     const handleLike = async (postId: string) => {
         if (!currentUser) return;
         await sendRequest('like_sns', 0, { postId });
+    };
+
+    const handlePost = async () => {
+        if (!currentUser || !compose.trim()) return;
+        setIsPosting(true);
+        try {
+            await sendRequest('post_sns', 0, { content: compose.trim() });
+            setCompose('');
+            setTimeout(() => refetch(), 200);
+        } finally {
+            setIsPosting(false);
+        }
     };
 
     const timeAgo = (timestamp: number) => {
@@ -82,10 +95,11 @@ export default function SNSApp({ onClose }: { onClose: () => void }) {
                                 </button>
                             </div>
                             <button
-                                disabled={!compose.trim()}
-                                className={`px-4 py-1.5 rounded-full text-xs font-black ${compose.trim() ? 'bg-[#1d9bf0] text-white' : 'bg-slate-100 text-slate-400'}`}
+                                disabled={!compose.trim() || isPosting}
+                                onClick={handlePost}
+                                className={`px-4 py-1.5 rounded-full text-xs font-black ${compose.trim() && !isPosting ? 'bg-[#1d9bf0] text-white' : 'bg-slate-100 text-slate-400'}`}
                             >
-                                ポスト
+                                {isPosting ? '投稿中...' : 'ポスト'}
                             </button>
                         </div>
                     </div>

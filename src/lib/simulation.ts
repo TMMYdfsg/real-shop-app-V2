@@ -1,5 +1,7 @@
 import { GameState, User, EconomyState, EnvironmentState, GameEvent } from '@/types';
 import crypto from 'crypto';
+import { QUALIFICATIONS } from '@/lib/gameData';
+import { COMPANY_ABILITIES, COMPANY_STATS, COMPANY_ABILITY_QUAL_CATEGORIES, COMPANY_STAT_QUAL_CATEGORIES } from '@/lib/companyData';
 
 // ==========================================
 // Economy Simulation
@@ -195,6 +197,46 @@ export function simulateTurn(state: GameState): GameState {
     newState = simulateEnvironment(newState);
 
     // Update users (loans, insurance, etc.)
+    const getQualificationSalaryBonus = (user: User) => {
+        const quals = user.qualifications || [];
+        let bonus = 0;
+        quals.forEach((qId) => {
+            const qual = QUALIFICATIONS.find((q) => q.id === qId);
+            if (qual?.effects?.salaryBonus) {
+                bonus += qual.effects.salaryBonus;
+            }
+        });
+        return bonus;
+    };
+
+    const getCompanyAbilityBonus = (abilityId?: string) => {
+        if (!abilityId) return 0;
+        return COMPANY_ABILITIES.find((a) => a.id === abilityId)?.salaryBonusPercent || 0;
+    };
+
+    const getCompanyStatBonus = (statId?: string) => {
+        if (!statId) return 0;
+        return COMPANY_STATS.find((s) => s.id === statId)?.salaryBonusPercent || 0;
+    };
+
+    const getCompanyQualificationSynergy = (user: User, abilityId?: string, statId?: string) => {
+        const categories = new Set<string>();
+        (abilityId ? COMPANY_ABILITY_QUAL_CATEGORIES[abilityId] : []).forEach((cat) => categories.add(cat));
+        (statId ? COMPANY_STAT_QUAL_CATEGORIES[statId] : []).forEach((cat) => categories.add(cat));
+        if (categories.size === 0) return 0;
+
+        const ownedQuals = user.qualifications || [];
+        let matchedCount = 0;
+        ownedQuals.forEach((qualId) => {
+            const qual = QUALIFICATIONS.find((q) => q.id === qualId);
+            if (qual && categories.has(qual.category)) {
+                matchedCount += 1;
+            }
+        });
+
+        return Math.min(12, matchedCount * 2);
+    };
+
     newState.users = newState.users.map(user => {
         let u = { ...user };
 
@@ -250,6 +292,39 @@ export function simulateTurn(state: GameState): GameState {
                     // Expire due to non-payment
                     ins.expiresAt = Date.now(); // Immediate expire
                 }
+            });
+        }
+
+        // 2.5. Company salary (per turn)
+        const companyPlaces = newState.places?.filter(
+            (place) =>
+                place.ownerId === u.id &&
+                place.buildingCategory === 'company' &&
+                place.status !== 'closed' &&
+                place.status !== 'bankrupted'
+        ) || [];
+
+        if (companyPlaces.length > 0) {
+            const qualificationBonus = getQualificationSalaryBonus(u);
+            companyPlaces.forEach((place) => {
+                const profile = place.companyProfile;
+                const baseSalary = profile?.baseSalary || 180000;
+                const abilityBonus = getCompanyAbilityBonus(profile?.abilityId);
+                const statBonus = getCompanyStatBonus(profile?.statId);
+                const synergyBonus = getCompanyQualificationSynergy(u, profile?.abilityId, profile?.statId);
+                const totalBonus = abilityBonus + statBonus + qualificationBonus + synergyBonus;
+                const salary = Math.floor(baseSalary * (1 + totalBonus / 100));
+
+                u.balance += salary;
+                if (!u.transactions) u.transactions = [];
+                u.transactions.push({
+                    id: crypto.randomUUID(),
+                    type: 'income',
+                    amount: salary,
+                    senderId: u.id,
+                    description: `会社給与 (${place.name})`,
+                    timestamp: Date.now()
+                });
             });
         }
 

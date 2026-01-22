@@ -1,19 +1,12 @@
 import { prisma } from '@/lib/db';
 import { GameState, User, Stock, Crypto, Request, Product, Transaction, Place, Land, NPC, GameEvent, Property, NewsItem, RouletteResult, CatalogItem } from '@/types';
+import { STOCKS as MASTER_STOCKS, FORBIDDEN_STOCKS as MASTER_FORBIDDEN_STOCKS, NEWS_EVENTS as MASTER_NEWS_EVENTS, NPCS as MASTER_NPCS } from '@/lib/gameData';
 import { generateLands, BASE_LAT, BASE_LNG } from '@/lib/cityData';
 
 // Re-export INITIAL_STATE for reference, though logic uses DB defaults
 const INITIAL_STATE_VALUES: GameState = {
     users: [],
-    stocks: [
-        { id: 's1', name: 'テック・フューチャー', price: 1000, previousPrice: 1000, volatility: 0.1, isForbidden: false },
-        { id: 's2', name: 'ハッピー・フーズ', price: 500, previousPrice: 500, volatility: 0.05, isForbidden: false },
-        { id: 's3', name: 'ミラクル建設', price: 800, previousPrice: 800, volatility: 0.08, isForbidden: false },
-        // Forbidden Stocks
-        { id: 'f1', name: 'シャドウ・コーポレーション', price: 5000, previousPrice: 5000, volatility: 0.5, isForbidden: true },
-        { id: 'f2', name: 'ブラックバイオ研究所', price: 2000, previousPrice: 2000, volatility: 0.8, isForbidden: true },
-        { id: 'f3', name: 'ネオカルト証券', price: 10000, previousPrice: 10000, volatility: 1.0, isForbidden: true },
-    ],
+    stocks: [...MASTER_STOCKS, ...MASTER_FORBIDDEN_STOCKS],
     cryptos: [],
     requests: [],
     marketStatus: 'open',
@@ -30,15 +23,40 @@ const INITIAL_STATE_VALUES: GameState = {
         turnDuration: 5 * 60 * 1000,
         moneyMultiplier: 1.0
     },
-    news: [],
+    news: MASTER_NEWS_EVENTS.map((event, index) => ({
+        id: `news_master_${index + 1}`,
+        message: `${event.headline} ${event.description}`,
+        timestamp: Date.now()
+    })),
+    roulettePresets: [
+        {
+            id: 'default',
+            name: 'デフォルト',
+            items: [
+                { id: 1, text: '宝くじ 1等 (1000枚)', effect: 'bonus_1000', weight: 1, color: '#7dd3fc' },
+                { id: 2, text: '宝くじ はずれ', effect: 'none', weight: 5, color: '#fde68a' },
+                { id: 3, text: '風邪をひいた (治療費 -50)', effect: 'sick_cold', weight: 3, color: '#fca5a5' },
+                { id: 4, text: '臨時ボーナス (300枚)', effect: 'bonus_300', weight: 2, color: '#a7f3d0' },
+                { id: 5, text: '財布を落とした (-100枚)', effect: 'lost_100', weight: 3, color: '#c4b5fd' },
+                { id: 6, text: '人気者になった (人気+10)', effect: 'pop_up', weight: 2, color: '#f9a8d4' },
+            ],
+            settings: {
+                wheelFontSize: 14,
+                resultFontSize: 22,
+                spinDurationMs: 3500,
+                autoScroll: true
+            }
+        }
+    ],
+    rouletteActivePresetId: 'default',
     roulette: { // Note: Currently not in DB schema explicitly as object, might need to store in GameSettings or separate
         items: [
-            { id: 1, text: '宝くじ 1等 (1000枚)', effect: 'bonus_1000', weight: 1 },
-            { id: 2, text: '宝くじ はずれ', effect: 'none', weight: 5 },
-            { id: 3, text: '風邪をひいた (治療費 -50)', effect: 'sick_cold', weight: 3 },
-            { id: 4, text: '臨時ボーナス (300枚)', effect: 'bonus_300', weight: 2 },
-            { id: 5, text: '財布を落とした (-100枚)', effect: 'lost_100', weight: 3 },
-            { id: 6, text: '人気者になった (人気+10)', effect: 'pop_up', weight: 2 },
+            { id: 1, text: '宝くじ 1等 (1000枚)', effect: 'bonus_1000', weight: 1, color: '#7dd3fc' },
+            { id: 2, text: '宝くじ はずれ', effect: 'none', weight: 5, color: '#fde68a' },
+            { id: 3, text: '風邪をひいた (治療費 -50)', effect: 'sick_cold', weight: 3, color: '#fca5a5' },
+            { id: 4, text: '臨時ボーナス (300枚)', effect: 'bonus_300', weight: 2, color: '#a7f3d0' },
+            { id: 5, text: '財布を落とした (-100枚)', effect: 'lost_100', weight: 3, color: '#c4b5fd' },
+            { id: 6, text: '人気者になった (人気+10)', effect: 'pop_up', weight: 2, color: '#f9a8d4' },
         ],
         currentResult: null
     },
@@ -85,7 +103,17 @@ const INITIAL_STATE_VALUES: GameState = {
             actionType: 'buy',
             minPayment: 5000,
             maxPayment: 20000
-        }
+        },
+        ...Object.entries(MASTER_NPCS).map(([name, npc], index) => ({
+            id: `npc_master_${index + 1}`,
+            name,
+            description: npc.description,
+            duration: 45 * 1000,
+            spawnRate: 8,
+            actionType: 'buy' as const,
+            minPayment: 300,
+            maxPayment: 2000
+        }))
     ],
     activeEvents: [],
     properties: [],
@@ -278,16 +306,44 @@ export async function getGameState(): Promise<GameState> {
             shopMenu: (u.shopMenu as any) || [],
             pointCards: (u.pointCards as any) || [],
             collection: (u.collection as any) || {},
+            traits: (u.traits as any) || [],
+            skills: (u.skills as any) || {},
+            needsTraitSelection: u.needsTraitSelection ?? false,
             ownedLands: (u.ownedLands as any) || [],
             ownedPlaces: (u.ownedPlaces as any) || [],
             ownedVehicles: (u.ownedVehicles as any) || [],
             qualifiedPlaces: (u.qualifiedPlaces as any) || [],
             qualifications: (u.qualifications as any) || [],
             cryptoHoldings: (u.cryptoHoldings as any) || {},
+            smartphone: (() => {
+                const baseSmartphone = (u.smartphone as any) || {
+                    model: 'Android',
+                    apps: ['shopping'],
+                    appOrder: ['shopping'],
+                    broken: false,
+                    battery: 100,
+                    settings: {}
+                };
+                const baseSettings = baseSmartphone.settings || {};
+                return {
+                    ...baseSmartphone,
+                    settings: {
+                        ...baseSettings,
+                        customIcons: baseSettings.customIcons || []
+                    }
+                };
+            })(),
             isOff: u.isOff || false,
             vacationReason: u.vacationReason || null,
             isDebugAuthorized: u.isDebugAuthorized || false,
         })) as unknown as User[];
+
+        const storedRoulettePresets = (settings as any).roulettePresets as any[] | undefined;
+        const roulettePresets = (storedRoulettePresets && storedRoulettePresets.length > 0)
+            ? storedRoulettePresets
+            : INITIAL_STATE_VALUES.roulettePresets;
+        const rouletteActivePresetId = (settings as any).rouletteActiveId || roulettePresets[0]?.id || 'default';
+        const activePreset = roulettePresets.find((preset: any) => preset.id === rouletteActivePresetId) || roulettePresets[0];
 
         const mappedPlaces = places.map((p: any) => ({
             ...p,
@@ -303,9 +359,50 @@ export async function getGameState(): Promise<GameState> {
             insurances: (p.insurances as any) || []
         })) as unknown as Place[];
 
-        return {
+        const stockMetaByName = new Map(
+            [...MASTER_STOCKS, ...MASTER_FORBIDDEN_STOCKS].map((stock) => [stock.name, stock])
+        );
+        const mappedStocks = (stocks as unknown as Stock[]).map((stock) => {
+            const meta = stockMetaByName.get(stock.name);
+            return {
+                ...stock,
+                category: meta?.category,
+                marketCap: meta?.marketCap,
+                owner: meta?.owner ?? undefined
+            };
+        });
+        const existingNames = new Set(mappedStocks.map((stock) => stock.name));
+        const missingStocks = MASTER_STOCKS
+            .map((stock, index) => ({
+                id: `s_master_${index + 1}`,
+                name: stock.name,
+                price: stock.price,
+                previousPrice: stock.price,
+                volatility: stock.volatility,
+                isForbidden: false,
+                category: stock.category,
+                marketCap: stock.marketCap ?? undefined,
+                owner: stock.owner ?? undefined
+            }))
+            .filter((stock) => !existingNames.has(stock.name));
+        const missingForbiddenStocks = MASTER_FORBIDDEN_STOCKS
+            .map((stock, index) => ({
+                id: `f_master_${index + 1}`,
+                name: stock.name,
+                price: stock.price,
+                previousPrice: stock.price,
+                volatility: stock.volatility,
+                isForbidden: true,
+                category: stock.category,
+                marketCap: stock.marketCap ?? undefined,
+                owner: stock.owner ?? undefined
+            }))
+            .filter((stock) => !existingNames.has(stock.name));
+        const mergedStocks = [...mappedStocks, ...missingStocks, ...missingForbiddenStocks];
+
+        const state: GameState = {
             users: mappedUsers,
-            stocks: stocks as unknown as Stock[],
+            stocks: mergedStocks,
             cryptos: cryptos.map((c: any) => ({
                 ...c,
                 priceHistory: (c.priceHistory as any) || [],
@@ -378,11 +475,27 @@ export async function getGameState(): Promise<GameState> {
 
             // Static/Aux Data
             news: news.map((n: any) => ({ ...n, timestamp: Number(n.timestamp) })) as unknown as NewsItem[],
-            roulette: INITIAL_STATE_VALUES.roulette, // Fallback: Memory only for now
+            roulette: {
+                items: activePreset?.items || INITIAL_STATE_VALUES.roulette.items,
+                currentResult: INITIAL_STATE_VALUES.roulette.currentResult
+            },
+            roulettePresets,
+            rouletteActivePresetId,
             npcTemplates: INITIAL_STATE_VALUES.npcTemplates, // Static
             properties: [], // Deprecated or load from DB if needed
             processedIdempotencyKeys: [] // Reset on reload in this design
         };
+
+        if (inMemoryState?.snsPosts) state.snsPosts = inMemoryState.snsPosts;
+        if (inMemoryState?.videos) state.videos = inMemoryState.videos;
+
+        if (!inMemoryState) {
+            inMemoryState = state;
+        } else {
+            inMemoryState = { ...inMemoryState, ...state, snsPosts: state.snsPosts, videos: state.videos };
+        }
+
+        return state;
     } catch (error) {
         console.error('getGameState DB Error:', error);
         useMemoryFallback = true;
@@ -407,6 +520,7 @@ export async function updateGameState(updater: (state: GameState) => GameState |
     // Apply updater (it mutates currentState in place usually, or returns new one)
     const result = updater(currentState);
     const newState = result || currentState;
+    inMemoryState = newState as GameState;
 
     // Increment revision
     newState.eventRevision = (newState.eventRevision || 0) + 1;
@@ -449,6 +563,8 @@ export async function updateGameState(updater: (state: GameState) => GameState |
                 infraWater: newState.environment.cityInfrastructure.water,
                 infraNetwork: newState.environment.cityInfrastructure.network,
                 securityLevel: newState.environment.securityLevel,
+                roulettePresets: newState.roulettePresets as any,
+                rouletteActiveId: newState.rouletteActivePresetId || null
             }
         });
 
@@ -485,6 +601,9 @@ export async function updateGameState(updater: (state: GameState) => GameState |
                     arrestCount: user.arrestCount,
                     stolenAmount: user.stolenAmount,
                     fanCount: user.fanCount,
+                    traits: user.traits as any,
+                    skills: user.skills as any,
+                    needsTraitSelection: user.needsTraitSelection ?? false,
                     employmentStatus: user.employmentStatus,
                     currentJobId: user.currentJobId,
                     jobHistory: user.jobHistory as any,
@@ -532,6 +651,9 @@ export async function updateGameState(updater: (state: GameState) => GameState |
                     rating: user.rating || 0,
                     job: user.job || 'unemployed',
                     employmentStatus: user.employmentStatus || 'unemployed',
+                    traits: (user.traits as any) || [],
+                    skills: (user.skills as any) || {},
+                    needsTraitSelection: user.needsTraitSelection ?? false,
                     // JSON フィールドのデフォルト値
                     shopItems: (user.shopItems as any) || [],
                     stocks: (user.stocks as any) || {},
@@ -550,18 +672,34 @@ export async function updateGameState(updater: (state: GameState) => GameState |
                     isOff: user.isOff || false,
                     vacationReason: user.vacationReason || null,
                     isDebugAuthorized: user.isDebugAuthorized || false,
+                    smartphone: (user.smartphone as any) || {
+                        model: 'Android',
+                        apps: ['shopping'],
+                        appOrder: ['shopping'],
+                        broken: false,
+                        battery: 100
+                    },
                 } as any
             });
         }
 
         // 3. Update Stocks
         for (const stock of newState.stocks) {
-            await prisma.stock.update({
+            await prisma.stock.upsert({
                 where: { id: stock.id },
-                data: {
+                update: {
                     price: stock.price,
                     previousPrice: stock.previousPrice,
                     volatility: stock.volatility,
+                    priceHistory: stock.priceHistory as any
+                },
+                create: {
+                    id: stock.id,
+                    name: stock.name,
+                    price: stock.price,
+                    previousPrice: stock.previousPrice,
+                    volatility: stock.volatility,
+                    isForbidden: stock.isForbidden,
                     priceHistory: stock.priceHistory as any
                 }
             });

@@ -30,13 +30,13 @@ export const useToast = () => {
 
 // Sound Effect Map
 const TOAST_SOUNDS: Record<ToastType, string | null> = {
-    success: '/sounds/peipei.mp3',
+    success: null,
     error: null,
     info: null,
     warning: null,
-    special: '/sounds/peipei.mp3',
-    income: '/sounds/peipei.mp3',
-    achievement: '/sounds/peipei.mp3',
+    special: null,
+    income: null,
+    achievement: null,
     disaster: null, // Disasters have their own alert system
 };
 
