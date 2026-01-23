@@ -8,6 +8,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/Button';
 import { Modal } from '@/components/ui/Modal';
 import { COLLECTION_ITEMS, FURNITURE_CATALOG, PET_CATALOG, RECIPES } from '@/lib/gameData';
+import type { InventoryItem } from '@/types';
 
 type CollectionCategory = 'furniture' | 'pets' | 'recipes' | 'insects' | 'fossils' | 'cards' | 'all';
 type CollectionCategoryKey = Exclude<CollectionCategory, 'all'>;
@@ -66,7 +67,7 @@ export default function CollectionPage() {
 
     // コレクションデータ（inventory と catalog から派生）
     const catalog = gameState?.catalogInventory || [];
-    const inventory = (player.inventory || []) as { itemId: string; name?: string }[];
+    const inventory = (player.inventory || []) as InventoryItem[];
 
     const detectCategory = (itemId: string): CollectionCategoryKey | 'other' => {
         const catalogItem = catalog.find(c => c.id === itemId);
