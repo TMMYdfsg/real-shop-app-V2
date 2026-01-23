@@ -73,6 +73,10 @@ export async function POST(request: Request) {
                 broken: false,
                 battery: 100,
                 settings: {
+                    theme: 'system',
+                    autoLockSeconds: 0,
+                    textScale: 1.0,
+                    trueTone: true,
                     customIcons: []
                 }
             }
