@@ -51,7 +51,7 @@ const THEME_OPTIONS = [
 export const SettingsApp: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     const { currentUser, sendRequest } = useGame();
     const [selectedSound, setSelectedSound] = useState('notification_1.mp3');
-    const [activeView, setActiveView] = useState<'main' | 'sounds' | 'detail' | 'display' | 'autolock' | 'auth' | 'passcode' | 'wallpaper' | 'channel_icon' | 'certificate'>('main');
+    const [activeView, setActiveView] = useState<'main' | 'sounds' | 'detail' | 'display' | 'autolock' | 'auth' | 'passcode' | 'wallpaper' | 'channel_icon' | 'certificate' | 'profile'>('main');
     const [detailTitle, setDetailTitle] = useState('');
     const [detailItems, setDetailItems] = useState<string[]>([]);
     const [isDarkMode, setIsDarkMode] = useState(false);
@@ -699,9 +699,71 @@ export const SettingsApp: React.FC<{ onClose: () => void }> = ({ onClose }) => {
         );
     }
 
+    if (activeView === 'profile') {
+        const [newName, setNewName] = useState(currentUser?.name || '');
+        const [isSaving, setIsSaving] = useState(false);
+
+        const handleSaveName = async () => {
+            if (!newName.trim()) {
+                alert('名前を入力してください');
+                return;
+            }
+
+            setIsSaving(true);
+            try {
+                await sendRequest('update_profile', 0, { name: newName.trim() });
+                setActiveView('main');
+            } catch (error) {
+                console.error('名前の更新に失敗しました', error);
+                alert('名前の更新に失敗しました');
+            } finally {
+                setIsSaving(false);
+            }
+        };
+
+        return (
+            <div className="h-full bg-[#f2f2f7] flex flex-col font-sans">
+                <div className="px-4 pt-14 pb-4 bg-white/80 backdrop-blur-xl border-b border-slate-200 sticky top-0 z-50 flex items-center">
+                    <button onClick={() => setActiveView('main')} className="flex items-center text-[#007aff] font-medium -ml-1">
+                        <ChevronLeft className="w-6 h-6" />
+                        <span>設定</span>
+                    </button>
+                    <h2 className="flex-1 text-center font-black pr-10">プロフィール</h2>
+                </div>
+
+                <div className="flex-1 overflow-y-auto no-scrollbar p-4 space-y-4">
+                    <div className="bg-white rounded-xl p-4 shadow-sm border border-slate-200 space-y-4">
+                        <div>
+                            <label className="block text-xs font-black text-slate-500 mb-2">名前</label>
+                            <input
+                                type="text"
+                                value={newName}
+                                onChange={(e) => setNewName(e.target.value)}
+                                className="w-full px-4 py-3 rounded-lg border border-slate-200 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#007aff]"
+                                placeholder="名前を入力"
+                                aria-label="名前を入力"
+                            />
+                        </div>
+
+                        <button
+                            onClick={handleSaveName}
+                            disabled={isSaving || !newName.trim()}
+                            className={`w-full py-3 rounded-lg text-sm font-bold ${isSaving || !newName.trim()
+                                    ? 'bg-slate-200 text-slate-400'
+                                    : 'bg-[#007aff] text-white'
+                                }`}
+                        >
+                            {isSaving ? '保存中...' : '保存'}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
     if (activeView === 'channel_icon') {
         const iconEmojis = ['👨', '👩', '🧑', '🤖', '👾', '🎬', '📹', '⭐', '🎵', '🎨', '📱', '🎮', '📚', '🍕', '🚀'];
-        
+
         return (
             <div className="h-full bg-[#f2f2f7] flex flex-col font-sans">
                 <div className="px-4 pt-14 pb-4 bg-white/80 backdrop-blur-xl border-b border-slate-200 sticky top-0 z-50 flex items-center">
@@ -766,7 +828,10 @@ export const SettingsApp: React.FC<{ onClose: () => void }> = ({ onClose }) => {
             {/* Settings List */}
             <div className="flex-1 overflow-y-auto no-scrollbar px-4 space-y-8 pb-10">
                 {/* Profile Section */}
-                <div className="bg-white rounded-xl p-4 flex items-center gap-4 shadow-sm border border-slate-200 active:bg-slate-50 transition-colors">
+                <button
+                    onClick={() => setActiveView('profile')}
+                    className="bg-white rounded-xl p-4 flex items-center gap-4 shadow-sm border border-slate-200 active:bg-slate-50 transition-colors w-full text-left"
+                >
                     <div className="w-16 h-16 bg-gradient-to-br from-slate-200 to-slate-300 rounded-full flex items-center justify-center p-0.5">
                         <User className="w-8 h-8 text-white" />
                     </div>
@@ -775,7 +840,7 @@ export const SettingsApp: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                         <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-0.5">Apple ID, iCloud+など</p>
                     </div>
                     <ChevronRight className="w-5 h-5 text-slate-300" />
-                </div>
+                </button>
 
                 {/* Network Section */}
                 <div className="bg-white rounded-xl overflow-hidden shadow-sm border border-slate-200">

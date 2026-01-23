@@ -461,3 +461,24 @@ enum CallStatus {
   MISSED
   DECLINED
 }
+
+model Video {
+  id             String   @id @default(uuid())
+  uploaderId     String
+  uploaderName   String
+  title          String
+  description    String?
+  tags           Json?
+  url            String
+  thumbnailColor String?
+  views          Int      @default(0)
+  likes          Int      @default(0)
+  likedBy        Json?
+  subscribers    Int      @default(0)
+  timestamp      BigInt
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([uploaderId])
+}
+

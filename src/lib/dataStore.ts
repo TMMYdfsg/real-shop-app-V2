@@ -275,7 +275,8 @@ export async function getGameState(): Promise<GameState> {
             npcs,
             events, // Clean single declaration
             news,
-            cryptos
+            cryptos,
+            videos
         ] = await Promise.all([
             prisma.user.findMany({ include: { transactions: true, requests: true } }),
             prisma.stock.findMany(),
@@ -286,7 +287,8 @@ export async function getGameState(): Promise<GameState> {
             prisma.nPC.findMany(),
             prisma.gameEvent.findMany(),
             prisma.news.findMany({ orderBy: { createdAt: 'desc' }, take: 50 }),
-            prisma.crypto.findMany()
+            prisma.crypto.findMany(),
+            (prisma as any).video.findMany({ orderBy: { timestamp: 'desc' } })
         ]);
 
         // Map DB types to GameState types (handling JSON fields)
@@ -484,17 +486,20 @@ export async function getGameState(): Promise<GameState> {
             rouletteActivePresetId,
             npcTemplates: INITIAL_STATE_VALUES.npcTemplates, // Static
             properties: [], // Deprecated or load from DB if needed
-            processedIdempotencyKeys: [] // Reset on reload in this design
+            processedIdempotencyKeys: [], // Reset on reload in this design
+            videos: videos.map((v: any) => ({
+                ...v,
+                tags: v.tags || [],
+                likedBy: v.likedBy || [],
+                timestamp: Number(v.timestamp)
+            }))
         };
 
-        if (inMemoryState?.snsPosts) state.snsPosts = inMemoryState.snsPosts;
-        if (inMemoryState?.videos) state.videos = inMemoryState.videos;
+        // Preserve snsPosts from inMemoryState (still in-memory for now if not in schema)
+        state.snsPosts = inMemoryState?.snsPosts || [];
 
-        if (!inMemoryState) {
-            inMemoryState = state;
-        } else {
-            inMemoryState = { ...inMemoryState, ...state, snsPosts: state.snsPosts, videos: state.videos };
-        }
+        // Update inMemoryState with the new state
+        inMemoryState = state;
 
         return state;
     } catch (error) {
@@ -821,6 +826,44 @@ export async function updateGameState(updater: (state: GameState) => GameState |
                         allowConstruction: land.allowConstruction ?? true,
                         allowCompany: land.allowCompany ?? true,
                         polygon: land.polygon as any
+                    }
+                });
+            }
+        }
+
+        // 8. Update Videos
+        if (newState.videos) {
+            for (const video of newState.videos) {
+                await (prisma as any).video.upsert({
+                    where: { id: video.id },
+                    update: {
+                        uploaderId: video.uploaderId,
+                        uploaderName: video.uploaderName,
+                        title: video.title,
+                        description: video.description,
+                        tags: video.tags as any,
+                        url: video.url,
+                        thumbnailColor: video.thumbnailColor,
+                        views: video.views,
+                        likes: video.likes,
+                        likedBy: video.likedBy as any,
+                        subscribers: video.subscribers,
+                        timestamp: BigInt(video.timestamp)
+                    },
+                    create: {
+                        id: video.id,
+                        uploaderId: video.uploaderId,
+                        uploaderName: video.uploaderName,
+                        title: video.title,
+                        description: video.description,
+                        tags: video.tags as any,
+                        url: video.url,
+                        thumbnailColor: video.thumbnailColor,
+                        views: video.views,
+                        likes: video.likes,
+                        likedBy: video.likedBy as any,
+                        subscribers: video.subscribers,
+                        timestamp: BigInt(video.timestamp)
                     }
                 });
             }

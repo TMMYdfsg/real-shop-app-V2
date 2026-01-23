@@ -33,19 +33,19 @@ export const SmartphoneShell = ({ children, onHome, screenStyle, screenClassName
                         className={`relative w-full h-full bg-black rounded-[2.8rem] overflow-hidden z-0 shadow-inner ring-1 ring-white/5 ${screenClassName || ''}`}
                         style={mergedStyle}
                     >
-                {/* Back button portal slot */}
-                <div id="smartphone-back-slot" className="absolute bottom-12 left-0 right-0 z-40 flex justify-center pointer-events-none" />
-                {/* Content */}
-                {children}
-                {toneOverlay}
+                        {/* Back button portal slot - positioned bottom left */}
+                        <div id="smartphone-back-slot" className="absolute bottom-16 left-4 z-40 pointer-events-none" />
+                        {/* Content */}
+                        {children}
+                        {toneOverlay}
 
-                {/* Home Indicator (Inside screen) */}
-                <div
-                    className="absolute bottom-2 left-0 right-0 h-8 flex justify-center items-end pb-2 z-50 cursor-pointer"
-                    onClick={handleHomeClick}
-                >
-                    <div className="w-32 h-1.5 bg-white/40 rounded-full backdrop-blur-md transition-all active:scale-x-110 active:bg-white/60" />
-                </div>
+                        {/* Home Indicator (Inside screen) */}
+                        <div
+                            className="absolute bottom-2 left-0 right-0 h-8 flex justify-center items-end pb-2 z-50 cursor-pointer"
+                            onClick={handleHomeClick}
+                        >
+                            <div className="w-32 h-1.5 bg-white/40 rounded-full backdrop-blur-md transition-all active:scale-x-110 active:bg-white/60" />
+                        </div>
                     </div>
                 );
             })()}
