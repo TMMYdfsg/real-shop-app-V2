@@ -40,6 +40,15 @@ const FIXED_EXCHANGE_ITEMS = [
         costPoints: 100,
         type: 'furniture'
     },
+    {
+        id: 'ticket_ur',
+        name: 'UR確定チケット',
+        emoji: '🎟️',
+        description: 'コレクションガチャでURが必ず出ます。',
+        price: 0,
+        costPoints: 10000,
+        type: 'gacha_ticket'
+    },
 ];
 
 export default function PointsExchangePage() {

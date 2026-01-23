@@ -11,7 +11,7 @@ interface ShellTopbarProps {
 
 export const ShellTopbar: React.FC<ShellTopbarProps> = ({ title, titleIcon, actions, onMenuToggle }) => (
   <header className="shell__topbar glass sticky top-0 z-50 border-b border-white/20">
-    <div className="shell__topbar-brand">
+    <div className="shell__topbar-brand lg:hidden">
       <div className="ui-subtitle font-bold text-indigo-950 dark:text-indigo-50 flex items-center gap-2">
         {titleIcon ? (
           <PlayerIcon

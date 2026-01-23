@@ -28,8 +28,9 @@ export default function VideoApp({ onClose }: { onClose: () => void }) {
 
     const buildPoster = (color: string, title: string) => {
         const safeTitle = (title || '動画').slice(0, 24);
-        const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='640' height='360'><rect width='100%' height='100%' fill='${color}'/><text x='50%' y='50%' text-anchor='middle' fill='rgba(255,255,255,0.7)' font-size='32' font-family='Arial'>${safeTitle}</text></svg>`;
-        return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
+        const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='640' height='360'><rect width='100%' height='100%' fill='${color}'/><text x='50%' y='50%' text-anchor='middle' fill='white' fill-opacity='0.7' font-size='32' font-family='Arial'>${safeTitle}</text></svg>`;
+        const base64 = typeof btoa !== 'undefined' ? btoa(unescape(encodeURIComponent(svg))) : Buffer.from(svg).toString('base64');
+        return `data:image/svg+xml;base64,${base64}`;
     };
 
     // Helper: Check video duration
@@ -161,7 +162,7 @@ export default function VideoApp({ onClose }: { onClose: () => void }) {
 
     return (
         <div className="h-full bg-white flex flex-col font-sans text-gray-900">
-            <AppHeader 
+            <AppHeader
                 title="▶ Tube"
                 onBack={() => {
                     if (view === 'watch') setView('list');
@@ -263,13 +264,31 @@ export default function VideoApp({ onClose }: { onClose: () => void }) {
                     <div className="aspect-video w-full bg-black sticky top-0 z-20">
                         {selectedVideo.url ? (
                             <video
-                                src={selectedVideo.url}
+                                key={selectedVideo.id + selectedVideo.url}
+                                src={selectedVideo.url} // Direct src as fallback
                                 controls
                                 autoPlay
-                                preload="metadata"
                                 playsInline
+                                webkit-playsinline="true"
+                                preload="auto"
+                                crossOrigin="anonymous"
                                 className="w-full h-full object-contain"
-                            />
+                                poster={buildPoster(selectedVideo.thumbnailColor, selectedVideo.title)}
+                                onError={(e) => {
+                                    console.error('Video Playback Error:', e);
+                                    console.log('Attempted URL:', selectedVideo.url);
+                                    if (selectedVideo.url.startsWith('/uploads/') || selectedVideo.url.startsWith('/api/video/serve/')) {
+                                        addToast('古いデータは再生できません。新しい投稿でお試しください。', 'warning');
+                                    } else {
+                                        addToast(`再生エラー: ${selectedVideo.url.substring(0, 30)}...`, 'error');
+                                    }
+                                }}
+                            >
+                                <source src={selectedVideo.url} type="video/mp4" />
+                                <source src={selectedVideo.url} type="video/quicktime" />
+                                <source src={selectedVideo.url} type="video/webm" />
+                                お使いのブラウザはビデオタグをサポートしていません。
+                            </video>
                         ) : (
                             <div className="w-full h-full flex items-center justify-center" style={{ backgroundColor: selectedVideo.thumbnailColor || '#cccccc' }}>
                                 <span className="text-white/50 font-bold">動画ファイルなし</span>
@@ -289,9 +308,8 @@ export default function VideoApp({ onClose }: { onClose: () => void }) {
                                         e.stopPropagation();
                                         handleLikeVideo(selectedVideo.id);
                                     }}
-                                    className={`flex items-center gap-1 transition-colors ${
-                                        likedVideoIds.has(selectedVideo.id) ? 'text-red-500' : 'hover:text-white'
-                                    }`}
+                                    className={`flex items-center gap-1 transition-colors ${likedVideoIds.has(selectedVideo.id) ? 'text-red-500' : 'hover:text-white'
+                                        }`}
                                 >
                                     <motion.span
                                         key={`like-${selectedVideo.id}-${likedVideoIds.has(selectedVideo.id)}`}
@@ -323,11 +341,10 @@ export default function VideoApp({ onClose }: { onClose: () => void }) {
                                     e.stopPropagation();
                                     handleSubscribeChannel(selectedVideo.uploaderId);
                                 }}
-                                className={`font-bold px-4 py-2 rounded-full text-xs transition-all ${
-                                    subscribedChannels.has(selectedVideo.uploaderId)
-                                        ? 'bg-gray-600 text-white'
-                                        : 'bg-white text-black hover:bg-gray-200'
-                                }`}
+                                className={`font-bold px-4 py-2 rounded-full text-xs transition-all ${subscribedChannels.has(selectedVideo.uploaderId)
+                                    ? 'bg-gray-600 text-white'
+                                    : 'bg-white text-black hover:bg-gray-200'
+                                    }`}
                             >
                                 <motion.span
                                     key={`sub-${selectedVideo.uploaderId}-${subscribedChannels.has(selectedVideo.uploaderId)}`}
@@ -366,6 +383,7 @@ export default function VideoApp({ onClose }: { onClose: () => void }) {
                                             className="w-full h-full object-cover pointer-events-none"
                                             muted
                                             playsInline
+                                            crossOrigin="anonymous"
                                             preload="metadata"
                                             poster={buildPoster(video.thumbnailColor, video.title)}
                                         />

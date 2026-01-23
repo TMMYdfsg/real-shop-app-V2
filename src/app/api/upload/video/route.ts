@@ -1,10 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { writeFile, mkdir } from 'fs/promises';
-import { existsSync } from 'fs';
-import path from 'path';
+import { v2 as cloudinary } from 'cloudinary';
 
 // Force dynamic rendering for file uploads
 export const dynamic = 'force-dynamic';
+
+cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET,
+    secure: true
+});
 
 export async function POST(request: NextRequest) {
     try {
@@ -18,11 +23,11 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // ファイルサイズチェック（200MB以下 - 10分程度の動画に対応）
-        const maxSize = 200 * 1024 * 1024; // 200MB
+        // ファイルサイズチェック（100MB以下 - Cloudinaryは無料枠でもこの程度対応可能）
+        const maxSize = 100 * 1024 * 1024; // 100MB
         if (file.size > maxSize) {
             return NextResponse.json(
-                { error: 'ファイルサイズが大きすぎます（最大200MB）' },
+                { error: 'ファイルサイズが大きすぎます（最大100MB）' },
                 { status: 400 }
             );
         }
@@ -30,40 +35,51 @@ export async function POST(request: NextRequest) {
         // ファイルタイプチェック
         const allowedTypes = ['video/mp4', 'video/webm', 'video/quicktime'];
         if (!allowedTypes.includes(file.type)) {
-            console.log('Rejected file type:', file.type, 'File name:', file.name);
             return NextResponse.json(
-                { error: `サポートされていないファイル形式です（MP4、WebM、MOVのみ）。検出された形式: ${file.type || '不明'}` },
+                { error: `サポートされていないファイル形式です（MP4、WebM、MOVのみ）。` },
                 { status: 400 }
             );
         }
 
-        // アップロードディレクトリを作成 (root/uploads/videos)
-        // publicディレクトリ以外に保存することで、Next.jsの開発サーバーの監視対象から外し、ブラウザのリロードを防ぐ
-        const uploadDir = path.join(process.cwd(), 'uploads', 'videos');
-        if (!existsSync(uploadDir)) {
-            await mkdir(uploadDir, { recursive: true });
+        // 環境変数のチェック
+        if (!process.env.CLOUDINARY_CLOUD_NAME || !process.env.CLOUDINARY_API_KEY || !process.env.CLOUDINARY_API_SECRET) {
+            return NextResponse.json(
+                { error: 'Cloudinaryの環境変数が設定されていません。CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET を設定してください。' },
+                { status: 500 }
+            );
         }
 
-        // ユニークなファイル名を生成
-        const timestamp = Date.now();
-        const random = Math.random().toString(36).substring(2, 8);
-        const ext = file.name.split('.').pop() || 'mp4';
-        const filename = `video_${timestamp}_${random}.${ext}`;
-        const filepath = path.join(uploadDir, filename);
-
-        // ファイルを保存
         const bytes = await file.arrayBuffer();
         const buffer = Buffer.from(bytes);
-        await writeFile(filepath, buffer);
 
-        // 公開URLを返す (Serving API経由)
-        const url = `/api/video/serve/${filename}`;
+        // Cloudinaryにアップロード
+        const uploaded = await new Promise<{
+            secure_url: string;
+            public_id: string;
+            bytes: number;
+            resource_type: string;
+        }>((resolve, reject) => {
+            const stream = cloudinary.uploader.upload_stream(
+                {
+                    resource_type: 'video',
+                    folder: 'real-shop/videos'
+                },
+                (error, result) => {
+                    if (error || !result) {
+                        reject(error ?? new Error('Cloudinary upload failed'));
+                        return;
+                    }
+                    resolve(result as any);
+                }
+            );
+            stream.end(buffer);
+        });
 
         return NextResponse.json({
             success: true,
-            url: url,
-            filename: filename,
-            size: file.size,
+            url: uploaded.secure_url,
+            filename: uploaded.public_id,
+            size: uploaded.bytes,
             type: file.type
         });
 

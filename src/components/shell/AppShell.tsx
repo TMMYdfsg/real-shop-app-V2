@@ -23,7 +23,7 @@ export const AppShell: React.FC<AppShellProps> = ({ title, titleIcon, navItems, 
 
   return (
     <div className="shell">
-      <ShellSidebar title={title} navItems={navItems} isOpen={isMobileMenuOpen} onClose={() => setIsMobileMenuOpen(false)} />
+      <ShellSidebar title={title} titleIcon={titleIcon} navItems={navItems} isOpen={isMobileMenuOpen} onClose={() => setIsMobileMenuOpen(false)} />
       <div className="shell__content">
         <ShellTopbar title={title} titleIcon={titleIcon} actions={actions} onMenuToggle={() => setIsMobileMenuOpen(!isMobileMenuOpen)} />
         <main className="shell__main">{children}</main>

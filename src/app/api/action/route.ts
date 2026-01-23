@@ -46,6 +46,30 @@ const applyStockPriceTick = (state: GameState) => {
     });
 };
 
+const resolveRarityByPrice = (price: number, thresholds: number[]) => {
+    const [commonMax, rareMax, epicMax] = thresholds;
+    if (price <= commonMax) return 'common';
+    if (price <= rareMax) return 'rare';
+    if (price <= epicMax) return 'epic';
+    return 'legendary';
+};
+
+const rollRarity = (ticketType: 'normal' | 'rare' | 'ssr' | 'ur') => {
+    const roll = Math.random() * 100;
+    if (ticketType === 'ur') return 'legendary';
+    if (ticketType === 'ssr') return roll < 10 ? 'legendary' : 'epic';
+    if (ticketType === 'rare') {
+        if (roll < 5) return 'legendary';
+        if (roll < 25) return 'epic';
+        if (roll < 60) return 'rare';
+        return 'common';
+    }
+    if (roll < 2) return 'legendary';
+    if (roll < 10) return 'epic';
+    if (roll < 30) return 'rare';
+    return 'common';
+};
+
 export async function POST(request: NextRequest) {
     const safeParseDetails = (d: any) => {
         if (!d) return {};
@@ -2133,6 +2157,123 @@ export async function POST(request: NextRequest) {
             }
         }
 
+        // コレクションガチャ
+        if (type === 'collection_gacha') {
+            const { ticketType, category } = safeParseDetails(details);
+            const validTicket = ['normal', 'rare', 'ssr', 'ur'].includes(ticketType);
+            const validCategory = ['furniture', 'pets', 'recipes', 'insects', 'fossils', 'cards'].includes(category);
+            if (!validTicket || !validCategory) {
+                return NextResponse.json({ success: false, error: '無効なガチャ設定です' }, { status: 400 });
+            }
+
+            const { COLLECTION_ITEMS, FURNITURE_CATALOG, PET_CATALOG, RECIPES } = await import('@/lib/gameData');
+            let resultItem: any = null;
+            let errorMessage = '';
+            const costMap: Record<string, number> = { normal: 100, rare: 500, ssr: 1000, ur: 0 };
+
+            await updateGameState((state) => {
+                const user = state.users.find(u => u.id === requesterId);
+                if (!user) return state;
+
+                const ticketCost = costMap[ticketType as keyof typeof costMap] ?? 0;
+                if (ticketType === 'ur') {
+                    if (!user.inventory) user.inventory = [];
+                    const ticketItem = user.inventory.find(i => i.itemId === 'ticket_ur');
+                    if (!ticketItem || ticketItem.quantity <= 0) {
+                        errorMessage = 'UR確定チケットがありません';
+                        return state;
+                    }
+                    ticketItem.quantity -= 1;
+                    if (ticketItem.quantity <= 0) {
+                        user.inventory = user.inventory.filter(i => i.itemId !== 'ticket_ur');
+                    }
+                } else {
+                    if (user.balance < ticketCost) {
+                        errorMessage = 'お金が足りません';
+                        return state;
+                    }
+                    user.balance -= ticketCost;
+                    if (!user.transactions) user.transactions = [];
+                    user.transactions.push({
+                        id: crypto.randomUUID(),
+                        type: 'payment',
+                        amount: ticketCost,
+                        senderId: user.id,
+                        description: `コレクションガチャ (${ticketType})`,
+                        timestamp: Date.now()
+                    });
+                }
+
+                const normalizedCategory = category as string;
+                const rarity = rollRarity(ticketType);
+                let pool: any[] = [];
+
+                if (normalizedCategory === 'furniture') {
+                    pool = FURNITURE_CATALOG.map((item: any) => ({
+                        ...item,
+                        rarity: resolveRarityByPrice(item.price || 0, [1000, 3000, 6000])
+                    }));
+                } else if (normalizedCategory === 'pets') {
+                    pool = PET_CATALOG.map((item: any) => ({
+                        ...item,
+                        rarity: resolveRarityByPrice(item.price || 0, [2000, 3500, 6000])
+                    }));
+                } else if (normalizedCategory === 'recipes') {
+                    pool = RECIPES.map((item: any) => ({
+                        ...item,
+                        rarity: resolveRarityByPrice(item.sellPrice || 0, [300, 500, 700])
+                    }));
+                } else if (normalizedCategory === 'insects') {
+                    pool = COLLECTION_ITEMS.filter((item: any) => item.type === 'insect');
+                } else if (normalizedCategory === 'fossils') {
+                    pool = COLLECTION_ITEMS.filter((item: any) => item.type === 'fossil');
+                } else if (normalizedCategory === 'cards') {
+                    pool = COLLECTION_ITEMS.filter((item: any) => item.type === 'card');
+                }
+
+                const rarityPool = pool.filter((item) => item.rarity === rarity);
+                const targetPool = rarityPool.length > 0 ? rarityPool : pool;
+                if (targetPool.length === 0) {
+                    errorMessage = 'ガチャのアイテムがありません';
+                    return state;
+                }
+
+                resultItem = targetPool[Math.floor(Math.random() * targetPool.length)];
+
+                if (normalizedCategory === 'furniture') {
+                    if (!user.furniture) user.furniture = [];
+                    user.furniture.push(resultItem.id);
+                } else if (normalizedCategory === 'pets') {
+                    if (!user.pets) user.pets = [];
+                    user.pets.push(resultItem.id);
+                } else if (normalizedCategory === 'recipes') {
+                    if (!user.inventory) user.inventory = [];
+                    const existing = user.inventory.find(i => i.itemId === resultItem.id);
+                    if (existing) {
+                        existing.quantity += 1;
+                    } else {
+                        user.inventory.push({
+                            id: crypto.randomUUID(),
+                            itemId: resultItem.id,
+                            name: resultItem.name,
+                            quantity: 1
+                        });
+                    }
+                } else {
+                    if (!user.gachaCollection) user.gachaCollection = [];
+                    user.gachaCollection.push(resultItem.id);
+                }
+
+                return state;
+            });
+
+            if (errorMessage) {
+                return NextResponse.json({ success: false, error: errorMessage }, { status: 400 });
+            }
+
+            return NextResponse.json({ success: true, item: resultItem });
+        }
+
         if (type === 'restock_item') {
             const { itemId, quantity } = safeParseDetails(details);
             await updateGameState((state) => {
@@ -2486,22 +2627,18 @@ export async function POST(request: NextRequest) {
                         createdAt: Date.now()
                     });
                 } else if (itemType === 'gacha_ticket') {
-                    // チケット機能はまだないので、とりあえずgachaCollectionに追加するか、
-                    // あるいは所持金に換金するか...ここは一旦「レアアイテム」としてshopMenuに追加
-                    if (!user.shopMenu) user.shopMenu = [];
-                    user.shopMenu.push({
-                        id: itemId,
-                        sellerId: user.id,
-                        name: itemData.name,
-                        emoji: itemData.emoji,
-                        cost: 0,
-                        price: 0, // 売れない？
-                        stock: 1,
-                        category: 'other',
-                        description: '持っているといいことがあるかも？',
-                        isSold: false,
-                        createdAt: Date.now()
-                    });
+                    if (!user.inventory) user.inventory = [];
+                    const existing = user.inventory.find(inv => inv.itemId === itemId);
+                    if (existing) {
+                        existing.quantity += 1;
+                    } else {
+                        user.inventory.push({
+                            id: crypto.randomUUID(),
+                            itemId: itemId,
+                            name: itemData.name,
+                            quantity: 1
+                        });
+                    }
                 }
 
                 // 履歴

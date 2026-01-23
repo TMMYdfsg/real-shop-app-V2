@@ -64,6 +64,8 @@ export const SettingsApp: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     const [wallpaperError, setWallpaperError] = useState('');
     const [wallpaperUrl, setWallpaperUrl] = useState('');
     const [galleryImages, setGalleryImages] = useState<string[]>([]);
+    const [newName, setNewName] = useState(currentUser?.name || '');
+    const [isSaving, setIsSaving] = useState(false);
 
     const baseSmartphoneSettings = useMemo(() => ({
         theme: 'system' as const,
@@ -112,6 +114,12 @@ export const SettingsApp: React.FC<{ onClose: () => void }> = ({ onClose }) => {
             setGalleryImages([]);
         }
     }, [currentUser?.id]);
+
+    useEffect(() => {
+        if (activeView === 'profile') {
+            setNewName(currentUser?.name || '');
+        }
+    }, [activeView, currentUser?.name]);
 
     const handlePlayPreview = (filename: string) => {
         const audio = new Audio(`/sounds/${filename}`);
@@ -700,9 +708,6 @@ export const SettingsApp: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     }
 
     if (activeView === 'profile') {
-        const [newName, setNewName] = useState(currentUser?.name || '');
-        const [isSaving, setIsSaving] = useState(false);
-
         const handleSaveName = async () => {
             if (!newName.trim()) {
                 alert('名前を入力してください');
