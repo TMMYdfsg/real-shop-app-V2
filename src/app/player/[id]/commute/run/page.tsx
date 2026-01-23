@@ -199,14 +199,14 @@ export default function CommuteRunPage() {
                             {result.cost > 0 && (
                                 <div className="flex justify-between text-red-500 font-bold">
                                     <span>通勤コスト</span>
-                                    <span>-¥{result.cost.toLocaleString()}</span>
+                                    <span>-{result.cost.toLocaleString()}枚</span>
                                 </div>
                             )}
 
                             {result.minigameBonus > 0 && (
                                 <div className="flex justify-between text-green-600 font-bold">
                                     <span>安全運転ボーナス</span>
-                                    <span>+¥{result.minigameBonus.toLocaleString()}</span>
+                                    <span>+{result.minigameBonus.toLocaleString()}枚</span>
                                 </div>
                             )}
 

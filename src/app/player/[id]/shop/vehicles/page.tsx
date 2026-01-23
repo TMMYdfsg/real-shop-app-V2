@@ -24,10 +24,10 @@ export default function VehicleShopPage() {
     const handleGetLicense = async () => {
         if (!currentUser) return;
         if (currentUser.balance < 300000) {
-            alert('お金が足りません（必要: ¥300,000）');
+            alert('お金が足りません（必要: 300,000枚）');
             return;
         }
-        if (!confirm('教習所に通って免許を取得しますか？（費用: ¥300,000）')) return;
+        if (!confirm('教習所に通って免許を取得しますか？（費用: 300,000枚）')) return;
 
         setIsProcessing(true);
         try {
@@ -107,7 +107,7 @@ export default function VehicleShopPage() {
                 <div className="flex justify-between items-center bg-white p-4 rounded-xl shadow-sm">
                     <div>
                         <div className="text-xs text-gray-500">所持金</div>
-                        <div className="font-bold text-xl">¥{currentUser.balance.toLocaleString()}</div>
+                        <div className="font-bold text-xl">{currentUser.balance.toLocaleString()}枚</div>
                     </div>
                     <div className="text-right">
                         <div className="text-xs text-gray-500">運転免許</div>
@@ -125,7 +125,7 @@ export default function VehicleShopPage() {
                             <div className="flex-1">
                                 <h3 className="font-bold text-lg">運転免許を取得しよう</h3>
                                 <p className="text-sm text-gray-600">車を運転するには免許が必要です。</p>
-                                <div className="font-bold text-indigo-600 mt-1">費用: ¥300,000</div>
+                                <div className="font-bold text-indigo-600 mt-1">費用: 300,000枚</div>
                             </div>
                         </div>
                         <div className="mt-4">
@@ -190,7 +190,7 @@ export default function VehicleShopPage() {
                                             )}
                                         </div>
                                         <div className="text-indigo-600 font-bold text-lg">
-                                            ¥{vehicle.price.toLocaleString()}
+                                            {vehicle.price.toLocaleString()}枚
                                         </div>
                                         <p className="text-xs text-gray-500 mt-1 line-clamp-2">
                                             {vehicle.description}
@@ -202,7 +202,7 @@ export default function VehicleShopPage() {
                                             {vehicle.fuelConsumption && (
                                                 <div>⛽ 燃費: {vehicle.fuelConsumption}</div>
                                             )}
-                                            <div>🔧 維持費: ¥{vehicle.maintenanceCost.toLocaleString()}</div>
+                                            <div>🔧 維持費: {vehicle.maintenanceCost.toLocaleString()}枚</div>
                                         </div>
                                     </div>
                                 </div>
@@ -235,7 +235,7 @@ export default function VehicleShopPage() {
                             <div className="text-6xl mb-2">{selectedVehicle.image}</div>
                             <h3 className="text-xl font-bold">{selectedVehicle.name}</h3>
                             <div className="text-2xl font-bold text-indigo-600 mt-2">
-                                ¥{selectedVehicle.price.toLocaleString()}
+                                {selectedVehicle.price.toLocaleString()}枚
                             </div>
                         </div>
 
@@ -250,7 +250,7 @@ export default function VehicleShopPage() {
                             </div>
                             <div className="flex justify-between">
                                 <span>維持費・修理費</span>
-                                <span className="font-bold">¥{selectedVehicle.maintenanceCost.toLocaleString()}〜</span>
+                                <span className="font-bold">{selectedVehicle.maintenanceCost.toLocaleString()}枚〜</span>
                             </div>
                             {selectedVehicle.type === 'car' && (
                                 <div className="text-xs text-red-500 mt-2">

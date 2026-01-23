@@ -13,6 +13,7 @@ import { getGameState } from '@/lib/dataStore';
 import { calculateSalary } from '@/lib/career';
 import { JOBS, PART_TIME_JOBS } from '@/lib/gameData';
 import { COMPANY_BASE_SALARY } from '@/lib/companyData';
+import { setSwitchBotLightForDayState } from '@/lib/switchbot';
 
 // // export const dynamic = 'force-dynamic';
 
@@ -129,6 +130,38 @@ export async function POST(request: NextRequest) {
                 return state;
             });
             lastStockTickAt = now;
+            return NextResponse.json({ success: true });
+        }
+
+        if (type === 'travel_time') {
+            const { targetEra, cost } = safeParseDetails(details);
+            const validEra = targetEra === 'past' || targetEra === 'future' || targetEra === 'present';
+            if (!validEra) {
+                return NextResponse.json({ success: false, message: '時代が無効です' }, { status: 400 });
+            }
+
+            await updateGameState((state) => {
+                const user = state.users.find(u => u.id === requesterId);
+                if (!user) return state;
+
+                const travelCost = Math.max(0, Number(cost) || 0);
+                if (travelCost > 0) {
+                    if (user.balance < travelCost) return state;
+                    user.balance -= travelCost;
+                    if (!user.transactions) user.transactions = [];
+                    user.transactions.push({
+                        id: uuidv4(),
+                        type: 'payment',
+                        amount: travelCost,
+                        description: `タイムトラベル (${targetEra})`,
+                        timestamp: Date.now()
+                    });
+                }
+
+                user.timeEra = targetEra;
+                return state;
+            });
+
             return NextResponse.json({ success: true });
         }
 
@@ -521,17 +554,33 @@ export async function POST(request: NextRequest) {
         // --- Virtual Currency Actions ---
         if (type === 'crypto_create') {
             const { name, symbol, price, volatility, description } = safeParseDetails(details);
+            if (!name || !symbol || price === undefined) {
+                return NextResponse.json({ success: false, message: '通貨名・単位・価格が必要です' }, { status: 400 });
+            }
+
+            let permissionError: string | null = null;
+            let validationError: string | null = null;
             await updateGameState((state) => {
                 const user = state.users.find(u => u.id === requesterId);
+                if (!user || user.role !== 'banker') {
+                    permissionError = '仮想通貨の作成は銀行員のみ可能です';
+                    return state;
+                }
                 if (user && user.role === 'banker') {
+                    const numericPrice = Number(price);
+                    const numericVolatility = Number(volatility ?? 0.1);
+                    if (Number.isNaN(numericPrice)) {
+                        validationError = '価格が正しくありません';
+                        return state;
+                    }
                     const newCrypto = {
                         id: `cry_${uuidv4()}`,
                         name,
                         symbol,
-                        price: Number(price),
-                        previousPrice: Number(price),
-                        volatility: Number(volatility),
-                        priceHistory: [Number(price)],
+                        price: numericPrice,
+                        previousPrice: numericPrice,
+                        volatility: Number.isNaN(numericVolatility) ? 0.1 : numericVolatility,
+                        priceHistory: [numericPrice],
                         creatorId: user.id,
                         description,
                         createdAt: Date.now(),
@@ -543,6 +592,12 @@ export async function POST(request: NextRequest) {
                 }
                 return state;
             });
+            if (permissionError) {
+                return NextResponse.json({ success: false, message: permissionError }, { status: 403 });
+            }
+            if (validationError) {
+                return NextResponse.json({ success: false, message: validationError }, { status: 400 });
+            }
             return NextResponse.json({ success: true, message: '仮想通貨を作成しました' });
         }
 
@@ -756,11 +811,11 @@ export async function POST(request: NextRequest) {
                             settings: { customIcons: [] }
                         };
                         user.smartphone = { ...baseSmartphone, ...smartphone };
-                        if (smartphone.settings) {
+                        if (smartphone.settings && baseSmartphone.settings && user.smartphone) {
                             user.smartphone.settings = {
                                 ...baseSmartphone.settings,
                                 ...smartphone.settings,
-                                customIcons: smartphone.settings.customIcons ?? baseSmartphone.settings?.customIcons ?? []
+                                customIcons: smartphone.settings.customIcons ?? (baseSmartphone.settings.customIcons ?? [])
                             };
                         }
                     }
@@ -1911,7 +1966,7 @@ export async function POST(request: NextRequest) {
                     const fuelConsumed = Math.ceil(distance / fuelEff);
                     user.carFuel = Math.max(0, (user.carFuel || 100) - fuelConsumed);
 
-                    // ガソリン代 (1L 170円換算)
+                    // ガソリン代 (1L 170枚換算)
                     cost += fuelConsumed * 170;
                 }
 
@@ -2030,7 +2085,7 @@ export async function POST(request: NextRequest) {
             await updateGameState((state) => {
                 const user = state.users.find(u => u.id === requesterId);
                 const { count } = details ? safeParseDetails(details) : { count: 1 };
-                const cost = count * 300; // 1回300円 hardcoded for now
+                const cost = count * 300; // 1回300枚 hardcoded for now
 
                 if (user && user.balance >= cost) {
                     user.balance -= cost;
@@ -2339,7 +2394,7 @@ export async function POST(request: NextRequest) {
                 // 転売チェック (Phase 6)
                 const checkResult = checkResalePrice(cost, price);
                 if (checkResult !== 'ok') {
-                    const message = `転売疑惑: ${stock}個を仕入れ値${cost}円に対して${price}円で販売設定 (倍率: ${(price / cost).toFixed(1)}倍)`;
+                    const message = `転売疑惑: ${stock}個を仕入れ値${cost}枚に対して${price}枚で販売設定 (倍率: ${(price / cost).toFixed(1)}倍)`;
                     // 警告or重大ログ
                     logAudit(user, 'resale_attempt', JSON.stringify({ itemId, cost, price, stock }), checkResult);
                 }
@@ -2666,7 +2721,7 @@ export async function POST(request: NextRequest) {
                         timestamp: Date.now()
                     });
 
-                    logAudit(user, 'high_value_transaction', `施設建設: ${name} (${cost}円)`, 'info');
+                    logAudit(user, 'high_value_transaction', `施設建設: ${name} (${cost}枚)`, 'info');
                 }
                 return state;
             });
@@ -2712,7 +2767,7 @@ export async function POST(request: NextRequest) {
 
                     // 監査ログ (高額融資の場合)
                     if (loanAmount >= 10000000) {
-                        logAudit(user, 'high_value_transaction', `高額融資実行: ${loanAmount}円`, 'info');
+                        logAudit(user, 'high_value_transaction', `高額融資実行: ${loanAmount}枚`, 'info');
                     }
 
                     // 融資実行
@@ -2746,7 +2801,7 @@ export async function POST(request: NextRequest) {
                     eventToBroadcast = {
                         type: 'ADMIN_MESSAGE',
                         payload: {
-                            message: `🏦 ${user.name}様に ${loanAmount.toLocaleString()}円 の融資が実行されました。`,
+                            message: `🏦 ${user.name}様に ${loanAmount.toLocaleString()}枚 の融資が実行されました。`,
                             severity: 'info'
                         },
                         timestamp: Date.now(),
@@ -3044,6 +3099,8 @@ export async function POST(request: NextRequest) {
                         thumbnailColor: color || '#ff0000',
                         views: 0,
                         likes: 0,
+                        likedBy: [],
+                        subscribers: 0,
                         timestamp: Date.now()
                     });
                 }
@@ -3052,14 +3109,72 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ success: true, message: '動画をアップロードしました' });
         }
 
+        // Video Like
+        if (type === 'like_video') {
+            const { videoId } = safeParseDetails(details);
+            await updateGameState((state) => {
+                const video = state.videos?.find(v => v.id === videoId);
+                if (video) {
+                    if (video.likedBy?.includes(requesterId)) {
+                        // Unlike
+                        video.likedBy = video.likedBy.filter(id => id !== requesterId);
+                        video.likes--;
+                    } else {
+                        // Like
+                        if (!video.likedBy) video.likedBy = [];
+                        video.likedBy.push(requesterId);
+                        video.likes++;
+                    }
+                }
+                return state;
+            });
+            return NextResponse.json({ success: true });
+        }
+
+        // Channel Subscribe
+        if (type === 'subscribe_channel') {
+            const { channelOwnerId } = safeParseDetails(details);
+            await updateGameState((state) => {
+                const targetUser = state.users.find(u => u.id === channelOwnerId);
+                if (targetUser) {
+                    if (!targetUser.channelSubscribers) targetUser.channelSubscribers = [];
+                    if (targetUser.channelSubscribers.includes(requesterId)) {
+                        // Unsubscribe
+                        targetUser.channelSubscribers = targetUser.channelSubscribers.filter(id => id !== requesterId);
+                    } else {
+                        // Subscribe
+                        targetUser.channelSubscribers.push(requesterId);
+                    }
+                }
+                return state;
+            });
+            return NextResponse.json({ success: true });
+        }
+
+        // Channel Icon Change
+        if (type === 'set_channel_icon') {
+            const { icon } = safeParseDetails(details);
+            await updateGameState((state) => {
+                const user = state.users.find(u => u.id === requesterId);
+                if (user) {
+                    user.channelIcon = icon;
+                }
+                return state;
+            });
+            return NextResponse.json({ success: true, message: 'チャンネルアイコンを変更しました' });
+        }
+
         // -----------------------------------------------------
         // ターン経過処理 (next_turn)
         // -----------------------------------------------------
         if (type === 'next_turn') {
+            let prevIsDay: boolean | null = null;
+            let nextIsDay: boolean | null = null;
             const { simulateTurn } = require('@/lib/simulation');
             const { EVENT_TEMPLATES, PLAYER_EVENT_TEMPLATES, EVENT_SPAWN_RATES } = require('@/lib/eventData');
 
             await updateGameState((state) => {
+                prevIsDay = state.isDay;
                 // 1. Increment Turn
                 state.turn += 1;
 
@@ -3071,7 +3186,7 @@ export async function POST(request: NextRequest) {
 
                 if (Math.random() < EVENT_SPAWN_RATES.global) {
                     const template = EVENT_TEMPLATES[Math.floor(Math.random() * EVENT_TEMPLATES.length)];
-                    const isDuplicate = newState.activeEvents.some((e) => e.type === template.type && !e.targetUserId);
+                    const isDuplicate = newState.activeEvents.some((e: any) => e.type === template.type && !e.targetUserId);
                     if (!isDuplicate) {
                         newState.activeEvents.push({
                             ...template,
@@ -3088,12 +3203,12 @@ export async function POST(request: NextRequest) {
                 }
 
                 newState.users
-                    .filter((u) => u.role === 'player')
-                    .forEach((user) => {
+                    .filter((u: any) => u.role === 'player')
+                    .forEach((user: any) => {
                         if (Math.random() >= EVENT_SPAWN_RATES.player) return;
                         const template = PLAYER_EVENT_TEMPLATES[Math.floor(Math.random() * PLAYER_EVENT_TEMPLATES.length)];
                         const existsForUser = newState.activeEvents.some(
-                            (e) => e.type === template.type && e.targetUserId === user.id
+                            (e: any) => e.type === template.type && e.targetUserId === user.id
                         );
                         if (existsForUser) return;
                         newState.activeEvents.push({
@@ -3115,8 +3230,14 @@ export async function POST(request: NextRequest) {
                 newState.timeRemaining = newState.settings.turnDuration;
                 newState.lastTick = Date.now();
 
+                nextIsDay = newState.isDay;
                 return newState;
             });
+            if (prevIsDay !== null && nextIsDay !== null && prevIsDay !== nextIsDay) {
+                setSwitchBotLightForDayState(nextIsDay).catch((error: any) => {
+                    console.error('[SwitchBot] Failed to sync day/night (action):', error);
+                });
+            }
             return NextResponse.json({ success: true, message: '新しいターンが始まりました' });
         }
 

@@ -4,6 +4,7 @@ import { useRealtime } from '@/hooks/useRealtime';
 import { VideoContent } from '@/types';
 import { useToast } from '@/components/ui/ToastProvider';
 import { AppHeader } from './AppHeader';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export default function VideoApp({ onClose }: { onClose: () => void }) {
     const { currentUser, sendRequest } = useGame();
@@ -13,6 +14,8 @@ export default function VideoApp({ onClose }: { onClose: () => void }) {
     // UI State
     const [view, setView] = useState<'list' | 'upload' | 'watch'>('list');
     const [selectedVideo, setSelectedVideo] = useState<VideoContent | null>(null);
+    const [likedVideoIds, setLikedVideoIds] = useState<Set<string>>(new Set());
+    const [subscribedChannels, setSubscribedChannels] = useState<Set<string>>(new Set());
 
     // Upload State
     const [title, setTitle] = useState('');
@@ -22,6 +25,12 @@ export default function VideoApp({ onClose }: { onClose: () => void }) {
     const [file, setFile] = useState<File | null>(null);
     const [isUploading, setIsUploading] = useState(false);
     const [uploadProgress, setUploadProgress] = useState(0);
+
+    const buildPoster = (color: string, title: string) => {
+        const safeTitle = (title || '動画').slice(0, 24);
+        const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='640' height='360'><rect width='100%' height='100%' fill='${color}'/><text x='50%' y='50%' text-anchor='middle' fill='rgba(255,255,255,0.7)' font-size='32' font-family='Arial'>${safeTitle}</text></svg>`;
+        return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
+    };
 
     // Helper: Check video duration
     const checkVideoDuration = (file: File): Promise<boolean> => {
@@ -110,6 +119,46 @@ export default function VideoApp({ onClose }: { onClose: () => void }) {
         setView('watch');
     };
 
+    const handleLikeVideo = async (videoId: string) => {
+        if (!currentUser) return;
+        try {
+            await sendRequest('like_video', 0, { videoId });
+            setLikedVideoIds(prev => {
+                const newSet = new Set(prev);
+                if (newSet.has(videoId)) {
+                    newSet.delete(videoId);
+                } else {
+                    newSet.add(videoId);
+                }
+                return newSet;
+            });
+            addToast('高評価を送信しました！', 'success');
+        } catch (error) {
+            console.error(error);
+            addToast('エラーが発生しました', 'error');
+        }
+    };
+
+    const handleSubscribeChannel = async (channelOwnerId: string) => {
+        if (!currentUser) return;
+        try {
+            await sendRequest('subscribe_channel', 0, { channelOwnerId });
+            setSubscribedChannels(prev => {
+                const newSet = new Set(prev);
+                if (newSet.has(channelOwnerId)) {
+                    newSet.delete(channelOwnerId);
+                } else {
+                    newSet.add(channelOwnerId);
+                }
+                return newSet;
+            });
+            addToast('チャンネルを登録しました！', 'success');
+        } catch (error) {
+            console.error(error);
+            addToast('エラーが発生しました', 'error');
+        }
+    };
+
     return (
         <div className="h-full bg-white flex flex-col font-sans text-gray-900">
             <AppHeader 
@@ -118,13 +167,6 @@ export default function VideoApp({ onClose }: { onClose: () => void }) {
                     if (view === 'watch') setView('list');
                     else onClose();
                 }}
-                rightActions={
-                    view === 'list' ? (
-                        <button onClick={() => setView('upload')} className="p-2 text-gray-600 hover:bg-gray-100 rounded-full">
-                            📹
-                        </button>
-                    ) : undefined
-                }
             />
 
             {/* Content Switcher */}
@@ -133,24 +175,32 @@ export default function VideoApp({ onClose }: { onClose: () => void }) {
                     <h2 className="font-bold text-xl">動画をアップロード</h2>
 
                     {/* File Input */}
-                    <div className="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center cursor-pointer hover:bg-gray-50 transition relative">
-                        <input
-                            type="file"
-                            accept="video/mp4,video/webm"
-                            onChange={(e) => setFile(e.target.files?.[0] || null)}
-                            className="absolute inset-0 opacity-0 cursor-pointer"
-                        />
-                        <div className="text-4xl mb-2">📁</div>
-                        <p className="font-bold text-gray-500">{file ? file.name : '動画ファイルを選択 (MP4)'}</p>
+                    <div>
+                        <label htmlFor="video-file" className="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center cursor-pointer hover:bg-gray-50 transition block">
+                            <input
+                                id="video-file"
+                                type="file"
+                                accept="video/mp4,video/webm"
+                                onChange={(e) => setFile(e.target.files?.[0] || null)}
+                                className="hidden"
+                                title="動画ファイルを選択"
+                            />
+                            <div className="text-4xl mb-2">📁</div>
+                            <p className="font-bold text-gray-500">{file ? file.name : '動画ファイルを選択 (MP4)'}</p>
+                        </label>
                     </div>
 
-                    <input
-                        type="text"
-                        value={title}
-                        onChange={(e) => setTitle(e.target.value)}
-                        placeholder="タイトル (必須)"
-                        className="w-full p-3 bg-gray-100 rounded-lg outline-none focus:ring-2 focus:ring-red-500"
-                    />
+                    <div>
+                        <label htmlFor="video-title" className="text-sm font-bold text-gray-500 block mb-2">タイトル (必須)</label>
+                        <input
+                            id="video-title"
+                            type="text"
+                            value={title}
+                            onChange={(e) => setTitle(e.target.value)}
+                            placeholder="タイトルを入力してください"
+                            className="w-full p-3 bg-gray-100 rounded-lg outline-none focus:ring-2 focus:ring-red-500"
+                        />
+                    </div>
 
                     <textarea
                         value={description}
@@ -176,6 +226,7 @@ export default function VideoApp({ onClose }: { onClose: () => void }) {
                                     onClick={() => setColor(c)}
                                     className={`w-8 h-8 rounded-full border-4 ${color === c ? 'border-black' : 'border-transparent'}`}
                                     style={{ backgroundColor: c }}
+                                    aria-label={`色 ${c} を選択`}
                                 />
                             ))}
                         </div>
@@ -215,10 +266,12 @@ export default function VideoApp({ onClose }: { onClose: () => void }) {
                                 src={selectedVideo.url}
                                 controls
                                 autoPlay
+                                preload="metadata"
+                                playsInline
                                 className="w-full h-full object-contain"
                             />
                         ) : (
-                            <div className="w-full h-full flex items-center justify-center" style={{ backgroundColor: selectedVideo.thumbnailColor }}>
+                            <div className="w-full h-full flex items-center justify-center" style={{ backgroundColor: selectedVideo.thumbnailColor || '#cccccc' }}>
                                 <span className="text-white/50 font-bold">動画ファイルなし</span>
                             </div>
                         )}
@@ -230,23 +283,60 @@ export default function VideoApp({ onClose }: { onClose: () => void }) {
                         <div className="flex items-center justify-between text-gray-400 text-xs mb-4">
                             <span>{selectedVideo.views}回視聴 • {new Date(selectedVideo.timestamp).toLocaleDateString()}</span>
                             <div className="flex gap-4">
-                                <button className="flex items-center gap-1 hover:text-white">👍 {selectedVideo.likes}</button>
+                                <motion.button
+                                    whileTap={{ scale: 0.8 }}
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleLikeVideo(selectedVideo.id);
+                                    }}
+                                    className={`flex items-center gap-1 transition-colors ${
+                                        likedVideoIds.has(selectedVideo.id) ? 'text-red-500' : 'hover:text-white'
+                                    }`}
+                                >
+                                    <motion.span
+                                        key={`like-${selectedVideo.id}-${likedVideoIds.has(selectedVideo.id)}`}
+                                        initial={{ scale: 0 }}
+                                        animate={{ scale: 1 }}
+                                        className="text-lg"
+                                    >
+                                        {likedVideoIds.has(selectedVideo.id) ? '❤️' : '🤍'}
+                                    </motion.span>
+                                    {selectedVideo.likes}
+                                </motion.button>
                                 <button className="flex items-center gap-1 hover:text-white">👎</button>
                                 <button className="flex items-center gap-1 hover:text-white">🔗 共有</button>
                             </div>
                         </div>
 
                         <div className="flex items-center gap-3 border-y border-gray-800 py-3 mb-4">
-                            <div className="w-10 h-10 bg-gray-700 rounded-full flex-shrink-0 flex items-center justify-center">
-                                👤
+                            <div className="w-10 h-10 bg-gray-700 rounded-full flex-shrink-0 flex items-center justify-center text-lg">
+                                {selectedVideo.uploaderName[0]}
                             </div>
                             <div className="flex-1">
                                 <div className="font-bold">{selectedVideo.uploaderName}</div>
-                                <div className="text-xs text-gray-400">チャンネル登録者数 100万人</div>
+                                <div className="text-xs text-gray-400">登録者数 {selectedVideo.subscribers ?? 0}</div>
                             </div>
-                            <button className="bg-white text-black font-bold px-4 py-2 rounded-full text-xs hover:bg-gray-200">
-                                登録
-                            </button>
+                            <motion.button
+                                whileTap={{ scale: 0.95 }}
+                                whileHover={{ scale: 1.05 }}
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleSubscribeChannel(selectedVideo.uploaderId);
+                                }}
+                                className={`font-bold px-4 py-2 rounded-full text-xs transition-all ${
+                                    subscribedChannels.has(selectedVideo.uploaderId)
+                                        ? 'bg-gray-600 text-white'
+                                        : 'bg-white text-black hover:bg-gray-200'
+                                }`}
+                            >
+                                <motion.span
+                                    key={`sub-${selectedVideo.uploaderId}-${subscribedChannels.has(selectedVideo.uploaderId)}`}
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                >
+                                    {subscribedChannels.has(selectedVideo.uploaderId) ? '登録済み' : '登録'}
+                                </motion.span>
+                            </motion.button>
                         </div>
 
                         <div className="bg-gray-900 rounded-xl p-3 text-sm text-gray-300 whitespace-pre-wrap">
@@ -271,7 +361,14 @@ export default function VideoApp({ onClose }: { onClose: () => void }) {
                                 {/* Thumbnail */}
                                 <div className={`aspect-video w-full relative mb-2 flex items-center justify-center overflow-hidden`} style={{ backgroundColor: video.thumbnailColor }}>
                                     {video.url ? (
-                                        <video src={video.url} className="w-full h-full object-cover pointer-events-none" />
+                                        <video
+                                            src={video.url}
+                                            className="w-full h-full object-cover pointer-events-none"
+                                            muted
+                                            playsInline
+                                            preload="metadata"
+                                            poster={buildPoster(video.thumbnailColor, video.title)}
+                                        />
                                     ) : (
                                         <div className="absolute inset-0 flex items-center justify-center text-white/50 text-4xl">▶</div>
                                     )}
@@ -295,6 +392,12 @@ export default function VideoApp({ onClose }: { onClose: () => void }) {
                             動画がありません。<br />最初の動画を投稿しよう！
                         </div>
                     )}
+                    <button
+                        onClick={() => setView('upload')}
+                        className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-red-600 text-white font-bold px-6 py-3 rounded-full shadow-lg hover:bg-red-500"
+                    >
+                        動画をアップロード
+                    </button>
                 </div>
             )}
         </div>

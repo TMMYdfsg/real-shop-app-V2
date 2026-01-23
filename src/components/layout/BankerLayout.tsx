@@ -3,15 +3,25 @@
 import React, { useRef, useEffect } from 'react';
 import { Sidebar } from './Sidebar';
 import { useGame } from '@/context/GameContext';
+import { useConditionalReload } from '@/hooks/useConditionalReload';
 import { Button } from '@/components/ui/Button';
 import { useRouter } from 'next/navigation';
 import { PageTransition } from './PageTransition';
 import { useSWRConfig } from 'swr';
 
 const BankerLayout: React.FC<{ children: React.ReactNode; initialData?: any }> = ({ children, initialData }) => {
-    const { currentUser } = useGame();
+    const { currentUser, gameState } = useGame();
     const router = useRouter();
     const { mutate } = useSWRConfig();
+
+    // 管理画面でのリロード仕組み: 10秒後に自動リロード（データ変更時のみ）
+    useConditionalReload({
+        isAdminScreen: () => true, // 常に管理画面
+        delayBeforeReloadMs: 10000, // 10秒後にリロード
+        onBeforeReload: () => {
+            console.log('[BankerLayout] データが変更されました。10秒後に自動リロードします...');
+        },
+    });
 
     // Hydrate SWR cache with server-side data
     useEffect(() => {
@@ -19,6 +29,20 @@ const BankerLayout: React.FC<{ children: React.ReactNode; initialData?: any }> =
             mutate('/api/game', initialData, false);
         }
     }, [initialData, mutate]);
+
+    // ゲーム状態の変更を検知してリロードをスケジュール
+    const prevRevisionRef = useRef<number | undefined>(gameState?.eventRevision);
+    useEffect(() => {
+        if (
+            gameState?.eventRevision !== undefined &&
+            prevRevisionRef.current !== undefined &&
+            gameState.eventRevision !== prevRevisionRef.current
+        ) {
+            console.log(`[BankerLayout] Game state changed (revision: ${prevRevisionRef.current} -> ${gameState.eventRevision})`);
+            // この時点でuseConditionalReloadが自動的に10秒後のリロードをスケジュール
+        }
+        prevRevisionRef.current = gameState?.eventRevision;
+    }, [gameState?.eventRevision]);
 
     const navItems = [
         { label: 'ホーム (Dashboard)', path: '/banker', icon: '📊' },

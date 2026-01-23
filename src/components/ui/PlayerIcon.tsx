@@ -16,11 +16,12 @@ export const PlayerIcon: React.FC<PlayerIconProps> = ({
     size = 48,
     className = ''
 }) => {
-    // カスタムアイコン（Base64）かどうかチェック
+    // カスタムアイコン（Base64）か外部URLかどうかチェック
     const isCustomIcon = playerIcon?.startsWith('data:image');
+    const isRemoteIcon = playerIcon?.startsWith('http://') || playerIcon?.startsWith('https://');
 
     // プリセットアイコンのパスを生成
-    const iconPath: string = isCustomIcon
+    const iconPath: string = isCustomIcon || isRemoteIcon
         ? playerIcon!
         : playerIcon
             ? `/icons/player/${playerIcon}`

@@ -63,7 +63,7 @@ export default function PointsPage() {
 
                         <div style={{ marginTop: '1rem', borderTop: '1px dashed #ccc', paddingTop: '0.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <p style={{ fontSize: '0.9rem', color: '#666' }}>
-                                ※ 100円で1ポイント
+                                ※ 100枚で1ポイント
                             </p>
                             <Button
                                 size="sm"

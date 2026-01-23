@@ -44,7 +44,7 @@ export const RegionModal: React.FC<RegionModalProps> = ({
                             >
                                 <span className="font-bold mb-1">{land.address}</span>
                                 <span className={`text-[10px] ${isOwned ? 'text-blue-500' : (canAfford ? 'text-indigo-600' : 'text-red-500')}`}>
-                                    {isOwned ? '所有済' : `¥${(land.price / 10000).toLocaleString()}万`}
+                                    {isOwned ? '所有済' : `${(land.price / 10000).toLocaleString()}万枚`}
                                 </span>
                             </button>
                         );

@@ -111,15 +111,15 @@ export const PlaceDetailModal: React.FC<PlaceDetailModalProps> = ({
                         <div className="grid grid-cols-3 gap-2 text-center text-sm">
                             <div className="p-2 border rounded">
                                 <div className="text-gray-500">売上</div>
-                                <div className="font-bold text-indigo-600">¥{place.stats.sales.toLocaleString()}</div>
+                                <div className="font-bold text-indigo-600">{place.stats.sales.toLocaleString()}枚</div>
                             </div>
                             <div className="p-2 border rounded">
                                 <div className="text-gray-500">経費</div>
-                                <div className="font-bold text-red-500">¥{place.stats.expenses.toLocaleString()}</div>
+                                <div className="font-bold text-red-500">{place.stats.expenses.toLocaleString()}枚</div>
                             </div>
                             <div className="p-2 border rounded bg-indigo-50">
                                 <div className="text-gray-500">純利益</div>
-                                <div className="font-bold text-indigo-800">¥{place.stats.profit.toLocaleString()}</div>
+                                <div className="font-bold text-indigo-800">{place.stats.profit.toLocaleString()}枚</div>
                             </div>
                         </div>
                     </div>
@@ -139,7 +139,7 @@ export const PlaceDetailModal: React.FC<PlaceDetailModalProps> = ({
                             </div>
                             <div className="p-2 border rounded col-span-2">
                                 <div className="text-gray-500">基準給与</div>
-                                <div className="font-bold text-gray-800">¥{place.companyProfile.baseSalary.toLocaleString()}</div>
+                                <div className="font-bold text-gray-800">{place.companyProfile.baseSalary.toLocaleString()}枚</div>
                             </div>
                         </div>
                         {companyBonusSummary && (
@@ -160,7 +160,7 @@ export const PlaceDetailModal: React.FC<PlaceDetailModalProps> = ({
                                     </div>
                                     <div className="flex items-center justify-between bg-amber-200/80 p-2 rounded-lg">
                                         <span className="text-amber-900">見込み給与</span>
-                                        <span className="font-bold text-amber-900">¥{companyBonusSummary.estimatedSalary.toLocaleString()}</span>
+                                        <span className="font-bold text-amber-900">{companyBonusSummary.estimatedSalary.toLocaleString()}枚</span>
                                     </div>
                                 </div>
                                 <div className="mt-2 text-[11px] text-amber-800">

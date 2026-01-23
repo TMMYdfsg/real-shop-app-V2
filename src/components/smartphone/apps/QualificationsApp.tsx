@@ -171,7 +171,7 @@ export const QualificationsApp: React.FC<{ onBack: () => void }> = ({ onBack }) 
                                     </div>
                                     <div className="bg-slate-50 rounded-lg p-2 flex items-center justify-between">
                                         <span>受験料</span>
-                                        <span className="font-bold text-slate-700">{qual.feeYen ? `${qual.feeYen.toLocaleString()}円` : '無料'}</span>
+                                        <span className="font-bold text-slate-700">{qual.feeYen ? `${qual.feeYen.toLocaleString()}枚` : '無料'}</span>
                                     </div>
                                 </div>
                                 <div className="mt-3">
@@ -218,7 +218,7 @@ export const QualificationsApp: React.FC<{ onBack: () => void }> = ({ onBack }) 
                                         <div className="bg-white border-2 border-blue-100 rounded-2xl p-3 mb-3 w-full max-w-[200px] mx-auto shadow-sm">
                                             <div className="text-[10px] font-bold text-blue-500 mb-1">受験料</div>
                                             <div className="text-xl font-black text-blue-900">
-                                                {examQual.feeYen ? `¥${examQual.feeYen.toLocaleString()}` : '無料'}
+                                                {examQual.feeYen ? `${examQual.feeYen.toLocaleString()}枚` : '無料'}
                                             </div>
                                         </div>
                                         <Button fullWidth onClick={() => setExamStep('question')}>試験を開始</Button>

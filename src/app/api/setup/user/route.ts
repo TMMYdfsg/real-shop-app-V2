@@ -53,6 +53,7 @@ export async function POST(request: Request) {
             traits: [],
             skills: {},
             needsTraitSelection: false,
+            timeEra: 'present',
             inventory: [],
             stocks: {},
             forbiddenStocks: {},

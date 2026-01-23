@@ -4,6 +4,7 @@ import { GameState, User, Transaction } from '@/types';
 import crypto from 'crypto';
 import { generateLands, PREFECTURES } from '@/lib/cityData';
 import { eventManager } from '@/lib/eventManager';
+import { setSwitchBotLightForDayState } from '@/lib/switchbot';
 import { STOCKS as MASTER_STOCKS, FORBIDDEN_STOCKS as MASTER_FORBIDDEN_STOCKS, INITIAL_MONEY, NEWS_EVENTS as MASTER_NEWS_EVENTS, NPCS as MASTER_NPCS } from '@/lib/gameData';
 
 // // export const dynamic = 'force-dynamic';
@@ -216,7 +217,10 @@ export async function POST(req: NextRequest) {
         // ターン進行 (Next Turn)
         // -----------------------------------------------------
         if (action === 'next_turn') {
+            let prevIsDay: boolean | null = null;
+            let nextIsDay: boolean | null = null;
             await updateGameState((state) => {
+                prevIsDay = state.isDay;
                 if (state.isDay) {
                     state.isDay = false;
                 } else {
@@ -493,8 +497,14 @@ export async function POST(req: NextRequest) {
                         state.roulette.items = activePreset.items;
                     }
                 }
+                nextIsDay = state.isDay;
                 return state;
             });
+            if (prevIsDay !== null && nextIsDay !== null && prevIsDay !== nextIsDay) {
+                setSwitchBotLightForDayState(nextIsDay).catch((error) => {
+                    console.error('[SwitchBot] Failed to sync day/night (admin):', error);
+                });
+            }
             return NextResponse.json({ success: true });
         }
 

@@ -118,7 +118,7 @@ export default function LandPurchasePhase() {
                                         <p>経度: {parcel.lng}</p>
                                     </div>
                                     <div className="text-2xl font-bold text-green-600 mb-4">
-                                        ¥{parcel.price.toLocaleString()}
+                                        {parcel.price.toLocaleString()}枚
                                     </div>
                                     <button
                                         onClick={() => handleBuy(parcel.id)}

@@ -40,6 +40,7 @@ export const APPS: App[] = [
     { id: 'dark_web', name: '裏サイト', icon: <DarkWebIcon />, color: 'bg-slate-900', description: 'アクセス注意...' },
     { id: 'news', name: 'ニュース', icon: <NewsIcon />, color: 'bg-orange-600', description: '最新ニュース' },
     { id: 'video', name: '動画', icon: <VideoIcon />, color: 'bg-red-600', description: '人気の動画' },
+    { id: 'channel', name: 'チャンネル', icon: <VideoIcon />, color: 'bg-purple-600', description: 'マイチャンネル' },
 ];
 
 export const DOCK_APPS = []; // Floating dock removed as per grid-only request, but we can keep it empty or use for something else.

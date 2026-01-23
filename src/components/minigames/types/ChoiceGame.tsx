@@ -13,7 +13,7 @@ interface ChoiceGameProps {
 // Simplified questions for demo. Real app should have more.
 const QUESTIONS: Record<string, { q: string, options: string[], ans: number }[]> = {
     normal: [
-        { q: "どちらが得？", options: ["100円もらう", "50%で200円"], ans: 0 },
+        { q: "どちらが得？", options: ["100枚もらう", "50%で200枚"], ans: 0 },
         { q: "正しいのは？", options: ["早寝早起き", "徹夜ゲーム"], ans: 0 },
         { q: "あいさつは？", options: ["無視する", "元気よく"], ans: 1 },
     ],

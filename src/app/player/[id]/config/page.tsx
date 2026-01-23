@@ -113,7 +113,7 @@ export default function ConfigPage() {
                             selectedIcon={playerIcon}
                             customIcons={customIcons}
                             onSelect={(icon) => {
-                                if (icon.startsWith('data:image') && !customIcons.includes(icon)) {
+                                if ((icon.startsWith('http://') || icon.startsWith('https://')) && !customIcons.includes(icon)) {
                                     setCustomIcons((prev) => [...prev, icon]);
                                 }
                                 setPlayerIcon(icon);

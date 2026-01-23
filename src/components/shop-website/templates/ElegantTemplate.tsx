@@ -110,7 +110,7 @@ export const ElegantTemplate: React.FC<TemplateProps> = ({ website, owner }) => 
                                                 className="text-2xl font-serif"
                                                 style={{ color: customization.primaryColor }}
                                             >
-                                                ¥<span className="font-bold">{item.price.toLocaleString()}</span>
+                                                <span className="font-bold">{item.price.toLocaleString()}</span>枚
                                             </span>
                                             <span className={`text-xs font-semibold px-3 py-1 ${item.stock > 0 ? 'text-green-800 bg-green-100' : 'text-red-800 bg-red-100'}`}>
                                                 {item.stock > 0 ? `在庫あり (${item.stock})` : '在庫切れ'}

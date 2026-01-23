@@ -26,22 +26,210 @@ const DashboardCard = ({ children, className = '', title, icon }: { children: Re
     </motion.div>
 );
 
+const SOUND_LIBRARY = [
+    'BGM1.mp3',
+    'BGM2.mp3',
+    'BGM3.mp3',
+    'BGM4.mp3',
+    'BGM5.wav',
+    'BGM6.mp3',
+    'BGM7.mp3',
+    'BGM8.mp3',
+    'BGM9.mp3',
+    'BGM10.mp3',
+    'BGM11.mp3',
+    'BGM12.mp3',
+    'BGM13.mp3',
+    'fbi-open-up-.mp3',
+    'FFの勝利音.mp3',
+    'JOJO.mp3',
+    'To be Conte.mp3',
+    'WATTS？？？？？？.mp3',
+    'Wiiショップ.mp3',
+    'Wiiチャンネル.mp3',
+    'いええええええええええい.mp3',
+    'いかゲーム.mp3',
+    'いびき1.mp3',
+    'うんち！.mp3',
+    'でぇん！1.mp3',
+    'でぇん！2.mp3',
+    'でぇん！3.mp3',
+    'でぇん！4.mp3',
+    'でぇん！5.mp3',
+    'でぇん！6.mp3',
+    'でぇん！7.mp3',
+    'なにぃ！？.mp3',
+    'にゃうにゃうにゃう.mp3',
+    'ﾊﾞﾝﾊﾞﾝﾊﾞﾝ.wav',
+    'ﾌﾞﾘｭｭｭｭｭ.mp3',
+    'へー.mp3',
+    'ﾍﾟﾛﾝｯ.mp3',
+    'みこちのあんだぉ.mp3',
+    'みこちのやんのかってぇ.mp3',
+    'みんな大好きみこちのあんだぉ.mp3',
+    'はぁ？.mp3',
+    'あきらめんなよ、修造.mp3',
+    'あつ森の声.mp3',
+    'しぃ〜.wav',
+    'エセドラえもん.mp3',
+    'サイコ.wav',
+    'ジュルッ.mp3',
+    'スター🌟.mp3',
+    'クワッ.wav',
+    'ウィンドゥーズエラー音.mp3',
+    'ウィンドゥーズシャットダウン.mp3',
+    'ウィンドゥーズ起動音.mp3',
+    'ウワァァァァァァ.mp3',
+    'わぁお.mp3',
+    'ヤメローシニタクナーイ！ .mp3',
+    'テレポート.mp3',
+    'デゥ.mp3',
+    'デデドン.mp3',
+    'リコーダーでタイタニック.mp3',
+    'ワタファ！？.mp3',
+    'ロブロックス ウゥ！.mp3',
+    'ムスカ 3分間.mp3',
+    'ムスカ どこへ行こうと.mp3',
+    'ムスカ お静かに.mp3',
+    'ムスカ ラピュタは滅びぬ.mp3',
+    'ムスカ ロボットの兵隊.mp3',
+    'ムスカ 人がゴミ.mp3',
+    'ムスカ 何をする.mp3',
+    'ムスカ 大砲で.mp3',
+    'ムスカ 時間だ.mp3',
+    'ムスカ 最高のショー.mp3',
+    'ムスカ 焼き払う.mp3',
+    'ムスカ 私をあまり怒らせないで.mp3',
+    'ムスカ 聖域.mp3',
+    'ムスカ 言葉を慎み.mp3',
+    'ムスカ 読める.mp3',
+    'ムスカ 雷.mp3',
+    'ムスカ 鬼ごっこ.mp3',
+    'トムの叫び声.mp3',
+    'トゥーサウザンドアワーズレイター.mp3',
+    'ドラクエ MISS.mp3',
+    'ナイス.wav',
+    'ニワトリの鳴き声1.mp3',
+    'ハリーポッターの下手なフルート.wav',
+    'ハロー？.mp3',
+    'ハローデェア.mp3',
+    'ハッピーハッピーハーピッー.mp3',
+    'ババイ.mp3',
+    'ビーバーの叫び声.mp3',
+    'ピプゥ.mp3',
+    'ピー音.mp3',
+    'ピュゥー.wav',
+    'フランスの音楽.mp3',
+    'ブラ.wav',
+    'ブロリーです.mp3',
+    'プゥー(エコー).mp3',
+    'ヘヘボーイ.mp3',
+    'ポーン.mp3',
+    'マイクラ 飲む音.mp3',
+    'ミニオン ケツ.mp3',
+    '何やってんだお前.mp3',
+    '叫ぶヤギ.wav',
+    '大笑い.mp3',
+    '天国👼.mp3',
+    '己の無力をシルガイイー.mp3',
+    '巨人化.mp3',
+    '巻き戻し.mp3',
+    '後半へ続く！.mp3',
+    '怪しい行動.wav',
+    '悲しい時2.wav',
+    '悲しい時.mp3',
+    '悲しい時(エアホーン).mp3',
+    '村人.mp3',
+    '残念でした.mp3',
+    '消しゴムマジック.mp3',
+    '猫ミームヤギ.mp3',
+    '真剣なとき.mp3',
+    '究極の選択BGM.mp3',
+    '笑い声1.mp3',
+    '笑い声2.mp3',
+    '粉バナナ.mp3',
+    '負け犬エモート.mp3',
+    '赤ちゃんの笑い声.mp3',
+    '逃げ足.mp3',
+    '野々村.mp3',
+    '開けろ、デトロイト市警だ！.mp3',
+    '闇に惑えmp3 着メロ.mp3',
+    '魂を喰らう死神の物真似.mp3',
+    '！？！？！？！？.mp3',
+    '(」’ω’)」ｵｫｵｫｵ!!!ｳｳｩｩｱｱｫｵ!!!!!!.wav',
+    '？？？？？？？.wav',
+    'adin.wav'
+];
+
+type SoundButton = {
+    id: string;
+    name: string;
+    file: string;
+};
+
 export default function BankerDashboard() {
     const { gameState, refresh } = useGame();
     const router = useRouter();
     const [activeTab, setActiveTab] = React.useState<'overview' | 'crypto' | 'real_estate' | 'catalog'>('overview');
     const [showRequests, setShowRequests] = React.useState(false);
+    const [switchbotStatus, setSwitchbotStatus] = React.useState<string | null>(null);
+    const [switchbotBusy, setSwitchbotBusy] = React.useState(false);
+    const lastDayStatusRef = React.useRef<boolean | null>(null);
+    const daySoundRef = React.useRef<HTMLAudioElement | null>(null);
+    const [soundSelect, setSoundSelect] = React.useState(SOUND_LIBRARY[0]);
+    const [soundButtons, setSoundButtons] = React.useState<SoundButton[]>([]);
+    const soundBoardKey = 'soundboard:banker';
 
-    if (!gameState) return (
-        <div className="min-h-screen flex items-center justify-center bg-slate-50 text-slate-500 font-bold">
-            <div className="flex flex-col items-center gap-4">
-                <div className="w-12 h-12 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div>
-                システム接続中...
-            </div>
-        </div>
-    );
+    React.useEffect(() => {
+        try {
+            const saved = localStorage.getItem(soundBoardKey);
+            if (saved) {
+                setSoundButtons(JSON.parse(saved));
+            }
+        } catch {
+            setSoundButtons([]);
+        }
+    }, []);
 
-    const pendingRequests = gameState.requests.filter(r => r.status === 'pending');
+    React.useEffect(() => {
+        try {
+            localStorage.setItem(soundBoardKey, JSON.stringify(soundButtons));
+        } catch {
+            // ignore storage failures
+        }
+    }, [soundButtons]);
+
+    const playDayNightSound = React.useCallback((isDay: boolean) => {
+        const primary = isDay ? '/sounds/lumos.mp3' : '/sounds/Nox.mp3';
+        const fallback = isDay ? '/sounds/day.mp3' : '/sounds/sleep.mp3';
+
+        if (daySoundRef.current) {
+            daySoundRef.current.pause();
+            daySoundRef.current.currentTime = 0;
+        }
+
+        const audio = new Audio(primary);
+        audio.volume = 0.9;
+        daySoundRef.current = audio;
+        audio.play().catch(() => {
+            const fallbackAudio = new Audio(fallback);
+            fallbackAudio.volume = 0.6;
+            daySoundRef.current = fallbackAudio;
+            fallbackAudio.play().catch(() => { });
+        });
+    }, []);
+
+    React.useEffect(() => {
+        if (!gameState || typeof gameState.isDay !== 'boolean') return;
+        if (lastDayStatusRef.current === null) {
+            lastDayStatusRef.current = gameState.isDay;
+            return;
+        }
+        if (lastDayStatusRef.current !== gameState.isDay) {
+            playDayNightSound(gameState.isDay);
+            lastDayStatusRef.current = gameState.isDay;
+        }
+    }, [gameState?.isDay, playDayNightSound]);
 
     const handleNextTurn = async () => {
         if (!confirm('ターンを進めますか？')) return;
@@ -78,6 +266,44 @@ export default function BankerDashboard() {
         });
         await refresh();
     };
+
+    const handleSwitchbotLight = async (isDay: boolean) => {
+        if (switchbotBusy) return;
+        setSwitchbotBusy(true);
+        setSwitchbotStatus(null);
+        try {
+            const res = await fetch('/api/switchbot', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ isDay }),
+            });
+            const data = await res.json().catch(() => ({}));
+            if (!res.ok) {
+                throw new Error(data?.message || 'SwitchBot制御に失敗しました');
+            }
+            if (data?.statusCode && data.statusCode !== 100) {
+                throw new Error(data?.message || 'SwitchBot制御に失敗しました');
+            }
+            playDayNightSound(isDay);
+            setSwitchbotStatus(isDay ? 'ライトをONにしました' : 'ライトをOFFにしました');
+        } catch (error: any) {
+            console.error('SwitchBot error:', error);
+            setSwitchbotStatus(error?.message || 'SwitchBot制御に失敗しました');
+        } finally {
+            setSwitchbotBusy(false);
+        }
+    };
+
+    if (!gameState) return (
+        <div className="min-h-screen flex items-center justify-center bg-slate-50 text-slate-500 font-bold">
+            <div className="flex flex-col items-center gap-4">
+                <div className="w-12 h-12 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div>
+                システム接続中...
+            </div>
+        </div>
+    );
+
+    const pendingRequests = gameState.requests.filter(r => r.status === 'pending');
 
     return (
         <div className="min-h-screen bg-slate-50 text-slate-800 pb-20">
@@ -183,6 +409,107 @@ export default function BankerDashboard() {
                                 </Button>
                             </DashboardCard>
 
+                            <DashboardCard title="SwitchBot ライト" icon="💡">
+                                <div className="text-xs text-slate-500 font-medium mb-4">
+                                    昼になると点灯、夜になると消灯します。手動操作も可能です。
+                                </div>
+                                <div className="grid grid-cols-2 gap-3">
+                                    <Button
+                                        className="h-12 bg-amber-500 hover:bg-amber-400 text-white font-bold"
+                                        onClick={() => handleSwitchbotLight(true)}
+                                        disabled={switchbotBusy}
+                                    >
+                                        ☀ ON
+                                    </Button>
+                                    <Button
+                                        className="h-12 bg-slate-800 hover:bg-slate-700 text-white font-bold"
+                                        onClick={() => handleSwitchbotLight(false)}
+                                        disabled={switchbotBusy}
+                                    >
+                                        🌙 OFF
+                                    </Button>
+                                </div>
+                                {switchbotStatus && (
+                                    <div className="mt-3 text-xs font-bold text-slate-600">
+                                        {switchbotStatus}
+                                    </div>
+                                )}
+                            </DashboardCard>
+
+                            <DashboardCard title="サウンドボード" icon="🔊">
+                                <div className="space-y-3">
+                                    <div className="text-xs text-slate-500">
+                                        効果音を選んでボタンに追加できます。名前は自由に編集できます。
+                                    </div>
+                                    <div className="flex gap-2">
+                                        <select
+                                            value={soundSelect}
+                                            onChange={(e) => setSoundSelect(e.target.value)}
+                                            className="flex-1 h-10 rounded-lg border border-slate-200 bg-white px-3 text-xs font-bold text-slate-700"
+                                        >
+                                            {SOUND_LIBRARY.map((sound) => (
+                                                <option key={sound} value={sound}>{sound}</option>
+                                            ))}
+                                        </select>
+                                        <Button
+                                            className="h-10 rounded-full bg-indigo-600 text-white font-bold px-4"
+                                            onClick={() => {
+                                                setSoundButtons((prev) => ([
+                                                    ...prev,
+                                                    {
+                                                        id: crypto.randomUUID(),
+                                                        name: soundSelect.replace(/\.(mp3|wav)$/i, ''),
+                                                        file: soundSelect
+                                                    }
+                                                ]));
+                                            }}
+                                        >
+                                            追加
+                                        </Button>
+                                    </div>
+                                    {soundButtons.length === 0 ? (
+                                        <div className="text-center text-xs text-slate-400 py-4">
+                                            まだボタンがありません
+                                        </div>
+                                    ) : (
+                                        <div className="grid grid-cols-2 gap-3">
+                                            {soundButtons.map((item) => (
+                                                <div key={item.id} className="space-y-2">
+                                                    <button
+                                                        className="w-full h-12 rounded-full bg-slate-900 text-white text-xs font-bold shadow-sm hover:bg-slate-800"
+                                                        onClick={() => {
+                                                            const audio = new Audio(`/sounds/${item.file}`);
+                                                            audio.volume = 0.9;
+                                                            audio.play().catch(() => { });
+                                                        }}
+                                                    >
+                                                        ▶ {item.name}
+                                                    </button>
+                                                    <input
+                                                        value={item.name}
+                                                        onChange={(e) => {
+                                                            const value = e.target.value;
+                                                            setSoundButtons((prev) => prev.map((btn) => (
+                                                                btn.id === item.id ? { ...btn, name: value } : btn
+                                                            )));
+                                                        }}
+                                                        className="w-full h-8 rounded-lg border border-slate-200 px-2 text-[10px] font-bold text-slate-600"
+                                                    />
+                                                    <Button
+                                                        className="h-7 w-full rounded-full bg-slate-100 text-slate-500 text-[10px] font-bold"
+                                                        onClick={() => {
+                                                            setSoundButtons((prev) => prev.filter((btn) => btn.id !== item.id));
+                                                        }}
+                                                    >
+                                                        削除
+                                                    </Button>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            </DashboardCard>
+
                             {/* Request Box */}
                             <DashboardCard title="承認待ちリクエスト" icon="📫">
                                 <div className="flex flex-col items-center justify-center py-6">
@@ -219,7 +546,7 @@ export default function BankerDashboard() {
                                                             </span>
                                                         </div>
                                                         <div className="mb-3 text-slate-600">
-                                                            請求額: <span className="font-mono font-bold">¥{req.amount}</span>
+                                                            請求額: <span className="font-mono font-bold">{req.amount}枚</span>
                                                         </div>
                                                         <div className="grid grid-cols-2 gap-2">
                                                             <Button size="sm" className="bg-emerald-500 hover:bg-emerald-600 border-none text-white h-8" onClick={() => handleRequest(req.id, 'approve')}>承認</Button>
@@ -253,11 +580,11 @@ export default function BankerDashboard() {
                                             <div className="space-y-2 mb-4 bg-slate-50 p-3 rounded-lg">
                                                 <div className="flex justify-between text-sm">
                                                     <span className="text-slate-500 font-bold text-xs">所持金</span>
-                                                    <span className="font-mono font-bold text-slate-700">¥{(user.balance || 0).toLocaleString()}</span>
+                                                    <span className="font-mono font-bold text-slate-700">{(user.balance || 0).toLocaleString()}枚</span>
                                                 </div>
                                                 <div className="flex justify-between text-sm">
                                                     <span className="text-slate-500 font-bold text-xs">借金</span>
-                                                    <span className="font-mono font-bold text-rose-500">¥{(user.debt || 0).toLocaleString()}</span>
+                                                    <span className="font-mono font-bold text-rose-500">{(user.debt || 0).toLocaleString()}枚</span>
                                                 </div>
                                             </div>
 

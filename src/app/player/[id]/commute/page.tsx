@@ -48,7 +48,7 @@ export default function CommutePage() {
             alert('お金が足りません！');
             return;
         }
-        if (!confirm(`${vehicle.name} (${vehicle.price.toLocaleString()}円) を購入しますか？`)) return;
+        if (!confirm(`${vehicle.name} (${vehicle.price.toLocaleString()}枚) を購入しますか？`)) return;
 
         await sendRequest('buy_vehicle', 0, JSON.stringify({ vehicleId: vehicle.id }));
         alert('購入しました！');
@@ -110,7 +110,7 @@ export default function CommutePage() {
                                         </div>
                                         <div>
                                             <span className="text-xs text-gray-500 block">月額コスト</span>
-                                            <span className="font-bold text-xl text-red-500">{currentMethod.cost.toLocaleString()}円</span>
+                                            <span className="font-bold text-xl text-red-500">{currentMethod.cost.toLocaleString()}枚</span>
                                         </div>
                                     </div>
                                 </div>
@@ -189,7 +189,7 @@ export default function CommutePage() {
                                             <div className="font-bold text-lg">{method.name}</div>
                                             <div className="flex justify-between text-sm mt-2 text-gray-500">
                                                 <span>⏱️ {method.time}分</span>
-                                                <span>💸 {method.cost > 0 ? `${method.cost.toLocaleString()}円/月` : '無料'}</span>
+                                                <span>💸 {method.cost > 0 ? `${method.cost.toLocaleString()}枚/月` : '無料'}</span>
                                             </div>
                                         </button>
                                     );
@@ -283,7 +283,7 @@ export default function CommutePage() {
                                                     </div>
                                                     <div className="flex justify-between">
                                                         <span>維持費</span>
-                                                        <span className="font-bold">{item.maintenanceCost.toLocaleString()}円/月</span>
+                                                        <span className="font-bold">{item.maintenanceCost.toLocaleString()}枚/月</span>
                                                     </div>
                                                 </div>
 
@@ -293,7 +293,7 @@ export default function CommutePage() {
                                                     variant={isOwned ? 'secondary' : 'primary'}
                                                     fullWidth
                                                 >
-                                                    {isOwned ? '購入済み' : `${item.price.toLocaleString()}円で購入`}
+                                                    {isOwned ? '購入済み' : `${item.price.toLocaleString()}枚で購入`}
                                                 </Button>
                                             </div>
                                         </Card>

@@ -26,11 +26,27 @@ export function useRealtime<T>(
 
         try {
             setError(null);
-            const res = await fetch(url, {
+            const playerId = typeof window !== 'undefined'
+                ? (localStorage.getItem('real-shop-user-id')
+                    || document.cookie.split('; ').find(row => row.startsWith('playerId='))?.split('=')[1])
+                : null;
+            const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'http://localhost';
+            let requestUrl = url;
+            if (playerId) {
+                const nextUrl = new URL(url, baseUrl);
+                if (!nextUrl.searchParams.has('playerId')) {
+                    nextUrl.searchParams.set('playerId', playerId);
+                }
+                requestUrl = nextUrl.toString();
+            }
+
+            const res = await fetch(requestUrl, {
                 headers: {
                     'Cache-Control': 'no-cache',
                     'Pragma': 'no-cache',
+                    ...(playerId ? { 'x-player-id': playerId } : {}),
                 },
+                credentials: 'include',
             });
 
             if (res.status === 401) {

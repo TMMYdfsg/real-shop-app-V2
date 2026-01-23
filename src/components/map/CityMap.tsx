@@ -276,7 +276,7 @@ export default function CityMap({
                         <div className="p-2 min-w-[200px]">
                             <h3 className="font-bold text-sm mb-1">{selectedLand.address}</h3>
                             <p className="text-xs text-gray-600 mb-2">
-                                価格: ¥{selectedLand.price.toLocaleString()}
+                                価格: {selectedLand.price.toLocaleString()}枚
                             </p>
                             <p className="text-xs text-gray-500 mb-2">
                                 {selectedLand.ownerId === currentUser?.id

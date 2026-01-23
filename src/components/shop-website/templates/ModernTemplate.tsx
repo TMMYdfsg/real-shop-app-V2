@@ -94,7 +94,7 @@ export const ModernTemplate: React.FC<TemplateProps> = ({ website, owner }) => {
                                 <h3 className="text-xl font-bold text-center mb-2">{item.name}</h3>
                                 <div className="flex justify-between items-center mt-4 pt-4 border-t border-white/20">
                                     <span className="text-3xl font-bold" style={{ color: customization.primaryColor }}>
-                                        ¥{item.price}
+                                        {item.price}枚
                                     </span>
                                     <span className={`text-sm px-3 py-1 rounded-full ${item.stock > 0 ? 'bg-green-500/20 text-green-300' : 'bg-red-500/20 text-red-300'}`}>
                                         {item.stock > 0 ? `在庫 ${item.stock}` : '売り切れ'}

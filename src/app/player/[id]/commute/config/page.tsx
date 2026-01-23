@@ -206,7 +206,7 @@ export default function CommuteConfigPage() {
                                             <div className="flex justify-between">
                                                 <span className="font-bold text-gray-800">{m.name}</span>
                                                 <span className="text-sm font-semibold text-gray-600">
-                                                    {typeof m.cost === 'number' ? `¥${m.cost}` : m.cost}
+                                                    {typeof m.cost === 'number' ? `${m.cost}枚` : m.cost}
                                                 </span>
                                             </div>
                                             <div className="text-xs text-gray-500">{m.desc}</div>

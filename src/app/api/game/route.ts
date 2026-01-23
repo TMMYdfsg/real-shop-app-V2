@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getGameState, updateGameState, convertBigIntToNumber } from '@/lib/dataStore';
 import { processGameTick } from '@/lib/gameLogic';
+import { setSwitchBotLightForDayState } from '@/lib/switchbot';
 
 // // export const dynamic = 'force-dynamic';
 
@@ -14,6 +15,12 @@ export async function GET() {
         if (hasChanged) {
             // 変更があれば保存
             finalState = await updateGameState(() => newState);
+            const dayStateChanged = currentState.isDay !== newState.isDay;
+            if (dayStateChanged) {
+                setSwitchBotLightForDayState(newState.isDay).catch((error) => {
+                    console.error('[SwitchBot] Failed to sync day/night:', error);
+                });
+            }
         }
 
         // BigIntを安全にシリアライズ可能な形式に変換

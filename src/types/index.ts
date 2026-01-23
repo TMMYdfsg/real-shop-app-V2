@@ -216,6 +216,8 @@ export interface User {
     health?: number; // 0-100
     shopMenu?: ShopItem[]; // 店舗メニュー
     landRank?: number; // 土地ランク
+    channelIcon?: string; // チャンネルアイコン（絵文字またはURL）
+    channelSubscribers?: string[]; // チャンネル購読者のユーザーID
 
     // Cooking & Collection
     ingredients?: { [ingredientId: string]: number }; // { 'ing_rice': 5, ... }
@@ -445,7 +447,20 @@ export interface VideoContent {
     thumbnailColor: string;
     views: number;
     likes: number;
+    likedBy: string[];   // Added for like tracking
+    subscribers: number; // Added for subscriber count
     timestamp: number;
+}
+
+export interface Channel {
+    id: string;
+    ownerId: string;
+    name: string;
+    icon: string;
+    subscribers: number;
+    subscribedBy: string[]; // Users who subscribed
+    videoCount: number;
+    createdAt: number;
 }
 
 export interface GameState {
@@ -479,6 +494,7 @@ export interface GameState {
     // Social Media & Video Data
     snsPosts?: SNSPost[];
     videos?: VideoContent[];
+    channels?: Channel[]; // チャンネル情報
 
     // City Simulator Data
     lands: Land[];
@@ -951,6 +967,8 @@ export interface SmartphoneSettings {
     biometricEnabled?: boolean;
     lockScreenImage?: string;
     customIcons?: string[];
+    incomingCallSound?: string;
+    outgoingCallSound?: string;
 }
 
 // ==========================================

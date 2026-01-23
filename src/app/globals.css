@@ -773,6 +773,21 @@ a {
   animation: pulse-glow 2s ease-in-out infinite;
 }
 
+@keyframes page-fade {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.page-transition {
+  animation: page-fade 260ms ease;
+}
+
 /* App Shell */
 .shell {
   display: grid;

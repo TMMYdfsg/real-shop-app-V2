@@ -60,7 +60,8 @@ export const PlayerLayout: React.FC<{ children: React.ReactNode; id: string; ini
 
     // 昼夜切替時の効果音（単一インスタンスで管理）
     if (lastDayStatus.current !== gameState.isDay) {
-      const soundFile = gameState.isDay ? '/sounds/day.mp3' : '/sounds/night.mp3';
+      const primarySound = gameState.isDay ? '/sounds/lumos.mp3' : '/sounds/Nox.mp3';
+      const fallbackSound = gameState.isDay ? '/sounds/day.mp3' : '/sounds/sleep.mp3';
 
       // 既存の音声をフェードアウトして停止
       if (bgmAudioRef.current) {
@@ -76,21 +77,40 @@ export const PlayerLayout: React.FC<{ children: React.ReactNode; id: string; ini
         }, 50);
       }
 
-      // 新しい音声を再生（少し遅延させてフェードアウトと重ならないようにする）
-      setTimeout(() => {
-        const audio = new Audio(soundFile);
+      const startFadeIn = (audio: HTMLAudioElement) => {
+        const fadeIn = setInterval(() => {
+          if (audio.volume < 0.5) {
+            audio.volume = Math.min(0.5, audio.volume + 0.1);
+          } else {
+            clearInterval(fadeIn);
+          }
+        }, 50);
+      };
+
+      const playWithFallback = (src: string, fallback: string) => {
+        const audio = new Audio(src);
         audio.volume = 0;
         bgmAudioRef.current = audio;
 
-        audio.play().then(() => {
-          const fadeIn = setInterval(() => {
-            if (audio.volume < 0.5) {
-              audio.volume = Math.min(0.5, audio.volume + 0.1);
-            } else {
-              clearInterval(fadeIn);
+        audio.play()
+          .then(() => startFadeIn(audio))
+          .catch(() => {
+            if (src === fallback) {
+              console.log('効果音再生エラー: fallback too');
+              return;
             }
-          }, 50);
-        }).catch(e => console.log('効果音再生エラー:', e));
+            const fallbackAudio = new Audio(fallback);
+            fallbackAudio.volume = 0;
+            bgmAudioRef.current = fallbackAudio;
+            fallbackAudio.play()
+              .then(() => startFadeIn(fallbackAudio))
+              .catch(e => console.log('効果音再生エラー:', e));
+          });
+      };
+
+      // 新しい音声を再生（少し遅延させてフェードアウトと重ならないようにする）
+      setTimeout(() => {
+        playWithFallback(primarySound, fallbackSound);
       }, 300);
 
       lastDayStatus.current = gameState.isDay;

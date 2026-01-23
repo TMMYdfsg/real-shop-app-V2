@@ -213,7 +213,12 @@ export const COLLECTIBLES: MasterCollectibles = {
   '昆虫': [
     'モンシロチョウ', 'カブトムシ', 'ナナホシテントウ', 'オニヤンマ', 'アゲハチョウ', 'クワガタ',
     'カミキリムシ', 'トンボ', 'ミヤマクワガタ', 'ヤンマ', 'カゲロウ', 'カブトムシの幼虫',
-    'オオクワガタ', 'ヒラタクワガタ', 'オオムラサキ', 'セミ', 'カマキリ', 'ハチ', 'テントウムシ', 'コガネムシ'
+    'オオクワガタ', 'ヒラタクワガタ', 'オオムラサキ', 'セミ', 'カマキリ', 'ハチ', 'テントウムシ', 'コガネムシ',
+    'アブラゼミ', 'ミンミンゼミ', 'ヒグラシ', 'ツクツクボウシ', 'ギンヤンマ', 'アキアカネ', 'シオカラトンボ',
+    'ショウリョウバッタ', 'トノサマバッタ', 'オサムシ', 'ゲンゴロウ', 'タガメ', 'ミズカマキリ', 'ハンミョウ',
+    'カマドウマ', 'ナナフシ', 'オオカマキリ', 'ニジイロクワガタ', 'ノコギリクワガタ', 'オニクワガタ', 'タマムシ',
+    'ルリボシヤンマ', 'チョウトンボ', 'モンキチョウ', 'キアゲハ', 'ナミアゲハ', 'オオスズメバチ', 'クロスズメバチ',
+    'テントウムシダマシ', 'ヒメカマキリ'
   ],
   '魚': [
     'アジ', 'サバ', 'タイ', 'ヒラメ', 'マグロ', 'シーラカンス', 'カレイ', 'イカ', 'タコ', 'ウナギ',
@@ -223,18 +228,34 @@ export const COLLECTIBLES: MasterCollectibles = {
     'イシモチ', 'メバル', 'アイナメ', 'カサゴ', 'ソイ', 'ウツボ', 'アオリイカ', 'ヤリイカ', 'コウイカ',
     'タチウオ', 'サヨリ', 'シラス', 'イワシ', 'キンメダイ', 'アカムツ', 'ホウボウ',
     'ウミタナゴ', 'アオダイ', 'キジハタ', 'マトウダイ', 'アブラボウズ', 'イシダイ', 'クエ',
-    'ハタハタ', 'サクラマス', 'シロギス', 'マコガレイ', 'マダイ'
+    'ハタハタ', 'サクラマス', 'シロギス', 'マコガレイ', 'マダイ',
+    'カンパチ', 'シマアジ', 'メジナ', 'クロダイ', 'トビウオ', 'ボラ', 'コノシロ', 'コチ', 'アンコウ', 'タラ',
+    'ニシン', 'サワラ', 'ヒラマサ', 'イサキ', 'マンボウ', 'ネコザメ', 'カワヨシノボリ', 'ドンコ', 'ゴンズイ',
+    'ヒメジ', 'アカハタ', 'イシガキダイ', 'チョウチョウウオ', 'ブラックバス', 'ブルーギル', 'ライギョ', 'ナマズ',
+    'ワカサギ', 'シシャモ', 'アメマス'
   ],
   'キラキラカード': [
     '伝説の勇者', '魔法使い見習い', '鋼鉄のゴーレム', 'キングドラゴン', '森のエルフ', '闇の騎士',
     '天空の守護者', '大地の精霊', '深海の魔女', '火の悪魔', '氷の女王', '風の精霊', '光の聖騎士',
-    '影の暗殺者', '雷鳴の戦士', '聖なる巫女', '獣の王', '海賊船長', '幻の幻獣', '時空の旅人'
+    '影の暗殺者', '雷鳴の戦士', '聖なる巫女', '獣の王', '海賊船長', '幻の幻獣', '時空の旅人',
+    '星の賢者', '月影の盗賊', '竜骨の戦士', '古代の守り手', '水晶の預言者', '炎翼の使者', '銀河の騎士',
+    '森羅の女神', '深緑の番人', '蒼海の王子', '紅蓮の魔導士', '黒曜の剣士', '虹色の狩人', '白銀の魔女',
+    '黄昏の詩人', '黎明の錬金術師', '雷雲の王', '幻影の踊り子', '虚空の守護者', '黄金の航海士',
+    '碧空の槍使い', '星屑の調律師', '聖樹の守人', '霧の幻術師', '砂漠の英雄', '古き精霊王',
+    '蒼炎の騎士', '刻印の召喚士', '天空の機士', '雪原の狙撃手'
   ],
   '化石': [
     'アンモナイト', '三葉虫', '恐竜の足跡', '古代の植物',
     '始祖鳥の化石', 'マンモスの牙', 'サメの歯化石', 'シーラカンスの骨', '巨大トリケラトプス',
     '古代哺乳類の骨', '化石魚', '翼竜の骨', '古代昆虫の化石', '氷河期の牙', '深海生物の化石',
-    '珊瑚の化石', '珪化木', '古代哺乳類の足跡', '三葉虫の巣', '古代ウミユリ'
+    '珊瑚の化石', '珪化木', '古代哺乳類の足跡', '三葉虫の巣', '古代ウミユリ',
+    'ティラノサウルスの歯', 'ステゴサウルスの背板', 'アンキロサウルスの鎧', 'プテラノドンの翼骨',
+    '恐竜の卵殻', '古代サメの椎骨', '古代イルカの化石', '巨大サソリの化石', 'アンモナイトの群集化石',
+    '古代貝の化石', 'ナウマンゾウの骨', 'サーベルタイガーの牙', '古代ワニの顎骨', '原始人の石器',
+    '古代トンボの化石', '火山灰に埋もれた葉化石', '深海貝の化石', '恐竜の皮膚痕',
+    '古代鳥類の羽根痕', '古代クジラの骨', '小型恐竜の全身骨格', 'アンモナイトの断面標本',
+    '古代カメの甲羅', 'シダ植物の化石', '古代カエルの化石', '巨大魚の顎骨',
+    'トリケラトプスの角', '原始ウマの化石', '古代甲殻類の化石', '氷河期の足跡化石'
   ]
 };
 
@@ -281,7 +302,37 @@ export const GAME_EVENTS: MasterEvent[] = [
   { name: 'ボランティアデー', turn: 90, description: '町の清掃や支援活動に参加すると人気度アップ。' },
   { name: '天体観測会', turn: 95, description: '星空を眺めてリラックス。幸福度が少し上がる。' },
   { name: '文化祭', turn: 100, description: '町全体で盛り上がる文化祭。様々なスキルが活躍。' },
-  { name: 'ファッションショー', turn: 105, description: 'おしゃれ好きにはたまらない。人気度が大きく上がる。' }
+  { name: 'ファッションショー', turn: 105, description: 'おしゃれ好きにはたまらない。人気度が大きく上がる。' },
+  { name: '雪まつり', turn: 110, description: '雪像が並ぶ冬の一大イベント。人気が少し上がる。' },
+  { name: '温泉フェア', turn: 115, description: '温泉地が賑わい、リラックス効果で幸福度が回復。' },
+  { name: 'ローカルフード祭', turn: 120, description: '地元グルメを楽しめる祭典。食系スキルに好影響。' },
+  { name: '古本市', turn: 125, description: '珍しい本が集まる市。知識系スキルに良い刺激。' },
+  { name: '春の植樹祭', turn: 130, description: '街の緑化イベント。人気度が少し上昇する。' },
+  { name: '職業体験デー', turn: 135, description: 'さまざまな仕事体験ができる。スキル経験値アップ。' },
+  { name: 'クラフトマーケット', turn: 140, description: '手作り品が集う市場。クラフト系職にチャンス。' },
+  { name: 'ミニロボ展示会', turn: 145, description: '小型ロボの展示が話題。技術系のひらめきが起きやすい。' },
+  { name: '灯りの夜祭', turn: 150, description: '灯りで街が彩られる夜祭。人気度が上がる。' },
+  { name: '農村収穫祭', turn: 155, description: '豊作を祝うイベント。農業系の報酬が上がるかも。' },
+  { name: 'ボードゲーム大会', turn: 160, description: '戦略ゲームで盛り上がる。論理系スキルが活躍。' },
+  { name: 'ストリートパフォーマンス大会', turn: 165, description: '大道芸で競い合う大会。芸能系の人気が上がる。' },
+  { name: '海開き', turn: 170, description: '海辺が解禁されて賑わう。観光人気が上昇。' },
+  { name: '登山チャレンジ', turn: 175, description: '山登りイベント。体力系スキルにボーナス。' },
+  { name: '地元アイドルライブ', turn: 180, description: 'アイドルイベントで人気度が上昇。' },
+  { name: 'クラシックコンサート', turn: 185, description: '音楽の祭典。音楽系スキルが伸びやすい。' },
+  { name: '科学実験フェア', turn: 190, description: '科学ショーが開催。科学系スキルの成長に有利。' },
+  { name: 'リサイクル週間', turn: 195, description: '環境意識が高まる週。街の評価が少し上がる。' },
+  { name: '星空グランピング', turn: 200, description: '特別な宿泊体験が話題。幸福度が回復。' },
+  { name: 'スイーツ博覧会', turn: 205, description: '甘いイベントで人気アップ。料理系にボーナス。' },
+  { name: '伝統工芸展', turn: 210, description: '職人技が集結。クラフト系職に良い影響。' },
+  { name: 'マラソンフェス', turn: 215, description: 'スポーツイベントで体力系スキルが活躍。' },
+  { name: '学園文化ウィーク', turn: 220, description: '学生主体の文化イベント。人気度が上昇。' },
+  { name: '夏のビーチパーティー', turn: 225, description: '海辺のイベントで観光人気がアップ。' },
+  { name: '町内運動会', turn: 230, description: '住民参加の運動会。スポーツ系が得意な人に有利。' },
+  { name: '写真コンテスト', turn: 235, description: '作品で競い合う。芸術系の評価が上がる。' },
+  { name: 'キャンプフェスタ', turn: 240, description: 'アウトドアイベント。耐久系スキルにボーナス。' },
+  { name: '料理教室スペシャル', turn: 245, description: '料理の腕を磨ける特別講座。料理系スキルが成長。' },
+  { name: '音楽コラボナイト', turn: 250, description: 'ミュージシャン同士の共演が話題。人気度アップ。' },
+  { name: 'ファッションマーケット', turn: 255, description: 'おしゃれ市場が開催され人気が上がる。' }
 ];
 
 export const FURNITURE: { [name: string]: MasterFurniture } = {
@@ -444,7 +495,37 @@ export const NPCS: { [name: string]: MasterNPC } = {
   '社交的な記者': { description: '真実を伝える社交的な記者。', affinity: 0 },
   '神秘的な魔法使い': { description: '謎に包まれた神秘的な魔法使い。', affinity: 0 },
   '寡黙な鍛冶職人': { description: '黙々と作業する寡黙な鍛冶職人。', affinity: 0 },
-  '人情味あふれるパン屋': { description: '心温まるパンを焼く人情味あふれるパン屋。', affinity: 0 }
+  '人情味あふれるパン屋': { description: '心温まるパンを焼く人情味あふれるパン屋。', affinity: 0 },
+  '熱心な新聞配達員': { description: '毎朝欠かさず街に新聞を届ける。', affinity: 0 },
+  'おしゃべりな美容師': { description: '話題が尽きない美容師。', affinity: 0 },
+  '控えめな研究員': { description: '静かに研究に打ち込む研究員。', affinity: 0 },
+  '陽気な料理長': { description: 'キッチンを明るく仕切る料理長。', affinity: 0 },
+  '頑固な時計職人': { description: '精密さにこだわる職人。', affinity: 0 },
+  '優雅な舞踏家': { description: '舞台で輝く優雅な踊り手。', affinity: 0 },
+  '元気な保育士': { description: '子供たちに慕われる保育士。', affinity: 0 },
+  '几帳面な会計士': { description: '帳簿のズレを見逃さない。', affinity: 0 },
+  'のんびり釣り人': { description: '川辺でのんびり過ごす釣り人。', affinity: 0 },
+  '情熱的な音楽家': { description: '音に全てを注ぐ音楽家。', affinity: 0 },
+  '冷静な医師': { description: '冷静な判断で患者を救う。', affinity: 0 },
+  '豪快な大工': { description: '豪快な仕事ぶりで評判の大工。', affinity: 0 },
+  '博識な教授': { description: '知識の引き出しが多い教授。', affinity: 0 },
+  '親切なタクシー運転手': { description: '道案内が丁寧な運転手。', affinity: 0 },
+  '夢見る作家': { description: '新しい物語を探す作家。', affinity: 0 },
+  '機転の利く配達員': { description: '細かな気配りで荷物を届ける。', affinity: 0 },
+  '陽気な農園主': { description: '畑仕事が大好きな農園主。', affinity: 0 },
+  '寡黙な警備員': { description: '黙々と見回りをこなす警備員。', affinity: 0 },
+  '気品ある陶芸家': { description: '器に品格を宿す陶芸家。', affinity: 0 },
+  '腕利きの整備士': { description: 'どんな機械も直す整備士。', affinity: 0 },
+  '強気な投資家': { description: 'リスクを恐れない投資家。', affinity: 0 },
+  '朗らかな看護師': { description: '笑顔で患者を支える看護師。', affinity: 0 },
+  '不思議な旅人': { description: '各地を巡る謎めいた旅人。', affinity: 0 },
+  '職人気質のパン職人': { description: 'パン作りに妥協しない職人。', affinity: 0 },
+  'にぎやかな道具屋': { description: '何でも揃う店を切り盛りする。', affinity: 0 },
+  '謙虚な修道女': { description: '静かに祈りを捧げる修道女。', affinity: 0 },
+  '探究心旺盛な学生': { description: '新しい学びに貪欲な学生。', affinity: 0 },
+  '温厚な裁縫師': { description: '丁寧に仕立てる裁縫師。', affinity: 0 },
+  '大胆な発明家': { description: 'ひらめきで発明を繰り返す。', affinity: 0 },
+  '旅好きな写真家': { description: '風景を撮り歩く写真家。', affinity: 0 }
 };
 
 export const NEWS_EVENTS: MasterNewsEvent[] = [
@@ -465,6 +546,35 @@ export const NEWS_EVENTS: MasterNewsEvent[] = [
   { id: 'NE015', headline: '工場火災発生', category: '災害', effect: 'job_penalty', target: '工場労働者', bonus: 0.5, duration: 3, description: '工場労働者の効率が低下。' },
   { id: 'NE016', headline: '新しい教育方針導入', category: '教育', effect: 'skill_bonus', target: '教師', bonus: 1.3, duration: 5, description: '教師のスキル成長率アップ。' },
   { id: 'NE017', headline: '大規模セール開催', category: '経済', effect: 'product_price_down', target: '小売店', bonus: 0.8, duration: 2, description: '小売店の商品の価格が下落。' },
-  { id: 'NE018', headline: '国際交流イベント', category: '文化', effect: 'popularity_up', target: '都市', bonus: 1.4, duration: 3, description: '都市の文化的な人気が上昇しています。' }
+  { id: 'NE018', headline: '国際交流イベント', category: '文化', effect: 'popularity_up', target: '都市', bonus: 1.4, duration: 3, description: '都市の文化的な人気が上昇しています。' },
+  { id: 'NE019', headline: '地元企業が大幅投資', category: '経済', effect: 'stock_up', target: 'all', bonus: 1.1, duration: 2, description: '株式市場が活気づいています。' },
+  { id: 'NE020', headline: '交通渋滞が深刻化', category: '社会', effect: 'job_penalty', target: 'タクシー運転手', bonus: 0.8, duration: 3, description: '移動系の仕事効率が低下。' },
+  { id: 'NE021', headline: '健康ブーム到来', category: '文化', effect: 'popularity_up', target: '都市', bonus: 1.2, duration: 3, description: '健康志向が広がり人気が上昇。' },
+  { id: 'NE022', headline: '新作映画が大ヒット', category: '文化', effect: 'popularity_up', target: '映画館', bonus: 1.4, duration: 3, description: '映画館の人気が上昇しています。' },
+  { id: 'NE023', headline: '小麦の供給不足', category: '経済', effect: 'product_price', target: '小麦粉', bonus: 1.8, duration: 2, description: '小麦粉の価格が上昇。' },
+  { id: 'NE024', headline: '大雨続き', category: '天気', effect: 'product_price_down', target: '野菜', bonus: 0.7, duration: 2, description: '野菜の価格が下落。' },
+  { id: 'NE025', headline: '観光インフラ整備', category: '都市開発', effect: 'popularity_up', target: '都市', bonus: 1.2, duration: 3, description: '街の人気が上昇。' },
+  { id: 'NE026', headline: '料理番組が話題', category: '文化', effect: 'skill_bonus', target: '料理', bonus: 1.3, duration: 4, description: '料理スキルの成長率アップ。' },
+  { id: 'NE027', headline: '詐欺被害が増加', category: '社会', effect: 'popularity_down', target: '小売店', bonus: -0.4, duration: 3, description: '小売店の人気が下落。' },
+  { id: 'NE028', headline: '花粉シーズン到来', category: '社会', effect: 'job_penalty', target: '農家', bonus: 0.85, duration: 2, description: '農作業が少し難しくなる。' },
+  { id: 'NE029', headline: '観光キャンペーン開始', category: '観光', effect: 'popularity_up', target: '観光地', bonus: 1.5, duration: 4, description: '観光地の人気が上昇。' },
+  { id: 'NE030', headline: '新素材の発見', category: '技術', effect: 'skill_bonus', target: '技術者', bonus: 1.5, duration: 3, description: '技術者のスキル成長率アップ。' },
+  { id: 'NE031', headline: '地震対策強化', category: '政治', effect: 'policy_change', target: 'all', bonus: 0, duration: 0, description: '新しい防災政策が実施されます。' },
+  { id: 'NE032', headline: '燃料価格高騰', category: '経済', effect: 'product_price', target: '灯油', bonus: 1.6, duration: 3, description: '燃料関連の価格が上昇。' },
+  { id: 'NE033', headline: '漁獲量増加', category: '経済', effect: 'product_price_down', target: '魚', bonus: 0.8, duration: 3, description: '魚の価格が下落。' },
+  { id: 'NE034', headline: '教育改革が成功', category: '教育', effect: 'skill_bonus', target: '教育力', bonus: 1.4, duration: 4, description: '教育系スキルの成長率アップ。' },
+  { id: 'NE035', headline: '市民清掃デー', category: '社会', effect: 'popularity_up', target: '都市', bonus: 1.1, duration: 2, description: '街の評価が少し上がる。' },
+  { id: 'NE036', headline: '感染症の再流行', category: '健康', effect: 'job_bonus', target: '医者', bonus: 1.4, duration: 3, description: '医者の報酬が増加。' },
+  { id: 'NE037', headline: '新テーマパーク計画', category: '経済', effect: 'stock_up', target: 'all', bonus: 1.15, duration: 2, description: '市場が期待で上向き。' },
+  { id: 'NE038', headline: '冷夏で需要低迷', category: '天気', effect: 'product_price_down', target: 'アイス', bonus: 0.6, duration: 2, description: 'アイスの価格が下落。' },
+  { id: 'NE039', headline: '大型台風接近', category: '災害', effect: 'property_damage', target: 'all', bonus: -0.4, duration: 2, description: '土地の価値が下がりやすい。' },
+  { id: 'NE040', headline: '古代遺跡の調査開始', category: '文化', effect: 'special_quest', target: 'all', bonus: 0, duration: 5, description: '特別な探索イベントが発生。' },
+  { id: 'NE041', headline: '地元農産物フェア', category: '経済', effect: 'product_price', target: '野菜', bonus: 1.3, duration: 2, description: '野菜の価格が上昇。' },
+  { id: 'NE042', headline: '音楽チャリティー', category: '文化', effect: 'popularity_up', target: '都市', bonus: 1.2, duration: 3, description: '街の人気が上昇。' },
+  { id: 'NE043', headline: 'AI教育プログラム導入', category: '技術', effect: 'skill_bonus', target: 'プログラミング', bonus: 1.6, duration: 4, description: 'プログラミング経験値が増加。' },
+  { id: 'NE044', headline: '大停電発生', category: '災害', effect: 'job_penalty', target: '工場労働者', bonus: 0.6, duration: 2, description: '工場関連の仕事効率が低下。' },
+  { id: 'NE045', headline: '物流効率化', category: '経済', effect: 'job_bonus', target: '郵便配達員', bonus: 1.3, duration: 3, description: '配達系の報酬が増加。' },
+  { id: 'NE046', headline: '観光地のマナー向上', category: '社会', effect: 'popularity_up', target: '観光地', bonus: 1.2, duration: 2, description: '観光地の評価が上昇。' },
+  { id: 'NE047', headline: 'SNS炎上', category: '社会', effect: 'popularity_down', target: '都市', bonus: -0.4, duration: 2, description: '街の人気が一時的に下落。' },
+  { id: 'NE048', headline: '新交通ルート開通', category: '都市開発', effect: 'popularity_up', target: '都市', bonus: 1.3, duration: 3, description: '街の人気が上昇。' }
 ];
-

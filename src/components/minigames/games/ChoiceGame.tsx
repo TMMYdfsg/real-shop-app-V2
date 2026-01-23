@@ -41,7 +41,7 @@ const QUESTION_DB: Partial<Record<JobType, Question[]>> = {
         { q: '客が急いでいると言った。', options: ['安全運転で急ぐ', '信号無視する', '断る'], answer: 0 },
     ],
     unemployed: [
-        { q: '道に100円落ちていた。', options: ['交番に届ける', 'もらう', '見なかったことにする'], answer: 0 },
+        { q: '道に100枚落ちていた。', options: ['交番に届ける', 'もらう', '見なかったことにする'], answer: 0 },
         { q: '暇だ。何をする？', options: ['寝る', 'バイトを探す', '空を眺める'], answer: 1 },
     ]
 };

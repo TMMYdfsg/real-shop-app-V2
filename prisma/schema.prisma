@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -10,153 +7,134 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// ==========================================
-// Core Game Models
-// ==========================================
-
 model GameSettings {
-  id                  String  @id @default("singleton")
+  id                  String   @id @default("singleton")
   taxRate             Float
   insuranceRate       Float
   interestRate        Float
   salaryAutoSafeRate  Float
   turnDuration        Int
-  moneyMultiplier     Float   @default(1.0)
-  turn                Int     @default(1)
-  isDay               Boolean @default(true)
-  isTimerRunning      Boolean @default(true)
-  isGameStarted       Boolean @default(false)
+  turn                Int      @default(1)
+  isDay               Boolean  @default(true)
+  isTimerRunning      Boolean  @default(true)
   lastTick            BigInt
   timeRemaining       Int
-  marketStatus        String  @default("open")
-  season              String  @default("spring")
-  eventRevision       Int     @default(0)
-  economyStatus       String  @default("normal")
-  economyInterestRate Float   @default(5.0)
-  priceIndex          Float   @default(100.0)
-  marketTrend         String  @default("stable")
-  taxRateAdjust       Float   @default(0.0)
-  lastUpdateTurn      Int     @default(0)
-  economyTotalSales   Float   @default(0.0) // グローバル総売上
-  envWeather          String  @default("sunny")
-  envTemperature      Int     @default(20)
-  envSeason           String  @default("spring")
-  infraPower          Int     @default(100)
-  infraWater          Int     @default(100)
-  infraNetwork        Int     @default(100)
-  securityLevel       Int     @default(100)
-  roulettePresets     Json?
-  rouletteActiveId    String?
+  marketStatus        String   @default("open")
+  season              String   @default("spring")
+  eventRevision       Int      @default(0)
+  economyStatus       String   @default("normal")
+  economyInterestRate Float    @default(5.0)
+  priceIndex          Float    @default(100.0)
+  marketTrend         String   @default("stable")
+  taxRateAdjust       Float    @default(0.0)
+  lastUpdateTurn      Int      @default(0)
+  envWeather          String   @default("sunny")
+  envTemperature      Int      @default(20)
+  envSeason           String   @default("spring")
+  infraPower          Int      @default(100)
+  infraWater          Int      @default(100)
+  infraNetwork        Int      @default(100)
+  securityLevel       Int      @default(100)
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt
+  moneyMultiplier     Float    @default(1.0)
+  isGameStarted       Boolean  @default(false)
+  economyTotalSales   Float    @default(0.0)
 }
 
 model User {
-  id                   String   @id
-  name                 String
-  role                 String
-  balance              Float
-  deposit              Float
-  debt                 Float
-  popularity           Int
-  happiness            Int
-  rating               Int
-  job                  String
-  jobType              String?
-  lastJobChangeTurn    Int?
-  unpaidTax            Float?
-  arrestCount          Int?
-  stolenAmount         Float?
-  fanCount             Int?
-  traits               Json?
-  skills               Json?
-  needsTraitSelection  Boolean @default(false)
-  employmentStatus     String
-  jobTitle             String?
-  currentJobId         String?
-  shopName             String?
-  cardType             String?
-  isInsured            Boolean?
-  propertyLevel        String?
-  health               Int?
-  landRank             Int?
-  commuteMethod        String?
-  hasLicense           Boolean?
-  homeLocationId       String?
-  workLocationId       String?
-  commuteDistance      Float?
-  lastCommuteTurn      Int?
-  carFuel              Float?
-  isLate               Boolean?
-  monthlyParkingCost   Float?
-  region               String?
-  creditScore          Int?
-  isHospitalized       Boolean?
-  suspicionScore       Int?
-  playerIcon           String?
-  isOff                Boolean  @default(false)
-  isDebugAuthorized    Boolean  @default(false)
-  vacationReason       String?
-  
-  // JSON fields for complex data
-  stocks               Json?    // { stockId: quantity }
-  forbiddenStocks      Json?
-  isForbiddenUnlocked  Boolean  @default(false)
-  inventory            Json?    // InventoryItem[]
-  shopItems            Json?    // ShopItem[]
-  shopMenu             Json?    // ShopItem[]
-  pointCards           Json?    // PointCard[]
-  catalogPoints        Int?
-  loyaltyPoints        Int?
-  ingredients          Json?
-  collection           Json?
-  furniture            Json?
-  pets                 Json?
-  coupons              Json?
-  gachaCollection      Json?
-  shopWebsite          Json?
-  pointExchangeItems   Json?
-  ownedLands           Json?
-  ownedPlaces          Json?
-  mainPlaceId          String?
-  sidePlaceIds         Json?
-  ownedVehicles        Json?
-  qualifications       Json?
-  examHistory          Json?
-  loans                Json?
-  insurances           Json?
-  lifeStats            Json?
-  family               Json?
-  partners             Json?
-  smartphone           Json?
-  commuteInfo          Json?
-  auditLogs            Json?
-  jobHistory           Json?
-  
-  // Crypto
-  cryptoHoldings       Json?    // { cryptoId: quantity }
-
-  transactions         Transaction[]
-  requests             Request[]
-  
-  // Parcel (土地) Relations
-  ownedParcel          Parcel?       @relation("ParcelOwner")
-  createdParcels       Parcel[]      @relation("ParcelCreatedBy")
-  
-  // Communication Relations
-  sentMessages         Message[]     @relation("SentMessages")
-  receivedMessages     Message[]     @relation("ReceivedMessages")
-  callsMade            VoiceCall[]   @relation("CallsMade")
-  callsReceived        VoiceCall[]   @relation("CallsReceived")
-
-  // Politics Relations
-  proposals            PolicyProposal[]
-  votes                Vote[]
-
-
-  
-  createdAt            DateTime @default(now())
-  updatedAt            DateTime @updatedAt
+  id                  String           @id
+  name                String
+  role                String
+  balance             Float
+  deposit             Float
+  debt                Float
+  popularity          Int
+  happiness           Int
+  rating              Int
+  job                 String
+  jobType             String?
+  lastJobChangeTurn   Int?
+  unpaidTax           Float?
+  arrestCount         Int?
+  stolenAmount        Float?
+  fanCount            Int?
+  employmentStatus    String
+  jobTitle            String?
+  currentJobId        String?
+  shopName            String?
+  cardType            String?
+  isInsured           Boolean?
+  propertyLevel       String?
+  health              Int?
+  landRank            Int?
+  commuteMethod       String?
+  hasLicense          Boolean?
+  homeLocationId      String?
+  workLocationId      String?
+  commuteDistance     Float?
+  lastCommuteTurn     Int?
+  carFuel             Float?
+  isLate              Boolean?
+  monthlyParkingCost  Float?
+  region              String?
+  creditScore         Int?
+  isHospitalized      Boolean?
+  suspicionScore      Int?
+  playerIcon          String?
+  traits              Json?
+  skills              Json?
+  needsTraitSelection Boolean          @default(false)
+  timeEra             String?
+  stocks              Json?
+  forbiddenStocks     Json?
+  isForbiddenUnlocked Boolean          @default(false)
+  inventory           Json?
+  shopItems           Json?
+  shopMenu            Json?
+  pointCards          Json?
+  catalogPoints       Int?
+  loyaltyPoints       Int?
+  ingredients         Json?
+  collection          Json?
+  furniture           Json?
+  pets                Json?
+  coupons             Json?
+  gachaCollection     Json?
+  shopWebsite         Json?
+  pointExchangeItems  Json?
+  ownedLands          Json?
+  ownedPlaces         Json?
+  mainPlaceId         String?
+  sidePlaceIds        Json?
+  ownedVehicles       Json?
+  qualifications      Json?
+  examHistory         Json?
+  loans               Json?
+  insurances          Json?
+  lifeStats           Json?
+  family              Json?
+  partners            Json?
+  smartphone          Json?
+  commuteInfo         Json?
+  auditLogs           Json?
+  jobHistory          Json?
+  createdAt           DateTime         @default(now())
+  updatedAt           DateTime         @updatedAt
+  cryptoHoldings      Json?
+  isOff               Boolean          @default(false)
+  vacationReason      String?
+  isDebugAuthorized   Boolean          @default(false)
+  proposals           PolicyProposal[]
+  requests            Request[]
+  transactions        Transaction[]
+  votes               Vote[]
+  receivedMessages    Message[]        @relation("ReceivedMessages")
+  sentMessages        Message[]        @relation("SentMessages")
+  createdParcels      Parcel[]         @relation("ParcelCreatedBy")
+  ownedParcel         Parcel?          @relation("ParcelOwner")
+  callsMade           VoiceCall[]      @relation("CallsMade")
+  callsReceived       VoiceCall[]      @relation("CallsReceived")
 }
 
 model Stock {
@@ -166,7 +144,7 @@ model Stock {
   previousPrice Float
   volatility    Float
   isForbidden   Boolean
-  priceHistory  Json?    // number[]
+  priceHistory  Json?
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 }
@@ -178,29 +156,26 @@ model Crypto {
   price         Float
   previousPrice Float
   volatility    Float
-  priceHistory  Json?    // number[]
+  priceHistory  Json?
   creatorId     String
   description   String?
-  
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 }
 
 model Request {
-  id              String   @id
-  type            String
-  requesterId     String
-  amount          Float
-  details         String?
-  status          String
-  timestamp       BigInt
-  idempotencyKey  String?
-  
-  user            User     @relation(fields: [requesterId], references: [id])
-  
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-  
+  id             String   @id
+  type           String
+  requesterId    String
+  amount         Float
+  details        String?
+  status         String
+  timestamp      BigInt
+  idempotencyKey String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  user           User     @relation(fields: [requesterId], references: [id])
+
   @@index([requesterId])
   @@index([status])
 }
@@ -213,17 +188,15 @@ model Transaction {
   receiverId  String?
   description String
   timestamp   BigInt
-  
-  user        User?    @relation(fields: [receiverId], references: [id])
-  
   createdAt   DateTime @default(now())
-  
+  user        User?    @relation(fields: [receiverId], references: [id])
+
   @@index([receiverId])
   @@index([senderId])
 }
 
 model Product {
-  id          String   @id
+  id          String  @id
   sellerId    String
   name        String
   price       Float
@@ -235,7 +208,7 @@ model Product {
   createdAt   BigInt?
   soldAt      BigInt?
   buyerId     String?
-  
+
   @@index([sellerId])
   @@index([isSold])
 }
@@ -251,88 +224,81 @@ model Land {
   size              Float
   zoning            String
   status            String   @default("active")
-  isForSale         Boolean  @default(true)
-  
-  maintenanceFee    Float    @default(0)
-  requiresApproval  Boolean  @default(false)
-  allowConstruction Boolean  @default(true)
-  allowCompany      Boolean  @default(true)
-  
-  polygon           Json?
-  
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
-  
+  allowCompany      Boolean  @default(true)
+  allowConstruction Boolean  @default(true)
+  isForSale         Boolean  @default(true)
+  maintenanceFee    Float    @default(0)
+  polygon           Json?
+  requiresApproval  Boolean  @default(false)
+
   @@index([ownerId])
 }
 
 model Place {
-  id          String   @id
-  ownerId     String
-  name        String
-  type        String
-  status      String
-  level       Int
-  lat         Float
-  lng         Float
-  address     String
-  landId      String
-  stats       Json?
-  employees   Json?
-  licenses    Json?
-  insurances  Json?
-  
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  
+  id         String   @id
+  ownerId    String
+  name       String
+  type       String
+  status     String
+  level      Int
+  lat        Float
+  lng        Float
+  address    String
+  landId     String
+  stats      Json?
+  employees  Json?
+  licenses   Json?
+  insurances Json?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
   @@index([ownerId])
 }
 
 model NPC {
-  id              String   @id
-  targetUserId    String
-  templateId      String
-  type            String
-  name            String
-  description     String
-  entryTime       BigInt
-  leaveTime       BigInt
-  effectApplied   Boolean
-  
-  createdAt       DateTime @default(now())
-  
+  id            String   @id
+  targetUserId  String
+  templateId    String
+  type          String
+  name          String
+  description   String
+  entryTime     BigInt
+  leaveTime     BigInt
+  effectApplied Boolean
+  createdAt     DateTime @default(now())
+
   @@index([targetUserId])
 }
 
 model NPCTemplate {
-  id              String   @id
-  name            String
-  description     String
-  duration        Int
-  spawnRate       Int
-  actionType      String
-  minPayment      Int?
-  maxPayment      Int?
-  minStealItems   Int?
-  maxStealItems   Int?
-  minStealAmount  Int?
-  maxStealAmount  Int?
-  
-  createdAt       DateTime @default(now())
+  id             String   @id
+  name           String
+  description    String
+  duration       Int
+  spawnRate      Int
+  actionType     String
+  minPayment     Int?
+  maxPayment     Int?
+  minStealItems  Int?
+  maxStealItems  Int?
+  minStealAmount Int?
+  maxStealAmount Int?
+  createdAt      DateTime @default(now())
 }
 
 model GameEvent {
-  id          String   @id
-  name        String
-  description String
-  type        String
-  startTime   BigInt
-  duration    Int
-  effectValue Float
+  id           String   @id
+  name         String
+  description  String
+  type         String
+  startTime    BigInt
+  duration     Int
+  effectValue  Float
   targetUserId String?
-  
-  createdAt   DateTime @default(now())
-  
+  createdAt    DateTime @default(now())
+
   @@index([targetUserId])
 }
 
@@ -344,35 +310,32 @@ model Property {
   income      Float
   ownerId     String?
   description String?
-  
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-  
+
   @@index([ownerId])
 }
 
 model News {
-  id          String   @id
-  message     String
-  timestamp   BigInt
-  
-  createdAt   DateTime @default(now())
+  id        String   @id
+  message   String
+  timestamp BigInt
+  createdAt DateTime @default(now())
 }
 
 model RouletteResult {
-  id          String   @id @default("singleton")
-  text        String
-  timestamp   BigInt
+  id           String   @id @default("singleton")
+  text         String
+  timestamp    BigInt
   targetUserId String?
-  
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 }
 
 model IdempotencyKey {
-  key         String   @id
-  createdAt   DateTime @default(now())
-  
+  key       String   @id
+  createdAt DateTime @default(now())
+
   @@index([createdAt])
 }
 
@@ -384,93 +347,60 @@ model CatalogItem {
   wholesalePrice Float
   stock          Int
   description    String?
-  
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 }
 
-// ==========================================
-// Land/Parcel System
-// ==========================================
-
 model Parcel {
   id                String       @id @default(uuid())
-  addressNormalized String       // 正規化された住所
-  lat               Float        // 緯度
-  lng               Float        // 経度
-  price             Int          // 価格
+  addressNormalized String
+  lat               Float
+  lng               Float
+  price             Int
   status            ParcelStatus @default(DRAFT)
-  
-  // 作成者（管理者 or 不動産屋）
   createdByUserId   String?
-  createdBy         User?        @relation("ParcelCreatedBy", fields: [createdByUserId], references: [id])
-  
-  // 所有者
   ownerUserId       String?      @unique
-  owner             User?        @relation("ParcelOwner", fields: [ownerUserId], references: [id])
-  
   soldAt            DateTime?
   createdAt         DateTime     @default(now())
   updatedAt         DateTime     @updatedAt
-  
+  createdBy         User?        @relation("ParcelCreatedBy", fields: [createdByUserId], references: [id])
+  owner             User?        @relation("ParcelOwner", fields: [ownerUserId], references: [id])
+
   @@map("parcels")
 }
 
-enum ParcelStatus {
-  DRAFT      // 下書き
-  PUBLISHED  // 公開中（購入可能）
-  SOLD       // 売約済み
-  HIDDEN     // 非表示
-}
-
-// ==========================================
-// Communication System
-// ==========================================
-
 model Message {
-  id          String   @id @default(uuid())
-  senderId    String
-  sender      User     @relation("SentMessages", fields: [senderId], references: [id])
-  receiverId  String
-  receiver    User     @relation("ReceivedMessages", fields: [receiverId], references: [id])
-  content     String
-  imageUrl    String?  // 画像データ (Base64 or URL)
-  type        String?  // 'text' | 'image'
-  isRead      Boolean  @default(false)
-  createdAt   DateTime @default(now())
-  
+  id         String   @id @default(uuid())
+  senderId   String
+  receiverId String
+  content    String
+  isRead     Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  imageUrl   String?
+  type       String?
+  receiver   User     @relation("ReceivedMessages", fields: [receiverId], references: [id])
+  sender     User     @relation("SentMessages", fields: [senderId], references: [id])
+
   @@index([receiverId, isRead])
   @@index([senderId])
   @@map("messages")
 }
 
 model VoiceCall {
-  id          String     @id @default(uuid())
-  callerId    String
-  caller      User       @relation("CallsMade", fields: [callerId], references: [id])
-  receiverId  String
-  receiver    User       @relation("CallsReceived", fields: [receiverId], references: [id])
-  status      CallStatus @default(PENDING)
-  startedAt   DateTime   @default(now())
-  endedAt     DateTime?
-  duration    Int?       // seconds
-  
+  id         String     @id @default(uuid())
+  callerId   String
+  receiverId String
+  status     CallStatus @default(PENDING)
+  startedAt  DateTime   @default(now())
+  endedAt    DateTime?
+  duration   Int?
+  caller     User       @relation("CallsMade", fields: [callerId], references: [id])
+  receiver   User       @relation("CallsReceived", fields: [receiverId], references: [id])
+
   @@index([callerId])
   @@index([receiverId])
   @@map("voice_calls")
 }
-
-enum CallStatus {
-  PENDING     // 呼び出し中
-  ACTIVE      // 通話中
-  ENDED       // 終了
-  MISSED      // 不在着信
-  DECLINED    // 拒否
-}
-
-// ==========================================
-// Politics System
-// ==========================================
 
 model PolicyProposal {
   id          String   @id @default(uuid())
@@ -479,27 +409,55 @@ model PolicyProposal {
   type        String
   params      Json?
   proposerId  String
-  proposer    User     @relation(fields: [proposerId], references: [id])
   status      String   @default("active")
   deadline    BigInt
-  
-  votes       Vote[]
-  
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
-  
+  proposer    User     @relation(fields: [proposerId], references: [id])
+  votes       Vote[]
+
   @@index([status])
 }
 
 model Vote {
-  id          String         @id @default(uuid())
-  proposalId  String
-  proposal    PolicyProposal @relation(fields: [proposalId], references: [id])
-  userId      String
-  user        User           @relation(fields: [userId], references: [id])
-  vote        String
-  
-  createdAt   DateTime @default(now())
-  
+  id         String         @id @default(uuid())
+  proposalId String
+  userId     String
+  vote       String
+  createdAt  DateTime       @default(now())
+  proposal   PolicyProposal @relation(fields: [proposalId], references: [id])
+  user       User           @relation(fields: [userId], references: [id])
+
   @@unique([proposalId, userId])
+}
+
+model BankerElection {
+  id          String   @id @default(uuid())
+  status      String   @default("active")
+  startedAt   DateTime @default(now())
+  endsAt      DateTime
+  candidates  Json
+  votes       Json?
+  npcVotes    Json?
+  winnerId    String?
+  rewardLog   Json?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([status])
+}
+
+enum ParcelStatus {
+  DRAFT
+  PUBLISHED
+  SOLD
+  HIDDEN
+}
+
+enum CallStatus {
+  PENDING
+  ACTIVE
+  ENDED
+  MISSED
+  DECLINED
 }

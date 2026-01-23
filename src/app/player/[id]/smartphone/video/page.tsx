@@ -15,6 +15,8 @@ export default function VideoPage() {
     const [title, setTitle] = useState('');
     const [color, setColor] = useState('#ff0000');
     const [selectedVideo, setSelectedVideo] = useState<any>(null);
+    const [file, setFile] = useState<File | null>(null);
+    const [isUploading, setIsUploading] = useState(false);
 
     if (!gameState || !currentUser) return <div className="p-4">Loading...</div>;
 
@@ -23,13 +25,33 @@ export default function VideoPage() {
     const handleUpload = async () => {
         if (!title.trim()) return;
         try {
-            await sendRequest('upload_video', 0, JSON.stringify({ title, color }));
+            setIsUploading(true);
+            let fileUrl = '';
+
+            if (file) {
+                const formData = new FormData();
+                formData.append('file', file);
+                const res = await fetch('/api/upload/video', {
+                    method: 'POST',
+                    body: formData,
+                });
+                if (!res.ok) {
+                    throw new Error('upload failed');
+                }
+                const data = await res.json();
+                fileUrl = data.url;
+            }
+
+            await sendRequest('upload_video', 0, { title, color, url: fileUrl, description: '', tags: [] });
             setTitle('');
             setUploadMode(false);
+            setFile(null);
             addToast('動画をアップロードしました！', 'success');
         } catch (error) {
             console.error(error);
             addToast('アップロード失敗', 'error');
+        } finally {
+            setIsUploading(false);
         }
     };
 
@@ -46,9 +68,7 @@ export default function VideoPage() {
                     </div>
                     <span className="text-xl font-bold tracking-tighter text-gray-800">Streamer</span>
                 </div>
-                <button onClick={() => setUploadMode(true)} className="text-gray-600">
-                    📹
-                </button>
+                <div className="w-6" />
             </header>
 
             {/* Video List */}
@@ -66,6 +86,15 @@ export default function VideoPage() {
                             className="aspect-video w-full relative group-hover:opacity-90 transition-opacity"
                             style={{ backgroundColor: video.thumbnailColor }}
                         >
+                            {video.url ? (
+                                <video
+                                    src={video.url}
+                                    muted
+                                    playsInline
+                                    preload="metadata"
+                                    className="w-full h-full object-cover"
+                                />
+                            ) : null}
                             <div className="absolute bottom-2 right-2 bg-black/70 text-white text-xs px-1 rounded">
                                 {Math.floor(Math.random() * 10)}:{Math.floor(Math.random() * 60).toString().padStart(2, '0')}
                             </div>
@@ -97,6 +126,12 @@ export default function VideoPage() {
                         </button>
                     </div>
                 )}
+                <button
+                    onClick={() => setUploadMode(true)}
+                    className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-red-600 text-white font-bold px-6 py-3 rounded-full shadow-lg hover:bg-red-500"
+                >
+                    動画をアップロード
+                </button>
             </div>
 
             {/* Upload Modal */}
@@ -129,6 +164,15 @@ export default function VideoPage() {
                                     />
                                 </div>
                                 <div>
+                                    <label className="block text-sm font-bold text-gray-700 mb-1">動画ファイル</label>
+                                    <input
+                                        type="file"
+                                        accept="video/mp4,video/webm,video/quicktime"
+                                        className="w-full border rounded-lg p-2 bg-white"
+                                        onChange={(e) => setFile(e.target.files?.[0] || null)}
+                                    />
+                                </div>
+                                <div>
                                     <label className="block text-sm font-bold text-gray-700 mb-1">サムネイルカラー</label>
                                     <div className="flex gap-2">
                                         {['#ff0000', '#0000ff', '#00ff00', '#ffff00', '#ff00ff', '#00ffff'].map((c) => (
@@ -142,10 +186,11 @@ export default function VideoPage() {
                                     </div>
                                 </div>
                                 <button
-                                    className="w-full bg-red-600 text-white font-bold py-3 rounded-lg hover:bg-red-700"
+                                    className="w-full bg-red-600 text-white font-bold py-3 rounded-lg hover:bg-red-700 disabled:opacity-50"
                                     onClick={handleUpload}
+                                    disabled={isUploading}
                                 >
-                                    アップロード
+                                    {isUploading ? 'アップロード中...' : 'アップロード'}
                                 </button>
                             </div>
                         </motion.div>
@@ -166,11 +211,24 @@ export default function VideoPage() {
                         <div
                             className="aspect-video w-full bg-black flex items-center justify-center relative"
                         >
-                            <motion.div
-                                className="w-full h-full opacity-50"
-                                style={{ backgroundColor: selectedVideo.thumbnailColor }}
-                            />
-                            <div className="absolute text-white text-4xl animate-pulse">▶ Playing...</div>
+                            {selectedVideo.url ? (
+                                <video
+                                    src={selectedVideo.url}
+                                    controls
+                                    autoPlay
+                                    playsInline
+                                    preload="metadata"
+                                    className="w-full h-full object-contain"
+                                />
+                            ) : (
+                                <>
+                                    <motion.div
+                                        className="w-full h-full opacity-50"
+                                        style={{ backgroundColor: selectedVideo.thumbnailColor }}
+                                    />
+                                    <div className="absolute text-white text-4xl animate-pulse">▶ 動画なし</div>
+                                </>
+                            )}
                             <button
                                 onClick={() => setSelectedVideo(null)}
                                 className="absolute top-4 left-4 text-white text-2xl font-bold drop-shadow-md"

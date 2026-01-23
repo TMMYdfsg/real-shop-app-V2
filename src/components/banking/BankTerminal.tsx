@@ -48,7 +48,7 @@ export default function BankTerminal({ user, economy, onClose, onAction }: BankT
         }
     };
 
-    const formatMoney = (val: number) => `¥${val.toLocaleString()}`;
+    const formatMoney = (val: number) => `${val.toLocaleString()}枚`;
 
     return (
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">

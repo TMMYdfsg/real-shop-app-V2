@@ -121,7 +121,7 @@ const formatDetails = (details: string | object) => {
     try {
         const obj = typeof details === 'string' ? JSON.parse(details) : details;
         if (obj.itemId) {
-            return `${obj.stock}個 (${obj.price}円/個) (原価: ${obj.cost}円)`;
+            return `${obj.stock}個 (${obj.price}枚/個) (原価: ${obj.cost}枚)`;
         }
         return JSON.stringify(obj);
     } catch {

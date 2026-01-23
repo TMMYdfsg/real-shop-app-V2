@@ -3,8 +3,7 @@ import { prisma } from '@/lib/db';
 import { generateChannelName } from '@/lib/agora';
 import { cookies } from 'next/headers';
 
-export const dynamic = 'force-static';
-export async function generateStaticParams() { return []; }
+export const dynamic = 'force-dynamic';
 
 
 
@@ -19,7 +18,8 @@ export async function PATCH(
     try {
         const { id } = await params;
         const cookieStore = await cookies();
-        const playerId = cookieStore.get('playerId')?.value;
+        const playerIdFromQuery = new URL(req.url).searchParams.get('playerId') || '';
+        const playerId = cookieStore.get('playerId')?.value || req.headers.get('x-player-id') || playerIdFromQuery;
 
         if (!playerId) {
             return NextResponse.json(
@@ -63,13 +63,15 @@ export async function PATCH(
         });
 
         // 応答時(ACTIVE)ならトークンを生成して返す
-        let token = undefined;
+        let token: string | null | undefined = undefined;
+        let uid: number | undefined = undefined;
         if (status === 'ACTIVE') {
             const channelName = generateChannelName(id);
-            token = generateRtcToken(channelName, 0);
+            uid = Math.floor(Math.random() * 1000000) + 1;
+            token = generateRtcToken(channelName, uid);
         }
 
-        return NextResponse.json({ ...updatedCall, token });
+        return NextResponse.json({ ...updatedCall, token, uid });
     } catch (error) {
         console.error('[API] Error updating call:', error);
         return NextResponse.json(
@@ -84,13 +86,13 @@ export async function PATCH(
  */
 import { RtcTokenBuilder, RtcRole } from 'agora-token';
 
-function generateRtcToken(channelName: string, uid: number): string {
+function generateRtcToken(channelName: string, uid: number): string | null {
     const appId = process.env.NEXT_PUBLIC_AGORA_APP_ID;
     const appCertificate = process.env.AGORA_APP_CERTIFICATE;
 
     if (!appId || !appCertificate) {
-        // App Certificateがない場合はダミートークン
-        return 'dummy-token';
+        // App Certificateがない場合は静的キーで参加
+        return null;
     }
 
     const role = RtcRole.PUBLISHER;

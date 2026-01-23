@@ -13,6 +13,7 @@ import UnifiedMessengerApp from './apps/UnifiedMessengerApp';
 import PoliticsNewsApp from '@/components/smartphone/apps/PoliticsNewsApp';
 import SNSApp from './SNSApp';
 import VideoApp from './VideoApp';
+import ChannelApp from './ChannelApp';
 import { JobBoardApp } from './apps/JobBoardApp';
 import { BankAssetApp } from './apps/BankAssetApp';
 import { LifeStatusApp } from './apps/LifeStatusApp';
@@ -84,6 +85,8 @@ export const SmartphoneOS = () => {
         return <SNSApp onClose={handleHome} />;
       case 'video':
         return <VideoApp onClose={handleHome} />;
+      case 'channel':
+        return <ChannelApp onClose={handleHome} />;
       case 'politics':
       case 'news':
         return <PoliticsNewsApp onClose={handleHome} initialTab={currentApp === 'news' ? 'news' : 'politics'} />;
@@ -135,7 +138,9 @@ export const SmartphoneOS = () => {
     trueTone: true,
     passcode: '',
     biometricEnabled: false,
-    lockScreenImage: ''
+    lockScreenImage: '',
+    incomingCallSound: 'notification_1.mp3',
+    outgoingCallSound: 'notification_2.mp3'
   }), []);
   const smartphoneSettings = useMemo(() => ({
     ...baseSettings,

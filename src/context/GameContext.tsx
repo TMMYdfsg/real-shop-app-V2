@@ -125,6 +125,13 @@ export function GameProvider({ children, initialData }: { children: React.ReactN
     const sendRequest = async (type: string, amount: number, details: any = {}) => {
         try {
             if (!currentUser) return;
+            const noReloadTypes = new Set([
+                'stock_tick',
+                'timer_update',
+                'timer_start',
+                'timer_stop',
+                'timer_reset'
+            ]);
             const res = await fetch('/api/action', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -138,6 +145,9 @@ export function GameProvider({ children, initialData }: { children: React.ReactN
             const data = await res.json();
             if (data.success) {
                 mutate(); // Refresh state
+                if (typeof window !== 'undefined' && !noReloadTypes.has(type)) {
+                    window.location.reload();
+                }
             } else {
                 console.error('Action failed:', data.message);
                 throw new Error(data.message);

@@ -16,11 +16,24 @@ interface Proposal {
     votes: { userId: string; vote: 'yes' | 'no' }[];
 }
 
+interface BankerElection {
+    id: string;
+    status: 'active' | 'finished';
+    startedAt: string;
+    endsAt: string;
+    candidates: { id: string; name: string }[];
+    votes?: Record<string, string>;
+    npcVotes?: { name: string; candidateId: string }[];
+    winnerId?: string | null;
+}
+
 export default function PoliticsApp({ onClose }: { onClose: () => void }) {
     const { currentUser } = useGame();
     const [proposals, setProposals] = useState<Proposal[]>([]);
     const [loading, setLoading] = useState(true);
     const [showCreateModal, setShowCreateModal] = useState(false);
+    const [election, setElection] = useState<BankerElection | null>(null);
+    const [electionLoading, setElectionLoading] = useState(true);
 
     // Fetch Proposals
     const fetchProposals = async () => {
@@ -40,9 +53,28 @@ export default function PoliticsApp({ onClose }: { onClose: () => void }) {
         }
     };
 
+    const fetchElection = async () => {
+        try {
+            fetch('/api/politics/election/resolve', { method: 'POST' }).catch(() => { });
+            const res = await fetch('/api/politics/election');
+            if (res.ok) {
+                const data = await res.json();
+                setElection(data);
+            }
+        } catch (e) {
+            console.error(e);
+        } finally {
+            setElectionLoading(false);
+        }
+    };
+
     useEffect(() => {
         fetchProposals();
-        const interval = setInterval(fetchProposals, 5000);
+        fetchElection();
+        const interval = setInterval(() => {
+            fetchProposals();
+            fetchElection();
+        }, 5000);
         return () => clearInterval(interval);
     }, []);
 
@@ -60,6 +92,40 @@ export default function PoliticsApp({ onClose }: { onClose: () => void }) {
                 // Simple animation feedback could go here
             } else {
                 alert('投票に失敗しました');
+            }
+        } catch (e) {
+            alert('エラーが発生しました');
+        }
+    };
+
+    const handleStartElection = async () => {
+        if (!currentUser) return;
+        try {
+            const res = await fetch('/api/politics/election', { method: 'POST' });
+            if (res.ok) {
+                fetchElection();
+            } else {
+                const data = await res.json().catch(() => ({}));
+                alert(data?.error || '選挙を開始できませんでした');
+            }
+        } catch (e) {
+            alert('エラーが発生しました');
+        }
+    };
+
+    const handleElectionVote = async (candidateId: string) => {
+        if (!currentUser || !election) return;
+        try {
+            const res = await fetch('/api/politics/election/vote', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ electionId: election.id, candidateId })
+            });
+            if (res.ok) {
+                fetchElection();
+            } else {
+                const data = await res.json().catch(() => ({}));
+                alert(data?.error || '投票に失敗しました');
             }
         } catch (e) {
             alert('エラーが発生しました');
@@ -91,6 +157,81 @@ export default function PoliticsApp({ onClose }: { onClose: () => void }) {
                     >
                         📝 新しいルールを提案する
                     </button>
+                </div>
+
+                {/* Banker Election */}
+                <div className="bg-white rounded-2xl p-5 shadow-sm border border-slate-200">
+                    <div className="flex items-center justify-between mb-3">
+                        <h3 className="font-bold text-slate-800">🏦 次期銀行員 総選挙</h3>
+                        {election?.status === 'active' && (
+                            <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded">
+                                受付中
+                            </span>
+                        )}
+                        {election?.status === 'finished' && (
+                            <span className="text-xs font-bold text-slate-500 bg-slate-100 px-2 py-1 rounded">
+                                終了
+                            </span>
+                        )}
+                    </div>
+                    {electionLoading ? (
+                        <div className="text-sm text-slate-400">読み込み中...</div>
+                    ) : (
+                        <>
+                            {!election && (
+                                <div className="text-center text-sm text-slate-500">
+                                    まだ総選挙は開催されていません。
+                                </div>
+                            )}
+                            {election?.status === 'active' && (
+                                <>
+                                    <div className="text-xs text-slate-500 mb-3">
+                                        締切: {new Date(election.endsAt).toLocaleTimeString()}
+                                    </div>
+                                    <div className="space-y-2">
+                                        {election.candidates.map((candidate) => {
+                                            const myVote = election.votes?.[currentUser?.id || ''];
+                                            return (
+                                                <button
+                                                    key={candidate.id}
+                                                    onClick={() => handleElectionVote(candidate.id)}
+                                                    disabled={!!myVote}
+                                                    className={`w-full flex items-center justify-between rounded-xl border px-4 py-3 text-sm font-bold transition ${myVote === candidate.id
+                                                        ? 'border-indigo-500 bg-indigo-50 text-indigo-700'
+                                                        : myVote
+                                                            ? 'border-slate-200 text-slate-400 bg-slate-50'
+                                                            : 'border-slate-200 hover:border-indigo-300 hover:bg-indigo-50 text-slate-700'
+                                                        }`}
+                                                >
+                                                    <span>{candidate.name}</span>
+                                                    <span className="text-xs text-slate-400">
+                                                        {myVote === candidate.id ? '投票済み' : '投票'}
+                                                    </span>
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                    <div className="text-xs text-slate-500 mt-3">
+                                        一般人NPCもランダム投票します。
+                                    </div>
+                                </>
+                            )}
+                            {election?.status === 'finished' && (
+                                <div className="text-sm text-slate-600 space-y-2">
+                                    <div>当選: {election.candidates.find(c => c.id === election.winnerId)?.name || '不明'}</div>
+                                    <div>一般人NPC投票数: {election.npcVotes?.length || 0}票</div>
+                                </div>
+                            )}
+                            {(!election || election.status === 'finished') && (
+                                <button
+                                    onClick={handleStartElection}
+                                    className="mt-4 w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 rounded-lg"
+                                >
+                                    総選挙を開始する
+                                </button>
+                            )}
+                        </>
+                    )}
                 </div>
 
                 {/* Proposals List */}
@@ -212,7 +353,7 @@ const PROPOSAL_TYPES: Record<string, { label: string, template: any }> = {
     },
     grant: {
         label: '💸 給付金',
-        template: { title: '市民全員に1000円配る！', description: '銀行から謎の資金が配られます。無駄遣いしよう！', type: 'grant', params: { amount: 1000 } }
+        template: { title: '市民全員に1000枚配る！', description: '銀行から謎の資金が配られます。無駄遣いしよう！', type: 'grant', params: { amount: 1000 } }
     },
     festival: {
         label: '🎉 毎日お祭り',
@@ -238,7 +379,7 @@ function CreateProposalModal({ onClose, onCreated }: { onClose: () => void, onCr
             if (res.ok) {
                 onCreated();
             } else {
-                alert('提案できませんでした。資金不足(500円)かも？');
+                alert('提案できませんでした。資金不足(500枚)かも？');
             }
         } catch (e) {
             console.error(e);
@@ -261,7 +402,7 @@ function CreateProposalModal({ onClose, onCreated }: { onClose: () => void, onCr
                     <button onClick={onClose} className="text-slate-400 hover:text-slate-600">✖</button>
                 </div>
                 <div className="p-4 space-y-3">
-                    <p className="text-xs text-slate-500 mb-2">※ 提案には <span className="font-bold text-orange-500">500円</span> かかります</p>
+                    <p className="text-xs text-slate-500 mb-2">※ 提案には <span className="font-bold text-orange-500">500枚</span> かかります</p>
                     {Object.entries(PROPOSAL_TYPES).map(([key, item]) => (
                         <button
                             key={key}

@@ -101,7 +101,11 @@ export async function createMicrophoneTrack() {
 
     try {
         const AgoraRTC = await import('agora-rtc-sdk-ng');
-        return await AgoraRTC.default.createMicrophoneAudioTrack();
+        return await AgoraRTC.default.createMicrophoneAudioTrack({
+            AEC: true,
+            ANS: true,
+            AGC: true,
+        });
     } catch (error) {
         console.error('[Agora] Failed to create microphone track:', error);
         return null;

@@ -58,6 +58,7 @@ export default function UnifiedMessengerApp({ onClose, initialTab = 'chats' }: {
     const [activeCall, setActiveCall] = useState<VoiceCall | null>(null);
     const [incomingCall, setIncomingCall] = useState<VoiceCall | null>(null);
     const [isMuted, setIsMuted] = useState(false);
+    const hasPhoneApp = (user?: { smartphone?: { apps?: string[] } } | null) => Array.isArray(user?.smartphone?.apps) && user!.smartphone!.apps!.includes('phone');
 
     // Messaging Data
     const { data: conversations } = useRealtime<Message[]>(
@@ -110,15 +111,32 @@ export default function UnifiedMessengerApp({ onClose, initialTab = 'chats' }: {
 
     const initiateCall = async (receiverId: string) => {
         try {
+            if (currentUser && !hasPhoneApp(currentUser as any)) {
+                alert('電話アプリがインストールされていません');
+                return;
+            }
+            const receiver = gameState?.users.find(u => u.id === receiverId) as any;
+            if (receiver && !hasPhoneApp(receiver)) {
+                alert('相手のスマホに電話アプリが入っていません');
+                return;
+            }
             const res = await fetch('/api/calls', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ receiverId }),
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(currentUser?.id ? { 'x-player-id': currentUser.id } : {})
+                },
+                credentials: 'include',
+                body: JSON.stringify({ receiverId, playerId: currentUser?.id }),
             });
+            if (!res.ok) {
+                const errorData = await res.json().catch(() => ({}));
+                throw new Error(errorData?.error || '通話の開始に失敗しました');
+            }
             const { call } = await res.json();
             setActiveCall(call);
         } catch (error) {
-            alert('通話の開始に失敗しました');
+            alert(error instanceof Error ? error.message : '通話の開始に失敗しました');
         }
     };
 
@@ -226,9 +244,13 @@ export default function UnifiedMessengerApp({ onClose, initialTab = 'chats' }: {
                     {activeTab === 'calls' && (
                         <motion.div key="calls" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="px-4 py-2">
                             {gameState?.users.filter(u => u.id !== currentUser?.id).map(u => (
-                                <div key={u.id} className="flex items-center justify-between p-3 hover:bg-slate-50 rounded-2xl transition">
+                                <div key={u.id} className={`flex items-center justify-between p-3 rounded-2xl transition ${hasPhoneApp(u as any) ? 'hover:bg-slate-50' : 'opacity-60'}`}>
                                     <div className="flex items-center gap-4"><PlayerIcon size={50} playerName={u.name} /><div><h4 className="font-black text-slate-900">{u.name}</h4><p className="text-xs text-slate-400 font-bold">音声通話</p></div></div>
-                                    <button onClick={() => initiateCall(u.id)} className="w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center text-blue-600"><Phone className="w-5 h-5 fill-current" /></button>
+                                    {hasPhoneApp(u as any) ? (
+                                        <button onClick={() => initiateCall(u.id)} className="w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center text-blue-600"><Phone className="w-5 h-5 fill-current" /></button>
+                                    ) : (
+                                        <span className="text-xs font-bold text-slate-400">未インストール</span>
+                                    )}
                                 </div>
                             ))}
                         </motion.div>

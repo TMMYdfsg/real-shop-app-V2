@@ -36,7 +36,7 @@ export const LandPurchaseModal: React.FC<LandPurchaseModalProps> = ({
 
                         <div className="text-gray-500">価格</div>
                         <div className="col-span-2 font-bold text-lg text-indigo-600">
-                            {land.price.toLocaleString()}円
+                            {land.price.toLocaleString()}枚
                         </div>
                     </div>
                 </div>
@@ -44,7 +44,7 @@ export const LandPurchaseModal: React.FC<LandPurchaseModalProps> = ({
                 <div className="flex justify-between items-center p-3 border rounded-lg">
                     <span className="text-gray-600">現在の所持金</span>
                     <span className={`font-bold ${canAfford ? 'text-green-600' : 'text-red-500'}`}>
-                        {currentBalance.toLocaleString()}円
+                        {currentBalance.toLocaleString()}枚
                     </span>
                 </div>
 

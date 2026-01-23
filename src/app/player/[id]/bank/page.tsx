@@ -98,7 +98,7 @@ export default function BankPage() {
                 </div>
                 <div className="text-right">
                     <div className="text-sm opacity-80">融資限度額</div>
-                    <div className="text-2xl font-bold">{maxLoan.toLocaleString()}円</div>
+                    <div className="text-2xl font-bold">{maxLoan.toLocaleString()}枚</div>
                 </div>
             </Card>
 
@@ -128,7 +128,7 @@ export default function BankPage() {
                         <Card padding="lg" className="text-center">
                             <div className="text-sm text-gray-500 mb-2">現在の預金残高</div>
                             <div className="text-4xl font-bold text-blue-600">
-                                {currentUser.deposit.toLocaleString()} <span className="text-lg text-gray-400">円</span>
+                                {currentUser.deposit.toLocaleString()} <span className="text-lg text-gray-400">枚</span>
                             </div>
                         </Card>
 
@@ -168,7 +168,7 @@ export default function BankPage() {
                                 <div className="space-y-2 mb-6">
                                     <div className="flex justify-between">
                                         <span>借入額</span>
-                                        <span className="font-bold">{activeLoan.amount.toLocaleString()}円</span>
+                                        <span className="font-bold">{activeLoan.amount.toLocaleString()}枚</span>
                                     </div>
                                     <div className="flex justify-between">
                                         <span>ステータス</span>
@@ -191,7 +191,7 @@ export default function BankPage() {
                                 <h3 className="font-bold text-lg mb-4">新規融資の申し込み</h3>
                                 <p className="text-sm text-gray-600 mb-4">
                                     事業拡大のための資金を借り入れることができます。<br />
-                                    信用スコアに基づき、最大 <strong>{maxLoan.toLocaleString()}円</strong> まで申請可能です。
+                                    信用スコアに基づき、最大 <strong>{maxLoan.toLocaleString()}枚</strong> まで申請可能です。
                                 </p>
                                 <div className="mb-4">
                                     <label className="block text-sm font-bold mb-2">希望借入額</label>

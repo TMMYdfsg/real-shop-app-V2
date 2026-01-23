@@ -309,6 +309,7 @@ export async function getGameState(): Promise<GameState> {
             traits: (u.traits as any) || [],
             skills: (u.skills as any) || {},
             needsTraitSelection: u.needsTraitSelection ?? false,
+            timeEra: u.timeEra || 'present',
             ownedLands: (u.ownedLands as any) || [],
             ownedPlaces: (u.ownedPlaces as any) || [],
             ownedVehicles: (u.ownedVehicles as any) || [],
@@ -562,9 +563,7 @@ export async function updateGameState(updater: (state: GameState) => GameState |
                 infraPower: newState.environment.cityInfrastructure.power,
                 infraWater: newState.environment.cityInfrastructure.water,
                 infraNetwork: newState.environment.cityInfrastructure.network,
-                securityLevel: newState.environment.securityLevel,
-                roulettePresets: newState.roulettePresets as any,
-                rouletteActiveId: newState.rouletteActivePresetId || null
+                securityLevel: newState.environment.securityLevel
             }
         });
 
@@ -604,6 +603,7 @@ export async function updateGameState(updater: (state: GameState) => GameState |
                     traits: user.traits as any,
                     skills: user.skills as any,
                     needsTraitSelection: user.needsTraitSelection ?? false,
+                    timeEra: user.timeEra,
                     employmentStatus: user.employmentStatus,
                     currentJobId: user.currentJobId,
                     jobHistory: user.jobHistory as any,
@@ -654,6 +654,7 @@ export async function updateGameState(updater: (state: GameState) => GameState |
                     traits: (user.traits as any) || [],
                     skills: (user.skills as any) || {},
                     needsTraitSelection: user.needsTraitSelection ?? false,
+                    timeEra: user.timeEra || 'present',
                     // JSON フィールドのデフォルト値
                     shopItems: (user.shopItems as any) || [],
                     stocks: (user.stocks as any) || {},

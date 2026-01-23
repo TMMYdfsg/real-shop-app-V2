@@ -54,7 +54,7 @@ export const RankingList = ({ users, currentUserId }: RankingListProps) => {
                             </div>
 
                             <div className="font-mono font-bold text-emerald-400 text-lg tracking-tight">
-                                ¥{user.balance.toLocaleString()}
+                                {user.balance.toLocaleString()}枚
                             </div>
                         </motion.div>
                     );

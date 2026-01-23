@@ -57,7 +57,7 @@ export const JapanPrefectureModal: React.FC<JapanPrefectureModalProps> = ({
                                     >
                                         <span className="font-bold">{land.address}</span>
                                         <span className={`text-[10px] ${canAfford ? 'text-indigo-600' : 'text-red-500'}`}>
-                                            {isOwned ? '所有済' : `¥${(land.price / 10000).toLocaleString()}万`}
+                                            {isOwned ? '所有済' : `${(land.price / 10000).toLocaleString()}万枚`}
                                         </span>
                                     </button>
                                 );

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRealtime } from '@/hooks/useRealtime';
 import { useGame } from '@/context/GameContext';
 import { getAgoraClient, createMicrophoneTrack, generateChannelName } from '@/lib/agora';
@@ -19,6 +19,9 @@ interface User {
     id: string;
     name: string;
     playerIcon?: string;
+    smartphone?: {
+        apps?: string[];
+    };
 }
 
 export default function PhoneApp({ onClose }: { onClose: () => void }) {
@@ -28,6 +31,14 @@ export default function PhoneApp({ onClose }: { onClose: () => void }) {
     const [agoraClient, setAgoraClient] = useState<any>(null);
     const [microphoneTrack, setMicrophoneTrack] = useState<any>(null);
     const [hasMicPermission, setHasMicPermission] = useState(false);
+    const [isSpeakerOn, setIsSpeakerOn] = useState(false);
+    const remoteTracksRef = useRef<any[]>([]);
+    const lastEndedCallIdRef = useRef<string | null>(null);
+    const speakerStateRef = useRef(false);
+    const outgoingToneRef = useRef<HTMLAudioElement | null>(null);
+    const incomingToneRef = useRef<HTMLAudioElement | null>(null);
+    const outgoingToneNameRef = useRef<string | null>(null);
+    const incomingToneNameRef = useRef<string | null>(null);
 
     const [connectionState, setConnectionState] = useState<'DISCONNECTED' | 'CONNECTING' | 'CONNECTED'>('DISCONNECTED');
     const [isPublished, setIsPublished] = useState(false);
@@ -38,10 +49,13 @@ export default function PhoneApp({ onClose }: { onClose: () => void }) {
 
 
 
+    const hasPhoneApp = (user?: User | null) => Array.isArray(user?.smartphone?.apps) && user!.smartphone!.apps!.includes('phone');
+    const canUsePhoneApp = hasPhoneApp(currentUser as unknown as User);
+
     // 通話履歴と着信をリアルタイム取得
     const { data: calls, isConnected, error: connectionError } = useRealtime<VoiceCall[]>(
         '/api/calls',
-        { interval: 2000, enabled: !!currentUser }
+        { interval: 2000, enabled: !!currentUser && canUsePhoneApp }
     );
 
     // SSLチェック
@@ -73,25 +87,136 @@ export default function PhoneApp({ onClose }: { onClose: () => void }) {
 
         if (pending && (!incomingCall || pending.id !== incomingCall.id)) {
             setIncomingCall(pending);
+        } else if (!pending && incomingCall) {
+            setIncomingCall(null);
         }
     }, [calls, incomingCall, currentUser?.id]);
 
     const getMyId = () => currentUser?.id || '';
 
+    const getIncomingTone = useCallback(() => {
+        return currentUser?.smartphone?.settings?.incomingCallSound
+            || localStorage.getItem('notification_sound')
+            || 'notification_1.mp3';
+    }, [currentUser?.smartphone?.settings?.incomingCallSound]);
+
+    const getOutgoingTone = useCallback(() => {
+        return currentUser?.smartphone?.settings?.outgoingCallSound
+            || localStorage.getItem('notification_sound')
+            || 'notification_1.mp3';
+    }, [currentUser?.smartphone?.settings?.outgoingCallSound]);
+
+    const stopTone = (ref: React.MutableRefObject<HTMLAudioElement | null>, nameRef: React.MutableRefObject<string | null>) => {
+        if (ref.current) {
+            ref.current.pause();
+            ref.current.currentTime = 0;
+        }
+        ref.current = null;
+        nameRef.current = null;
+    };
+
+    const playLoopTone = (ref: React.MutableRefObject<HTMLAudioElement | null>, nameRef: React.MutableRefObject<string | null>, filename: string) => {
+        if (nameRef.current === filename) return;
+        stopTone(ref, nameRef);
+        const audio = new Audio(`/sounds/${filename}`);
+        audio.loop = true;
+        audio.volume = 0.5;
+        audio.play().catch(() => { });
+        ref.current = audio;
+        nameRef.current = filename;
+    };
+
+    const playCallEndSound = useCallback((callId?: string) => {
+        if (typeof window === 'undefined') return;
+        if (callId && lastEndedCallIdRef.current === callId) return;
+        const filename = localStorage.getItem('notification_sound') || 'notification_1.mp3';
+        const audio = new Audio(`/sounds/${filename}`);
+        audio.volume = 0.6;
+        audio.play().catch(() => { });
+        if (callId) lastEndedCallIdRef.current = callId;
+    }, []);
+
+    const setRemoteVolume = useCallback((volume: number) => {
+        remoteTracksRef.current.forEach((track) => {
+            if (track && typeof track.setVolume === 'function') {
+                track.setVolume(volume);
+            }
+        });
+    }, []);
+
+    useEffect(() => {
+        speakerStateRef.current = isSpeakerOn;
+        setRemoteVolume(isSpeakerOn ? 100 : 60);
+    }, [isSpeakerOn, setRemoteVolume]);
+
+    useEffect(() => {
+        if (!incomingCall || !canUsePhoneApp) {
+            stopTone(incomingToneRef, incomingToneNameRef);
+            return;
+        }
+        playLoopTone(incomingToneRef, incomingToneNameRef, getIncomingTone());
+    }, [incomingCall, canUsePhoneApp, getIncomingTone]);
+
+    useEffect(() => {
+        const isCalling = activeCall
+            && activeCall.status === 'PENDING'
+            && activeCall.caller.id === getMyId();
+        if (!isCalling) {
+            stopTone(outgoingToneRef, outgoingToneNameRef);
+            return;
+        }
+        playLoopTone(outgoingToneRef, outgoingToneNameRef, getOutgoingTone());
+    }, [activeCall, getOutgoingTone, getMyId]);
+
+    useEffect(() => {
+        if (!activeCall || !calls || !Array.isArray(calls)) return;
+        const updated = calls.find(c => c.id === activeCall.id);
+        if (!updated) return;
+        if (updated.status !== activeCall.status) {
+            setActiveCall(updated);
+        }
+        if (['ENDED', 'DECLINED', 'MISSED'].includes(updated.status)) {
+            leaveVoiceChannel();
+            setActiveCall(null);
+            playCallEndSound(updated.id);
+        }
+    }, [calls, activeCall, playCallEndSound]);
+
     const initiateCall = async (receiverId: string) => {
         try {
+            if (currentUser && !hasPhoneApp(currentUser as unknown as User)) {
+                alert('電話アプリがインストールされていません');
+                return;
+            }
+            const receiver = gameState?.users.find(u => u.id === receiverId) as User | undefined;
+            if (receiver && !hasPhoneApp(receiver)) {
+                alert('相手のスマホに電話アプリが入っていません');
+                return;
+            }
             const res = await fetch('/api/calls', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ receiverId }),
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(currentUser?.id ? { 'x-player-id': currentUser.id } : {})
+                },
+                credentials: 'include',
+                body: JSON.stringify({ receiverId, playerId: currentUser?.id }),
             });
-            const { call, token, channelId } = await res.json();
+            if (!res.ok) {
+                const errorData = await res.json().catch(() => ({}));
+                throw new Error(errorData?.error || '通話の開始に失敗しました');
+            }
+            const { call, token, channelId, uid } = await res.json();
+            if (!channelId) {
+                throw new Error('通話チャンネルの作成に失敗しました');
+            }
             setActiveCall(call);
             const safeToken = typeof token === 'string' && token.length > 0 ? token : null;
-            await joinVoiceChannel(channelId, safeToken);
+            const safeUid = typeof uid === 'number' ? uid : null;
+            await joinVoiceChannel(channelId, safeToken, safeUid);
         } catch (error) {
             console.error('Failed to initiate call:', error);
-            alert('通話の開始に失敗しました');
+            alert(error instanceof Error ? error.message : '通話の開始に失敗しました');
         }
     };
 
@@ -99,14 +224,22 @@ export default function PhoneApp({ onClose }: { onClose: () => void }) {
         try {
             const res = await fetch(`/api/calls/${call.id}`, {
                 method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ status: 'ACTIVE' }),
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(currentUser?.id ? { 'x-player-id': currentUser.id } : {})
+                },
+                credentials: 'include',
+                body: JSON.stringify({ status: 'ACTIVE', playerId: currentUser?.id }),
             });
+            if (!res.ok) {
+                throw new Error('通話の開始に失敗しました');
+            }
             const data = await res.json();
             const token = typeof data.token === 'string' && data.token.length > 0 ? data.token : null;
+            const uid = typeof data.uid === 'number' ? data.uid : null;
             setIncomingCall(null);
             setActiveCall(call);
-            await joinVoiceChannel(call.id, token);
+            await joinVoiceChannel(call.id, token, uid);
         } catch (error) {
             console.error('Failed to answer call:', error);
         }
@@ -116,10 +249,15 @@ export default function PhoneApp({ onClose }: { onClose: () => void }) {
         try {
             await fetch(`/api/calls/${call.id}`, {
                 method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ status: 'DECLINED' }),
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(currentUser?.id ? { 'x-player-id': currentUser.id } : {})
+                },
+                credentials: 'include',
+                body: JSON.stringify({ status: 'DECLINED', playerId: currentUser?.id }),
             });
             setIncomingCall(null);
+            playCallEndSound(call.id);
         } catch (error) { }
     };
 
@@ -128,18 +266,24 @@ export default function PhoneApp({ onClose }: { onClose: () => void }) {
         try {
             await fetch(`/api/calls/${activeCall.id}`, {
                 method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(currentUser?.id ? { 'x-player-id': currentUser.id } : {})
+                },
+                credentials: 'include',
                 body: JSON.stringify({
                     status: 'ENDED',
                     duration: Math.floor((Date.now() - new Date(activeCall.startedAt).getTime()) / 1000),
+                    playerId: currentUser?.id,
                 }),
             });
             await leaveVoiceChannel();
             setActiveCall(null);
+            playCallEndSound(activeCall.id);
         } catch (error) { }
     };
 
-    const joinVoiceChannel = async (channelId: string, token: string | null) => {
+    const joinVoiceChannel = async (channelId: string, token: string | null, uid: number | null) => {
         if (typeof window === 'undefined') return;
         const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
         if (window.location.protocol !== 'https:' && !isLocalhost) {
@@ -162,15 +306,36 @@ export default function PhoneApp({ onClose }: { onClose: () => void }) {
 
             client.on('user-published', async (user: any, mediaType: 'audio') => {
                 await client.subscribe(user, mediaType);
-                if (mediaType === 'audio') user.audioTrack?.play();
+                if (mediaType === 'audio') {
+                    user.audioTrack?.play();
+                    if (typeof user.audioTrack?.setVolume === 'function') {
+                        user.audioTrack.setVolume(speakerStateRef.current ? 100 : 60);
+                    }
+                    remoteTracksRef.current = [...remoteTracksRef.current, user.audioTrack].filter(Boolean);
+                }
             });
 
-            await client.join(process.env.NEXT_PUBLIC_AGORA_APP_ID!, generateChannelName(channelId), token ?? null, null);
+            client.on('user-unpublished', (user: any, mediaType: 'audio') => {
+                if (mediaType === 'audio' && user.audioTrack) {
+                    if (typeof user.audioTrack.stop === 'function') {
+                        user.audioTrack.stop();
+                    }
+                    remoteTracksRef.current = remoteTracksRef.current.filter((track) => track !== user.audioTrack);
+                }
+            });
+
+            if (!process.env.NEXT_PUBLIC_AGORA_APP_ID) {
+                throw new Error('Agora App ID is missing');
+            }
+            await client.join(process.env.NEXT_PUBLIC_AGORA_APP_ID, generateChannelName(channelId), token ?? null, uid ?? null);
             setConnectionState('CONNECTED');
 
             const track = await createMicrophoneTrack();
             setMicrophoneTrack(track);
             if (track) {
+                if (typeof track.setMuted === 'function' && isMuted) {
+                    track.setMuted(true);
+                }
                 await client.publish([track]);
                 setIsPublished(true);
             }
@@ -182,8 +347,31 @@ export default function PhoneApp({ onClose }: { onClose: () => void }) {
     };
 
     const leaveVoiceChannel = async () => {
-        microphoneTrack?.close();
-        agoraClient?.leave();
+        stopTone(outgoingToneRef, outgoingToneNameRef);
+        stopTone(incomingToneRef, incomingToneNameRef);
+        if (microphoneTrack) {
+            if (typeof microphoneTrack.setMuted === 'function') {
+                microphoneTrack.setMuted(true);
+            }
+            if (typeof microphoneTrack.stop === 'function') {
+                microphoneTrack.stop();
+            }
+            if (typeof microphoneTrack.close === 'function') {
+                microphoneTrack.close();
+            }
+        }
+        remoteTracksRef.current.forEach((track) => {
+            if (track && typeof track.stop === 'function') {
+                track.stop();
+            }
+        });
+        remoteTracksRef.current = [];
+        if (agoraClient) {
+            if (typeof agoraClient.removeAllListeners === 'function') {
+                agoraClient.removeAllListeners();
+            }
+            await agoraClient.leave();
+        }
         setAgoraClient(null);
         setMicrophoneTrack(null);
         setIsPublished(false);
@@ -192,45 +380,23 @@ export default function PhoneApp({ onClose }: { onClose: () => void }) {
 
     const toggleMute = () => {
         if (microphoneTrack) {
-            microphoneTrack.setMuted(!isMuted);
+            if (typeof microphoneTrack.setMuted === 'function') {
+                microphoneTrack.setMuted(!isMuted);
+            }
             setIsMuted(!isMuted);
         }
     };
 
+    const toggleSpeaker = () => {
+        setIsSpeakerOn((prev) => !prev);
+    };
+
     // --- RENDER ---
-
-    // Incoming Call Modal
-    if (incomingCall) {
-        return (
-            <div className="absolute inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-50">
-                <div className="w-full h-full flex flex-col items-center justify-center p-8 text-white">
-                    <div className="w-24 h-24 bg-gray-700 rounded-full mb-4 flex items-center justify-center text-4xl animate-pulse">
-                        📞
-                    </div>
-                    <h2 className="text-3xl font-light mb-2">{incomingCall.caller.name}</h2>
-                    <p className="text-gray-400 mb-12">スマートフォン...</p>
-
-                    <div className="flex w-full justify-between px-8 mt-auto mb-20">
-                        <div className="flex flex-col items-center gap-2">
-                            <button onClick={() => declineCall(incomingCall)} className="w-16 h-16 bg-red-500 rounded-full flex items-center justify-center text-2xl shadow-lg hover:scale-110 transition">
-                                ✖
-                            </button>
-                            <span className="text-xs">拒否</span>
-                        </div>
-                        <div className="flex flex-col items-center gap-2">
-                            <button onClick={() => answerCall(incomingCall)} className="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center text-2xl shadow-lg hover:scale-110 transition animate-bounce">
-                                📞
-                            </button>
-                            <span className="text-xs">応答</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        );
-    }
 
     // Active Call Screen
     if (activeCall) {
+        const isCaller = activeCall.caller.id === getMyId();
+        const statusLabel = activeCall.status === 'PENDING' && isCaller ? '呼び出し中...' : '通話中...';
         return (
             <div className="h-full bg-slate-900 text-white flex flex-col items-center pt-20 relative overflow-hidden">
                 <div className="relative z-10 flex flex-col items-center">
@@ -240,6 +406,9 @@ export default function PhoneApp({ onClose }: { onClose: () => void }) {
                     <h2 className="text-2xl font-bold mb-2">
                         {activeCall.caller.id === getMyId() ? activeCall.receiver.name : activeCall.caller.name}
                     </h2>
+                    <p className="text-white/60 mb-2 font-medium">
+                        {statusLabel}
+                    </p>
                     <p className="text-white/60 mb-12 font-mono">
                         {Math.floor((Date.now() - new Date(activeCall.startedAt).getTime()) / 1000 / 60)}:
                         {String(Math.floor((Date.now() - new Date(activeCall.startedAt).getTime()) / 1000 % 60)).padStart(2, '0')}
@@ -248,7 +417,7 @@ export default function PhoneApp({ onClose }: { onClose: () => void }) {
                     <div className="grid grid-cols-3 gap-6 mb-12">
                         <CallButton icon="🔇" label="消音" active={isMuted} onClick={toggleMute} />
                         <CallButton icon="⌨️" label="キーパッド" onClick={() => { }} />
-                        <CallButton icon="🔊" label="スピーカー" onClick={() => { }} />
+                        <CallButton icon="🔊" label="スピーカー" active={isSpeakerOn} onClick={toggleSpeaker} />
                     </div>
 
                     <button onClick={endCall} className="w-16 h-16 bg-red-500 hover:bg-red-600 rounded-full flex items-center justify-center text-2xl shadow-lg">
@@ -261,7 +430,7 @@ export default function PhoneApp({ onClose }: { onClose: () => void }) {
 
     // Default: Contacts List
     return (
-        <div className="h-full bg-white flex flex-col">
+        <div className="h-full bg-white flex flex-col relative">
             <AppHeader title="電話" onBack={onClose} />
 
             {/* Warnings */}
@@ -277,18 +446,59 @@ export default function PhoneApp({ onClose }: { onClose: () => void }) {
             )}
 
             <div className="flex-1 overflow-y-auto no-scrollbar">
+                {incomingCall && (
+                    <div className="sticky top-0 z-40 px-4 pt-3">
+                        <div className="rounded-2xl bg-white/95 border border-emerald-200 shadow-lg p-3 flex items-center justify-between gap-3">
+                            <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-xl">
+                                    📞
+                                </div>
+                                <div>
+                                    <div className="text-sm font-bold text-gray-900">{incomingCall.caller.name}</div>
+                                    <div className="text-xs text-gray-500">着信中...</div>
+                                </div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <button
+                                    onClick={() => declineCall(incomingCall)}
+                                    className="px-3 py-2 text-xs rounded-full bg-red-500 text-white shadow hover:bg-red-600"
+                                >
+                                    拒否
+                                </button>
+                                <button
+                                    onClick={() => answerCall(incomingCall)}
+                                    className="px-3 py-2 text-xs rounded-full bg-emerald-500 text-white shadow hover:bg-emerald-600"
+                                >
+                                    応答
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
                 <div className="px-6 py-2 text-xs font-bold text-gray-500 bg-gray-50">連絡先</div>
                 {gameState?.users
                     .filter(u => u.id !== currentUser?.id)
                     .map(u => (
-                        <div key={u.id} className="flex items-center justify-between p-4 border-b border-gray-100 hover:bg-gray-50 transition cursor-pointer" onClick={() => initiateCall(u.id)}>
+                        <div
+                            key={u.id}
+                            className={`flex items-center justify-between p-4 border-b border-gray-100 transition ${hasPhoneApp(u as User) ? 'hover:bg-gray-50 cursor-pointer' : 'opacity-60'}`}
+                            onClick={() => {
+                                if (!hasPhoneApp(u as User)) {
+                                    alert('相手のスマホに電話アプリが入っていません');
+                                    return;
+                                }
+                                initiateCall(u.id);
+                            }}
+                        >
                             <div className="flex items-center gap-3">
                                 <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center text-lg text-gray-500 font-bold">
                                     {u.name[0]}
                                 </div>
                                 <span className="font-bold text-gray-800 text-lg">{u.name}</span>
                             </div>
-                            <button className="text-green-500 text-2xl">�</button>
+                            <span className={`text-xs font-bold ${hasPhoneApp(u as User) ? 'text-emerald-600' : 'text-gray-400'}`}>
+                                {hasPhoneApp(u as User) ? '発信' : '未インストール'}
+                            </span>
                         </div>
                     ))}
             </div>

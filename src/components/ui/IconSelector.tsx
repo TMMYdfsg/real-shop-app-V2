@@ -33,8 +33,8 @@ export const IconSelector: React.FC<IconSelectorProps> = ({ selectedIcon = 'defa
     const [zoom, setZoom] = useState(1);
     const [croppedAreaPixels, setCroppedAreaPixels] = useState<CroppedArea | null>(null);
 
-    // カスタムアイコンかどうかチェック（Base64形式）
-    const isCustomIcon = selectedIcon?.startsWith('data:image');
+    // カスタムアイコンかどうかチェック（Base64/URL）
+    const isCustomIcon = selectedIcon?.startsWith('data:image') || selectedIcon?.startsWith('http://') || selectedIcon?.startsWith('https://');
 
     const handleDragOver = useCallback((e: React.DragEvent) => {
         e.preventDefault();
@@ -98,13 +98,34 @@ export const IconSelector: React.FC<IconSelectorProps> = ({ selectedIcon = 'defa
 
         try {
             const croppedImage = await getCroppedImg(imageToCrop, croppedAreaPixels, 128);
-            setCustomPreview(croppedImage);
-            onSelect(croppedImage);
+            const blob = await fetch(croppedImage).then((res) => res.blob());
+            const file = new File([blob], 'icon.png', { type: blob.type || 'image/png' });
+            const formData = new FormData();
+            formData.append('file', file);
+
+            const res = await fetch('/api/upload/image', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (!res.ok) {
+                throw new Error('Icon upload failed');
+            }
+
+            const data = await res.json();
+            const url = data?.url as string;
+
+            if (!url) {
+                throw new Error('Invalid upload response');
+            }
+
+            setCustomPreview(url);
+            onSelect(url);
             setIsCropping(false);
             setImageToCrop(null);
         } catch (e) {
-            console.error('画像のクロップに失敗しました', e);
-            alert('画像のクロップに失敗しました');
+            console.error('画像のアップロードに失敗しました', e);
+            alert('画像のアップロードに失敗しました');
         }
     };
 

@@ -158,7 +158,7 @@ export const JobBoardApp: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                             {selectedJob.id === 'job_debugger' ? (
                                 <span className="text-red-600">報酬なし (デバッグ用)</span>
                             ) : (
-                                activeTab === 'jobs' ? `¥${salary.toLocaleString()}` : `¥${hourlyWage.toLocaleString()}`
+                                activeTab === 'jobs' ? `${salary.toLocaleString()}枚` : `${hourlyWage.toLocaleString()}枚`
                             )}
                         </div>
                     </div>
@@ -310,7 +310,7 @@ export const JobBoardApp: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                                                 <div className="text-[10px] font-bold text-orange-500 mb-1">{place?.name}</div>
                                                 <div className="font-black text-xs leading-tight mb-1">{job.name}</div>
                                                 <div className="text-xs font-black text-slate-900 mb-2">
-                                                    ¥{(job as any).hourlyWage?.toLocaleString() || (job as any).salary?.toLocaleString()}
+                                                    {(job as any).hourlyWage?.toLocaleString() || (job as any).salary?.toLocaleString()}枚
                                                 </div>
                                                 <button className="w-full bg-[#fae100] py-1.5 rounded-lg text-[10px] font-black">詳細を見る</button>
                                             </div>
@@ -386,7 +386,7 @@ const JobListItem = ({ job, onClick, type }: { job: any, onClick: () => void, ty
                         <span className="text-[10px] font-black text-slate-400">{type === 'jobs' ? '月給' : '時給'}</span>
                     </div>
                     <div className="text-lg font-black text-slate-900 tracking-tight">
-                        ¥{job.id === 'job_debugger' ? '0' : (type === 'jobs' ? (job.salary || 0).toLocaleString() : (job.hourlyWage || 0).toLocaleString())}
+                        {job.id === 'job_debugger' ? '0' : (type === 'jobs' ? (job.salary || 0).toLocaleString() : (job.hourlyWage || 0).toLocaleString())}枚
                         <span className="text-[10px] ml-0.5">{type === 'jobs' ? '〜' : ''}</span>
                     </div>
                 </div>

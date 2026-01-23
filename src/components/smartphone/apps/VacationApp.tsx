@@ -138,7 +138,7 @@ export const VacationApp: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                     <div className="flex justify-between items-end mb-4 px-1">
                         <div>
                             <p className="text-xs font-bold text-slate-400">Total Price</p>
-                            <p className="text-2xl font-black text-[#003580]">¥0 <span className="text-xs text-slate-400">(給与停止)</span></p>
+                            <p className="text-2xl font-black text-[#003580]">0枚 <span className="text-xs text-slate-400">(給与停止)</span></p>
                         </div>
                         <p className="text-[10px] font-bold text-emerald-600">Free Cancellation</p>
                     </div>

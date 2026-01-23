@@ -51,7 +51,7 @@ const THEME_OPTIONS = [
 export const SettingsApp: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     const { currentUser, sendRequest } = useGame();
     const [selectedSound, setSelectedSound] = useState('notification_1.mp3');
-    const [activeView, setActiveView] = useState<'main' | 'sounds' | 'detail' | 'display' | 'autolock' | 'auth' | 'passcode' | 'wallpaper'>('main');
+    const [activeView, setActiveView] = useState<'main' | 'sounds' | 'detail' | 'display' | 'autolock' | 'auth' | 'passcode' | 'wallpaper' | 'channel_icon' | 'certificate'>('main');
     const [detailTitle, setDetailTitle] = useState('');
     const [detailItems, setDetailItems] = useState<string[]>([]);
     const [isDarkMode, setIsDarkMode] = useState(false);
@@ -74,7 +74,9 @@ export const SettingsApp: React.FC<{ onClose: () => void }> = ({ onClose }) => {
         trueTone: true,
         passcode: '',
         biometricEnabled: false,
-        lockScreenImage: ''
+        lockScreenImage: '',
+        incomingCallSound: 'notification_1.mp3',
+        outgoingCallSound: 'notification_2.mp3'
     }), []);
 
     const resolvedSmartphoneSettings = useMemo(() => ({
@@ -120,6 +122,16 @@ export const SettingsApp: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     const handleSaveSound = (filename: string) => {
         setSelectedSound(filename);
         localStorage.setItem('notification_sound', filename);
+        handlePlayPreview(filename);
+    };
+
+    const handleSaveIncomingSound = async (filename: string) => {
+        await updateSmartphoneSetting({ incomingCallSound: filename });
+        handlePlayPreview(filename);
+    };
+
+    const handleSaveOutgoingSound = async (filename: string) => {
+        await updateSmartphoneSetting({ outgoingCallSound: filename });
         handlePlayPreview(filename);
     };
 
@@ -197,17 +209,52 @@ export const SettingsApp: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                 </div>
 
                 <div className="flex-1 overflow-y-auto no-scrollbar p-4 space-y-6">
-                    <div className="bg-white rounded-xl overflow-hidden shadow-sm border border-slate-200">
-                        {SOUND_LIST.map((sound, i) => (
-                            <button
-                                key={sound.id}
-                                onClick={() => handleSaveSound(sound.filename)}
-                                className={`w-full flex items-center justify-between p-4 ${i !== 0 ? 'border-t border-slate-100' : ''} active:bg-slate-50 transition-colors`}
-                            >
-                                <span className={`text-sm font-medium ${selectedSound === sound.filename ? 'text-[#007aff] font-bold' : 'text-slate-900'}`}>{sound.label}</span>
-                                {selectedSound === sound.filename && <Check className="w-4 h-4 text-[#007aff]" />}
-                            </button>
-                        ))}
+                    <div className="space-y-2">
+                        <div className="text-xs font-black text-slate-500">通知音</div>
+                        <div className="bg-white rounded-xl overflow-hidden shadow-sm border border-slate-200">
+                            {SOUND_LIST.map((sound, i) => (
+                                <button
+                                    key={sound.id}
+                                    onClick={() => handleSaveSound(sound.filename)}
+                                    className={`w-full flex items-center justify-between p-4 ${i !== 0 ? 'border-t border-slate-100' : ''} active:bg-slate-50 transition-colors`}
+                                >
+                                    <span className={`text-sm font-medium ${selectedSound === sound.filename ? 'text-[#007aff] font-bold' : 'text-slate-900'}`}>{sound.label}</span>
+                                    {selectedSound === sound.filename && <Check className="w-4 h-4 text-[#007aff]" />}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div className="space-y-2">
+                        <div className="text-xs font-black text-slate-500">着信音</div>
+                        <div className="bg-white rounded-xl overflow-hidden shadow-sm border border-slate-200">
+                            {SOUND_LIST.map((sound, i) => (
+                                <button
+                                    key={`incoming-${sound.id}`}
+                                    onClick={() => handleSaveIncomingSound(sound.filename)}
+                                    className={`w-full flex items-center justify-between p-4 ${i !== 0 ? 'border-t border-slate-100' : ''} active:bg-slate-50 transition-colors`}
+                                >
+                                    <span className={`text-sm font-medium ${smartphoneSettings.incomingCallSound === sound.filename ? 'text-[#007aff] font-bold' : 'text-slate-900'}`}>{sound.label}</span>
+                                    {smartphoneSettings.incomingCallSound === sound.filename && <Check className="w-4 h-4 text-[#007aff]" />}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div className="space-y-2">
+                        <div className="text-xs font-black text-slate-500">呼び出し音</div>
+                        <div className="bg-white rounded-xl overflow-hidden shadow-sm border border-slate-200">
+                            {SOUND_LIST.map((sound, i) => (
+                                <button
+                                    key={`outgoing-${sound.id}`}
+                                    onClick={() => handleSaveOutgoingSound(sound.filename)}
+                                    className={`w-full flex items-center justify-between p-4 ${i !== 0 ? 'border-t border-slate-100' : ''} active:bg-slate-50 transition-colors`}
+                                >
+                                    <span className={`text-sm font-medium ${smartphoneSettings.outgoingCallSound === sound.filename ? 'text-[#007aff] font-bold' : 'text-slate-900'}`}>{sound.label}</span>
+                                    {smartphoneSettings.outgoingCallSound === sound.filename && <Check className="w-4 h-4 text-[#007aff]" />}
+                                </button>
+                            ))}
+                        </div>
                     </div>
                 </div>
             </div>
@@ -266,6 +313,7 @@ export const SettingsApp: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                             <button
                                 onClick={() => updateSmartphoneSetting({ trueTone: !smartphoneSettings.trueTone })}
                                 className={`w-12 h-7 rounded-full transition-all relative p-1 ${smartphoneSettings.trueTone ? 'bg-green-500' : 'bg-slate-200'}`}
+                                aria-label="True Toneを切り替え"
                             >
                                 <motion.div
                                     animate={{ x: smartphoneSettings.trueTone ? 20 : 0 }}
@@ -285,6 +333,39 @@ export const SettingsApp: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                         </div>
                         <ChevronRight className="w-4 h-4 text-slate-300" />
                     </button>
+                </div>
+            </div>
+        );
+    }
+
+    if (activeView === 'certificate') {
+        const host = typeof window !== 'undefined' ? window.location.hostname : 'localhost';
+        const httpsUrl = `https://${host}:3001`;
+        return (
+            <div className="h-full bg-[#f2f2f7] flex flex-col font-sans">
+                <div className="px-4 pt-14 pb-4 bg-white/80 backdrop-blur-xl border-b border-slate-200 sticky top-0 z-50 flex items-center">
+                    <button onClick={() => setActiveView('main')} className="flex items-center text-[#007aff] font-medium -ml-1">
+                        <ChevronLeft className="w-6 h-6" />
+                        <span>設定</span>
+                    </button>
+                    <h2 className="flex-1 text-center font-black pr-10">HTTPS証明書</h2>
+                </div>
+                <div className="flex-1 overflow-y-auto no-scrollbar p-4 space-y-4">
+                    <div className="bg-white rounded-xl p-4 shadow-sm border border-slate-200 space-y-3">
+                        <div className="text-sm font-black text-slate-900">信頼手順</div>
+                        <ol className="text-xs text-slate-600 space-y-2 list-decimal list-inside">
+                            <li>下のボタンでHTTPSページを開く</li>
+                            <li>ブラウザの警告で「続行」/「詳細」→「このサイトにアクセス」</li>
+                            <li>一度許可すると以降は警告が出なくなります</li>
+                        </ol>
+                        <div className="text-[11px] text-slate-500">アクセス先: {httpsUrl}</div>
+                        <button
+                            onClick={() => window.open(httpsUrl, '_blank')}
+                            className="w-full py-2 rounded-lg bg-[#007aff] text-white text-sm font-bold"
+                        >
+                            HTTPSページを開く
+                        </button>
+                    </div>
                 </div>
             </div>
         );
@@ -323,6 +404,7 @@ export const SettingsApp: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                         <button
                             onClick={() => updateSmartphoneSetting({ autoLockOnUpdate: !smartphoneSettings.autoLockOnUpdate })}
                             className={`w-12 h-7 rounded-full transition-all relative p-1 ${smartphoneSettings.autoLockOnUpdate ? 'bg-green-500' : 'bg-slate-200'}`}
+                            aria-label="更新時に自動ロックを切り替え"
                         >
                             <motion.div
                                 animate={{ x: smartphoneSettings.autoLockOnUpdate ? 20 : 0 }}
@@ -339,6 +421,7 @@ export const SettingsApp: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                         <button
                             onClick={() => updateSmartphoneSetting({ autoLockOnHome: !smartphoneSettings.autoLockOnHome })}
                             className={`w-12 h-7 rounded-full transition-all relative p-1 ${smartphoneSettings.autoLockOnHome ? 'bg-green-500' : 'bg-slate-200'}`}
+                            aria-label="ホーム復帰時に自動ロックを切り替え"
                         >
                             <motion.div
                                 animate={{ x: smartphoneSettings.autoLockOnHome ? 20 : 0 }}
@@ -486,6 +569,7 @@ export const SettingsApp: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                             <button
                                 onClick={() => hasPasscode && updateSmartphoneSetting({ biometricEnabled: !smartphoneSettings.biometricEnabled })}
                                 className={`w-12 h-7 rounded-full transition-all relative p-1 ${smartphoneSettings.biometricEnabled && hasPasscode ? 'bg-green-500' : 'bg-slate-200'}`}
+                                aria-label="Face IDを切り替え"
                             >
                                 <motion.div
                                     animate={{ x: smartphoneSettings.biometricEnabled && hasPasscode ? 20 : 0 }}
@@ -575,6 +659,7 @@ export const SettingsApp: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                         type="password"
                         maxLength={4}
                         className="text-center text-2xl tracking-[0.3em] px-6 py-3 rounded-xl bg-white shadow-sm border border-slate-200 outline-none w-48"
+                        aria-label="パスコードの入力"
                     />
                     {passcodeError && <p className="text-xs text-rose-500 mt-3 font-bold">{passcodeError}</p>}
                     <button
@@ -608,6 +693,55 @@ export const SettingsApp: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                                 <ChevronRight className="w-4 h-4 text-slate-300" />
                             </div>
                         ))}
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    if (activeView === 'channel_icon') {
+        const iconEmojis = ['👨', '👩', '🧑', '🤖', '👾', '🎬', '📹', '⭐', '🎵', '🎨', '📱', '🎮', '📚', '🍕', '🚀'];
+        
+        return (
+            <div className="h-full bg-[#f2f2f7] flex flex-col font-sans">
+                <div className="px-4 pt-14 pb-4 bg-white/80 backdrop-blur-xl border-b border-slate-200 sticky top-0 z-50 flex items-center">
+                    <button onClick={() => setActiveView('main')} className="flex items-center text-[#007aff] font-medium -ml-1">
+                        <ChevronLeft className="w-6 h-6" />
+                        <span>設定</span>
+                    </button>
+                    <h2 className="flex-1 text-center font-black pr-10">チャンネルアイコン</h2>
+                </div>
+
+                <div className="flex-1 overflow-y-auto no-scrollbar p-4 space-y-4">
+                    <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
+                        <p className="text-sm font-medium text-slate-600 mb-4">現在のアイコン</p>
+                        <div className="text-6xl text-center mb-4">
+                            {currentUser?.channelIcon || '👤'}
+                        </div>
+                    </div>
+
+                    <div className="bg-white rounded-xl p-4 shadow-sm border border-slate-200">
+                        <p className="text-sm font-medium text-slate-600 mb-4">アイコンを選択</p>
+                        <div className="grid grid-cols-5 gap-3">
+                            {iconEmojis.map(emoji => (
+                                <motion.button
+                                    key={emoji}
+                                    whileTap={{ scale: 0.8 }}
+                                    whileHover={{ scale: 1.1 }}
+                                    onClick={async () => {
+                                        try {
+                                            await sendRequest('set_channel_icon', 0, { icon: emoji });
+                                            setActiveView('main');
+                                        } catch (error) {
+                                            console.error(error);
+                                        }
+                                    }}
+                                    className="aspect-square rounded-lg flex items-center justify-center text-4xl bg-slate-100 hover:bg-slate-200 transition-colors border-2 border-slate-200"
+                                >
+                                    {emoji}
+                                </motion.button>
+                            ))}
+                        </div>
                     </div>
                 </div>
             </div>
@@ -670,6 +804,17 @@ export const SettingsApp: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                     />
                 </div>
 
+                {/* Channel Settings */}
+                <div className="bg-white rounded-xl overflow-hidden shadow-sm border border-slate-200">
+                    <SettingItem
+                        icon={<span className="text-lg">{currentUser?.channelIcon || '📺'}</span>}
+                        color="bg-orange-500"
+                        label="チャンネルアイコン"
+                        value={currentUser?.channelIcon || '未設定'}
+                        onClick={() => setActiveView('channel_icon')}
+                    />
+                </div>
+
                 {/* Privacy & General */}
                 <div className="bg-white rounded-xl overflow-hidden shadow-sm border border-slate-200">
                     <SettingItem icon={<Info />} color="bg-slate-500" label="一般" onClick={() => openDetail('一般', ['情報', 'ソフトウェアアップデート', '言語と地域', '日付と時刻', 'リセット'])} />
@@ -683,6 +828,7 @@ export const SettingsApp: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                     <SettingItem icon={<Bell />} color="bg-yellow-500" label="サウンド" onClick={() => setActiveView('sounds')} />
                     <SettingItem icon={<Lock />} color="bg-emerald-600" label="Face ID/パスコード" onClick={() => setActiveView('auth')} />
                     <SettingItem icon={<Info />} color="bg-purple-600" label="バッテリー" onClick={() => openDetail('バッテリー', ['バッテリーの状態', '低電力モード', '使用状況'])} />
+                    <SettingItem icon={<Lock />} color="bg-amber-500" label="HTTPS証明書" onClick={() => setActiveView('certificate')} />
                 </div>
 
                 {/* Version Info */}

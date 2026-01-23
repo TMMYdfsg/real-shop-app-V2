@@ -72,7 +72,7 @@ export const BankAssetApp: React.FC<BankAssetAppProps> = ({ onBack }) => {
                     <p className="text-emerald-200 text-xs font-medium mb-1 uppercase tracking-widest">Total Assets</p>
                     <div className="flex items-baseline gap-2">
                         <h2 className="text-4xl font-black tracking-tight">
-                            ¥{totalAssets.toLocaleString()}
+                            {totalAssets.toLocaleString()}枚
                         </h2>
                         <span className="text-emerald-200 text-sm font-bold">JPY</span>
                     </div>
@@ -80,11 +80,11 @@ export const BankAssetApp: React.FC<BankAssetAppProps> = ({ onBack }) => {
                     <div className="flex gap-4 mt-4">
                         <div className="bg-white/10 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/10 flex items-center gap-2">
                             <div className="w-2 h-2 bg-emerald-400 rounded-full" />
-                            <span className="text-xs font-bold">Cash: ¥{cashBalance.toLocaleString()}</span>
+                            <span className="text-xs font-bold">Cash: {cashBalance.toLocaleString()}枚</span>
                         </div>
                         <div className="bg-white/10 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/10 flex items-center gap-2">
                             <div className="w-2 h-2 bg-yellow-400 rounded-full" />
-                            <span className="text-xs font-bold">Crypto: ¥{Math.floor(cryptoValue).toLocaleString()}</span>
+                            <span className="text-xs font-bold">Crypto: {Math.floor(cryptoValue).toLocaleString()}枚</span>
                         </div>
                     </div>
                 </div>
@@ -176,7 +176,7 @@ const AccountCard = ({ title, subtitle, amount, type }: { title: string, subtitl
         </div>
         <div className="text-right flex items-center gap-3">
             <div>
-                <p className="text-lg font-black text-slate-800">¥{Math.floor(amount).toLocaleString()}</p>
+                <p className="text-lg font-black text-slate-800">{Math.floor(amount).toLocaleString()}枚</p>
                 <div className="flex items-center justify-end gap-1 text-[10px] font-bold text-emerald-500">
                     <TrendingUp className="w-2 h-2" />
                     <span>+0.2%</span>

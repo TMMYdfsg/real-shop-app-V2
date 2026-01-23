@@ -109,7 +109,7 @@ export const ColorfulTemplate: React.FC<TemplateProps> = ({ website, owner }) =>
                                                 color: 'white'
                                             }}
                                         >
-                                            ¥{item.price}
+                                            {item.price}枚
                                         </span>
                                         <span className={`text-sm font-bold px-3 py-1 rounded-full ${item.stock > 0 ? 'bg-green-400 text-green-900' : 'bg-red-400 text-red-900'}`}>
                                             在庫 {item.stock}

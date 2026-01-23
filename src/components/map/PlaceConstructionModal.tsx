@@ -146,7 +146,7 @@ export const PlaceConstructionModal: React.FC<PlaceConstructionModalProps> = ({ 
                 <div className="p-3 bg-indigo-50 border border-indigo-100 rounded-lg">
                     <div className="flex justify-between items-center text-sm">
                         <span className="text-indigo-700 font-medium">建設費用</span>
-                        <span className="text-indigo-900 font-bold">¥{getCost().toLocaleString()}</span>
+                        <span className="text-indigo-900 font-bold">{getCost().toLocaleString()}枚</span>
                     </div>
                 </div>
 
@@ -222,7 +222,7 @@ export const PlaceConstructionModal: React.FC<PlaceConstructionModalProps> = ({ 
                                 <div className="grid grid-cols-2 gap-2 text-xs">
                                     <div className="flex items-center justify-between bg-white/70 p-2 rounded-lg">
                                         <span className="text-amber-800">基準給与</span>
-                                        <span className="font-bold text-amber-900">¥{companySummary.baseSalary.toLocaleString()}</span>
+                                        <span className="font-bold text-amber-900">{companySummary.baseSalary.toLocaleString()}枚</span>
                                     </div>
                                     <div className="flex items-center justify-between bg-white/70 p-2 rounded-lg">
                                         <span className="text-amber-800">合計ボーナス</span>
@@ -242,7 +242,7 @@ export const PlaceConstructionModal: React.FC<PlaceConstructionModalProps> = ({ 
                                     </div>
                                     <div className="flex items-center justify-between bg-amber-200/80 p-2 rounded-lg col-span-2">
                                         <span className="text-amber-900">見込み給与</span>
-                                        <span className="font-bold text-amber-900">¥{companySummary.estimatedSalary.toLocaleString()}</span>
+                                        <span className="font-bold text-amber-900">{companySummary.estimatedSalary.toLocaleString()}枚</span>
                                     </div>
                                 </div>
                                 <div className="mt-3 text-[11px] text-amber-800">

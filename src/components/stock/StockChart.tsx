@@ -267,7 +267,7 @@ export const StockChart: React.FC<StockChartProps> = ({
             <div className="flex justify-between text-xs mt-2 text-slate-400">
                 <span>安値: <span className="text-red-400 font-bold">{minPrice.toLocaleString()}</span></span>
                 <span className="text-white font-bold text-sm">
-                    現在: {stock.price.toLocaleString()}円
+                    現在: {stock.price.toLocaleString()}枚
                 </span>
                 <span>高値: <span className="text-green-400 font-bold">{maxPrice.toLocaleString()}</span></span>
             </div>

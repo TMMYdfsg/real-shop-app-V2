@@ -84,7 +84,7 @@ export const SimpleTemplate: React.FC<TemplateProps> = ({ website, owner }) => {
                                 </div>
                                 <div className="flex justify-between items-center">
                                     <span className="text-2xl font-bold" style={{ color: customization.primaryColor }}>
-                                        ¥{item.price}
+                                        {item.price}枚
                                     </span>
                                     <span className={`text-sm ${item.stock > 0 ? 'text-green-600' : 'text-red-600'}`}>
                                         在庫: {item.stock}
