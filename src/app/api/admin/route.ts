@@ -497,14 +497,8 @@ export async function POST(req: NextRequest) {
                         state.roulette.items = activePreset.items;
                     }
                 }
-                nextIsDay = state.isDay;
                 return state;
             });
-            if (prevIsDay !== null && nextIsDay !== null && prevIsDay !== nextIsDay) {
-                setSwitchBotLightForDayState(nextIsDay).catch((error) => {
-                    console.error('[SwitchBot] Failed to sync day/night (admin):', error);
-                });
-            }
             return NextResponse.json({ success: true });
         }
 
@@ -904,7 +898,7 @@ export async function POST(req: NextRequest) {
                 // 1. Reset Users (Keep ID, Name, Role)
                 state.users.forEach(u => {
                     if (u.role === 'player') {
-                        u.balance = u.role === 'banker' ? 1000000 : INITIAL_MONEY; // 初期所持金
+                        u.balance = INITIAL_MONEY; // 初期所持金
                         u.deposit = 0;
                         u.debt = 0;
                         u.popularity = 0;
@@ -952,7 +946,7 @@ export async function POST(req: NextRequest) {
                         description: npc.description,
                         duration: 45 * 1000,
                         spawnRate: 8,
-                        actionType: 'buy',
+                        actionType: 'buy' as const,
                         minPayment: 300,
                         maxPayment: 2000
                     }))
