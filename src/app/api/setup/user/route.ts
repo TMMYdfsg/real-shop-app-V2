@@ -77,6 +77,8 @@ export async function POST(request: Request) {
                     autoLockSeconds: 0,
                     textScale: 1.0,
                     trueTone: true,
+                    uiTheme: 'default',
+                    reduceMotion: false,
                     customIcons: []
                 }
             }

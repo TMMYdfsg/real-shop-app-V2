@@ -81,7 +81,11 @@ export async function POST(request: Request) {
                     apps: ['shopping'],
                     appOrder: ['shopping'],
                     broken: false,
-                    battery: 100
+                    battery: 100,
+                    settings: {
+                        uiTheme: 'default',
+                        reduceMotion: false
+                    }
                 }
             };
         });

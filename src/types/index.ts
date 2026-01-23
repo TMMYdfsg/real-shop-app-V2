@@ -963,6 +963,8 @@ export interface SmartphoneSettings {
     autoLockOnHome?: boolean;
     textScale: number; // e.g. 0.9 - 1.2
     trueTone: boolean;
+    uiTheme?: 'default' | 'mario' | 'nintendo_switch' | 'minecraft' | 'pokemon' | 'sumikko' | 'digital_circus' | 'kawaii_lollipop' | 'labubu' | 'windows' | 'animal_crossing' | 'nintendo' | 'circus' | 'lollipop';
+    reduceMotion?: boolean;
     passcode?: string;
     biometricEnabled?: boolean;
     lockScreenImage?: string;

@@ -87,3 +87,96 @@
   --glass-bg: rgba(15, 23, 42, 0.8);
   --glass-border: rgba(255, 255, 255, 0.1);
 }
+
+[data-ui-theme='minecraft'] {
+  --bg: #1f1f1f;
+  --surface: #2c2c2c;
+  --surface-2: #3b3b3b;
+  --surface-3: #4a4a4a;
+  --text: #f2f2f2;
+  --text-muted: #b9b9b9;
+  --border: #6b6b6b;
+  --border-strong: #8c8c8c;
+  --primary: #4caf50;
+  --primary-2: #2e7d32;
+  --primary-contrast: #0f0f0f;
+  --shadow: 0 0 0;
+  --r-xs: 4px;
+  --r-sm: 6px;
+  --r-md: 8px;
+  --r-lg: 10px;
+  --r-xl: 12px;
+  --font-sans: 'Press Start 2P', 'Pixelify Sans', ui-monospace, monospace;
+}
+
+[data-ui-theme='mario'] {
+  --r-xs: 6px;
+  --r-sm: 8px;
+  --r-md: 10px;
+  --r-lg: 14px;
+  --r-xl: 18px;
+}
+
+[data-ui-theme='nintendo_switch'] {
+  --r-xs: 14px;
+  --r-sm: 18px;
+  --r-md: 20px;
+  --r-lg: 24px;
+  --r-xl: 32px;
+}
+
+[data-ui-theme='pokemon'] {
+  --r-xs: 10px;
+  --r-sm: 12px;
+  --r-md: 16px;
+  --r-lg: 20px;
+  --r-xl: 24px;
+}
+
+[data-ui-theme='sumikko'] {
+  --r-xs: 18px;
+  --r-sm: 22px;
+  --r-md: 24px;
+  --r-lg: 28px;
+  --r-xl: 36px;
+}
+
+[data-ui-theme='digital_circus'] {
+  --r-xs: 8px;
+  --r-sm: 10px;
+  --r-md: 12px;
+  --r-lg: 14px;
+  --r-xl: 16px;
+}
+
+[data-ui-theme='kawaii_lollipop'] {
+  --r-xs: 20px;
+  --r-sm: 24px;
+  --r-md: 28px;
+  --r-lg: 32px;
+  --r-xl: 40px;
+}
+
+[data-ui-theme='labubu'] {
+  --r-xs: 14px;
+  --r-sm: 18px;
+  --r-md: 22px;
+  --r-lg: 26px;
+  --r-xl: 32px;
+}
+
+[data-ui-theme='windows'] {
+  --r-xs: 2px;
+  --r-sm: 3px;
+  --r-md: 4px;
+  --r-lg: 6px;
+  --r-xl: 8px;
+}
+
+[data-ui-theme='animal_crossing'] {
+  --r-xs: 16px;
+  --r-sm: 20px;
+  --r-md: 24px;
+  --r-lg: 28px;
+  --r-xl: 36px;
+}

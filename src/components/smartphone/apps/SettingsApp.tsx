@@ -42,6 +42,27 @@ const TEXT_SIZE_OPTIONS = [
     { label: '特大', scale: 1.2 }
 ];
 
+const UI_THEME_OPTIONS = [
+    { label: 'デフォルト', value: 'default' },
+    { label: 'マリオ風', value: 'mario' },
+    { label: 'Nintendo風', value: 'nintendo_switch' },
+    { label: 'マイクラ風', value: 'minecraft' },
+    { label: 'ポケモン風', value: 'pokemon' },
+    { label: 'すみっコぐらし風', value: 'sumikko' },
+    { label: 'デジタルサーカス風', value: 'digital_circus' },
+    { label: 'ロリポップ風', value: 'kawaii_lollipop' },
+    { label: 'ラブブ風', value: 'labubu' },
+    { label: 'Windows風', value: 'windows' },
+    { label: 'あつ森風', value: 'animal_crossing' }
+] as const;
+
+const normalizeUiTheme = (value?: string) => {
+    if (value === 'nintendo') return 'nintendo_switch';
+    if (value === 'circus') return 'digital_circus';
+    if (value === 'lollipop') return 'kawaii_lollipop';
+    return value || 'default';
+};
+
 const THEME_OPTIONS = [
     { label: 'ライト', value: 'light' },
     { label: 'ダーク', value: 'dark' },
@@ -74,6 +95,8 @@ export const SettingsApp: React.FC<{ onClose: () => void }> = ({ onClose }) => {
         autoLockOnHome: true,
         textScale: 1,
         trueTone: true,
+        uiTheme: 'default' as const,
+        reduceMotion: false,
         passcode: '',
         biometricEnabled: false,
         lockScreenImage: '',
@@ -87,6 +110,7 @@ export const SettingsApp: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     }), [baseSmartphoneSettings, currentUser?.smartphone?.settings]);
 
     const [smartphoneSettings, setSmartphoneSettings] = useState(resolvedSmartphoneSettings);
+    const normalizedUiTheme = normalizeUiTheme(smartphoneSettings.uiTheme);
 
     useEffect(() => {
         const saved = localStorage.getItem('notification_sound');
@@ -313,6 +337,21 @@ export const SettingsApp: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                             </div>
                         </div>
 
+                        <div>
+                            <p className="text-xs font-black text-slate-500 mb-2">UIテーマ</p>
+                            <div className="grid grid-cols-2 gap-2">
+                                {UI_THEME_OPTIONS.map(option => (
+                                    <button
+                                        key={option.value}
+                                        onClick={() => updateSmartphoneSetting({ uiTheme: option.value })}
+                                        className={`py-2 rounded-lg text-[10px] font-black ${normalizedUiTheme === option.value ? 'bg-emerald-600 text-white' : 'bg-slate-100 text-slate-600'}`}
+                                    >
+                                        {option.label}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
                         <div className="flex items-center justify-between">
                             <div>
                                 <p className="text-sm font-bold text-slate-900">True Tone</p>
@@ -325,6 +364,23 @@ export const SettingsApp: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                             >
                                 <motion.div
                                     animate={{ x: smartphoneSettings.trueTone ? 20 : 0 }}
+                                    className="w-5 h-5 bg-white rounded-full shadow-sm"
+                                />
+                            </button>
+                        </div>
+
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <p className="text-sm font-bold text-slate-900">派手な演出を抑える</p>
+                                <p className="text-[10px] text-slate-400">グリッチ/ぼかしなどの強い演出を軽減</p>
+                            </div>
+                            <button
+                                onClick={() => updateSmartphoneSetting({ reduceMotion: !smartphoneSettings.reduceMotion })}
+                                className={`w-12 h-7 rounded-full transition-all relative p-1 ${smartphoneSettings.reduceMotion ? 'bg-emerald-500' : 'bg-slate-200'}`}
+                                aria-label="派手な演出を切り替え"
+                            >
+                                <motion.div
+                                    animate={{ x: smartphoneSettings.reduceMotion ? 20 : 0 }}
                                     className="w-5 h-5 bg-white rounded-full shadow-sm"
                                 />
                             </button>

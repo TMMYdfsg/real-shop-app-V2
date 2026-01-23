@@ -332,7 +332,9 @@ export async function getGameState(): Promise<GameState> {
                     ...baseSmartphone,
                     settings: {
                         ...baseSettings,
-                        customIcons: baseSettings.customIcons || []
+                        customIcons: baseSettings.customIcons || [],
+                        uiTheme: baseSettings.uiTheme || 'default',
+                        reduceMotion: baseSettings.reduceMotion ?? false
                     }
                 };
             })(),

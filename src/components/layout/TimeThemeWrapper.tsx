@@ -7,6 +7,14 @@ import { motion, AnimatePresence } from 'framer-motion';
 export const TimeThemeWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const { currentUser, gameState } = useGame();
     const [era, setEra] = useState<'present' | 'past' | 'future'>('present');
+    const uiThemeRaw = currentUser?.smartphone?.settings?.uiTheme || 'default';
+    const uiTheme = uiThemeRaw === 'nintendo'
+        ? 'nintendo_switch'
+        : uiThemeRaw === 'circus'
+            ? 'digital_circus'
+            : uiThemeRaw === 'lollipop'
+                ? 'kawaii_lollipop'
+                : uiThemeRaw;
 
     // 時間帯ロジック
     const isDay = gameState?.isDay ?? true;
@@ -38,6 +46,13 @@ export const TimeThemeWrapper: React.FC<{ children: React.ReactNode }> = ({ chil
             document.documentElement.removeAttribute('data-era');
         };
     }, [era]);
+
+    useEffect(() => {
+        document.documentElement.setAttribute('data-ui-theme', uiTheme);
+        return () => {
+            document.documentElement.removeAttribute('data-ui-theme');
+        };
+    }, [uiTheme]);
 
     // 時代・時間に基づくテーマスタイル
     const themeStyles = useMemo(() => {
@@ -132,18 +147,264 @@ export const TimeThemeWrapper: React.FC<{ children: React.ReactNode }> = ({ chil
 
     }, [era, isDay, isSunset]);
 
-    const currentStyle = (themeStyles as any).style || {};
+    const uiThemeStyles = useMemo(() => {
+        switch (uiTheme) {
+            case 'mario':
+                return {
+                    style: {
+                        '--bg': '#6ecbff',
+                        '--surface': '#ffffff',
+                        '--surface-2': '#f2f8ff',
+                        '--surface-3': '#e7f1ff',
+                        '--text': '#1f2a44',
+                        '--text-muted': '#4a5a7a',
+                        '--border': '#cddaf0',
+                        '--border-strong': '#9fb3d9',
+                        '--primary': '#e53935',
+                        '--primary-2': '#ffcc00',
+                        '--primary-contrast': '#ffffff',
+                        '--shadow': '24 48 96',
+                        '--glass-bg': 'rgba(255, 255, 255, 0.85)',
+                        '--glass-border': 'rgba(255, 255, 255, 0.55)'
+                    } as React.CSSProperties,
+                    background:
+                        'linear-gradient(180deg, #6ecbff 0%, #aee7ff 60%, #7ed957 60%, #7ed957 100%),' +
+                        'repeating-linear-gradient(90deg, rgba(255,255,255,0.35) 0 14px, transparent 14px 28px)'
+                };
+            case 'nintendo_switch':
+                return {
+                    style: {
+                        '--bg': '#f2f2f2',
+                        '--surface': '#ffffff',
+                        '--surface-2': '#ededed',
+                        '--surface-3': '#e2e2e2',
+                        '--text': '#222222',
+                        '--text-muted': '#666666',
+                        '--border': '#d0d0d0',
+                        '--border-strong': '#b4b4b4',
+                        '--primary': '#00b3ff',
+                        '--primary-2': '#ff3b3b',
+                        '--primary-contrast': '#ffffff',
+                        '--shadow': '24 24 24',
+                        '--glass-bg': 'rgba(255, 255, 255, 0.85)',
+                        '--glass-border': 'rgba(0, 0, 0, 0.08)'
+                    } as React.CSSProperties,
+                    background:
+                        'linear-gradient(135deg, #f5f5f5 0%, #e9ecef 100%),' +
+                        'radial-gradient(circle at 20% 20%, rgba(0,179,255,0.15), transparent 45%),' +
+                        'radial-gradient(circle at 80% 10%, rgba(255,59,59,0.18), transparent 40%)'
+                };
+            case 'minecraft':
+                return {
+                    style: {
+                        '--bg': '#1f1f1f',
+                        '--surface': '#2c2c2c',
+                        '--surface-2': '#3b3b3b',
+                        '--surface-3': '#4a4a4a',
+                        '--text': '#f2f2f2',
+                        '--text-muted': '#b9b9b9',
+                        '--border': '#6b6b6b',
+                        '--border-strong': '#8c8c8c',
+                        '--primary': '#4caf50',
+                        '--primary-2': '#2e7d32',
+                        '--primary-contrast': '#0f0f0f',
+                        '--shadow': '0 0 0',
+                        '--glass-bg': 'rgba(44, 44, 44, 0.9)',
+                        '--glass-border': 'rgba(255, 255, 255, 0.08)'
+                    } as React.CSSProperties,
+                    background:
+                        'linear-gradient(180deg, #3b4f2f 0%, #3b4f2f 45%, #5b3a1f 45%, #5b3a1f 100%),' +
+                        'repeating-linear-gradient(90deg, rgba(0,0,0,0.12) 0 16px, transparent 16px 32px)'
+                };
+            case 'pokemon':
+                return {
+                    style: {
+                        '--bg': '#fdf6f6',
+                        '--surface': '#ffffff',
+                        '--surface-2': '#ffecec',
+                        '--surface-3': '#ffd5d5',
+                        '--text': '#1a1a1a',
+                        '--text-muted': '#6b6b6b',
+                        '--border': '#e8bcbc',
+                        '--border-strong': '#d58f8f',
+                        '--primary': '#e53935',
+                        '--primary-2': '#1e88e5',
+                        '--primary-contrast': '#ffffff',
+                        '--shadow': '34 24 24',
+                        '--glass-bg': 'rgba(255, 255, 255, 0.88)',
+                        '--glass-border': 'rgba(229, 57, 53, 0.2)'
+                    } as React.CSSProperties,
+                    background:
+                        'radial-gradient(circle at 50% 20%, rgba(229,57,53,0.25), transparent 45%),' +
+                        'linear-gradient(180deg, #ffffff 0%, #ffecec 60%, #ffefef 100%)'
+                };
+            case 'sumikko':
+                return {
+                    style: {
+                        '--bg': '#fff7f0',
+                        '--surface': '#fffdf7',
+                        '--surface-2': '#f7efe6',
+                        '--surface-3': '#efe3d6',
+                        '--text': '#5b4a3a',
+                        '--text-muted': '#907a66',
+                        '--border': '#e3d2c1',
+                        '--border-strong': '#d1bda8',
+                        '--primary': '#f4a5c0',
+                        '--primary-2': '#a7d8c9',
+                        '--primary-contrast': '#5b4a3a',
+                        '--shadow': '120 100 80',
+                        '--glass-bg': 'rgba(255, 253, 247, 0.92)',
+                        '--glass-border': 'rgba(244, 165, 192, 0.25)'
+                    } as React.CSSProperties,
+                    background:
+                        'linear-gradient(135deg, #fff7f0 0%, #fce4ec 45%, #e8f5e9 100%),' +
+                        'radial-gradient(circle at 10% 80%, rgba(255,255,255,0.6), transparent 40%)'
+                };
+            case 'digital_circus':
+                return {
+                    style: {
+                        '--bg': '#1b0f1f',
+                        '--surface': '#2b162f',
+                        '--surface-2': '#3a1d3f',
+                        '--surface-3': '#4a2451',
+                        '--text': '#fdf3ff',
+                        '--text-muted': '#c2a7cc',
+                        '--border': '#5c2b66',
+                        '--border-strong': '#7a3a86',
+                        '--primary': '#ff3b3b',
+                        '--primary-2': '#1e88e5',
+                        '--primary-contrast': '#fff1f1',
+                        '--shadow': '30 0 50',
+                        '--glass-bg': 'rgba(39, 18, 46, 0.85)',
+                        '--glass-border': 'rgba(255, 59, 59, 0.2)'
+                    } as React.CSSProperties,
+                    background:
+                        'repeating-linear-gradient(90deg, rgba(255,59,59,0.25) 0 40px, rgba(30,136,229,0.25) 40px 80px),' +
+                        'radial-gradient(circle at 70% 20%, rgba(255,255,255,0.2), transparent 35%)'
+                };
+            case 'kawaii_lollipop':
+                return {
+                    style: {
+                        '--bg': '#fff0fb',
+                        '--surface': '#ffffff',
+                        '--surface-2': '#ffe5f7',
+                        '--surface-3': '#ffd0ef',
+                        '--text': '#5a2d5f',
+                        '--text-muted': '#a35d9b',
+                        '--border': '#f5b2df',
+                        '--border-strong': '#e68cc7',
+                        '--primary': '#ff7eb6',
+                        '--primary-2': '#6dd5ff',
+                        '--primary-contrast': '#5a2d5f',
+                        '--shadow': '120 50 120',
+                        '--glass-bg': 'rgba(255, 255, 255, 0.9)',
+                        '--glass-border': 'rgba(255, 126, 182, 0.25)'
+                    } as React.CSSProperties,
+                    background:
+                        'linear-gradient(135deg, #ffd6f6 0%, #c6e7ff 100%),' +
+                        'radial-gradient(circle at 85% 25%, rgba(255,255,255,0.6), transparent 40%)'
+                };
+            case 'labubu':
+                return {
+                    style: {
+                        '--bg': '#f5f0e6',
+                        '--surface': '#fff9f0',
+                        '--surface-2': '#efe6d8',
+                        '--surface-3': '#e4d6c4',
+                        '--text': '#4b3b2b',
+                        '--text-muted': '#7e6a54',
+                        '--border': '#d6c4ac',
+                        '--border-strong': '#c2ab92',
+                        '--primary': '#8cc5a3',
+                        '--primary-2': '#f4b183',
+                        '--primary-contrast': '#3d2f1f',
+                        '--shadow': '90 70 40',
+                        '--glass-bg': 'rgba(255, 249, 240, 0.9)',
+                        '--glass-border': 'rgba(140, 197, 163, 0.25)'
+                    } as React.CSSProperties,
+                    background:
+                        'linear-gradient(135deg, #f5f0e6 0%, #e9f5e9 45%, #ffe3d1 100%),' +
+                        'repeating-linear-gradient(45deg, rgba(0,0,0,0.04) 0 12px, transparent 12px 24px)'
+                };
+            case 'windows':
+                return {
+                    style: {
+                        '--bg': '#0b3d91',
+                        '--surface': '#f0f0f0',
+                        '--surface-2': '#dcdcdc',
+                        '--surface-3': '#c7c7c7',
+                        '--text': '#1f2937',
+                        '--text-muted': '#4b5563',
+                        '--border': '#9aa3ad',
+                        '--border-strong': '#7b8794',
+                        '--primary': '#1d4ed8',
+                        '--primary-2': '#2563eb',
+                        '--primary-contrast': '#ffffff',
+                        '--shadow': '0 0 0',
+                        '--glass-bg': 'rgba(240, 240, 240, 0.95)',
+                        '--glass-border': 'rgba(0, 0, 0, 0.12)'
+                    } as React.CSSProperties,
+                    background:
+                        'linear-gradient(135deg, #0b3d91 0%, #1d4ed8 55%, #0f172a 100%)'
+                };
+            case 'animal_crossing':
+                return {
+                    style: {
+                        '--bg': '#e9f7e1',
+                        '--surface': '#fffdf4',
+                        '--surface-2': '#f4f1e6',
+                        '--surface-3': '#e6e0d3',
+                        '--text': '#3f3a2c',
+                        '--text-muted': '#7b705b',
+                        '--border': '#d7cbb0',
+                        '--border-strong': '#bfae88',
+                        '--primary': '#6fbf73',
+                        '--primary-2': '#f4c67a',
+                        '--primary-contrast': '#3f3a2c',
+                        '--shadow': '110 90 60',
+                        '--glass-bg': 'rgba(255, 253, 244, 0.9)',
+                        '--glass-border': 'rgba(111, 191, 115, 0.22)'
+                    } as React.CSSProperties,
+                    background:
+                        'linear-gradient(180deg, #e9f7e1 0%, #d8f1c8 60%, #f6e6b5 100%)'
+                };
+            default:
+                return null;
+        }
+    }, [uiTheme]);
+
+    const currentStyle = { ...(themeStyles as any).style, ...(uiThemeStyles?.style || {}) } as React.CSSProperties;
 
     // テキスト色の決定（夜間は白、昼間は黒）
     const textColor = (themeStyles as any).color || (!isDay ? '#f1f5f9' : (isSunset ? '#431407' : '#1e293b'));
 
     return (
         <div
-            className="min-h-screen relative transition-colors duration-1000 ease-in-out font-sans"
+            className={`min-h-screen relative transition-colors duration-1000 ease-in-out font-sans ui-theme-${uiTheme}`}
             style={{
-                background: currentStyle['--bg-gradient'] || themeStyles.background,
+                background: (uiThemeStyles as any)?.background || currentStyle['--bg-gradient'] || themeStyles.background,
                 color: textColor,
-                fontFamily: themeStyles.font,
+                fontFamily: uiTheme === 'minecraft'
+                    ? "'Press Start 2P', 'Pixelify Sans', ui-monospace, monospace"
+                    : (uiTheme === 'mario'
+                        ? "'Press Start 2P', 'Changa One', ui-sans-serif"
+                        : (uiTheme === 'nintendo'
+                            ? "'Noto Sans JP', 'M PLUS 1p', ui-sans-serif"
+                            : (uiTheme === 'pokemon'
+                                ? "'Press Start 2P', 'Pixelify Sans', ui-monospace, monospace"
+                                : (uiTheme === 'sumikko'
+                                    ? "'M PLUS Rounded 1c', ui-sans-serif"
+                                    : (uiTheme === 'circus'
+                                        ? "'Rubik Glitch', 'Creepster', ui-sans-serif"
+                                        : (uiTheme === 'lollipop'
+                                            ? "'Cherry Bomb One', 'M PLUS Rounded 1c', ui-sans-serif"
+                                            : (uiTheme === 'labubu'
+                                                ? "'Coming Soon', 'Rock Salt', ui-sans-serif"
+                                                : (uiTheme === 'windows'
+                                                    ? "'Segoe UI', Tahoma, ui-sans-serif"
+                                                    : (uiTheme === 'animal_crossing'
+                                                        ? "'M PLUS Rounded 1c', ui-sans-serif"
+                                                        : themeStyles.font))))))))),
                 ...currentStyle
             }}
         >

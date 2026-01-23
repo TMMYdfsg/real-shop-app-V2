@@ -30,6 +30,14 @@ const BankerLayout: React.FC<{ children: React.ReactNode; initialData?: any }> =
         }
     }, [initialData, mutate]);
 
+    useEffect(() => {
+        const uiTheme = currentUser?.smartphone?.settings?.uiTheme || 'default';
+        document.documentElement.setAttribute('data-ui-theme', uiTheme);
+        return () => {
+            document.documentElement.removeAttribute('data-ui-theme');
+        };
+    }, [currentUser?.smartphone?.settings?.uiTheme]);
+
     // ゲーム状態の変更を検知してリロードをスケジュール
     const prevRevisionRef = useRef<number | undefined>(gameState?.eventRevision);
     useEffect(() => {

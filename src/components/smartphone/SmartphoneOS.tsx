@@ -136,6 +136,8 @@ export const SmartphoneOS = () => {
     autoLockOnHome: true,
     textScale: 1,
     trueTone: true,
+    uiTheme: 'default' as const,
+    reduceMotion: false,
     passcode: '',
     biometricEnabled: false,
     lockScreenImage: '',

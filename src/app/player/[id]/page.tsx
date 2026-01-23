@@ -11,6 +11,7 @@ import { Chip } from '@/components/ui/Chip';
 import { DataTable } from '@/components/ui/DataTable';
 import { StatCard } from '@/components/kpi/StatCard';
 import nextDynamic from 'next/dynamic';
+import { motion, AnimatePresence } from 'framer-motion';
 
 // Dynamic import for BankTerminal to avoid SSR issues if any
 const BankTerminal = nextDynamic(() => import('@/components/banking/BankTerminal'), { ssr: false });
@@ -159,16 +160,57 @@ type SoundButton = {
 export default function PlayerHome({ params }: { params: Promise<{ id: string }> }) {
     // Unwrapping params using React.use()
     const { id } = use(params);
-    const { gameState, currentUser, refresh } = useGame();
+    const { gameState, currentUser, refresh, login } = useGame();
     const [isBankOpen, setIsBankOpen] = useState(false);
     const [soundSelect, setSoundSelect] = useState(SOUND_LIBRARY[0]);
     const [soundButtons, setSoundButtons] = useState<SoundButton[]>([]);
     const soundBoardKey = `soundboard:player:${id}`;
+    const [countdown, setCountdown] = useState<number | null>(null);
+    const [hasTriggeredStart, setHasTriggeredStart] = useState(false);
 
     if (!gameState) return <div className="ui-container ui-muted">Loading world data...</div>;
 
+    const routeUser = gameState.users.find(u => u.id === id);
+
+    useEffect(() => {
+        if (!gameState) return;
+        if (!currentUser && routeUser) {
+            login(routeUser.id);
+        }
+    }, [gameState, currentUser, routeUser, login]);
+
+    useEffect(() => {
+        if (!gameState) return;
+        if (gameState.settings.isGameStarted === false) {
+            if (countdown === null) setCountdown(10);
+        } else {
+            setCountdown(null);
+            setHasTriggeredStart(false);
+        }
+    }, [gameState, countdown]);
+
+    useEffect(() => {
+        if (countdown === null) return;
+        if (countdown <= 0) {
+            if (!hasTriggeredStart) {
+                setHasTriggeredStart(true);
+                fetch('/api/admin', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'start_game' })
+                }).then(() => refresh()).catch(() => {});
+            }
+            return;
+        }
+        const timer = setTimeout(() => {
+            setCountdown(prev => (prev === null ? prev : Math.max(0, prev - 1)));
+        }, 1000);
+        return () => clearTimeout(timer);
+    }, [countdown, hasTriggeredStart, refresh]);
+
     // Game Start Lock (Check this FIRST, before currentUser check)
     if (gameState.settings.isGameStarted === false) {
+        const displayCount = countdown ?? 10;
         return (
             <div className="night-overlay">
                 <div className="u-text-center u-max-w-md">
@@ -176,16 +218,32 @@ export default function PlayerHome({ params }: { params: Promise<{ id: string }>
                     <h1 className="ui-title">準備中</h1>
                     <p className="ui-muted">
                         ゲームが初期化されました。<br />
-                        管理者がゲームを開始するまで<br />
-                        しばらくお待ちください。
+                        まもなく自動で開始します。
                     </p>
-                    <div className="ui-muted">Waiting for admin...</div>
+                    <div className="ui-muted mb-4">開始まで</div>
+                    <AnimatePresence mode="wait">
+                        <motion.div
+                            key={displayCount}
+                            initial={{ scale: 0.6, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 1.3, opacity: 0 }}
+                            transition={{ duration: 0.4, ease: 'easeOut' }}
+                            className="text-5xl font-black tracking-tight text-white"
+                        >
+                            {displayCount}
+                        </motion.div>
+                    </AnimatePresence>
                 </div>
             </div>
         );
     }
 
     if (!currentUser) {
+        if (routeUser) {
+            return (
+                <div className="ui-container ui-muted">ログイン中...</div>
+            );
+        }
         return (
             <div className="ui-container">
                 <Card>
