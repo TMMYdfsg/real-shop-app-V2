@@ -1,7 +1,7 @@
 :root {
   --space-2: 8px;
   --radius-md: 10px;
-  --shadow-1: 0 2px 8px rgba(0,0,0,0.16);
+  --shadow-1: 0 2px 8px rgba(0, 0, 0, 0.16);
   --font-base: system-ui, -apple-system, Segoe UI, Roboto, Noto Sans JP, sans-serif;
   --theme-bg-image: none;
   --theme-btn-image: none;
@@ -67,7 +67,7 @@
   --card-shadow-hover: 0 8px 0 rgba(0, 0, 0, 0.25);
   --input-shadow: inset 0 2px 0 rgba(0, 0, 0, 0.18);
   --input-focus-shadow: 0 0 0 4px rgba(229, 57, 53, 0.25), inset 0 2px 0 rgba(0, 0, 0, 0.2);
-  --tab-active-shadow: 0 4px 0 rgba(0,  0, 0, 0.2);
+  --tab-active-shadow: 0 4px 0 rgba(0, 0, 0, 0.2);
   --chip-bg: rgba(255, 234, 179, 0.8);
   --chip-border: rgba(46, 46, 46, 0.3);
   --nav-bg: rgba(255, 255, 255, 0.85);
@@ -142,12 +142,12 @@
   --font-app: var(--font-display);
   --bg-primary: var(--bg-canvas);
   --bg-secondary: var(--bg-panel);
-  --primary-contrast: #0f0f0f;
+  --primary-contrast: #ffffff;
   --button-press-offset: 1px;
 
   --bg-canvas: #7aae5b;
   --bg-panel: #2b2b2b;
-  --text-primary: #f2f2f2;
+  --text-primary: #ffffff;
   --text-secondary: #c7c7c7;
   --accent-primary: #2e7d32;
   --accent-secondary: #00bcd4;
@@ -390,7 +390,8 @@
   --border-default: #e2ddcf;
 
   --asset-bg-forest: url("assets/labubu/bg_forest.png");
-  --asset-btn-face: url("assets/labubu/btn_face_smile.png");
+  --asset-btn-face: none;
+  /* url("assets/labubu/btn_face_smile.png") */
   --theme-bg-image: var(--asset-bg-forest);
   --theme-btn-image: var(--asset-btn-face);
   --theme-card-image: var(--asset-bg-forest);
@@ -437,7 +438,8 @@
   --border-default: #9e9e9e;
 
   --asset-bg-xp: url("assets/windows/bg_xp_bliss.png");
-  --asset-btn-start: url("assets/windows/btn_start.png");
+  --asset-btn-start: none;
+  /* url("assets/windows/btn_start.png") */
   --theme-bg-image: var(--asset-bg-xp);
   --theme-btn-image: var(--asset-btn-start);
   --theme-card-image: var(--asset-bg-xp);
@@ -488,7 +490,8 @@
   --border-default: #cfe8d7;
 
   --asset-bg-island: url("assets/ac/bg_island_day.png");
-  --asset-btn-leaf: url("assets/ac/btn_leaf.png");
+  --asset-btn-leaf: none;
+  /* url("assets/ac/btn_leaf.png") */
   --theme-bg-image: var(--asset-bg-island);
   --theme-btn-image: var(--asset-btn-leaf);
   --theme-card-image: var(--asset-bg-island);

@@ -3,6 +3,10 @@ import { useRealtime } from '@/hooks/useRealtime';
 import { useGame } from '@/context/GameContext';
 import { getAgoraClient, createMicrophoneTrack, generateChannelName } from '@/lib/agora';
 import { AppHeader } from './AppHeader';
+import dynamic from 'next/dynamic';
+
+const ReactPlayer = dynamic(() => import('react-player'), { ssr: false }) as any;
+
 
 interface VoiceCall {
     id: string;
@@ -36,9 +40,12 @@ export default function PhoneApp({ onClose }: { onClose: () => void }) {
     const lastEndedCallIdRef = useRef<string | null>(null);
     const speakerStateRef = useRef(false);
     const outgoingToneRef = useRef<HTMLAudioElement | null>(null);
-    const incomingToneRef = useRef<HTMLAudioElement | null>(null);
     const outgoingToneNameRef = useRef<string | null>(null);
-    const incomingToneNameRef = useRef<string | null>(null);
+    // Incoming tone handled by CommunicationNotifier now for global support
+
+    // For YouTube support
+    const [playingUrl, setPlayingUrl] = useState<string | null>(null);
+
 
     const [connectionState, setConnectionState] = useState<'DISCONNECTED' | 'CONNECTING' | 'CONNECTED'>('DISCONNECTED');
     const [isPublished, setIsPublished] = useState(false);
@@ -113,9 +120,18 @@ export default function PhoneApp({ onClose }: { onClose: () => void }) {
         }
         ref.current = null;
         nameRef.current = null;
+        setPlayingUrl(null); // Also stop Youtube
     };
 
     const playLoopTone = (ref: React.MutableRefObject<HTMLAudioElement | null>, nameRef: React.MutableRefObject<string | null>, filename: string) => {
+        if (filename.startsWith('http')) {
+            // YouTube or external URL
+            stopTone(ref, nameRef); // Ensure audio is stopped
+            setPlayingUrl(filename);
+            return;
+        }
+
+        // Local file
         if (nameRef.current === filename) return;
         stopTone(ref, nameRef);
         const audio = new Audio(`/sounds/${filename}`);
@@ -149,6 +165,7 @@ export default function PhoneApp({ onClose }: { onClose: () => void }) {
         setRemoteVolume(isSpeakerOn ? 100 : 60);
     }, [isSpeakerOn, setRemoteVolume]);
 
+    /* Incoming tone is now handled globally by CommunicationNotifier
     useEffect(() => {
         if (!incomingCall || !canUsePhoneApp) {
             stopTone(incomingToneRef, incomingToneNameRef);
@@ -156,6 +173,7 @@ export default function PhoneApp({ onClose }: { onClose: () => void }) {
         }
         playLoopTone(incomingToneRef, incomingToneNameRef, getIncomingTone());
     }, [incomingCall, canUsePhoneApp, getIncomingTone]);
+    */
 
     useEffect(() => {
         const isCalling = activeCall
@@ -348,7 +366,7 @@ export default function PhoneApp({ onClose }: { onClose: () => void }) {
 
     const leaveVoiceChannel = async () => {
         stopTone(outgoingToneRef, outgoingToneNameRef);
-        stopTone(incomingToneRef, incomingToneNameRef);
+        // stopTone(incomingToneRef, incomingToneNameRef);
         if (microphoneTrack) {
             if (typeof microphoneTrack.setMuted === 'function') {
                 microphoneTrack.setMuted(true);
@@ -431,6 +449,11 @@ export default function PhoneApp({ onClose }: { onClose: () => void }) {
     // Default: Contacts List
     return (
         <div className="h-full bg-white flex flex-col relative">
+            {playingUrl && (
+                <div style={{ display: 'none' }}>
+                    <ReactPlayer url={playingUrl} playing loop volume={0.5} width={0} height={0} />
+                </div>
+            )}
             <AppHeader title="電話" onBack={onClose} />
 
             {/* Warnings */}

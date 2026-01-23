@@ -3,6 +3,11 @@
 import { useState, useEffect, useRef } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useRealtime } from '@/hooks/useRealtime';
+import { useGame } from '@/context/GameContext';
+import dynamic from 'next/dynamic';
+
+const ReactPlayer = dynamic(() => import('react-player'), { ssr: false }) as any;
+
 
 interface NotificationData {
     hasUnreadMessages: boolean;
@@ -28,6 +33,10 @@ export default function CommunicationNotifier() {
     const pathname = usePathname();
     const [showMsgToast, setShowMsgToast] = useState(false);
     const lastMessageIdRef = useRef<string | null>(null);
+    const { currentUser } = useGame();
+    const ringtoneRef = useRef<HTMLAudioElement | null>(null);
+    const [youtubeRingtone, setYoutubeRingtone] = useState<string | null>(null);
+
 
     // すでにスマホアプリ画面にいる場合は通知を抑制（邪魔になるため）
     const isCommunicationPage = pathname?.includes('/smartphone');
@@ -57,7 +66,9 @@ export default function CommunicationNotifier() {
                 setTimeout(() => setShowMsgToast(false), 5000);
 
                 // 通知音（控えめに）
+                // playNotificationSound(); // Disable messsage sound for now if desired, or keep it. Keeping it.
                 playNotificationSound();
+
 
                 // デスクトップ通知
                 showDesktopNotification(
@@ -100,6 +111,44 @@ export default function CommunicationNotifier() {
         }
     };
 
+    // Global Ringtone Logic
+    useEffect(() => {
+        const incoming = notif?.incomingCall;
+
+        // Cleanup function for ringtone
+        const stopRingtone = () => {
+            if (ringtoneRef.current) {
+                ringtoneRef.current.pause();
+                ringtoneRef.current.currentTime = 0;
+                ringtoneRef.current = null;
+            }
+            setYoutubeRingtone(null);
+        };
+
+        if (incoming) {
+            const sound = currentUser?.smartphone?.settings?.incomingCallSound
+                || localStorage.getItem('notification_sound')
+                || 'notification_1.mp3';
+
+            if (sound.startsWith('http')) {
+                setYoutubeRingtone(sound);
+            } else {
+                if (!ringtoneRef.current) {
+                    const audio = new Audio(`/sounds/${sound}`);
+                    audio.loop = true;
+                    audio.volume = 0.5;
+                    audio.play().catch(() => { });
+                    ringtoneRef.current = audio;
+                }
+            }
+        } else {
+            stopRingtone();
+        }
+
+        return stopRingtone;
+    }, [notif?.incomingCall, currentUser?.smartphone?.settings?.incomingCallSound]);
+
+
     const handleMessageClick = () => {
         setShowMsgToast(false);
         if (notif?.myId) {
@@ -115,7 +164,13 @@ export default function CommunicationNotifier() {
 
     return (
         <>
+            {youtubeRingtone && (
+                <div style={{ display: 'none' }}>
+                    <ReactPlayer url={youtubeRingtone} playing loop volume={0.5} width={0} height={0} />
+                </div>
+            )}
             {/* メッセージ通知トースト (右上) */}
+
             {showMsgToast && notif?.latestMessage && (
                 <div
                     className="fixed top-20 right-4 z-[9999] glass-dark rounded-2xl shadow-2xl p-4 border border-white/10 animate-slide-in-right cursor-pointer hover:bg-white/10 transition-all max-w-sm w-full"

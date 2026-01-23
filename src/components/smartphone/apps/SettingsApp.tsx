@@ -289,6 +289,49 @@ export const SettingsApp: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                         </div>
                     </div>
                 </div>
+
+                <div className="px-4 pb-8 space-y-6">
+                    <div className="space-y-2">
+                        <div className="text-xs font-black text-slate-500">YouTube着信音設定</div>
+                        <div className="bg-white rounded-xl p-4 shadow-sm border border-slate-200 space-y-3">
+                            <p className="text-[10px] text-slate-400">YouTubeのURLを入力すると着信音として使用されます</p>
+                            <input
+                                type="text"
+                                placeholder="https://youtube.com/watch?v=..."
+                                className="w-full px-3 py-2 rounded-lg border border-slate-200 text-xs"
+                                defaultValue={smartphoneSettings.incomingCallSound?.includes('http') ? smartphoneSettings.incomingCallSound : ''}
+                                onBlur={(e) => {
+                                    const val = e.target.value.trim();
+                                    if (val && val.startsWith('http')) {
+                                        handleSaveIncomingSound(val);
+                                    } else if (!val && smartphoneSettings.incomingCallSound?.includes('http')) {
+                                        handleSaveIncomingSound('notification_1.mp3');
+                                    }
+                                }}
+                            />
+                        </div>
+                    </div>
+                    <div className="space-y-2">
+                        <div className="text-xs font-black text-slate-500">YouTube呼び出し音設定</div>
+                        <div className="bg-white rounded-xl p-4 shadow-sm border border-slate-200 space-y-3">
+                            <p className="text-[10px] text-slate-400">YouTubeのURLを入力すると発信時の呼び出し音として使用されます</p>
+                            <input
+                                type="text"
+                                placeholder="https://youtube.com/watch?v=..."
+                                className="w-full px-3 py-2 rounded-lg border border-slate-200 text-xs"
+                                defaultValue={smartphoneSettings.outgoingCallSound?.includes('http') ? smartphoneSettings.outgoingCallSound : ''}
+                                onBlur={(e) => {
+                                    const val = e.target.value.trim();
+                                    if (val && val.startsWith('http')) {
+                                        handleSaveOutgoingSound(val);
+                                    } else if (!val && smartphoneSettings.outgoingCallSound?.includes('http')) {
+                                        handleSaveOutgoingSound('notification_2.mp3');
+                                    }
+                                }}
+                            />
+                        </div>
+                    </div>
+                </div>
             </div>
         );
     }
@@ -810,8 +853,8 @@ export const SettingsApp: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                             onClick={handleSaveName}
                             disabled={isSaving || !newName.trim()}
                             className={`w-full py-3 rounded-lg text-sm font-bold ${isSaving || !newName.trim()
-                                    ? 'bg-slate-200 text-slate-400'
-                                    : 'bg-[#007aff] text-white'
+                                ? 'bg-slate-200 text-slate-400'
+                                : 'bg-[#007aff] text-white'
                                 }`}
                         >
                             {isSaving ? '保存中...' : '保存'}
