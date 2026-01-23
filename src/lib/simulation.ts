@@ -2,6 +2,7 @@ import { GameState, User, EconomyState, EnvironmentState, GameEvent } from '@/ty
 import crypto from 'crypto';
 import { QUALIFICATIONS } from '@/lib/gameData';
 import { COMPANY_ABILITIES, COMPANY_STATS, COMPANY_ABILITY_QUAL_CATEGORIES, COMPANY_STAT_QUAL_CATEGORIES } from '@/lib/companyData';
+import type { CompanyAbilityId, CompanyStatId } from '@/lib/companyData';
 
 // ==========================================
 // Economy Simulation
@@ -209,20 +210,28 @@ export function simulateTurn(state: GameState): GameState {
         return bonus;
     };
 
+    const isCompanyAbilityId = (value?: string): value is CompanyAbilityId => {
+        return !!value && value in COMPANY_ABILITY_QUAL_CATEGORIES;
+    };
+
+    const isCompanyStatId = (value?: string): value is CompanyStatId => {
+        return !!value && value in COMPANY_STAT_QUAL_CATEGORIES;
+    };
+
     const getCompanyAbilityBonus = (abilityId?: string) => {
-        if (!abilityId) return 0;
+        if (!isCompanyAbilityId(abilityId)) return 0;
         return COMPANY_ABILITIES.find((a) => a.id === abilityId)?.salaryBonusPercent || 0;
     };
 
     const getCompanyStatBonus = (statId?: string) => {
-        if (!statId) return 0;
+        if (!isCompanyStatId(statId)) return 0;
         return COMPANY_STATS.find((s) => s.id === statId)?.salaryBonusPercent || 0;
     };
 
     const getCompanyQualificationSynergy = (user: User, abilityId?: string, statId?: string) => {
         const categories = new Set<string>();
-        (abilityId ? COMPANY_ABILITY_QUAL_CATEGORIES[abilityId] : []).forEach((cat) => categories.add(cat));
-        (statId ? COMPANY_STAT_QUAL_CATEGORIES[statId] : []).forEach((cat) => categories.add(cat));
+        (isCompanyAbilityId(abilityId) ? COMPANY_ABILITY_QUAL_CATEGORIES[abilityId] : []).forEach((cat) => categories.add(cat));
+        (isCompanyStatId(statId) ? COMPANY_STAT_QUAL_CATEGORIES[statId] : []).forEach((cat) => categories.add(cat));
         if (categories.size === 0) return 0;
 
         const ownedQuals = user.qualifications || [];
