@@ -17,7 +17,7 @@ const CompactGlassIcon = React.forwardRef<HTMLButtonElement, {
     onDragStart?: () => void;
     onDragMove?: (event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => void;
     onDragEnd?: (event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => void;
-    dragConstraints?: React.RefObject<Element>;
+    dragConstraints?: React.RefObject<HTMLElement | null>;
 }>(({ app, onClick, onDragStart, onDragMove, onDragEnd, dragConstraints }, ref) => {
     const handleAppClick = () => {
         const vibration = getVibrationAdapter();

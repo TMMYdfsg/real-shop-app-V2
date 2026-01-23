@@ -446,6 +446,7 @@ export default function BankerDashboard() {
                                             value={soundSelect}
                                             onChange={(e) => setSoundSelect(e.target.value)}
                                             className="flex-1 h-10 rounded-lg border border-slate-200 bg-white px-3 text-xs font-bold text-slate-700"
+                                            aria-label="効果音を選択"
                                         >
                                             {SOUND_LIBRARY.map((sound) => (
                                                 <option key={sound} value={sound}>{sound}</option>
@@ -494,6 +495,7 @@ export default function BankerDashboard() {
                                                             )));
                                                         }}
                                                         className="w-full h-8 rounded-lg border border-slate-200 px-2 text-[10px] font-bold text-slate-600"
+                                                        aria-label="ボタン名を編集"
                                                     />
                                                     <Button
                                                         className="h-7 w-full rounded-full bg-slate-100 text-slate-500 text-[10px] font-bold"
